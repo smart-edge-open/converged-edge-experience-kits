@@ -1,0 +1,6 @@
+---
+- name: Add proxy to /etc/yum.conf
+  lineinfile:
+    path: /etc/yum.conf
+    line: proxy={{ proxy_yum_url }}
+  when: proxy_yum_url != ""

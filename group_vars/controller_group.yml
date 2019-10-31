@@ -1,0 +1,2 @@
+---
+os_yum_base_packages: "nano,mc,dstat,jq,vim-common,curl,yum-utils,python-pip,wget,bridge-utils,device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel"

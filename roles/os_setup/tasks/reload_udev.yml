@@ -1,0 +1,6 @@
+---
+- name: Reload udev rules (1/2)
+  command: udevadm control --reload-rules
+
+- name: Retrigger udev (2/2)
+  command: udevadm trigger

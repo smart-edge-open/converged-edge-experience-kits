@@ -1,0 +1,35 @@
+---
+#- debug:
+#    msg: "Set up RT kernel"
+
+- name: Download repo GPG key (1/3)
+  get_url:
+    url: "{{ os_kernel_rt_repository_key }}"
+    dest: /etc/pki/rpm-gpg/
+    mode: 0644
+
+- name: Import repository GPG key (2/3)
+  rpm_key:
+    state: present
+    key: "{{ os_kernel_rt_repository_key }}"
+
+- name: Download repository file (3/3)
+  get_url:
+    url: "{{ os_kernel_rt_repository_url }}"
+    dest: /etc/yum.repos.d/
+    mode: 0644
+
+- name: Install correct tuned package
+  yum:
+    name: "{{ os_kernel_rt_tuned_package_url }}"
+    state: present
+    allow_downgrade: yes
+
+- debug:
+    msg: "kernel version to install: {{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
+
+- name: Install required RT kernel
+  yum:
+    name: "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
+    state: present
+    disable_excludes: all

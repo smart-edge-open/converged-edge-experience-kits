@@ -1,0 +1,7 @@
+---
+- name: Remove yum.conf proxy settings
+  lineinfile:
+    dest: /etc/yum.conf
+    regexp: "^proxy=.*"
+    state: absent
+  when: proxy_yum_url == ""

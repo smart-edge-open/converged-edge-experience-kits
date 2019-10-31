@@ -1,0 +1,9 @@
+---
+- name: Disable SWAP (current session) (1/2)
+  command: swapoff -a
+
+- name: Disable SWAP (in /etc/fstab) (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^([\/\s].*swap.*)$'
+    replace: '# \1'

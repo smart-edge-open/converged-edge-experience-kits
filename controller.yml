@@ -1,0 +1,7 @@
+---
+# Deploy OpenNESS Controller on given host(s)
+
+- hosts: controller_group
+  tasks: []
+  roles:
+    - role: controller_dpdk

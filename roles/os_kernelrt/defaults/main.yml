@@ -1,0 +1,7 @@
+---
+os_kernel_rt_install: false
+os_kernel_rt_repository_url: http://linuxsoft.cern.ch/cern/centos/7/rt/CentOS-RT.repo
+os_kernel_rt_repository_key: http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern
+os_kernel_rt_package_name: "kernel-rt-kvm"
+os_kernel_rt_package_version: "3.10.0-957.21.3.rt56.935.el7.x86_64"
+os_kernel_rt_tuned_package_url: "http://ftp.pbone.net/mirror/ftp.scientificlinux.org/linux/scientific/7.5/x86_64/os/Packages/tuned-2.9.0-1.el7.noarch.rpm"

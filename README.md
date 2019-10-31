@@ -1,1 +1,1 @@
-initial commit
+OpenNESS Container Kits repo

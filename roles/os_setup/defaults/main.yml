@@ -1,0 +1,2 @@
+---
+os_remove_yum_plugins: false

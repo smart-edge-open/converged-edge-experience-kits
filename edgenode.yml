@@ -1,0 +1,10 @@
+---
+# Deploy EdgeNode on given host(s)
+
+- hosts: edgenode_group
+  pre_tasks:
+  - debug:
+      msg: "Setting up {{ inventory_hostname | upper}} at {{ ansible_host }}"
+  roles:
+    - role: os_setup
+    - role: os_kernelrt

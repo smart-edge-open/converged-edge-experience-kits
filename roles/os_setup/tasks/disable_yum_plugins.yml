@@ -1,0 +1,7 @@
+---
+- name: Disable yum plugins
+  lineinfile:
+    dest: /etc/yum.conf
+    regexp: "^plugins=.*"
+    state: absent
+  when: os_remove_yum_plugins

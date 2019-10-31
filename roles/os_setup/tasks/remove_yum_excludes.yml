@@ -1,0 +1,9 @@
+---
+- name: Remove excludes (rpm packages) from /etc/yum.conf
+  lineinfile:
+    dest: /etc/yum.conf
+    regexp: "^exclude=.*"
+    state: absent
+  when: 
+    - os_yum_exclude_rpm_packages is defined
+    - os_yum_exclude_rpm_packages != ""
