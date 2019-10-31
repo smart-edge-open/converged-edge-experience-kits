@@ -1,0 +1,44 @@
+---
+  
+- name: remove qemu-img if installed
+  shell: rpm -e --nodeps qemu-img
+  ignore_errors: true
+  changed_when: false
+  args:
+    warn: false
+
+- name: check if already installed
+  stat:
+    path: "{{ qemu_install_dir }}"
+  register: qemu_dest_dir
+
+- name: download archive
+  get_url:
+    url: "{{ qemu_download_url }}"
+    dest: "{{ qemu_download_dest }}"
+  when: qemu_dest_dir.stat.exists == False
+
+- name: ensure install dir exists
+  file:
+    path: "{{ qemu_install_dir }}"
+    state: directory
+
+- name: extract archive
+  unarchive:
+    src: "{{ qemu_download_url }}"
+    dest: "{{ qemu_install_dir }}"
+    extra_opts: "--strip-components=1"
+    remote_src: yes
+    creates: "{{ qemu_install_dir }}/README"
+
+- name: configure
+  command: ./configure --target-list={{ qemu_targets }} --enable-kvm
+  args:
+    chdir: "{{ qemu_install_dir }}"
+
+- name: compile and install
+  make:
+    chdir: "{{ qemu_install_dir }}"
+    target: install
+  environment:
+    "MAKEFLAGS": "-j$(nproc)"

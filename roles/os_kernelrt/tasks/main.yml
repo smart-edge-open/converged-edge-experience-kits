@@ -1,22 +1,20 @@
 ---
-#- debug:
-#    msg: "Set up RT kernel"
 
 - name: Download repo GPG key (1/3)
   get_url:
     url: "{{ os_kernel_rt_repository_key }}"
-    dest: /etc/pki/rpm-gpg/
+    dest: "{{ os_kernel_rt_repository_key_dest }}"
     mode: 0644
 
 - name: Import repository GPG key (2/3)
   rpm_key:
     state: present
-    key: "{{ os_kernel_rt_repository_key }}"
+    key: "{{ os_kernel_rt_repository_key_dest }}"
 
 - name: Download repository file (3/3)
   get_url:
     url: "{{ os_kernel_rt_repository_url }}"
-    dest: /etc/yum.repos.d/
+    dest: "{{ os_kernel_rt_repository_dest }}"
     mode: 0644
 
 - name: Install correct tuned package
@@ -30,6 +28,16 @@
 
 - name: Install required RT kernel
   yum:
-    name: "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
+    name: "{{ item }}"
     state: present
     disable_excludes: all
+  with_items:
+    - "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
+    - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
+
+- name: Configure GRUB for new kernel
+  include_tasks: configure_grub.yml
+
+- name: Reboot the machine
+  reboot:
+  when: ansible_kernel != os_kernel_rt_package_version

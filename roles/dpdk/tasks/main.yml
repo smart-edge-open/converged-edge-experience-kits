@@ -1,0 +1,86 @@
+---
+
+- name: check if already installed
+  stat:
+    path: "{{ dpdk_install_dir }}"
+  register: dpdk_dest_dir
+
+- name: download
+  get_url:
+    url: "{{ dpdk_download_url }}"
+    dest: "{{ dpdk_download_dest }}"
+    checksum: "md5:{{ dpdk_checksum }}"
+  when: dpdk_dest_dir.stat.exists == False
+
+- name: ensure install dir exists
+  file:
+    path: "{{ dpdk_install_dir }}"
+    state: directory
+
+- name: extract
+  unarchive:
+    src: "{{ dpdk_download_url }}"
+    dest: "{{ dpdk_install_dir }}"
+    extra_opts: "--strip-components=1"
+    remote_src: yes
+    creates: "{{ dpdk_install_dir }}/README"
+
+- name: check if already compiled
+  stat:
+    path: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
+  register: igb_uio_module
+
+- name: compile
+  make:
+    chdir: "{{ dpdk_install_dir }}"
+    target: install
+    params:
+      T: x86_64-native-linuxapp-gcc
+  environment:
+    "MAKEFLAGS": "-j$(nproc)"
+  when: igb_uio_module.stat.exists == False
+
+- name: copy kernel modules
+  copy:
+    src: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/{{ item }}"
+    dest: "/lib/modules/{{ os_kernel_rt_package_version }}/kernel/drivers/"
+    remote_src: yes
+  with_items:
+    - "igb_uio.ko"
+    - "rte_kni.ko"
+
+- name: depmod
+  command: depmod -a
+
+- name: copy list of modules to load at boot
+  copy:
+    src: dpdk.conf
+    dest: /etc/modules-load.d/dpdk.conf
+
+- name: copy list of modules to modprobe at boot
+  copy:
+    src: dpdk0kni.conf
+    dest: /etc/modprobe.d/dpdk0kni.conf
+
+- name: unload modules
+  modprobe:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "igb_uio"
+  - "rte_kni"
+  - "uio"
+
+- name: load uio and igb_uio modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - "uio"
+  - "igb_uio"
+
+- name: load rte_kni module
+  modprobe:
+    name: "rte_kni"
+    state: present
+    params: 'carrier=on'

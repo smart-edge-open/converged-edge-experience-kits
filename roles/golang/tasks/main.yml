@@ -1,0 +1,30 @@
+---
+
+- name: check if already installed
+  stat:
+    path: /usr/local/go/bin/go
+  register: go_exe_file
+
+- name: download
+  get_url:
+    url: "{{ golang_download_url }}"
+    dest: "{{ golang_download_dest }}"
+    checksum: "sha256:{{ golang_download_checksum }}"
+  when: go_exe_file.stat.exists == False
+
+- name: install
+  unarchive:
+    src: "{{ golang_download_dest }}"
+    dest: "/usr/local"
+    remote_src: yes
+    creates: /usr/local/go/bin/go
+
+- name: add exports to /etc/profile
+  lineinfile:
+    state: present
+    dest: /etc/profile
+    line: "{{ item }}"
+  with_items:
+  - "export GOROOT=/usr/local/go"
+  - "export GOPATH=~/go"
+  - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"
