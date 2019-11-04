@@ -1,0 +1,30 @@
+---
+
+- name: add Docker repository
+  yum_repository:
+    name: docker
+    description: Docker CE repository
+    baseurl: "{{ docker_repository_url }}"
+    gpgkey: "{{ docker_repository_key }}"
+    gpgcheck: yes
+
+- name: install Docker CE
+  yum:
+    name: "{{ docker_packages }}"
+    state: present
+
+- name: install docker-compose
+  pip:
+    name: docker-compose
+    state: present
+
+- name: set up proxy
+  include_tasks: proxy.yml
+  when: proxy_os_enable
+
+- name: enable & start docker service
+  systemd:
+    name: docker
+    enabled: yes
+    masked: no
+    state: restarted
