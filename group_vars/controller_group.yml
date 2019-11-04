@@ -1,2 +1,6 @@
 ---
 os_yum_base_packages: "nano,mc,dstat,jq,vim-common,curl,yum-utils,python-pip,wget,bridge-utils,device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel"
+
+git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
+git_repo_branch: master
+git_repo_dest: /opt/edgecontroller

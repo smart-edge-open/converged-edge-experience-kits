@@ -9,3 +9,6 @@ proxy_os_ftp: "http://proxy-dmz.intel.com:911"
 proxy_os_noproxy: "localhost,127.0.0.1,10.244.0.0/16,10.96.0.0/24"
 
 os_remove_yum_plugins: true
+
+git_repo_token: ""
+

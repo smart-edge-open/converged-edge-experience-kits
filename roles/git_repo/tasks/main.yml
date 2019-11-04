@@ -1,0 +1,16 @@
+---
+
+- name: Remove old repository folder
+  file:
+    path: "{{ git_repo_dest }}"
+    state: absent
+
+- debug:
+    msg: "Using git token for repository checkout"
+  when: git_repo_token != ""
+
+- name: Checkout main repository
+  git:
+    repo: "{{ git_repo_url }}"
+    dest: "{{ git_repo_dest }}"
+    version: "{{ git_repo_branch }}"
