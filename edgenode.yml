@@ -2,10 +2,12 @@
 # Deploy EdgeNode on given host(s)
 
 - hosts: edgenode_group
+  serial: 1
   pre_tasks:
   - debug:
-      msg: "Setting up {{ inventory_hostname | upper}} at {{ ansible_host }}"
+      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
   roles:
     - role: os_setup
-    - role: os_kernelrt
-    - role: docker
+    - role: git_repo
+    - role: kubernetes/worker
+    - role: kubeovn/worker

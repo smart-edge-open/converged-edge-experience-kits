@@ -1,0 +1,58 @@
+---
+
+- name: uninstall kubernetes
+  include_tasks: uninstall.yml
+  tags:
+  - uninstall
+
+- name: import repository
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes repository
+    baseurl: "{{ kubernetes_repository_url }}"
+    gpgkey: "{{ kubernetes_repository_key }}"
+    gpgcheck: yes
+    enabled: true
+    repo_gpgcheck: true
+
+- name: install packages 
+  yum: 
+    name: "{{ kubernetes_packages }}"
+    state: present
+    skip_broken: yes
+    update_cache: yes
+    allow_downgrade: true
+  notify:
+  - enable and restart kubelet
+
+- name: set up proxy
+  include_tasks: proxy.yml
+  when: proxy_os_enable
+
+- name: allow bridged packets to traverse iptables rules
+  block:
+    - name: load br_netfiler module
+      modprobe:
+        name: br_netfilter
+        state: present
+    - name: copy net.bridge.bridge-nf-call-ip(6)tables settings
+      copy:
+        src: sysctl_k8s.conf
+        dest: /etc/sysctl.d/sysctl_k8s.conf
+    - name: refresh sysctl
+      command: sysctl --system
+
+- name: open common firewall ports
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+    - 6443/tcp
+    - 2379-2380/tcp
+    - 10250-10252/tcp
+
+- name: restart services if needed
+  meta: flush_handlers

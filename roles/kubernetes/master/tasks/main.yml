@@ -1,0 +1,30 @@
+---
+
+- include_tasks: cleanup.yml
+  tags:
+  - cleanup
+
+- name: initialize cluster
+  command: kubeadm init
+  register: kubeadm_init_output
+
+- name: copy cluster admin config
+  block:
+  - name: create /root/.kube dir
+    file:
+      path: /root/.kube
+      state: directory
+      mode: 0755
+      owner: root
+      group: root
+  - name: copy kubernetes admin.conf to /root/.kube/config
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /root/.kube/config
+      owner: root
+      group: root
+      mode: 0664
+      remote_src: yes
+
+- name: label host as kube-ovn master
+  command: "kubectl label node {{ ansible_hostname }} kube-ovn/role=master --overwrite"

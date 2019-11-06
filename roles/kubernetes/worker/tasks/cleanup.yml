@@ -1,0 +1,14 @@
+---
+
+- name: "[k8s master] drain the node"
+  command: kubectl drain {{ ansible_hostname }} --ignore-daemonsets --timeout=60s
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+
+- name: "[k8s master] delete the node"
+  command: kubectl delete node {{ ansible_hostname }}
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+
+- name: reset kubeadm
+  command: kubeadm reset --force

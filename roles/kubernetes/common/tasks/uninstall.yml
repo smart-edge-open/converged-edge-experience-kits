@@ -1,0 +1,49 @@
+---
+
+- name: disable kubelet service
+  systemd:
+    name: kubelet
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+
+- name: close firewall ports
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: disabled
+    immediate: yes
+  with_items:
+    - 6443/tcp
+    - 2379-2380/tcp
+    - 10250-10252/tcp
+
+- name: remove k8s sysctl rules
+  block:
+    - name: remove k8s sysctl rules
+      file:
+        path: /etc/sysctl.d/sysctl_k8s.conf
+        state: absent
+    - name: refresh sysctl
+      command: sysctl --system
+
+- name: remove proxy for service
+  file:
+    name: /usr/lib/systemd/system/kubelet.service.d/http-proxy.conf
+    state: absent
+
+- name: uninstall packages 
+  yum: 
+    name: "{{ kubernetes_packages_to_remove }}"
+    state: absent
+
+- name: remove repository
+  yum_repository:
+    name: kubernetes
+    state: absent 
+
+- name: clear yum cache
+  command: yum clean metadata
+  args:
+    warn: false

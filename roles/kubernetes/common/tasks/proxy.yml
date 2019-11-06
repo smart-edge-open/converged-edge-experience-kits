@@ -1,0 +1,14 @@
+---
+
+- name: create http-proxy.conf for kubelet service
+  block:
+    - name: create kubelet system config directory
+      file:
+        name: /usr/lib/systemd/system/kubelet.service.d/
+        state: directory
+    - name: create http-proxy.conf from template
+      template:
+        src: http-proxy.conf.j2
+        dest: /usr/lib/systemd/system/kubelet.service.d/http-proxy.conf
+      notify:
+      - enable and restart kubelet

@@ -1,0 +1,4 @@
+---
+
+- name: prune everything  
+  shell: docker system prune --all --force

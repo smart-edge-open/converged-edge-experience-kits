@@ -1,0 +1,5 @@
+---
+
+- name: apply openness definitions
+  command: "kubectl apply -f {{ item }}"
+  with_items: "{{ openness_yamls }}"

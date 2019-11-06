@@ -1,0 +1,8 @@
+---
+- name: enable and restart kubelet
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    state: restarted

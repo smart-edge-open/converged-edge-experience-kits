@@ -2,6 +2,17 @@
 # Deploy OpenNESS Controller on given host(s)
 
 - hosts: controller_group
-  tasks: []
+
+  pre_tasks:
+  - fail: 
+      msg: "Only one controller is supported"
+    when:
+    - groups['controller_group'] is defined
+    - (groups['controller_group']|length>1)
+
   roles:
-    - role: controller_dpdk
+    - role: os_setup
+    - role: git_repo
+    - role: kubernetes/master
+    - role: kubeovn/master
+    - role: openness/master

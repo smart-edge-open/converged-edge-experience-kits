@@ -1,0 +1,46 @@
+---
+
+- include_tasks: cleanup.yml
+  tags:
+  - cleanup
+
+- name: reinstall ovs
+  block:
+  - name: remove old packages
+    yum:
+      name: "{{ ovs_legacy_packages }}"
+      state: absent
+  - name: installing OVS tool dependencies
+    yum:
+      name: "{{ ovs_dependencies_yum }}"
+  - name: installing OVS tool
+    shell: yum install -y {{ ovs_package_url }}
+    args:
+      warn: false
+
+- name: open kube-ovn firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+  - 10250/tcp
+  - 30000-32767/tcp
+  - 8285/udp
+  - 8472/udp
+
+- name: waiting for OVS DB on the node
+  wait_for:
+    path: /var/run/openvswitch/db.sock
+    timeout: 600
+
+- name: configure OVS
+  shell: |
+    ovs-vsctl set open . external-ids:ovn-bridge-mappings=local-network:br-local
+    ovs-vsctl --may-exist add-br br-local
+  register: result
+  until: result.failed == false
+  retries: 5
+  delay: 60

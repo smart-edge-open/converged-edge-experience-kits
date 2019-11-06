@@ -1,0 +1,18 @@
+---
+
+- include_tasks: cleanup.yml
+  tags:
+  - cleanup
+
+- name: join the cluster
+  block:
+  - name: obtain the join command
+    command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
+    register: join_command
+    delegate_to: "{{ groups['controller_group'][0] }}"
+  - name: join the cluster
+    shell: "{{ join_command.stdout }}"
+
+- name: label node as a worker
+  command: kubectl label node {{ ansible_hostname }} node-role.kubernetes.io/worker=worker
+  delegate_to: "{{ groups['controller_group'][0] }}"

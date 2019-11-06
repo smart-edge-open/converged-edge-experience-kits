@@ -1,0 +1,9 @@
+---
+
+- name: reset kubeadm
+  command: kubeadm reset --force
+
+- name: remove kubeconfig
+  file:
+    path: /root/.kube/
+    state: absent

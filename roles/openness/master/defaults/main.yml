@@ -1,0 +1,5 @@
+---
+
+openness_yamls:
+- "{{ git_repo_dest }}/kube-ovn/openness.yaml"
+- "{{ git_repo_dest }}/kube-ovn/default_network_policy.yaml"

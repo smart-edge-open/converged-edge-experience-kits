@@ -1,5 +1,15 @@
 ---
 
+- name: prune
+  include_tasks: prune.yml
+  tags:
+  - docker_prune
+
+- name: uninstall docker
+  include_tasks: uninstall.yml
+  tags:
+  - uninstall
+
 - name: add Docker repository
   yum_repository:
     name: docker
@@ -12,6 +22,8 @@
   yum:
     name: "{{ docker_packages }}"
     state: present
+  notify:
+  - enable and start docker service
 
 - name: install docker-compose
   pip:
@@ -22,9 +34,5 @@
   include_tasks: proxy.yml
   when: proxy_os_enable
 
-- name: enable & start docker service
-  systemd:
-    name: docker
-    enabled: yes
-    masked: no
-    state: restarted
+- name: restart services if needed
+  meta: flush_handlers

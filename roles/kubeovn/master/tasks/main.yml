@@ -1,0 +1,74 @@
+---
+
+- include_tasks: cleanup.yml
+  tags:
+  - cleanup
+
+- name: reinstall openvswitch tool
+  block:
+  - name: remove old packages
+    yum: 
+      name: "{{ ovn_legacy_packages }}"
+      state: absent
+  - name: install OVN tools dependencies
+    yum: 
+      name: "{{ ovn_packages_yum }}"
+      state: installed
+      update_cache: yes
+      allow_downgrade: true
+      validate_certs: no
+  - name: install OVN tools
+    shell: "yum install -y {{ ovn_packages_urls | join(' ') }}"
+    args:
+      warn: false
+
+- name: open kube-ovn firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+  - 6641/tcp
+  - 6642/tcp
+  - 6081/udp
+
+- name: apply kube-ovn
+  command: "kubectl apply -f {{ item }}"
+  with_items: "{{ kubeovn_yamls }}"
+
+- name: openness' ovn configuration
+  block:
+  - name: wait for OVN DB socket
+    command: "stat /var/run/openvswitch/ovnnb_db.sock"
+    register: ovn_db_sock_file
+    retries: 60
+    delay: 10
+    until: ovn_db_sock_file.rc == 0
+
+  - name: configure ovn-cluster
+    shell: ovn-nbctl lrp-add ovn-cluster ovn-cluster-local 02:0a:0a:0a:0a:01 192.168.1.1/24
+    register: result
+    until: result.failed == false
+    retries: 5
+    delay: 30
+
+  - name: configure local-ovn-cluster
+    shell: | 
+      ovn-nbctl ls-add local
+      ovn-nbctl lsp-add local local-ovn-cluster
+      ovn-nbctl lsp-set-type local-ovn-cluster router
+      ovn-nbctl lsp-set-addresses local-ovn-cluster 02:0a:0a:0a:0a:01
+      ovn-nbctl lsp-set-options local-ovn-cluster router-port=ovn-cluster-local
+      ovn-nbctl lsp-add local local-ovs-phy
+      ovn-nbctl lsp-set-addresses local-ovs-phy unknown
+      ovn-nbctl lsp-set-type local-ovs-phy localnet
+      ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
+
+- name: Wait till k8s master starts
+  shell: kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
+  register: k8s_master_init_start
+  retries: 30
+  delay: 10
+  until: k8s_master_init_start.rc == 0
