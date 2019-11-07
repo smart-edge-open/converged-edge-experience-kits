@@ -9,5 +9,7 @@
   roles:
     - role: os_setup
     - role: git_repo
+    - role: golang
     - role: kubernetes/worker
     - role: kubeovn/worker
+    - role: openness/worker
