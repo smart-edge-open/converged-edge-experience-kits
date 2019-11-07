@@ -15,4 +15,5 @@
 - include_tasks: disable_yum_plugins.yml
 - include_tasks: remove_yum_excludes.yml
 - include_tasks: add_yum_excludes.yml
+- include_tasks: install_epel_repository.yml
 - include_tasks: install_base_os_packages.yml
