@@ -1,0 +1,17 @@
+---
+
+- name: create temporary custom gitconfig
+  template:
+    src: openness_gitconfig.j2
+    dest: /root/.openness_gitconfig
+
+- block:
+  - name: build binaries and images
+    shell: source /etc/profile && GITCONFIG=/root/.openness_gitconfig KUBE_OVN_MODE=True make build-docker
+    args:
+      chdir: "{{ git_repo_dest }}"
+  always:
+  - name: remove temporary gitconfig
+    file:
+      path: /root/.openness_gitconfig
+      state: absent

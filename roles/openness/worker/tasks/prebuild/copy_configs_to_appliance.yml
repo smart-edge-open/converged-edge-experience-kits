@@ -1,0 +1,17 @@
+
+- name: create config directory
+  file:
+    path: /var/lib/appliance/configs
+    state: directory
+
+- name: copy configs
+  copy:
+    src: "{{ git_repo_dest }}/configs/{{ item }}"
+    dest: /var/lib/appliance/configs/
+    directory_mode: yes
+    remote_src: yes
+  with_items:
+  - appliance.json
+  - syslog-ng.conf
+  - eaa.json
+  - interfaceservice.json

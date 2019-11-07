@@ -1,0 +1,3 @@
+---
+
+- include_tasks: prebuild/copy_configs_to_appliance.yml

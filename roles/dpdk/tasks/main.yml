@@ -30,6 +30,12 @@
     path: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
   register: igb_uio_module
 
+- name: remove old dpdk path to compiled DPDK
+  file:
+    path: /etc/ansible/facts.d/dpdk.fact
+    state: absent
+  when: igb_uio_module.stat.exists == False
+
 - name: compile
   make:
     chdir: "{{ dpdk_install_dir }}"
@@ -39,6 +45,16 @@
   environment:
     "MAKEFLAGS": "-j$(nproc)"
   when: igb_uio_module.stat.exists == False
+
+- name: create Ansible dpdk facts.d folder
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+
+- name: save dpdk path to local fact file
+  template:
+    src: dpdk.fact.j2
+    dest: /etc/ansible/facts.d/dpdk.fact
 
 - name: copy kernel modules
   copy:

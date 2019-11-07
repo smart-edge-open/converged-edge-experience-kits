@@ -1,0 +1,4 @@
+---
+
+- include_tasks: prebuild.yml
+- include_tasks: build.yml
