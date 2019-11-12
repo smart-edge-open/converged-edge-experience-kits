@@ -1,9 +1,32 @@
 ---
 
+- name: get worker hostname
+  block:
+  - name: hostname
+    command: hostname
+    register: hostname_output
+  - set_fact:
+      k8s_worker_hostname: "{{ hostname_output.stdout }}"
+
 - name: create temporary custom gitconfig
   template:
     src: openness_gitconfig.j2
     dest: /root/.openness_gitconfig
+
+- name: include openness gitconfig
+  block:
+    - name: create .gitconfig if needed
+      file:
+        path: /root/.gitconfig
+        state: touch
+        modification_time: preserve
+        access_time: preserve
+    - name: add include to .gitconfig
+      blockinfile:
+        path: /root/.gitconfig
+        block: |
+          [include]
+            path = /root/.openness_gitconfig
 
 - block:
   - name: build binaries and images
@@ -15,3 +38,16 @@
     file:
       path: /root/.openness_gitconfig
       state: absent
+  - name: remove include in gitconfig
+    blockinfile:
+      path: /root/.gitconfig
+      state: absent
+      block: |
+        [include]
+          path = /root/.openness_gitconfig
+
+# since these pods are part of openness' DaemonSet will be recreated after deletion
+# this step is for pods to use newly created docker images from previous block
+- name: recreate openness pods
+  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_hostname }} -o=NAME)
+  delegate_to: "{{ groups['controller_group'][0] }}"

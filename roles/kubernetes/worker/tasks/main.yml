@@ -1,8 +1,22 @@
 ---
 
+- name: get worker hostname
+  block:
+  - name: hostname
+    command: hostname
+    register: hostname_output
+  - set_fact:
+      k8s_worker_hostname: "{{ hostname_output.stdout }}"
+
 - include_tasks: cleanup.yml
   tags:
   - cleanup
+
+- name: check if already in cluster
+  command: kubectl get node {{ k8s_worker_hostname }}
+  register: get_node
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
 
 - name: join the cluster
   block:
@@ -12,7 +26,8 @@
     delegate_to: "{{ groups['controller_group'][0] }}"
   - name: join the cluster
     shell: "{{ join_command.stdout }}"
+  when: get_node.rc == 1
 
 - name: label node as a worker
-  command: kubectl label node {{ ansible_hostname }} node-role.kubernetes.io/worker=worker
+  command: kubectl label node {{ k8s_worker_hostname }} node-role.kubernetes.io/worker=worker --overwrite
   delegate_to: "{{ groups['controller_group'][0] }}"

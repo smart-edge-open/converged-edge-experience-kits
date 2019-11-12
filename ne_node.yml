@@ -6,10 +6,15 @@
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
+  - fail:
+      msg: "Hostname cannot be localhost"
+    when: '"localhost" in ansible_hostname'
+
   roles:
     - role: os_setup
     - role: git_repo
     - role: golang
+    - role: docker
     - role: kubernetes/worker
     - role: kubeovn/worker
     - role: openness/worker

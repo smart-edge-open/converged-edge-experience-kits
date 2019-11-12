@@ -4,7 +4,7 @@ ovn_version: "2.11.4-1"
 
 ovs_package_url: "https://github.com/alauda/ovs/releases/download/v{{ ovn_version }}/openvswitch-{{ ovn_version }}.el7.x86_64.rpm"
 ovs_dependencies_yum: "unbound"
-ovs_legacy_packages: "openvswitch,unbound"
+ovs_packages_to_remove: "openvswitch,unbound"
 
 kubeovn_cleanup_paths:
 - /var/run/openvswitch

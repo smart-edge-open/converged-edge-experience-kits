@@ -1,9 +1,8 @@
 ---
 
-- name: Remove old repository folder
-  file:
-    path: "{{ git_repo_dest }}"
-    state: absent
+- include_tasks: cleanup.yml
+  tags:
+  - cleanup
 
 - debug:
     msg: "Using git token for repository checkout"
@@ -14,3 +13,4 @@
     repo: "{{ git_repo_url }}"
     dest: "{{ git_repo_dest }}"
     version: "{{ git_repo_branch }}"
+    update: no

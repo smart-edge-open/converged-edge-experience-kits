@@ -1,12 +1,12 @@
 ---
 
 - name: "[k8s master] drain the node"
-  command: kubectl drain {{ ansible_hostname }} --ignore-daemonsets --timeout=60s
+  command: kubectl drain {{ k8s_worker_hostname }} --ignore-daemonsets --timeout=60s
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
 
 - name: "[k8s master] delete the node"
-  command: kubectl delete node {{ ansible_hostname }}
+  command: kubectl delete node {{ k8s_worker_hostname }}
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
 

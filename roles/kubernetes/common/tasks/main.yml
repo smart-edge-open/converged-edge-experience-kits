@@ -39,8 +39,13 @@
       copy:
         src: sysctl_k8s.conf
         dest: /etc/sysctl.d/sysctl_k8s.conf
-    - name: refresh sysctl
+    - name: get current sysctl vars
+      shell: grep 0 /proc/sys/net/bridge/bridge-nf-call-iptables /proc/sys/net/bridge/bridge-nf-call-ip6tables
+      register: sysctl_out
+      ignore_errors: yes
+    - name: refresh sysctl only if desired vars are disabled
       command: sysctl --system
+      when: sysctl_out.rc == 0
 
 - name: open common firewall ports
   ignore_errors: yes

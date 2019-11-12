@@ -4,11 +4,17 @@
   tags:
   - cleanup
 
-- name: reinstall openvswitch tool
+- name: check if packages installed in proper version
+  shell: rpm -q openvswitch ovn ovn-common | grep {{ ovn_version }} | wc -l
+  args:
+    warn: false
+  register: rpm_grep
+
+- name: (re)install openvswitch tools if needed
   block:
   - name: remove old packages
     yum: 
-      name: "{{ ovn_legacy_packages }}"
+      name: "{{ ovn_packages_to_remove }}"
       state: absent
   - name: install OVN tools dependencies
     yum: 
@@ -21,6 +27,7 @@
     shell: "yum install -y {{ ovn_packages_urls | join(' ') }}"
     args:
       warn: false
+  when: "'3' not in rpm_grep.stdout"
 
 - name: open kube-ovn firewall rules
   ignore_errors: yes
@@ -41,27 +48,25 @@
 - name: openness' ovn configuration
   block:
   - name: wait for OVN DB socket
-    command: "stat /var/run/openvswitch/ovnnb_db.sock"
-    register: ovn_db_sock_file
-    retries: 60
-    delay: 10
-    until: ovn_db_sock_file.rc == 0
+    wait_for:
+      path: /var/run/openvswitch/ovnnb_db.sock
+      timeout: 600
 
   - name: configure ovn-cluster
-    shell: ovn-nbctl lrp-add ovn-cluster ovn-cluster-local 02:0a:0a:0a:0a:01 192.168.1.1/24
+    shell: ovn-nbctl --may-exist lrp-add ovn-cluster ovn-cluster-local 02:0a:0a:0a:0a:01 192.168.1.1/24
     register: result
     until: result.failed == false
-    retries: 5
+    retries: 20
     delay: 30
 
   - name: configure local-ovn-cluster
     shell: | 
-      ovn-nbctl ls-add local
-      ovn-nbctl lsp-add local local-ovn-cluster
+      ovn-nbctl --may-exist ls-add local
+      ovn-nbctl --may-exist lsp-add local local-ovn-cluster
       ovn-nbctl lsp-set-type local-ovn-cluster router
       ovn-nbctl lsp-set-addresses local-ovn-cluster 02:0a:0a:0a:0a:01
       ovn-nbctl lsp-set-options local-ovn-cluster router-port=ovn-cluster-local
-      ovn-nbctl lsp-add local local-ovs-phy
+      ovn-nbctl --may-exist lsp-add local local-ovs-phy
       ovn-nbctl lsp-set-addresses local-ovs-phy unknown
       ovn-nbctl lsp-set-type local-ovs-phy localnet
       ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network

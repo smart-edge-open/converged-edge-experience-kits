@@ -31,6 +31,6 @@
     state: absent 
 
 - name: clear yum cache
-  command: yum clean metadata
+  command: yum clean all
   args:
     warn: false

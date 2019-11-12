@@ -18,6 +18,11 @@
     gpgkey: "{{ docker_repository_key }}"
     gpgcheck: yes
 
+- name: clear yum cache
+  command: yum clean all
+  args:
+    warn: false
+
 - name: install Docker CE
   yum:
     name: "{{ docker_packages }}"

@@ -24,4 +24,4 @@ ovn_packages_urls:
 ovn_packages_yum:
 - "unbound"
 
-ovn_legacy_packages: "openvswitch,ovn,ovn-common,unbound"
+ovn_packages_to_remove: "openvswitch,ovn,ovn-common,unbound"

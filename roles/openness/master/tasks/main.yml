@@ -1,5 +1,47 @@
 ---
 
+- name: create openness namespace if needed
+  block:
+  - name: check if openness namespace exists
+    shell: kubectl get ns openness
+    ignore_errors: yes
+    register: get_ns_openness
+  - name: create openness namespace
+    shell: kubectl create namespace openness
+    when: get_ns_openness.rc == 1
+
+- name: root CA creation
+  block:
+  - name: create directory for root CA
+    file:
+      name: "{{ git_repo_dest }}/certs/CA"
+      state: directory
+  - name: create root CA
+    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh openness {{ git_repo_dest }}/certs/CA"
+
+- name: create root CA secret
+  block:
+  - name: check if root CA secret exists
+    shell: kubectl get secret root-ca --namespace=openness
+    ignore_errors: yes
+    register: get_secret_rootca
+  - name: create secret with root CA
+    shell: kubectl create secret generic root-ca --from-file={{ git_repo_dest }}/certs/CA/key.pem --from-file={{ git_repo_dest }}/certs/CA/cert.pem --namespace=openness
+    when: get_secret_rootca.rc == 1
+
+- name: create certificate generator secret
+  block:
+  - name: check if certificate generator secret exists
+    shell: kubectl get secret certgen --namespace=openness
+    ignore_errors: yes
+    register: get_secret_certgen
+  - name: create secret with certificate generator
+    shell: kubectl create secret generic certgen --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh --namespace=openness
+    when: get_secret_certgen.rc == 1
+
+- name: generate certs of openness components
+  include_tasks: certs.yml
+
 - name: apply openness definitions
-  command: "kubectl apply -f {{ item }}"
+  command: kubectl apply -f {{ item }}
   with_items: "{{ openness_yamls }}"

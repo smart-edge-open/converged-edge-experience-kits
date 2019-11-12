@@ -4,27 +4,42 @@
   tags:
   - cleanup
 
-- name: initialize cluster
-  command: kubeadm init
-  register: kubeadm_init_output
+- name: check if cluster exists
+  command: kubectl cluster-info
+  ignore_errors: yes
+  register: cluster_info
 
-- name: copy cluster admin config
+- name: initialize cluster
   block:
-  - name: create /root/.kube dir
-    file:
-      path: /root/.kube
-      state: directory
-      mode: 0755
-      owner: root
-      group: root
-  - name: copy kubernetes admin.conf to /root/.kube/config
-    copy:
-      src: /etc/kubernetes/admin.conf
-      dest: /root/.kube/config
-      owner: root
-      group: root
-      mode: 0664
-      remote_src: yes
+  - name: initialize cluster
+    command: kubeadm init
+    register: kubeadm_init_output
+  - name: copy cluster admin config
+    block:
+    - name: create /root/.kube dir
+      file:
+        path: /root/.kube
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+    - name: copy kubernetes admin.conf to /root/.kube/config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        owner: root
+        group: root
+        mode: 0664
+        remote_src: yes
+  when: cluster_info.rc == 1
+
+- name: get master hostname
+  block:
+  - name: hostname
+    command: hostname
+    register: hostname_output
+  - set_fact:
+      k8s_master_hostname: "{{ hostname_output.stdout }}"
 
 - name: label host as kube-ovn master
-  command: "kubectl label node {{ ansible_hostname }} kube-ovn/role=master --overwrite"
+  command: "kubectl label node {{ k8s_master_hostname }} kube-ovn/role=master --overwrite"
