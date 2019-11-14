@@ -15,3 +15,10 @@
   - syslog-ng.conf
   - eaa.json
   - interfaceservice.json
+
+- name: customize eaa.json
+  block:
+  - name: change validation endpoint for EAA
+    shell: jq '.ValidationEndpoint=""' /var/lib/appliance/configs/eaa.json | sponge /var/lib/appliance/configs/eaa.json
+  - name: change EAA common name
+    shell: jq '.Certs.CommonName="eaa.openness"' /var/lib/appliance/configs/eaa.json | sponge /var/lib/appliance/configs/eaa.json
