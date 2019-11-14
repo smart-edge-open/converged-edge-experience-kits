@@ -1,0 +1,33 @@
+---
+
+- name: create temp directory
+  tempfile:
+    state: directory
+    suffix: .nfd
+  register: tmp_dir
+
+- name: download NFD yamls
+  get_url:
+    url: "{{ nfd_base_url }}/{{ item }}.template"
+    dest: "{{ tmp_dir.path }}/{{ item }}"
+  with_items: "{{ nfd_yamls }}"
+
+- name: copy files for kustomization
+  copy:
+    src: "{{ item }}"
+    dest: "{{ tmp_dir.path }}"
+  with_items: "{{ kustomization_files_to_copy }}"
+
+- name: apply NFD plugin
+  shell: kubectl kustomize . | kubectl apply -f -
+  args:
+    chdir: "{{ tmp_dir.path }}"
+
+- name: apply network policy
+  shell: kubectl apply -f {{ nfd_netpol }}
+
+- name: remove temp directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
