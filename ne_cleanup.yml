@@ -1,0 +1,30 @@
+---
+
+- hosts: controller_group
+  tasks:
+  - include_vars: ./roles/openness/master/defaults/main.yml
+  - include_tasks: ./roles/openness/master/tasks/cleanup.yml
+  - include_vars: ./roles/kubeovn/master/defaults/main.yml
+  - include_tasks: ./roles/kubeovn/master/tasks/cleanup.yml
+  - include_tasks: ./roles/kubernetes/master/tasks/cleanup.yml
+  - include_vars: ./roles/kubernetes/common/defaults/main.yml
+  - include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
+  - include_vars: ./roles/docker/defaults/main.yml
+  - include_tasks: ./roles/docker/tasks/prune.yml
+  - include_tasks: ./roles/docker/tasks/uninstall.yml
+  - include_vars: ./roles/git_repo/defaults/main.yml
+  - include_tasks: ./roles/git_repo/tasks/cleanup.yml
+
+- hosts: edgenode_group
+  serial: 1
+  tasks:
+  - include_vars: ./roles/kubeovn/worker/defaults/main.yml
+  - include_tasks: ./roles/kubeovn/worker/tasks/cleanup.yml
+  - include_tasks: ./roles/kubernetes/worker/tasks/cleanup.yml
+  - include_vars: ./roles/kubernetes/common/defaults/main.yml
+  - include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
+  - include_vars: ./roles/docker/defaults/main.yml
+  - include_tasks: ./roles/docker/tasks/prune.yml
+  - include_tasks: ./roles/docker/tasks/uninstall.yml
+  - include_vars: ./roles/git_repo/defaults/main.yml
+  - include_tasks: ./roles/git_repo/tasks/cleanup.yml

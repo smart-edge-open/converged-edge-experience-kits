@@ -1,10 +1,5 @@
 ---
 
-- name: uninstall kubernetes
-  include_tasks: uninstall.yml
-  tags:
-  - uninstall
-
 - name: import repository
   yum_repository:
     name: kubernetes

@@ -8,10 +8,6 @@
   - set_fact:
       k8s_worker_hostname: "{{ hostname_output.stdout }}"
 
-- include_tasks: cleanup.yml
-  tags:
-  - cleanup
-
 - name: check if already in cluster
   command: kubectl get node {{ k8s_worker_hostname }}
   register: get_node

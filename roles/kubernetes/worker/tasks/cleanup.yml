@@ -10,5 +10,11 @@
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
 
+- name: check if kubeadm is installed
+  shell: command -v kubeadm >/dev/null 2>&1
+  register: kubeadm_exec
+  ignore_errors: yes
+
 - name: reset kubeadm
   command: kubeadm reset --force
+  when: kubeadm_exec.rc == 0

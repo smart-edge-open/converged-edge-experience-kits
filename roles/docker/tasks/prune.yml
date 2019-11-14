@@ -1,4 +1,10 @@
 ---
 
+- name: check if docker is installed
+  shell: command -v docker >/dev/null 2>&1
+  register: docker_exec
+  ignore_errors: yes
+
 - name: prune everything  
   shell: docker system prune --all --force
+  when: docker_exec.rc == 0

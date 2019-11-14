@@ -1,9 +1,5 @@
 ---
 
-- include_tasks: cleanup.yml
-  tags:
-  - cleanup
-
 - name: check if cluster exists
   command: kubectl cluster-info
   ignore_errors: yes

@@ -1,9 +1,5 @@
 ---
 
-- include_tasks: cleanup.yml
-  tags:
-  - cleanup
-
 - debug:
     msg: "Using git token for repository checkout"
   when: git_repo_token != ""

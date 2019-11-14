@@ -1,15 +1,5 @@
 ---
 
-- name: prune
-  include_tasks: prune.yml
-  tags:
-  - docker_prune
-
-- name: uninstall docker
-  include_tasks: uninstall.yml
-  tags:
-  - uninstall
-
 - name: add Docker repository
   yum_repository:
     name: docker
