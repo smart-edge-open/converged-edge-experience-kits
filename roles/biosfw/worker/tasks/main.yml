@@ -1,0 +1,38 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: check local syscfg_package.zip
+  stat:
+    path: "{{ syscfg_local_path }}"
+  connection: local
+  register: syscfg_local_file
+
+- name: file not present
+  debug:
+    msg: "{{ syscfg_local_path }} does not exists, BIOSFW won't be set up on the node"
+  when: syscfg_local_file.stat.exists == False
+
+- name: set up biosfw for the node
+  block:
+  - name: copy local syscfg to remote
+    copy:
+      src: "{{ syscfg_local_path }}"
+      dest: "{{ syscfg_remote_path }}"
+  - name: build BIOSFW worker image
+    shell: make build-docker-biosfw
+    args:
+      chdir: "{{ git_repo_dest }}"
+  when: syscfg_local_file.stat.exists == True
