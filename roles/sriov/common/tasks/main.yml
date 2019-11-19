@@ -1,0 +1,64 @@
+---
+
+- name: download CNI plugin
+  git:
+    repo: "{{ sriov_cni.url }}"
+    dest: "{{ sriov_cni.download_dir }}"
+    clone: yes
+    update: no
+    version: "{{ sriov_cni.commit }}"
+
+# master only
+- name: patch CNI plugin (only master)
+  block:
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
+  - name: patch CNI plugin (only master)
+    patch:
+      src: "{{ sriov_cni.patch_path }}"
+      basedir: "{{ sriov_cni.download_dir }}/images"
+      strip: 0
+      binary: no
+      remote_src: yes
+  when: apply_patch_cni
+
+
+- name: download device plugin
+  git:
+    repo: "{{ sriov_dev_plugin.url }}"
+    dest: "{{ sriov_dev_plugin.download_dir }}"
+    clone: yes
+    update: no
+    version: "{{ sriov_dev_plugin.commit }}"
+
+- name: patch device plugin for FPGA SRIOV USERSPACE functionality
+  block:
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
+  - name: patch device plugin for FPGA SRIOV USERSPACE functionality
+    patch:
+      src: "{{ fpga_sriov_userspace.patch_path }}"
+      basedir: "{{ sriov_dev_plugin.download_dir }}"
+      strip: 1
+      binary: no
+      remote_src: yes
+  when: fpga_sriov_userspace.enabled
+
+
+- name: build CNI image
+  docker_image:
+    name: sriov-cni
+    source: build
+    build:
+      path: "{{ sriov_cni.download_dir }}"
+      use_config_proxy: yes
+      pull: yes
+
+- name: build device plugin image
+  shell: make image
+  args:
+    chdir: "{{ sriov_dev_plugin.download_dir }}"

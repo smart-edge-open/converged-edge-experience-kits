@@ -1,0 +1,38 @@
+---
+
+- name: include sriov/common default vars
+  include_vars: ../../../sriov/common/defaults/main.yml
+
+- block:
+  - name: check if FPGA SRIOV device is connected and get PCI address of devices.
+    shell: lspci | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
+    register: pci_address
+    
+  - name: bind FPGA SRIOV PF to IGB UIO.
+    shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
+    
+  - name: create VFs
+    shell: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
+    with_items:
+      - "{{ pci_address.stdout_lines }}"
+    
+  - name: bind FPGA SRIOV VFs to IGB_UIO
+    shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
+  when: fpga_userspace_vf.enabled
+
+- name: check that FPGA Config utility is present
+  stat:
+    path: "{{ git_repo_dest }}/build/fpga_config/bbdev_config_service"
+  register: fpga_dir
+
+- debug:
+    msg: "FPGA SRIOV USERSPACE enabled but FPGA-config directory not found, FPGA config utility will not be build."
+  when: fpga_dir.stat.exists == false
+
+- name: build FPGA Config utility image
+  shell: make build-docker-fpga-cfg
+  args:
+    chdir: "{{ base_path }}"
+  when: 
+  - fpga_sriov_userspace.enabled
+  - fpga_dir.stat.exists

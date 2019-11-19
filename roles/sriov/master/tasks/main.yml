@@ -1,0 +1,26 @@
+---
+
+- name: include sriov/common default vars
+  include_vars: ../../../sriov/common/defaults/main.yml
+
+# Deploy SRIOV-CNI
+- name: deploy CNI
+  shell: kubectl create -f ./images/sriov-cni-daemonset.yaml
+  args:
+    chdir: "{{ sriov_cni.download_dir }}"
+
+# Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
+- name: deploy dev plugin configMap
+  shell: kubectl create -f {{ config_map_path }}
+  when: not fpga_sriov_userspace.enabled
+
+# Create/deploy a sample configMap to be used for FPGA USERSPACE SRIOV-DEVICE plugin
+- name: deploy FPGA dev plugin configMap
+  shell: kubectl create -f {{ fpga_userspace_config_map_path }}
+  when: fpga_sriov_userspace.enabled
+
+# Deploy SRIOV-DEVICE Plugin
+- name: deploy dev plugin
+  shell: kubectl create -f ./deployments/k8s-v1.16/sriovdp-daemonset.yaml
+  args:
+    chdir: "{{ sriov_dev_plugin.download_dir }}"

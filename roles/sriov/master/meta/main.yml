@@ -1,0 +1,4 @@
+dependencies:
+- role: sriov/common
+  vars:
+    apply_patch_cni: true

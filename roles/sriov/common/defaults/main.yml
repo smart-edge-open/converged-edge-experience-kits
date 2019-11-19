@@ -1,0 +1,28 @@
+---
+
+sriov_cni: 
+  url: "https://github.com/intel/sriov-cni"
+  download_dir : "/temp/sriov_cni"
+  commit: "c9e13c3643e4f7b5b4cd5169a8879ed894b1a07a"
+  patch_path: "{{ git_repo_dest }}/fpga/sriov-cni-1.16.patch"
+
+sriov_dev_plugin:
+  url: "https://github.com/intel/sriov-network-device-plugin"
+  download_dir: "/temp/sriov_dev_plugin"
+  commit: "bf28fdc3e2d9dd2edcc4f0bceb58448ac9317696"
+
+fpga_sriov_userspace:
+  enabled: false
+  patch_path: "{{ git_repo_dest }}/fpga/FPGA_SRIOV_USERSPACE_DEV_PLUGIN.patch"
+
+# Config for nodes
+fpga_userspace_vf:
+  enabled: false
+  vendor_id: "1172"
+  vf_device_id: "5050"
+  pf_device_id: "5052"
+  vf_number: "2"
+
+# Config for master
+config_map_path: "{{ git_repo_dest }}/sriov/configMap.yaml"
+fpga_userspace_config_map_path: "{{ git_repo_dest }}/fpga/configMap.yaml"
