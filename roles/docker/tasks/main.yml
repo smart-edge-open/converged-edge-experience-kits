@@ -29,5 +29,18 @@
   include_tasks: proxy.yml
   when: proxy_os_enable
 
+- name: set cgroups driver to systemd
+  block:
+  - name: make sure /etc/docker/ exists
+    file:
+      path: /etc/docker/
+      state: directory
+  - name: set cgroups driver to systemd
+    copy:
+      src: daemon.json
+      dest: /etc/docker/daemon.json
+    notify:
+    - enable and start docker service
+
 - name: restart services if needed
   meta: flush_handlers

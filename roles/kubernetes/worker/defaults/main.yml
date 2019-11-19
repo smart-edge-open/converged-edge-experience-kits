@@ -14,16 +14,12 @@
 
 ---
 
-- name: check if kubeadm is installed
-  shell: command -v kubeadm >/dev/null 2>&1
-  register: kubeadm_exec
-  ignore_errors: yes
+kubernetes_env_file: "/etc/sysconfig/kubelet"
+kubernetes_config_file: "/usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
 
-- name: reset kubeadm
-  command: kubeadm reset --force
-  when: kubeadm_exec.rc == 0
+cpu:
+  policy: "none" # Options: none (disabled), static
+  reserved_cpus: 1
 
-- name: remove kubeconfig
-  file:
-    path: /root/.kube/
-    state: absent
+topology_manager:
+  policy: "none" # Options: none (default, disabled), best-effort, restricted, single-numa-node
