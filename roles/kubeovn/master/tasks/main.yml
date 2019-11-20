@@ -73,18 +73,3 @@
   retries: 30
   delay: 10
   until: k8s_master_init_start.rc == 0
-
-- name: build interface service cli
-  command: go build -o {{ git_repo_dest }}/dist/interfaceservicecli {{ git_repo_dest }}/cmd/interfaceservicecli
-
-- name: copy interface service cli
-  copy:
-    src: "{{ git_repo_dest }}/dist/interfaceservicecli"
-    dest: /usr/local/bin/interfaceservicecli
-    mode: '0755'
-
-- name: copy kubectl-interfaceservice
-  copy:
-    src: "{{ git_repo_dest }}/kube-ovn/kubectl-interfaceservice"
-    dest: /usr/local/bin/kubectl-interfaceservice
-    mode: '0755'

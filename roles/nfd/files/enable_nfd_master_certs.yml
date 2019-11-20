@@ -41,4 +41,3 @@
         mountPath: /root/certs
       - name: certgen
         mountPath: /root/certgen
-l
