@@ -30,4 +30,17 @@
     state: absent
   with_items:
   - "{{ certs_dest }}/client/interfaceservice"
+  - "{{ certs_dest }}/client/edgeclient"
   - "{{ certs_dest }}/CA"
+  - "{{ certs_dest }}"
+  - "/etc/openness"
+
+- name: remove kubectl plugins
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - "/usr/local/bin/edgednscli"
+  - "/usr/local/bin/kubectl-edgednscli"
+  - "/usr/local/bin/interfaceservicecli"
+  - "/usr/local/bin/kubectl-interfaceservice"

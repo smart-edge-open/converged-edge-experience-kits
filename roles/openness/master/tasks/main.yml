@@ -1,5 +1,13 @@
 ---
 
+- name: make sure /etc/openness and /etc/openness/certs exist
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - /etc/openness
+  - "{{ certs_dest }}"
+
 - name: create openness namespace if needed
   block:
   - name: check if openness namespace exists

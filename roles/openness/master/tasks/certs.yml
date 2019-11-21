@@ -8,3 +8,20 @@
       state: directory
   - name: create Interface Service client certificate
     shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh interfaceservice.openness {{ certs_dest }}/client/interfaceservice {{ certs_dest }}/CA"
+  - name: create symbolic link to root's cert
+    src: "{{ certs_dest }}/CA/cert.pem"
+    dest: "{{ certs_dest }}/client/interfaceservice/root.pem"
+    state: link
+
+- name: certificate for EdgeDNS CLI
+  block:
+  - name: create directory for Interface Service client certificate
+    file:
+      name: "{{ certs_dest }}/client/edgedns"
+      state: directory
+  - name: create EdgeDNS client certificate
+    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh edgedns.openness {{ certs_dest }}/client/edgedns {{ certs_dest }}/CA"
+  - name: create symbolic link to root's cert
+    src: "{{ certs_dest }}/CA/cert.pem"
+    dest: "{{ certs_dest }}/client/edgedns/root.pem"
+    state: link
