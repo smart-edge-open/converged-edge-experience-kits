@@ -1,5 +1,5 @@
 ---
-# Deploy OpenNESS Controller on given host(s)
+# Deploy OpenNESS Controller on given host
 
 - hosts: controller_group
 
@@ -16,7 +16,12 @@
   roles:
     - role: os_setup
     - role: git_repo
+    - role: golang
     - role: docker
     - role: kubernetes/master
     - role: kubeovn/master
     - role: openness/master
+    - role: multus
+    # - role: biosfw/master
+    # - role: nfd
+    # - role: sriov/master
