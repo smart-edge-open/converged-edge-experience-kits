@@ -1,13 +1,13 @@
 
 - name: create config directory
   file:
-    path: /var/lib/appliance/configs
+    path: "{{ configs_dest }}"
     state: directory
 
 - name: copy configs
   copy:
     src: "{{ git_repo_dest }}/configs/{{ item }}"
-    dest: /var/lib/appliance/configs/
+    dest: "{{ configs_dest }}/"
     directory_mode: yes
     remote_src: yes
   with_items:
@@ -19,6 +19,6 @@
 - name: customize eaa.json
   block:
   - name: change validation endpoint for EAA
-    shell: jq '.ValidationEndpoint=""' /var/lib/appliance/configs/eaa.json | sponge /var/lib/appliance/configs/eaa.json
+    shell: jq '.ValidationEndpoint=""' '{{ configs_dest }}/eaa.json' | sponge '{{ configs_dest }}/eaa.json'
   - name: change EAA common name
-    shell: jq '.Certs.CommonName="eaa.openness"' /var/lib/appliance/configs/eaa.json | sponge /var/lib/appliance/configs/eaa.json
+    shell: jq '.Certs.CommonName="eaa.openness"' '{{ configs_dest }}/eaa.json' | sponge '{{ configs_dest }}/eaa.json'

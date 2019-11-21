@@ -1,0 +1,20 @@
+---
+
+- name: build interface service cli
+  shell: source /etc/profile && go build -o dist/interfaceservicecli ./cmd/interfaceservicecli
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: copy interface service cli
+  copy:
+    src: "{{ git_repo_dest }}/dist/interfaceservicecli"
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: '0755'
+
+- name: copy kubectl-interfaceservice
+  copy:
+    src: "{{ git_repo_dest }}/kube-ovn/kubectl-interfaceservice"
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: '0755'

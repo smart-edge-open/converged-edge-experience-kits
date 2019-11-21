@@ -1,5 +1,7 @@
 ---
 
+certs_dest: /etc/openness/certs
+
 nfd_version: "v0.4.0"
 
 nfd_netpol: "{{ git_repo_dest }}/kube-ovn/nfd_network_policy.yml"

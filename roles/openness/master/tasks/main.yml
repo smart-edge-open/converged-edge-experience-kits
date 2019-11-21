@@ -14,10 +14,10 @@
   block:
   - name: create directory for root CA
     file:
-      name: "{{ git_repo_dest }}/certs/CA"
+      name: "{{ certs_dest }}/CA"
       state: directory
   - name: create root CA
-    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh openness {{ git_repo_dest }}/certs/CA"
+    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh openness {{ certs_dest }}/CA"
 
 - name: create root CA secret
   block:
@@ -26,7 +26,7 @@
     ignore_errors: yes
     register: get_secret_rootca
   - name: create secret with root CA
-    shell: kubectl create secret generic root-ca --from-file={{ git_repo_dest }}/certs/CA/key.pem --from-file={{ git_repo_dest }}/certs/CA/cert.pem --namespace=openness
+    shell: kubectl create secret generic root-ca --from-file={{ certs_dest }}/CA/key.pem --from-file={{ certs_dest }}/CA/cert.pem --namespace=openness
     when: get_secret_rootca.rc == 1
 
 - name: create certificate generator secret
@@ -45,3 +45,6 @@
 - name: apply openness definitions
   command: kubectl apply -f {{ item }}
   with_items: "{{ openness_yamls }}"
+
+- name: build CLIs
+  include_tasks: build_cli.yml

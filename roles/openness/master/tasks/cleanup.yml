@@ -29,5 +29,5 @@
     path: "{{ item }}"
     state: absent
   with_items:
-  - "{{ git_repo_dest }}/certs/client/interfaceservice"
-  - "{{ git_repo_dest }}/certs/CA"
+  - "{{ certs_dest }}/client/interfaceservice"
+  - "{{ certs_dest }}/CA"

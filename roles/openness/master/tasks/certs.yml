@@ -4,7 +4,7 @@
   block:
   - name: create directory for Interface Service client certificate
     file:
-      name: "{{ git_repo_dest }}/certs/client/interfaceservice"
+      name: "{{ certs_dest }}/client/interfaceservice"
       state: directory
   - name: create Interface Service client certificate
-    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh interfaceservice.openness {{ git_repo_dest }}/certs/client/interfaceservice {{ git_repo_dest }}/certs/CA"
+    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh interfaceservice.openness {{ certs_dest }}/client/interfaceservice {{ certs_dest }}/CA"
