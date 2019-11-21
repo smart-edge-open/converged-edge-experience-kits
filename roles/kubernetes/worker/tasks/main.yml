@@ -33,12 +33,19 @@
 
 - name: join the cluster
   block:
+  # If playbook failed because kubeadm join failed, then most probably /etc/kubernetes was created
+  # Next execution of the playbook will also fail, because /etc/kubernetes exists
+  # So, since the node is no part of cluster, let's try to delete /etc/kubernetes just in case
+  - name: try to remove /etc/kubernetes
+    file:
+      path: /etc/kubernetes
+      state: absent
   - name: obtain the join command
     command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
     register: join_command
     delegate_to: "{{ groups['controller_group'][0] }}"
   - name: join the cluster
-    shell: "{{ join_command.stdout }}"
+    shell: "{{ join_command.stdout }} --v=2"
   when: get_node.rc == 1
 
 - name: label node as a worker

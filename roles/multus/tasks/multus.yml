@@ -1,0 +1,54 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: create temp dir
+  tempfile:
+    state: directory
+    suffix: -multus
+  register: tmp_dir
+
+- name: download Multus daemonSet
+  get_url:
+    url: "{{ multus_daemonset_url }}"
+    dest: "{{ tmp_dir.path }}/multus-daemonset.yml"
+
+- name: create kustomization.yml
+  copy:
+    src: kustomization.yml
+    dest: "{{ tmp_dir.path }}/kustomization.yml"
+
+- name: create rename_default_net.yml
+  copy:
+    src: rename_default_net.yml
+    dest: "{{ tmp_dir.path }}/rename_default_net.yml"
+
+- name: setup Multus
+  shell: kubectl kustomize . | kubectl apply -f -
+  args:
+    chdir: "{{ tmp_dir.path }}"
+
+- name: wait for Multus to start
+  shell: kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
+  register: multus_started
+  retries: 30
+  delay: 10
+  until: multus_started.rc == 0
+
+- name: remove temp directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined

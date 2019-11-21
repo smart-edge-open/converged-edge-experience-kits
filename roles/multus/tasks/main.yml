@@ -14,41 +14,10 @@
 
 ---
 
-- name: create temp dir
-  tempfile:
-    state: directory
-    suffix: -multus
-  register: tmp_dir
+- name: check if host is controller
+  debug:
+    msg: "Multus is only for controller/k8s master host"
+  when: "'controller_group' not in group_names"
 
-- name: download Multus daemonSet
-  get_url:
-    url: "{{ multus_daemonset_url }}"
-    dest: "{{ tmp_dir.path }}/multus-daemonset.yml"
-
-- name: create kustomization.yml
-  copy:
-    src: kustomization.yml
-    dest: "{{ tmp_dir.path }}/kustomization.yml"
-
-- name: create rename_default_net.yml
-  copy:
-    src: rename_default_net.yml
-    dest: "{{ tmp_dir.path }}/rename_default_net.yml"
-
-- name: setup Multus
-  shell: kubectl kustomize . | kubectl apply -f -
-  args:
-    chdir: "{{ tmp_dir.path }}"
-
-- name: wait for Multus to start
-  shell: kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
-  register: multus_started
-  retries: 30
-  delay: 10
-  until: multus_started.rc == 0
-
-- name: remove temp directory
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
+- include_tasks: multus.yml
+  when: "'controller_group' in group_names"
