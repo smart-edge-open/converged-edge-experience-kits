@@ -1,0 +1,87 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+# Stop and stop selected containers
+- name: remove syslog container
+  docker_container:
+    name: "{{ docker_syslog_container_name }}"
+    state: absent
+
+- name: remove appliance container
+  docker_container:
+    name: "{{ docker_appliance_container_name }}"
+    state: absent
+
+- name: remove eaa container
+  docker_container:
+    name: "{{ docker_eaa_container_name }}"
+    state: absent
+
+- name: remove edgednssvr container
+  docker_container:
+    name: "{{ docker_edgednssvr_container_name }}"
+    state: absent
+
+- name: remove nts container
+  docker_container:
+    name: "{{ docker_nts_container_name }}"
+    state: absent
+
+# Bring up containers
+- name: up syslog container
+  shell: "REMOTE_SYSLOG_IP={{ remote_syslog_ip }} VER={{ docker_containers_ver }} docker-compose up -d --no-build syslog-ng"
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: up edgednssvr container
+  shell: "LOCAL_SYSLOG_IP=192.168.122.1 VER={{ docker_containers_ver }} docker-compose up --no-start --no-build edgednssvr"
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: up nts container
+  shell: "VER={{ docker_containers_ver }} NTS_MEM_MB_S0={{ docker_nts_mem_mb_s0 }} NTS_MEM_MB_S1={{ docker_nts_mem_mb_s1 }} docker-compose up --no-start --no-build nts"
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: up EAA container
+  shell: "VER={{ docker_containers_ver }} docker-compose up -d --no-build eaa"
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: up appliance container
+  shell: "VER={{ docker_containers_ver }} docker-compose up -d --no-build appliance"
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+# Certificates and keys exchange
+- name: Wait for default key file
+  shell: while true; do [ -s /var/lib/appliance/certs/key.pem ] && break; done
+
+- name: Generate key for controller
+  shell: openssl pkey -pubout -in /var/lib/appliance/certs/key.pem -inform pem -outform der | md5sum | xxd -r -p | openssl enc -a | tr -d '=' | tr '/+' '_-'
+  register: key_msg
+
+- set_fact: verification_key="{{ key_msg.stdout }}"
+
+- debug:
+    msg: "THIS IS YOUR VERIFICATION KEY: {{ verification_key }}"
+
+# Restart containers
+- name: restart syslog_ng container
+  docker_container:
+    name: "{{ docker_syslog_container_name }}"
+    state: started
+    restart: yes

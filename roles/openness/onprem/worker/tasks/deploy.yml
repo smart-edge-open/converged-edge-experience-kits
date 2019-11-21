@@ -1,0 +1,39 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- include_tasks: subtasks/remove_additional_folder_structure.yml
+- include_tasks: subtasks/create_additional_folder_structure.yml
+
+# Certificates
+- include_tasks: subtasks/remove_certificates_and_keys.yml
+- include_tasks: subtasks/create_empty_cert_and_key.yml
+
+# Configuration files
+- include_tasks: subtasks/copy_configs_to_appliance.yml
+- include_tasks: subtasks/update_appliance_config_files.yml
+- include_tasks: subtasks/copy_logrotate_file.yml
+- include_tasks: subtasks/add_firewall_rules.yml
+
+# Align libvirtd and Docker network settings
+- include_tasks: subtasks/remove_virbr0_interface.yml
+- include_tasks: subtasks/recreate_libvirtd_network_config_file.yml
+- include_tasks: subtasks/create_custom_docker_daemon_config_file.yml
+- include_tasks: subtasks/create_edgedns_tap.yml
+
+- name: restart Docker
+  systemd:
+    name: docker
+    state: restarted

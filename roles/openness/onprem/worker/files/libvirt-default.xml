@@ -1,0 +1,25 @@
+<network>
+  <name>default</name>
+  <bridge name="virbr0"/>
+  <forward/>
+  <dns>
+    <forwarder domain='local.mec' addr='192.168.122.128'/>
+    <host ip="192.168.122.1">
+      <hostname>eaa.community.appliance.mec</hostname>
+    </host>
+    <host ip="192.168.122.1">
+      <hostname>eva.community.appliance.mec</hostname>
+    </host>
+    <host ip="192.168.122.1">
+      <hostname>syslog.community.appliance.mec</hostname>
+    </host>
+    <host ip="192.168.122.128">
+      <hostname>edgedns.community.appliance.mec</hostname>
+    </host>
+  </dns>
+  <ip address="192.168.122.1" netmask="255.255.255.0">
+    <dhcp>
+      <range start="192.168.122.129" end="192.168.122.254"/>
+    </dhcp>
+  </ip>
+</network>

@@ -6,9 +6,16 @@ proxy_os_remove_old: true
 proxy_os_http: "http://proxy-dmz.intel.com:911"
 proxy_os_https: "http://proxy-dmz.intel.com:911"
 proxy_os_ftp: "http://proxy-dmz.intel.com:911"
-proxy_os_noproxy: "localhost,127.0.0.1,10.244.0.0/16,10.96.0.0/24"
+proxy_os_noproxy: "localhost,127.0.0.1,10.244.0.0/16,10.96.0.0/24,10.103.102.0/24"
 
 os_remove_yum_plugins: true
 
 git_repo_token: ""
 
+# Node settings
+#enrollment_endpoint: "1.2.3.4:8081"
+#remote_syslog_ip: "1.2.3.5"
+
+# Controller settings
+#mysql_root_password: "pass"
+#cce_admin_password: "pass"

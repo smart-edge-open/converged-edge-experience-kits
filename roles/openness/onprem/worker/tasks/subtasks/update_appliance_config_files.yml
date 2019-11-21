@@ -1,0 +1,24 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: Update appliance config file
+  shell: jq '.enrollment.endpoint="{{ enrollment_endpoint }}" | .useSyslog=true | .syslogAddr="192.168.122.1:514"' /var/lib/appliance/configs/appliance.json | sponge /var/lib/appliance/configs/appliance.json
+
+- name: Update EVA config file
+  shell: jq '.ControllerEndpoint="{{ enrollment_endpoint }}"' /var/lib/appliance/configs/eva.json | sponge /var/lib/appliance/configs/eva.json
+
+- name: Update ELA config file
+  shell: jq '.ControllerEndpoint="{{ enrollment_endpoint }}"' /var/lib/appliance/configs/ela.json | sponge /var/lib/appliance/configs/ela.json

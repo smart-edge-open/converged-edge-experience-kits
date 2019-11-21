@@ -1,0 +1,9 @@
+/var/log/appliance/* {
+    weekly
+    rotate 3
+    size 10M
+    compress
+    delaycompress
+    missingok
+    notifempty
+}

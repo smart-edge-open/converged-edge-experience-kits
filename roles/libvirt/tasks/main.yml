@@ -1,0 +1,14 @@
+---
+
+- name: install libvirt
+  yum:
+    name: "{{ libvirt_packages }}"
+    state: present
+    skip_broken: yes
+
+- name: enable and restart libvirtd service
+  systemd:
+    name: libvirtd
+    state: restarted
+    enabled: yes
+    masked: no

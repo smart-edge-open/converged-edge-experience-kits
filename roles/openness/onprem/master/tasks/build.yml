@@ -1,0 +1,83 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: check if a backup of original .env file already exists
+  stat:
+    path: "{{ git_repo_dest }}/.env.ansible.backup"
+  register: env_backup_file
+
+- name: make a backup of original .env file if backup is missing
+  copy:
+    src: "{{ git_repo_dest }}/.env"
+    dest: "{{ git_repo_dest }}/.env.ansible.backup"
+    remote_src: yes
+  when: env_backup_file.stat.exists == false
+
+- name: generate .env file
+  template:
+    src: .env.j2
+    dest: "{{ git_repo_dest }}/.env"
+
+- name: create temporary custom gitconfig
+  template:
+    src: openness_gitconfig.j2
+    dest: /root/.openness_gitconfig
+
+- name: include openness gitconfig
+  block:
+    - name: create .gitconfig if needed
+      file:
+        path: /root/.gitconfig
+        state: touch
+        modification_time: preserve
+        access_time: preserve
+    - name: add include to .gitconfig
+      blockinfile:
+        path: /root/.gitconfig
+        block: |
+          [include]
+            path = /root/.openness_gitconfig
+
+- block:
+  - name: build controller
+    make:
+      chdir: "{{ git_repo_dest }}"
+      target: build
+    register: build_controller_output
+  always:
+  - name: remove temporary gitconfig
+    file:
+      path: /root/.openness_gitconfig
+      state: absent
+  - name: remove include in gitconfig
+    blockinfile:
+      path: /root/.gitconfig
+      state: absent
+      block: |
+        [include]
+          path = /root/.openness_gitconfig
+
+- debug:
+    msg: "{{ build_controller_output.stdout }}"
+
+- name: start controller
+  make:
+    chdir: "{{ git_repo_dest }}"
+    target: all-up
+  register: start_controller_output
+
+- debug:
+    msg: "{{ start_controller_output.stdout }}"

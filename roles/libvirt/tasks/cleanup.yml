@@ -1,0 +1,23 @@
+---
+
+- name: get libvirt service status
+  service_facts:
+  register: service_state
+
+- name: stop service
+  service:
+    name: libvirtd
+    state: stopped
+  when:
+    - "'libvirtd.service' in services"
+
+- name: uninstall
+  yum:
+    name: "{{ libvirt_packages }}"
+    state: absent
+  when: "'libvirtd.service' in services"
+
+- name: remove old images from disk
+  file:
+    state: absent
+    path: /var/lib/libvirt/images

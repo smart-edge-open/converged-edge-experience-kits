@@ -1,0 +1,53 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: create temporary custom gitconfig
+  template:
+    src: openness_gitconfig.j2
+    dest: /root/.openness_gitconfig
+
+- name: include openness gitconfig
+  block:
+    - name: create .gitconfig if needed
+      file:
+        path: /root/.gitconfig
+        state: touch
+        modification_time: preserve
+        access_time: preserve
+    - name: add include to .gitconfig
+      blockinfile:
+        path: /root/.gitconfig
+        block: |
+          [include]
+            path = /root/.openness_gitconfig
+
+- block:
+  - name: binaries and images
+    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local['dpdk']['dpdk_install_dir'] }} RTE_TARGET={{ dpdk_make_target }} make build-docker
+    args:
+      chdir: "{{ git_repo_dest }}"
+  always:
+  - name: remove temporary gitconfig
+    file:
+      path: /root/.openness_gitconfig
+      state: absent
+  - name: remove include in gitconfig
+    blockinfile:
+      path: /root/.gitconfig
+      state: absent
+      block: |
+        [include]
+          path = /root/.openness_gitconfig
