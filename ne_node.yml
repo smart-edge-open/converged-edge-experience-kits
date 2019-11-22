@@ -15,8 +15,8 @@
     - role: git_repo
     - role: golang
     - role: docker
+    # - role: sriov/worker
     - role: kubernetes/worker
     - role: kubeovn/worker
     - role: openness/worker
     # - role: biosfw/worker
-    # - role: sriov/worker

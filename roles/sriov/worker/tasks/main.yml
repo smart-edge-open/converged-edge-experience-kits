@@ -4,20 +4,44 @@
   include_vars: ../../../sriov/common/defaults/main.yml
 
 - block:
-  - name: check if FPGA SRIOV device is connected and get PCI address of devices.
+  - name: check if FPGA SRIOV device is connected and get PCI address of devices
     shell: lspci | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
     register: pci_address
     
-  - name: bind FPGA SRIOV PF to IGB UIO.
+  - name: bind FPGA SRIOV PF to IGB UIO
     shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
+
+  - name: enable PF FPGA bind to IGB_UIO on boot
+    lineinfile:
+      state: present
+      dest: /etc/rc.d/rc.local
+      line: "{{ item }}"
+    with_items:
+      - "echo \"{{ fpga_userspace_vf.vendor_id}} {{ fpga_userspace_vf.pf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
     
-  - name: create VFs
+  - name: create SRIOV VFs
     shell: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
     with_items:
       - "{{ pci_address.stdout_lines }}"
-    
+  
+  - name: enable creation of SRIOV VFs on boot
+    lineinfile:
+      state: present
+      dest: /etc/rc.d/rc.local
+      line: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
+    with_items:
+      - "{{ pci_address.stdout_lines }}"
+
   - name: bind FPGA SRIOV VFs to IGB_UIO
     shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
+
+  - name: enable VFs binding to IGB_UIO on boot
+    lineinfile:
+      state: present
+      dest: /etc/rc.d/rc.local
+      line: "{{ item }}"
+    with_items:
+      - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
   when: fpga_userspace_vf.enabled
 
 - name: check that FPGA Config utility is present
@@ -36,3 +60,39 @@
   when: 
   - fpga_sriov_userspace.enabled
   - fpga_dir.stat.exists
+
+- name: disable SR-IOV ethernet interfaces
+  shell: echo 0 > {{ item }}
+  with_lines: cat /etc/rc.d/rc.local 2> /dev/null | grep sriov_numvfs | sed -e 's/.*> //'
+
+- name: clear SR-IOV boot time setup
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    regexp: '(.*)sriov_numvfs(.*)'
+    state: absent
+
+- name: checking network interfaces for SR-IOV support
+  stat:
+    path: /sys/class/net/{{ item.key }}/device/sriov_numvfs
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+  register: sriov_support
+
+- fail:
+    msg: 'The device does not support SR-IOV'
+  with_items: "{{ sriov_support.results }}"
+  when: not item.stat.exists
+
+- name: enable SR-IOV for network interfaces
+  shell: echo 0 > /sys/class/net/{{ item.key }}/device/sriov_numvfs && echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+
+- name: enable SR-IOV for network interfaces at boot time
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    line: "echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs"
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+
+- name: enable SR-IOV startup
+  file:
+    dest: /etc/rc.d/rc.local
+    mode: a+x

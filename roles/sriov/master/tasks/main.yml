@@ -9,6 +9,25 @@
   args:
     chdir: "{{ sriov_cni.download_dir }}"
 
+# Create temporary directory for SR-IOV network CRD
+- name: create temp dir
+  tempfile:
+    state: directory
+    suffix: -sriov-crd
+  register: tmp_dir
+
+# Copy SR-IOV network CRD to temporary directory
+- name: create SR-IOV network CRD
+  copy:
+    src: openness-sriov-crd.yml
+    dest: "{{ tmp_dir.path }}/openness-sriov-crd.yml"
+
+# Create SR-IOV network
+- name: deploy SR-IOV network CRD
+  shell: kubectl create -f openness-sriov-crd.yml
+  args:
+    chdir: "{{ tmp_dir.path }}"
+
 # Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
 - name: deploy dev plugin configMap
   shell: kubectl create -f {{ config_map_path }}
