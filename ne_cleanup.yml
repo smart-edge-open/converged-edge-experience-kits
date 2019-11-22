@@ -21,6 +21,7 @@
   - include_vars: ./roles/kubeovn/worker/defaults/main.yml
   - include_tasks: ./roles/kubeovn/worker/tasks/cleanup.yml
   - include_tasks: ./roles/kubernetes/worker/tasks/cleanup.yml
+  - include_tasks: ./roles/openness/worker/tasks/cleanup.yml
   - include_vars: ./roles/kubernetes/common/defaults/main.yml
   - include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
   - include_vars: ./roles/docker/defaults/main.yml

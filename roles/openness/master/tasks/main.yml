@@ -50,9 +50,25 @@
 - name: generate certs of openness components
   include_tasks: certs.yml
 
+- name: create syslog configmap
+  block:
+  - name: check if syslog configmap exists
+    shell: kubectl get configmap syslog-conf --namespace=openness
+    ignore_errors: yes
+    register: get_configmap_syslog
+  - name: create configmap with syslog configs
+    shell: kubectl create configmap syslog-conf --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-master.conf --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-worker.conf --namespace=openness
+    when: get_configmap_syslog.rc == 1
+
 - name: apply openness definitions
   command: kubectl apply -f {{ item }}
   with_items: "{{ openness_yamls }}"
+
+- name: copy logrotate config
+  copy:
+    src: logrotate_openness
+    dest: /etc/logrotate.d/openness
+    remote_src: no
 
 - name: build CLIs
   include_tasks: build_cli.yml

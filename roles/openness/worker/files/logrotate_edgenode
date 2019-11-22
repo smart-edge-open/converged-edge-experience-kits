@@ -1,0 +1,9 @@
+/var/log/edgenode/* {
+    weekly
+    rotate 3
+    size 10M
+    compress
+    delaycompress
+    missingok
+    notifempty
+}

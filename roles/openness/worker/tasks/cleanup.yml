@@ -1,0 +1,8 @@
+---
+
+- name: remove generated files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - "/etc/openness"
