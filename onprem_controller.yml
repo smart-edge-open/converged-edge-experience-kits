@@ -17,7 +17,6 @@
 
   roles:
     - role: os_setup
-    - role: os_kernelrt
     - role: docker
     - role: git_repo
     - role: openness/onprem/master

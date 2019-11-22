@@ -30,7 +30,7 @@
 - name: remove all Docker containers
   shell: docker-compose rm --stop -f
   args:
-    chdir "{{ git_repo_dest }}"
+    chdir: "{{ git_repo_dest }}"
   when: 
     - docker_service_status.rc == 0
     - repo_folder_result.rc == 0

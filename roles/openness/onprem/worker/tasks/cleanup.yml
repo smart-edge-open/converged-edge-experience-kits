@@ -14,6 +14,9 @@
 
 ---
 
+- name: reload facts
+  setup:
+
 - name: build cleanup
   make:
     chdir: "{{ git_repo_dest }}"
