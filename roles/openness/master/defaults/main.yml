@@ -1,6 +1,7 @@
 ---
 
 certs_dest: /etc/openness/certs
+configs_dest: /etc/openness/configs
 
 openness_yamls:
 - "{{ git_repo_dest }}/kube-ovn/openness.yaml"

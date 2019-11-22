@@ -1,3 +1,3 @@
 ---
 
-configs_dest: /etc/openness
+configs_dest: /etc/openness/configs
