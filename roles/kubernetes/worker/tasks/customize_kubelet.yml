@@ -17,7 +17,8 @@
 - name: setting KUBELET_EXTRA_ARGS
   lineinfile:
     path: "{{ kubernetes_env_file }}"
-    line: '--config {{ kubernetes_config_file }}'
+    regexp: "^KUBELET_EXTRA_ARGS="
+    line: "KUBELET_EXTRA_ARGS=--config /usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
   notify:
   - enable and restart kubelet
 
