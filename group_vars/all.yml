@@ -1,12 +1,12 @@
 ---
-proxy_yum_url: "http://proxy-dmz.intel.com:911/"
+proxy_yum_url: ""
 
-proxy_os_enable: true
+proxy_os_enable: false
 proxy_os_remove_old: true
-proxy_os_http: "http://proxy-dmz.intel.com:911"
-proxy_os_https: "http://proxy-dmz.intel.com:911"
-proxy_os_ftp: "http://proxy-dmz.intel.com:911"
-proxy_os_noproxy: "localhost,127.0.0.1,10.244.0.0/16,10.96.0.0/24,10.103.102.0/24"
+proxy_os_http: "http://proxy.example.org:3128"
+proxy_os_https: "http://proxy.example.org:3129"
+proxy_os_ftp: "http://proxy.example.org:3128"
+proxy_os_noproxy: "localhost,127.0.0.1,10.244.0.0/16,10.96.0.0/24"
 
 os_remove_yum_plugins: true
 
