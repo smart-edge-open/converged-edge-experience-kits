@@ -18,3 +18,7 @@ source scripts/task_log_file.sh
 ansible-playbook -vv \
     ./ne_controller.yml \
     --inventory inventory.ini
+
+ansible-playbook -vv \
+    ./ne_node.yml \
+    --inventory inventory.ini

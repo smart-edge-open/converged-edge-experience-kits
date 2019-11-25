@@ -1,3 +1,8 @@
+```text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation.
+```
+
 # OpenNESS Container Kits repo
 
 # Purpose
@@ -16,11 +21,14 @@ In order to use the playbooks several preconditions must be fulfilled:
 
 For convenience, playbooks can be played by running helper deploy scripts.
 Convention for the scripts is: `action_mode[_group].sh`. Following scripts are available:
-* `deploy_ne_controller.sh`
-* `deploy_ne_node.sh`
-* `cleanup_ne.sh`
-* `deploy_onprem_controller.sh`
-* `deploy_onprem_node.sh`
+* Network Edge mode
+  * `deploy_ne.sh` - sets up cluster (first controller, then nodes)
+  * `cleanup_ne.sh`
+  * `deploy_ne_controller.sh`
+  * `deploy_ne_node.sh`
+* On Premise mode
+  * `deploy_onprem_controller.sh`
+  * `deploy_onprem_node.sh`
 
 NOTE: Playbooks for Controller/Kubernetes master must be played before playbooks for Edge Nodes.
 
