@@ -36,6 +36,7 @@
           clientCAFile: /etc/kubernetes/pki/ca.crt
       clusterDNS:
         - 10.96.0.10
+      clusterDomain: cluster.local
       featureGates:
         TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
   notify:
