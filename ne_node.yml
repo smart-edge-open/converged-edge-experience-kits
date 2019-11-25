@@ -15,6 +15,7 @@
     - role: git_repo
     - role: golang
     - role: docker
+    # - role: opae_fpga
     # - role: sriov/worker
     - role: kubernetes/worker
     - role: kubeovn/worker

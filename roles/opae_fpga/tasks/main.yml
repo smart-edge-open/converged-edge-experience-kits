@@ -1,0 +1,55 @@
+---
+# tasks file for opae_fpga
+
+- name: copy list of modules to load at boot
+  copy:
+    src: opaedeps.conf
+    dest: /etc/modules-load.d/opaedeps.conf
+
+- name: load opae dependancy modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - "mtd"
+  - "pps_core"
+  - "ptp"
+
+- name: check local n3000-1-3-5-beta-cfg-2x2x25g-setup.zip
+  stat:
+    path: "{{ opae_local_path_cfg }}"
+  connection: local
+  register: opae_local_file_cfg
+
+- name: file for OPAE config not present
+  debug:
+    msg: "{{ opae_local_path_cfg }} does not exists, OPAE won't be set up on the node"
+  when: opae_local_file_cfg.stat.exists == False
+
+- name: check local n3000-1-3-5-beta-rte-setup.zip
+  stat:
+    path: "{{ opae_local_path_stp }}"
+  connection: local
+  register: opae_local_file_stp
+
+- name: file for OPAE setup not present
+  debug:
+    msg: "{{ opae_local_path_stp }} does not exists, OPAE won't be set up on the node"
+  when: opae_local_file_stp.stat.exists == False
+
+- name: set up OPAE for the node
+  block:
+  - name: copy local opae_cfg to remote
+    copy:
+      src: "{{ opae_local_path_cfg }}"
+      dest: "{{ opae_remote_path }}"
+  - name: copy local opae_stp to remote
+    copy:
+      src: "{{ opae_local_path_stp }}"
+      dest: "{{ opae_remote_path }}"
+  - name: build OPAE for PACN3000 FPGA worker image
+    shell: make build-docker-fpga-opae
+    args:
+      chdir: "{{ git_repo_dest }}"
+  when: opae_local_file_cfg.stat.exists == True and opae_local_file_stp.stat.exists == True
+
