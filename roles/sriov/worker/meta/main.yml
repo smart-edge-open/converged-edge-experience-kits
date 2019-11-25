@@ -1,5 +1,3 @@
 dependencies:
 - role: dpdk
 - role: sriov/common
-  vars:
-    apply_patch_cni: false

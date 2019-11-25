@@ -20,7 +20,7 @@
       - "echo \"{{ fpga_userspace_vf.vendor_id}} {{ fpga_userspace_vf.pf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
     
   - name: create SRIOV VFs
-    shell: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
+    shell: "echo 0 | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs && echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
     with_items:
       - "{{ pci_address.stdout_lines }}"
   
@@ -44,22 +44,28 @@
       - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
   when: fpga_userspace_vf.enabled
 
-- name: check that FPGA Config utility is present
+- name: check local bbdev_config_service_directory
   stat:
-    path: "{{ git_repo_dest }}/build/fpga_config/bbdev_config_service"
-  register: fpga_dir
+    path: "{{ syscfg_local_path }}"
+  connection: local
+  register: syscfg_local_file
 
-- debug:
-    msg: "FPGA SRIOV USERSPACE enabled but FPGA-config directory not found, FPGA config utility will not be build."
-  when: fpga_dir.stat.exists == false
+- name: file not present
+  debug:
+    msg: "{{ syscfg_local_path }} does not exists, FPGA Config utility won't be set up on the node"
+  when: syscfg_local_file.stat.exists == False
 
-- name: build FPGA Config utility image
-  shell: make build-docker-fpga-cfg
-  args:
-    chdir: "{{ base_path }}"
-  when: 
-  - fpga_sriov_userspace.enabled
-  - fpga_dir.stat.exists
+- name: set up FPGA Config utility on the node
+  block:
+  - name: copy local FPGA Config utility to remote
+    copy:
+      src: "{{ syscfg_local_path }}"
+      dest: "{{ syscfg_remote_path }}"
+  - name: build FPGA Config utility worker image
+    shell: make build-docker-fpga-cfg
+    args:
+      chdir: "{{ git_repo_dest }}"
+  when: syscfg_local_file.stat.exists == True
 
 - name: disable SR-IOV ethernet interfaces
   shell: echo 0 > {{ item }}

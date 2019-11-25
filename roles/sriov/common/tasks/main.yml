@@ -8,23 +8,6 @@
     update: no
     version: "{{ sriov_cni.commit }}"
 
-# master only
-- name: patch CNI plugin (only master)
-  block:
-  - name: install patch utility
-    yum:
-      name: patch
-      state: present
-  - name: patch CNI plugin (only master)
-    patch:
-      src: "{{ sriov_cni.patch_path }}"
-      basedir: "{{ sriov_cni.download_dir }}/images"
-      strip: 0
-      binary: no
-      remote_src: yes
-  when: apply_patch_cni
-
-
 - name: download device plugin
   git:
     repo: "{{ sriov_dev_plugin.url }}"
