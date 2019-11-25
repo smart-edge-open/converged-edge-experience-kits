@@ -11,7 +11,7 @@ Repository contains set of Ansible playbooks for easy setup of OpenNESS in Netwo
 # Preconditions
 In order to use the playbooks several preconditions must be fulfilled:
 
-* Hosts for Kubernetes master and workers (Edge Nodes) must have set proper hostname (not `localhost`). That hostname must be in `/etc/hosts` as well.
+* Hosts for Kubernetes master and workers (Edge Nodes) must have set proper (refer to [K8s naming restrictions](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names)) and unique hostname (not `localhost`). That hostname must be in `/etc/hosts` as well.
 * Inventory must be configured (refer to [Configuring inventory](#configuring-inventory)) 
 * SSH keys must be exchanged with hosts (refer to [Exchanging SSH keys with hosts](#Exchanging-SSH-keys-with-hosts))
 * Proxy must be configured if needed (refer to [Setting proxy](#setting-proxy))
