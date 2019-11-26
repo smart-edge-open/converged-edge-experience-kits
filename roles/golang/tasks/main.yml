@@ -24,7 +24,7 @@
     url: "{{ golang_download_url }}"
     dest: "{{ golang_download_dest }}"
     checksum: "sha256:{{ golang_download_checksum }}"
-  when: go_exe_file.stat.exists == False
+  when: not go_exe_file.stat.exists
 
 - name: install
   unarchive:

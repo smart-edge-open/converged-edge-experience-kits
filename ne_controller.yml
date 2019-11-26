@@ -19,7 +19,7 @@
 - hosts: controller_group
 
   pre_tasks:
-  - fail: 
+  - fail:
       msg: "Only one controller is supported"
     when:
     - groups['controller_group'] is defined

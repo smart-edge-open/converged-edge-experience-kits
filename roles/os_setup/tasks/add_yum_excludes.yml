@@ -19,6 +19,6 @@
     dest: /etc/yum.conf
     line: "{{ os_yum_exclude_rpm_packages }}"
     insertafter: EOF
-  when: 
+  when:
     - os_yum_exclude_rpm_packages is defined
-    - os_yum_exclude_rpm_packages != ""
+    - os_yum_exclude_rpm_packages|bool

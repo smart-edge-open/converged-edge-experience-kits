@@ -17,7 +17,7 @@
 - debug:
     msg: "Installing the following packages: {{ os_yum_base_packages }}"
 - name: Install base OS rpm packages
-  yum: 
+  yum:
     name: "{{ os_yum_base_packages }}"
     state: present
     skip_broken: yes

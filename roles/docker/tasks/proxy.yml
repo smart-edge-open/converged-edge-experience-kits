@@ -37,13 +37,13 @@
     file:
       path: /root/.docker/temp-proxy.json
       state: absent
-  when: docker_user_config_file.stat.exists == true
+  when: docker_user_config_file.stat.exists
 
 - name: rename temp-proxy.json to config.json
   command: mv /root/.docker/temp-proxy.json /root/.docker/config.json
   args:
     creates: /root/.docker/config.json
-  when: docker_user_config_file.stat.exists == false
+  when: not docker_user_config_file.stat.exists
 
 - name: create http-proxy.conf for docker service
   block:

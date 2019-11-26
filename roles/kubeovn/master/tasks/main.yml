@@ -23,11 +23,11 @@
 - name: (re)install openvswitch tools if needed
   block:
   - name: remove old packages
-    yum: 
+    yum:
       name: "{{ ovn_packages_to_remove }}"
       state: absent
   - name: install OVN tools dependencies
-    yum: 
+    yum:
       name: "{{ ovn_packages_yum }}"
       state: installed
       update_cache: yes
@@ -65,12 +65,12 @@
   - name: configure ovn-cluster
     shell: ovn-nbctl --may-exist lrp-add ovn-cluster ovn-cluster-local 02:0a:0a:0a:0a:01 192.168.1.1/24
     register: result
-    until: result.failed == false
+    until: not result.failed
     retries: 20
     delay: 30
 
   - name: configure local-ovn-cluster
-    shell: | 
+    shell: |
       ovn-nbctl --may-exist ls-add local
       ovn-nbctl --may-exist lsp-add local local-ovn-cluster
       ovn-nbctl lsp-set-type local-ovn-cluster router

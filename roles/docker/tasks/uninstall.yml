@@ -42,7 +42,7 @@
 - name: remove repository
   yum_repository:
     name: docker
-    state: absent 
+    state: absent
 
 - name: clear yum cache
   command: yum clean all

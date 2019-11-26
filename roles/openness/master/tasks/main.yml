@@ -49,7 +49,11 @@
     ignore_errors: yes
     register: get_secret_rootca
   - name: create secret with root CA
-    shell: kubectl create secret generic root-ca --from-file={{ certs_dest }}/CA/key.pem --from-file={{ certs_dest }}/CA/cert.pem --namespace=openness
+    shell: >
+      kubectl create secret generic root-ca
+      --from-file={{ certs_dest }}/CA/key.pem
+      --from-file={{ certs_dest }}/CA/cert.pem
+      --namespace=openness
     when: get_secret_rootca.rc == 1
 
 - name: create certificate generator secret
@@ -59,7 +63,11 @@
     ignore_errors: yes
     register: get_secret_certgen
   - name: create secret with certificate generator
-    shell: kubectl create secret generic certgen --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh --namespace=openness
+    shell: >
+      kubectl create secret generic certgen
+        --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh
+        --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh
+        --namespace=openness
     when: get_secret_certgen.rc == 1
 
 - name: generate certs of openness components
@@ -72,7 +80,11 @@
     ignore_errors: yes
     register: get_configmap_syslog
   - name: create configmap with syslog configs
-    shell: kubectl create configmap syslog-conf --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-master.conf --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-worker.conf --namespace=openness
+    shell: >
+      kubectl create configmap syslog-conf
+      --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-master.conf
+      --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-worker.conf
+      --namespace=openness
     when: get_configmap_syslog.rc == 1
 
 - name: apply openness definitions

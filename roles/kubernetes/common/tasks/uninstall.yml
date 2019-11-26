@@ -47,15 +47,15 @@
     name: /usr/lib/systemd/system/kubelet.service.d/http-proxy.conf
     state: absent
 
-- name: uninstall packages 
-  yum: 
+- name: uninstall packages
+  yum:
     name: "{{ kubernetes_packages_to_remove }}"
     state: absent
 
 - name: remove repository
   yum_repository:
     name: kubernetes
-    state: absent 
+    state: absent
 
 - name: clear yum cache
   command: yum clean metadata

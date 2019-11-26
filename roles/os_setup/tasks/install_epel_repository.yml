@@ -15,6 +15,6 @@
 ---
 
 - name: Download and install EPEL package
-  yum: 
+  yum:
     name: epel-release
     state: present
