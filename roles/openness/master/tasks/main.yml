@@ -65,9 +65,9 @@
   - name: create secret with certificate generator
     shell: >
       kubectl create secret generic certgen
-        --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh
-        --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh
-        --namespace=openness
+      --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh
+      --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh
+      --namespace=openness
     when: get_secret_certgen.rc == 1
 
 - name: generate certs of openness components
