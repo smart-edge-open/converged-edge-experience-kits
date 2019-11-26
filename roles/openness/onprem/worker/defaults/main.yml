@@ -23,3 +23,6 @@ docker_appliance_container_name: "edgenode_appliance_1"
 docker_eaa_container_name: "edgenode_eaa_1"
 docker_edgednssvr_container_name: "mec-app-edgednssvr"
 docker_nts_container_name: "nts"
+remote_syslog_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+enrollment_endpoint: "{{ remote_syslog_ip }}:8081"
+download_root_ca_from_controller: true

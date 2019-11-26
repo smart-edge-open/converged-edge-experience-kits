@@ -14,6 +14,8 @@
 
 ---
 
+- include_tasks: subtasks/download_root_ca_from_controller.yml
+
 # Stop and stop selected containers
 - name: remove syslog container
   docker_container:
@@ -78,6 +80,11 @@
 
 - debug:
     msg: "THIS IS YOUR VERIFICATION KEY: {{ verification_key }}"
+
+- name: store verification key in folder repository folder
+  copy:
+    content: "{{ verification_key }}"
+    dest: "{{ git_repo_dest }}/verification_key.txt"
 
 # Restart containers
 - name: restart syslog_ng container
