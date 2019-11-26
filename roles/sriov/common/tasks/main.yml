@@ -48,7 +48,7 @@
 
 - name: build CNI image
   docker_image:
-    name: sriov-cni
+    name: nfvpe/sriov-cni
     source: build
     build:
       path: "{{ sriov_cni.download_dir }}"

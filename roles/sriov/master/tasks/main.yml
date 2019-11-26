@@ -19,7 +19,7 @@
 
 # Deploy SRIOV-CNI
 - name: deploy CNI
-  shell: kubectl create -f ./images/sriov-cni-daemonset.yaml
+  shell: kubectl create -f ./images/k8s-v1.16/sriov-cni-daemonset.yaml
   args:
     chdir: "{{ sriov_cni.download_dir }}"
 

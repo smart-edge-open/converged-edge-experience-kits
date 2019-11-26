@@ -17,8 +17,7 @@
 sriov_cni: 
   url: "https://github.com/intel/sriov-cni"
   download_dir : "/temp/sriov_cni"
-  commit: "c9e13c3643e4f7b5b4cd5169a8879ed894b1a07a"
-  patch_path: "{{ git_repo_dest }}/fpga/sriov-cni-1.16.patch"
+  commit: "2aa9b0e71e2d9eb53ac996005d32bd90c5f39d1d"
 
 sriov_dev_plugin:
   url: "https://github.com/intel/sriov-network-device-plugin"
