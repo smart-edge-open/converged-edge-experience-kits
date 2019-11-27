@@ -18,8 +18,8 @@ kubernetes_env_file: "/etc/sysconfig/kubelet"
 kubernetes_config_file: "/usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
 
 cpu:
-  policy: "none" # Options: none (disabled), static
+  policy: "static" # Options: none (disabled), static (default)
   reserved_cpus: 1
 
 topology_manager:
-  policy: "none" # Options: none (default, disabled), best-effort, restricted, single-numa-node
+  policy: "best-effort" # Options: none (disabled), best-effort (default), restricted, single-numa-node
