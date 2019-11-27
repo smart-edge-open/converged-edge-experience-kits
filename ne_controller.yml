@@ -40,3 +40,4 @@
     # - role: biosfw/master
     # - role: nfd
     # - role: sriov/master
+    # - role: cmk/master
