@@ -14,26 +14,10 @@
 
 ---
 
-# Deploy EdgeNode on given host(s)
+- name: check if host is edge node
+  debug:
+    msg: "HDDL is only for edge node host"
+  when: "'edgenode_group' not in group_names"
 
-- hosts: edgenode_group
-  serial: 1
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
-
-  roles:
-    - role: os_setup
-    - role: os_kernelrt
-    - role: dpdk
-    - role: golang
-    - role: docker
-    - role: libvirt
-    - role: qemu
-    - role: git_repo
-    - role: openness/onprem/worker
-    #- role: hddl
-
+- include_tasks: hddl.yml
+  when: "'edgenode_group' in group_names"

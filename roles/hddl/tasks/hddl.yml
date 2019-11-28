@@ -1,0 +1,83 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: check if ion module already installed
+  stat:
+    path: /sys/module/myd_ion
+  register: ion
+
+- name: check if vsc module already installed
+  stat:
+    path: /sys/module/myd_vsc
+  register: vsc
+
+- name: check if udev rules already installed
+  stat:
+    path: /etc/udev/rules.d/99-hddl-ion.rules
+  register: udev
+
+- name: download and install OpenVino if modules and udevs not there
+  block:
+  - name: create /temp
+    file:
+      path: "/temp"
+      state: directory
+  - name: check if already downloaded
+    stat:
+      path: "{{ openvino_download_dir }}"
+    register: ov_dl_dir
+  - name: download OpenVino - may take a while (~750MB file)
+    get_url:
+      url: "{{ openvino_url }}"
+      dest: "{{ openvino_download_dest }}"
+    when: ov_dl_dir.stat.exists == False
+  - name: ensure download dir exists
+    file:
+      path: "{{ openvino_download_dir }}"
+      state: directory
+  - name: extract OpenVino
+    unarchive:
+      src: "{{ openvino_download_dest }}"
+      dest: "{{ openvino_download_dir }}"
+      extra_opts: "--strip-components=1"
+      remote_src: yes
+      creates: "{{ openvino_silent_config }}"
+  - name: configure licence agreement
+    lineinfile:
+      path: "{{ openvino_silent_config }}"
+      regexp: '^ACCEPT_EULA='
+      line: ACCEPT_EULA=accept
+  - name: install OpenVino
+    command: "{{ openvino_install_command }}"
+    args: 
+      chdir: "{{ openvino_download_dir }}"
+  - name: install OpenVino kernel drivers and udev rules
+    shell: "{{ openvino_hddl_dependency_install }}" 
+  when: udev.stat.exists == false or vsc.stat.exists == False or ion.stat.exists == False
+
+- name: build HDDL image
+  shell: source /etc/profile && make build-docker-hddl
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: bring up hddlservice container
+  shell: "VER={{ docker_hddlservice_tag }} docker-compose up -d --no-build hddlservice"
+  args:
+    chdir: "{{ git_repo_dest }}/build/hddlservice"
+
+- name: wait until VPU is bound to Myriad driver
+  wait_for:
+    path: /dev/myriad0
