@@ -14,13 +14,17 @@
 
 ---
 
-- name: remove generated files
+- name: remove downloaded artifacts
   file:
-    path: "{{ item }}"
+    name: "{{ item }}"
     state: absent
   with_items:
-  - /etc/openness
-  - /etc/logrotate.d/edgenode
+  - "{{ sriov_cni.download_dir }}"
+  - "{{ sriov_dev_plugin.download_dir }}"
 
-# built executables are removed during git_repo's role cleanup
-# built Docker images are removed during docker's role cleanup
+- name: remove patch utility
+  yum:
+    name: patch
+    state: absent
+
+# Docker images are removed during Docker's cleanup

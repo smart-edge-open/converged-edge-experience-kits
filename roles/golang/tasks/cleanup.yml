@@ -14,13 +14,17 @@
 
 ---
 
-- name: remove generated files
+- name: remove /usr/local/go
   file:
-    path: "{{ item }}"
+    path: /usr/local/go
     state: absent
-  with_items:
-  - /etc/openness
-  - /etc/logrotate.d/edgenode
 
-# built executables are removed during git_repo's role cleanup
-# built Docker images are removed during docker's role cleanup
+- name: remove exports from /etc/profile
+  lineinfile:
+    state: absent
+    dest: /etc/profile
+    line: "{{ item }}"
+  with_items:
+  - "export GOROOT=/usr/local/go"
+  - "export GOPATH=~/go"
+  - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"

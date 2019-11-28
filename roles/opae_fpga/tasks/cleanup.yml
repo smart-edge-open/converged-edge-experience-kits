@@ -14,13 +14,18 @@
 
 ---
 
-- name: remove generated files
-  file:
-    path: "{{ item }}"
+- name: unload modules
+  modprobe:
+    name: "{{ item }}"
     state: absent
   with_items:
-  - /etc/openness
-  - /etc/logrotate.d/edgenode
+  - mtd
+  - pps_core
+  - ptp
 
-# built executables are removed during git_repo's role cleanup
-# built Docker images are removed during docker's role cleanup
+- name: remove opaedeps.conf
+  file:
+    path: /etc/modules-load.d/opaedeps.conf
+    state: absent
+
+# Docker images will be removed during Docker's cleanup
