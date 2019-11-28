@@ -14,39 +14,36 @@
 
 ---
 
-- name: disable docker service
-  systemd:
-    name: docker
-    enabled: no
-    state: stopped
-  ignore_errors: yes
-
-- name: uninstall
-  yum:
-    name: "{{ docker_packages_to_remove }}"
-    state: absent
-
-- name: remove docker-compose
-  pip:
-    name: docker-compose
-    state: absent
-  ignore_errors: yes
-
-- name: remove dirs
+- name: remove binaries
   file:
+    path: "{{ dpdk_install_dir }}"
+    state: absent
+
+- name: remove download folder
+  file:
+    path: "{{ dpdk_download_dest }}"
+    state: absent
+
+- name: remove ansible fact file
+  file:
+    path: /etc/ansible/facts.d/dpdk.fact
+    state: absent
+
+- name: unload modules
+  modprobe:
     name: "{{ item }}"
     state: absent
   with_items:
-  - /root/.docker
-  - /etc/systemd/system/docker.service.d
-  - /etc/docker
+  - "igb_uio"
+  - "rte_kni"
+  - "uio"
 
-- name: remove repository
-  yum_repository:
-    name: docker
+- name: remove dpdk kernel modules file
+  file:
+    path: /etc/modules-load.d/dpdk.conf
     state: absent
 
-- name: clear yum cache
-  command: yum clean all
-  args:
-    warn: false
+- name: remove dpdk kni kernel modules file
+  file:
+    path: /etc/modprobe.d/dpdk0kni.conf
+    state: absent
