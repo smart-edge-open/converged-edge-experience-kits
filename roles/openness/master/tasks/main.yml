@@ -40,7 +40,7 @@
       name: "{{ certs_dest }}/CA"
       state: directory
   - name: create root CA
-    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh openness {{ certs_dest }}/CA"
+    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh openness {{ certs_dest }}/CA"
 
 - name: create root CA secret
   block:
@@ -65,8 +65,8 @@
   - name: create secret with certificate generator
     shell: >
       kubectl create secret generic certgen
-      --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh
-      --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh
+      --from-file={{ git_repo_dest }}/kube-ovn/tls_pair.sh
+      --from-file={{ git_repo_dest }}/kube-ovn/entrypoint_tls.sh
       --namespace=openness
     when: get_secret_certgen.rc == 1
 
