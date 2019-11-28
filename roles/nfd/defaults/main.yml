@@ -27,8 +27,6 @@ nfd_yamls:
 
 kustomization_files_to_copy:
 - add_nfd_namespace.yml
-- enable_nfd_master_certs.yml
-- enable_nfd_worker_certs.yml
 - kustomization.yml
 - replace_cluster_role_binding_namespace.yml
 - replace_service_account_namespace.yml

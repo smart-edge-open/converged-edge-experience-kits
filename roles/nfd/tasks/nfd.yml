@@ -32,6 +32,14 @@
     dest: "{{ tmp_dir.path }}"
   with_items: "{{ kustomization_files_to_copy }}"
 
+- name: create NFD certificates configuration file
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ tmp_dir.path }}/{{ item }}"
+  with_items:
+  - enable_nfd_master_certs.yml
+  - enable_nfd_worker_certs.yml
+
 - name: apply NFD plugin
   shell: kubectl kustomize . | kubectl apply -f -
   args:
