@@ -66,3 +66,8 @@
       chdir: "{{ git_repo_dest }}"
   when: opae_local_file_cfg.stat.exists == True and opae_local_file_stp.stat.exists == True
 
+- name: Create directory for user FPGA images
+  file:
+    path: "{{ vran_image_dir }}"
+    state: directory
+
