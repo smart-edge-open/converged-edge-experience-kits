@@ -37,7 +37,7 @@
     - role: kubeovn/master
     - role: openness/master
     - role: multus
+    - role: nfd
     # - role: biosfw/master
-    # - role: nfd
     # - role: sriov/master
     # - role: cmk/master
