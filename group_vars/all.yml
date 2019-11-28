@@ -28,5 +28,5 @@ os_remove_yum_plugins: true
 git_repo_token: ""
 
 # Controller settings
-#mysql_root_password: "pass"
-#cce_admin_password: "pass"
+mysql_root_password: "pass"
+cce_admin_password: "pass"
