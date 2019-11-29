@@ -37,13 +37,6 @@
   - name: change EAA common name
     shell: jq '.Certs.CommonName="eaa.openness"' '{{ configs_dest }}/eaa.json' | sponge '{{ configs_dest }}/eaa.json'
 
-- name: customize appliance.json
-  block:
-  - name: Enable syslog usage
-    shell: jq '.UseSyslog=true' '{{ configs_dest }}/appliance.json' | sponge '{{ configs_dest }}/appliance.json'
-  - name: Set syslog address
-    shell: jq '.SyslogAddr="syslog.openness:514"' '{{ configs_dest }}/appliance.json' | sponge '{{ configs_dest }}/appliance.json'
-
 - name: copy logrotate config
   copy:
     src: logrotate_edgenode
