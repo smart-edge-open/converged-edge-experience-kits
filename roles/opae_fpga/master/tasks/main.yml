@@ -15,7 +15,7 @@
 ---
 
 - name: Build RSU kubectl plugin
-  shell: go build -o kubectl-rsu
+  shell: source /etc/profile && go build -o kubectl-rsu
   args:
     chdir: "{{ git_repo_dest }}/fpga/kube-rsu/"
 
