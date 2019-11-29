@@ -36,6 +36,7 @@
     - role: kubernetes/master
     - role: kubeovn/master
     - role: openness/master
+    # - role: opae_fpga/master
     - role: multus
     - role: nfd
     # - role: biosfw/master
