@@ -41,3 +41,20 @@
       src: "{{ certs_dest }}/CA/cert.pem"
       dest: "{{ certs_dest }}/client/edgedns/root.pem"
       state: link
+
+- name: certificates for EAA
+  block:
+  - name: create directory for EAA and EAA CA certificate
+    file:
+      name: "{{ certs_dest }}/eaa/CA"
+      state: directory
+  - name: create EAA root CA certificate
+    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh ca.eaa.openness {{ certs_dest }}/eaa/CA"
+  - name: create EAA certificate signed by EAA root CA certificate
+    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh eaa.openness {{ certs_dest }}/eaa {{ certs_dest }}/eaa/CA" 
+  - name: rename keys and cerfiticates 
+    shell: >
+      mv {{ certs_dest }}/eaa/CA/key.pem {{ certs_dest }}/eaa/CA/rootCA.key &&
+      mv {{ certs_dest }}/eaa/CA/cert.pem {{ certs_dest }}/eaa/CA/rootCA.pem &&
+      mv {{ certs_dest }}/eaa/key.pem {{ certs_dest }}/eaa/server.key &&
+      mv {{ certs_dest }}/eaa/cert.pem {{ certs_dest }}/eaa/server.pem

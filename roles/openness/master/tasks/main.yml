@@ -73,6 +73,22 @@
 - name: generate certs of openness components
   include_tasks: certs.yml
 
+- name: create EAA tls secret
+  block:
+  - name: check if EAA tls secret exists
+    shell: kubectl get secret eaa-tls --namespace=openness
+    ignore_errors: yes
+    register: get_secret_eaa
+  - name: create secret with EAA certs
+    shell: >
+      kubectl create secret generic eaa-tls
+      --from-file={{ certs_dest }}/eaa/CA/rootCA.key
+      --from-file={{ certs_dest }}/eaa/CA/rootCA.pem
+      --from-file={{ certs_dest }}/eaa/server.key
+      --from-file={{ certs_dest }}/eaa/server.pem
+      --namespace=openness
+    when: get_secret_eaa.rc == 1
+
 - name: create syslog configmap
   block:
   - name: check if syslog configmap exists
