@@ -24,6 +24,9 @@
   - include_vars: ./roles/sriov/common/defaults/main.yml
   - include_tasks: ./roles/sriov/common/tasks/cleanup.yml
 
+  - include_vars: ./roles/opae_fpga/master/defaults/main.yml
+  - include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
+
   - include_vars: ./roles/biosfw/master/defaults/main.yml
   - include_tasks: ./roles/biosfw/master/tasks/cleanup.yml
 
@@ -72,8 +75,8 @@
   - include_vars: ./roles/sriov/common/defaults/main.yml
   - include_tasks: ./roles/sriov/common/tasks/cleanup.yml
 
-  - include_vars: ./roles/opae_fpga/defaults/main.yml
-  - include_tasks: ./roles/opae_fpga/tasks/cleanup.yml
+  - include_vars: ./roles/opae_fpga/worker/defaults/main.yml
+  - include_tasks: ./roles/opae_fpga/worker/tasks/cleanup.yml
 
   - include_vars: ./roles/docker/defaults/main.yml
   - include_tasks: ./roles/docker/tasks/prune.yml
