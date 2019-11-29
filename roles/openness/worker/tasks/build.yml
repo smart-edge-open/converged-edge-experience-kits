@@ -63,5 +63,5 @@
 # since these pods are part of openness' DaemonSet will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
 - name: recreate openness pods
-  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_hostname }} -o=NAME)
+  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_hostname }} -o=NAME | grep -v syslog)
   delegate_to: "{{ groups['controller_group'][0] }}"
