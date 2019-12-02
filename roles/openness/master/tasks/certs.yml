@@ -50,8 +50,13 @@
       state: directory
   - name: create EAA root CA certificate
     shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh ca.eaa.openness {{ certs_dest }}/eaa/CA"
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ certs_dest }}/eaa/CA/cert.pem"
+      dest: "{{ certs_dest }}/eaa/root.pem"
+      state: link 
   - name: create EAA certificate signed by EAA root CA certificate
-    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh eaa.openness {{ certs_dest }}/eaa {{ certs_dest }}/eaa/CA" 
+    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh eaa.openness {{ certs_dest }}/eaa {{ certs_dest }}/eaa/CA"
   - name: rename keys and cerfiticates 
     shell: >
       mv {{ certs_dest }}/eaa/CA/key.pem {{ certs_dest }}/eaa/CA/rootCA.key &&
