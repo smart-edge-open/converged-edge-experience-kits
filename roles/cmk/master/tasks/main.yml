@@ -14,39 +14,32 @@
 
 ---
 
-- name: create temp directory
+- name: create temp dir
   tempfile:
     state: directory
-    suffix: .nfd
+    suffix: -cmk
   register: tmp_dir
 
-- name: download NFD yamls
+- name: download CMK yamls
   get_url:
-    url: "{{ nfd_base_url }}/{{ item }}.template"
-    dest: "{{ tmp_dir.path }}/{{ item }}"
-  with_items: "{{ nfd_yamls }}"
-
-- name: copy files for kustomization
-  copy:
-    src: "{{ item }}"
+    url: "{{ cmk_base_url }}/{{ item }}"
     dest: "{{ tmp_dir.path }}"
-  with_items: "{{ kustomization_files_to_copy }}"
+  with_items: "{{ cmk_yamls }}"
 
-- name: create NFD certificates configuration file
+- name: create kustomization.yml
+  copy:
+    src: kustomization.yml
+    dest: "{{ tmp_dir.path }}/kustomization.yml"
+
+- name: create rewrite_args.yml
   template:
-    src: "{{ item }}.j2"
-    dest: "{{ tmp_dir.path }}/{{ item }}"
-  with_items:
-  - enable_nfd_master_certs.yml
-  - enable_nfd_worker_certs.yml
+    src: rewrite_args.yml.j2
+    dest: "{{ tmp_dir.path }}/rewrite_args.yml"
 
-- name: apply NFD plugin
+- name: setup CMK
   shell: kubectl kustomize . | kubectl apply -f -
   args:
     chdir: "{{ tmp_dir.path }}"
-
-- name: apply network policy
-  shell: kubectl apply -f {{ nfd_netpol }}
 
 - name: remove temp directory
   file:

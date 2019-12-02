@@ -40,7 +40,7 @@
       name: "{{ certs_dest }}/CA"
       state: directory
   - name: create root CA
-    shell: "{{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh openness {{ certs_dest }}/CA"
+    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh openness {{ certs_dest }}/CA"
 
 - name: create root CA secret
   block:
@@ -65,13 +65,29 @@
   - name: create secret with certificate generator
     shell: >
       kubectl create secret generic certgen
-        --from-file={{ git_repo_dest }}/ansible/scripts/other/tls_pair.sh
-        --from-file={{ git_repo_dest }}/ansible/scripts/other/entrypoint_tls.sh
-        --namespace=openness
+      --from-file={{ git_repo_dest }}/kube-ovn/tls_pair.sh
+      --from-file={{ git_repo_dest }}/kube-ovn/entrypoint_tls.sh
+      --namespace=openness
     when: get_secret_certgen.rc == 1
 
 - name: generate certs of openness components
   include_tasks: certs.yml
+
+- name: create EAA tls secret
+  block:
+  - name: check if EAA tls secret exists
+    shell: kubectl get secret eaa-tls --namespace=openness
+    ignore_errors: yes
+    register: get_secret_eaa
+  - name: create secret with EAA certs
+    shell: >
+      kubectl create secret generic eaa-tls
+      --from-file={{ certs_dest }}/eaa/CA/rootCA.key
+      --from-file={{ certs_dest }}/eaa/CA/rootCA.pem
+      --from-file={{ certs_dest }}/eaa/server.key
+      --from-file={{ certs_dest }}/eaa/server.pem
+      --namespace=openness
+    when: get_secret_eaa.rc == 1
 
 - name: create syslog configmap
   block:

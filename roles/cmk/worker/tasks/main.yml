@@ -14,26 +14,14 @@
 
 ---
 
-# Deploy EdgeNode on given host(s)
+- name: download CPU Manager plugin
+  git:
+    repo: "{{ cmk_url }}"
+    dest: "{{ cmk_download_dir }}"
+    version: "{{ cmk_commit }}"
+    update: no
 
-- hosts: edgenode_group
-  serial: 1
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
-
-  roles:
-    - role: os_setup
-    - role: os_kernelrt
-    - role: dpdk
-    - role: golang
-    - role: docker
-    - role: libvirt
-    - role: qemu
-    - role: git_repo
-    - role: openness/onprem/worker
-    #- role: hddl
-
+- name: build CPU Manager image
+  shell: source /etc/profile && make
+  args:
+    chdir: "{{ cmk_download_dir }}"

@@ -30,6 +30,7 @@
   pip:
     name: docker-compose
     state: absent
+  ignore_errors: yes
 
 - name: remove dirs
   file:
@@ -38,6 +39,7 @@
   with_items:
   - /root/.docker
   - /etc/systemd/system/docker.service.d
+  - /etc/docker
 
 - name: remove repository
   yum_repository:

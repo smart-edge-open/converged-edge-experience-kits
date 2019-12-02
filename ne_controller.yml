@@ -17,6 +17,8 @@
 # Deploy OpenNESS Controller on given host
 
 - hosts: controller_group
+  vars:
+    hugepage_amount: "500"
 
   pre_tasks:
   - fail:
@@ -30,13 +32,16 @@
 
   roles:
     - role: os_setup
+    - role: os_kernelrt
     - role: git_repo
     - role: golang
     - role: docker
     - role: kubernetes/master
     - role: kubeovn/master
     - role: openness/master
+    # - role: opae_fpga/master
     - role: multus
+    - role: nfd
     # - role: biosfw/master
-    # - role: nfd
     # - role: sriov/master
+    # - role: cmk/master

@@ -14,26 +14,17 @@
 
 ---
 
-# Deploy EdgeNode on given host(s)
+- name: remove downloaded artifacts
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ sriov_cni.download_dir }}"
+  - "{{ sriov_dev_plugin.download_dir }}"
 
-- hosts: edgenode_group
-  serial: 1
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
+- name: remove patch utility
+  yum:
+    name: patch
+    state: absent
 
-  roles:
-    - role: os_setup
-    - role: os_kernelrt
-    - role: dpdk
-    - role: golang
-    - role: docker
-    - role: libvirt
-    - role: qemu
-    - role: git_repo
-    - role: openness/onprem/worker
-    #- role: hddl
-
+# Docker images are removed during Docker's cleanup

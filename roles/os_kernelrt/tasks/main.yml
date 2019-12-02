@@ -49,9 +49,19 @@
     - "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
     - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
 
-- name: Configure GRUB for new kernel
-  include_tasks: configure_grub.yml
+- name: Set RT kernel as default
+  shell: grubby --set-default /boot/vmlinuz-{{ os_kernel_rt_package_version }}
 
-- name: Reboot the machine
-  reboot:
-  when: ansible_kernel != os_kernel_rt_package_version
+- name: Configure GRUB for new kernel
+  include_role:
+    name: grub
+
+- name: Reboot the machine if still needed
+  block: 
+  # because grub role does reboot as well we might have already booted with proper kernel
+  - name: refresh ansible_kernel
+    setup:
+      filter: ansible_kernel
+  - name: Reboot the machine if still needed
+    reboot:
+    when: ansible_kernel != os_kernel_rt_package_version

@@ -17,7 +17,6 @@
 os_yum_base_packages: "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python-pip,wget,bridge-utils,boost-devel,openssl-devel,pcre-devel,zlib-devel,glib2-devel,autoconf,automake,libtool,flex,bison,git,cmake,pciutils,python-websocket-client,jsoncpp-devel,fcgi-devel,hiredis-devel,numactl-devel,gcc-c++,psmisc,python-httplib2,pixman-devel,moreutils,jq,python-devel"
 os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
 os_remove_yum_plugins: true
-os_kernel_rt_install: true
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git
 git_repo_branch: master

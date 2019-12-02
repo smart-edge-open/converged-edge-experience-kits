@@ -18,6 +18,9 @@
 
 - hosts: edgenode_group
   serial: 1
+  vars:
+    hugepage_amount: "500"
+
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
@@ -27,12 +30,15 @@
 
   roles:
     - role: os_setup
+    - role: os_kernelrt
     - role: git_repo
     - role: golang
     - role: docker
-    # - role: opae_fpga
+    # - role: opae_fpga/worker
     # - role: sriov/worker
     - role: kubernetes/worker
     - role: kubeovn/worker
     - role: openness/worker
     # - role: biosfw/worker
+    # - role: sriov/worker
+    # - role: cmk/worker

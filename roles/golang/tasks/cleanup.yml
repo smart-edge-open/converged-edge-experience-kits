@@ -14,26 +14,17 @@
 
 ---
 
-# Deploy EdgeNode on given host(s)
+- name: remove /usr/local/go
+  file:
+    path: /usr/local/go
+    state: absent
 
-- hosts: edgenode_group
-  serial: 1
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
-
-  roles:
-    - role: os_setup
-    - role: os_kernelrt
-    - role: dpdk
-    - role: golang
-    - role: docker
-    - role: libvirt
-    - role: qemu
-    - role: git_repo
-    - role: openness/onprem/worker
-    #- role: hddl
-
+- name: remove exports from /etc/profile
+  lineinfile:
+    state: absent
+    dest: /etc/profile
+    line: "{{ item }}"
+  with_items:
+  - "export GOROOT=/usr/local/go"
+  - "export GOPATH=~/go"
+  - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"

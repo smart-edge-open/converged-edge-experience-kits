@@ -14,26 +14,12 @@
 
 ---
 
-# Deploy EdgeNode on given host(s)
+- name: Build RSU kubectl plugin
+  shell: source /etc/profile && go build -o kubectl-rsu
+  args:
+    chdir: "{{ git_repo_dest }}/fpga/kube-rsu/"
 
-- hosts: edgenode_group
-  serial: 1
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
-
-  roles:
-    - role: os_setup
-    - role: os_kernelrt
-    - role: dpdk
-    - role: golang
-    - role: docker
-    - role: libvirt
-    - role: qemu
-    - role: git_repo
-    - role: openness/onprem/worker
-    #- role: hddl
-
+- name: Install RSU kubectl plugin
+  shell: mv kubectl-rsu "{{ rsu_plugin_dest }}"
+  args:
+    chdir: "{{ git_repo_dest }}/fpga/kube-rsu/"

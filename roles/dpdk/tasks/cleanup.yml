@@ -14,13 +14,36 @@
 
 ---
 
-- name: remove generated files
+- name: remove binaries
   file:
-    path: "{{ item }}"
+    path: "{{ dpdk_install_dir }}"
+    state: absent
+
+- name: remove download folder
+  file:
+    path: "{{ dpdk_download_dest }}"
+    state: absent
+
+- name: remove ansible fact file
+  file:
+    path: /etc/ansible/facts.d/dpdk.fact
+    state: absent
+
+- name: unload modules
+  modprobe:
+    name: "{{ item }}"
     state: absent
   with_items:
-  - /etc/openness
-  - /etc/logrotate.d/edgenode
+  - "igb_uio"
+  - "rte_kni"
+  - "uio"
 
-# built executables are removed during git_repo's role cleanup
-# built Docker images are removed during docker's role cleanup
+- name: remove dpdk kernel modules file
+  file:
+    path: /etc/modules-load.d/dpdk.conf
+    state: absent
+
+- name: remove dpdk kni kernel modules file
+  file:
+    path: /etc/modprobe.d/dpdk0kni.conf
+    state: absent
