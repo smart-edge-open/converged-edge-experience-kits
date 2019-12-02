@@ -37,9 +37,6 @@
     - role: kubeovn/master
     - role: openness/master
     - role: multus
-    # - role: ngc_test/master
-    # - role: ngc/common
-    # - role: ngc/master
     # - role: biosfw/master
     # - role: nfd
     # - role: sriov/master
