@@ -14,14 +14,23 @@
 
 ---
 
-- name: create temporary custom .openness_gitconfig
-  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+- name: create temporary custom gitconfig
+  copy:
+    dest: /root/.openness_gitconfig
+    content: |
+      [url "https://{{ git_repo_token }}@github.com/"]
+        insteadOf = https://github.com/
 
-- block:
-  - name: binaries and images
-    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local['dpdk']['dpdk_install_dir'] }} RTE_TARGET={{ dpdk_make_target }} make build-docker
-    args:
-      chdir: "{{ git_repo_dest }}"
-  always:
-  - name: remove .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+- name: create .gitconfig if needed
+  file:
+    path: /root/.gitconfig
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+
+- name: add include to .gitconfig
+  blockinfile:
+    path: /root/.gitconfig
+    block: |
+      [include]
+        path = /root/.openness_gitconfig

@@ -31,25 +31,8 @@
     src: .env.j2
     dest: "{{ git_repo_dest }}/.env"
 
-- name: create temporary custom gitconfig
-  template:
-    src: openness_gitconfig.j2
-    dest: /root/.openness_gitconfig
-
-- name: include openness gitconfig
-  block:
-    - name: create .gitconfig if needed
-      file:
-        path: /root/.gitconfig
-        state: touch
-        modification_time: preserve
-        access_time: preserve
-    - name: add include to .gitconfig
-      blockinfile:
-        path: /root/.gitconfig
-        block: |
-          [include]
-            path = /root/.openness_gitconfig
+- name: create temporary custom .openness_gitconfig
+  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
 
 - block:
   - name: build controller
@@ -58,17 +41,8 @@
       target: build
     register: build_controller_output
   always:
-  - name: remove temporary gitconfig
-    file:
-      path: /root/.openness_gitconfig
-      state: absent
-  - name: remove include in gitconfig
-    blockinfile:
-      path: /root/.gitconfig
-      state: absent
-      block: |
-        [include]
-          path = /root/.openness_gitconfig
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 - debug:
     msg: "{{ build_controller_output.stdout }}"
