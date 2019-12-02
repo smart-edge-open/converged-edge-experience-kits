@@ -14,22 +14,6 @@
 
 ---
 
-- name: build OAM component
-  make:
-  args:
-    chdir: "{{ git_repo_ngc_dir }}"
-    target: oam
-
-- name: copy oam binaries to build folder
-  copy:
-    src: "{{ git_repo_ngc_dist_dir }}/oam"
-    dest: "{{ git_repo_ngc_build_dir }}/onprem/ngctest/oam"
-
-- name: copy oam.json configuration file
-  copy:
-    src: "{{ git_repo_ngc_dir }}/configs/oam.json"
-    dest: "{{ configs_dest }}/ngc"
-
 - name: check Docker service
   shell: systemctl status docker
   ignore_errors: true
@@ -38,24 +22,32 @@
     warn: false
   register: docker_service_status
 
-- name: build OAM docker image
-  docker_image:
-    name: oam-image:1.0
-    source: build
-    build:
-      path: "{{git_repo_ngc_build_dir}}/onprem/ngctest/oam"
-      pull: no
+- name: check Docker container NEF is running
+  shell: docker ps | grep nef-container
+  changed_when: false
+  register: docker_container_running
   when: docker_service_status.rc == 0
 
-- name: Run OAM container
+- name: stop NEF container
   docker_container:
-    name: oam-container
-    image: oam-image:1.0
-    state: started
-    volumes:
-      - /etc/openness/certs/ngc:/etc/certs:rw
-      - /etc/openness/configs/ngc:/etc/configs:rw
-    #published_ports: 8082:8082
-  when: docker_service_status.rc == 0
+    name: nef-container
+    state: stopped
+
+- name: remove NEF container
+  shell: docker rm -f nef-container
+  ignore_errors: yes
+  register: docker_container_removed
+  when:
+    - docker_service_status.rc == 0
+    - docker_container_running.stdout != ""
+
+- name: remove NEF image 
+  command: docker image rm -f nef-image:1.0
+  ignore_errors: yes
+  when:
+    - docker_container_removed.rc == 0
+    - docker_service_status.rc == 0
+    - docker_container_running.stdout != ""
+
 
 

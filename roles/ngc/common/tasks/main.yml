@@ -43,3 +43,8 @@
     name: "{{ certs_dest }}/ngc"
     state: directory
 
+- name: create directory for ngc configs
+  file:
+    name: "{{ configs_dir }}/ngc"
+    state: directory
+

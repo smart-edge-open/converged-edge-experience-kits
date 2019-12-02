@@ -23,27 +23,27 @@
 - name: copy NEF binaries to build folder
   copy:
     src: "{{ git_repo_ngc_build_dir }}/nef"
-    dest: "{{ git_repo_ngc_build_dir }}nefp/nef"
+    dest: "{{ git_repo_ngc_build_dir }}/ne/ngc/nef"
 
 - name: copy nef.json configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/nef.json"
-    dest: "{{ configs_dest }}"
+    dest: "{{ configs_dest }}/ngc"
 
 - name: build NEF docker image
   docker_image:
     name: nef-image:1.0
     source: build
     build:
-      path: "{{ git_repo_ngc_build_dir }}/nefp/nef"
+      path: "{{ git_repo_ngc_build_dir }}/ne/ngc/nef"
       pull: yes
       use_config_proxy: yes
 
 - name: deploy NEF
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/podNEF.yaml
+  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/ne_k8s/ngc/podNEF.yaml
 
 - name: deploy NEF service
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/serviceNEF.yaml
+  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/ne_k8s/ngc/serviceNEF.yaml
 
 
 

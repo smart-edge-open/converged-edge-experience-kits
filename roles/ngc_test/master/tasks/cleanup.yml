@@ -14,16 +14,36 @@
 
 ---
 
-- name: remove af definitions
-  command: kubectl delete -f pod-af
+- name: remove AF definitions
+  command: kubectl delete pod af.ngc
+  register: af_pod_removed_status
   ignore_errors: yes
 
-- name: remove nef definitions
-  command: kubectl delete -f pod-nef
-  with
+- name: remove AF image
+  command: docker image rm -f af-image:1.0
+  ignore_errors: yes
+  when:
+    - af_pod_removed_status.rc == 0
+
+- name: remove NEF definitions
+  command: kubectl delete pod nef.ngc
+  register: nef_pod_removed_status
   ignore_errors: yes
 
-- name: remove oam definitions
-  command: kubectl delete -f pod-oam
+- name: remove NEF image
+  command: docker image rm -f nef-image:1.0
   ignore_errors: yes
+  when:
+    - nef_pod_removed_status.rc == 0
+
+- name: remove OAM definitions
+  command: kubectl delete pod oam.ngc
+  register: oam_pod_removed_status
+  ignore_errors: yes
+
+- name: remove OAM image
+  command: docker image rm -f oam-image:1.0
+  ignore_errors: yes
+  when:
+    - oam_pod_removed_status.rc == 0
 

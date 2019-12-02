@@ -43,6 +43,21 @@
     name: "{{ certs_dest }}/ngc"
     state: directory
 
+- name: create directory for ngc configs
+  file:
+    name: "{{ configs_dest }}/ngc"
+    state: directory
+
+- name: create ngc namespace if needed
+  block:
+  - name: check if ngc namespace exists
+    shell: kubectl get ns ngc
+    ignore_errors: yes
+    register: get_ns_ngc
+  - name: create ngc namespace
+    shell: kubectl create namespace ngc
+    when: get_ns_ngc.rc == 1
+
 - include_tasks: subtasks/bringup_oam.yml
 
 - include_tasks: subtasks/bringup_nef.yml

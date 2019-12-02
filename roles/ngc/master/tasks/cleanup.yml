@@ -14,11 +14,19 @@
 
 ---
 
-- name: remove AF pod
-  command: kubectl delete pod pod-af
+
+- name: remove AF definitions
+  command: kubectl delete pod af.ngc
+  register: af_pod_removed_status
   ignore_errors: yes
 
 - name: remove AF service
-  command: kubectl delete service pod-af
+  command: kubectl delete service afservice.ngc
   ignore_errors: yes
+
+- name: remove AF image
+  command: docker image rm -f af-image:1.0
+  ignore_errors: yes
+  when:
+    - af_pod_removed_status.rc == 0
 
