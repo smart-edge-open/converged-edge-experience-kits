@@ -14,15 +14,6 @@
 
 ---
 
-- name: unload modules
-  modprobe:
-    name: "{{ item }}"
-    state: absent
-  with_items:
-  - mtd
-  - pps_core
-  - ptp
-
 - name: remove opaedeps.conf
   file:
     path: /etc/modules-load.d/opaedeps.conf

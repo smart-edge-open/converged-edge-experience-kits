@@ -12,5 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-/biosfw/
-/logs/
+---
+
+- name: remove biosfw plugin
+  file:
+    path: "{{ biosfw_plugin_dest }}"
+    state: absent
