@@ -82,10 +82,10 @@
   - name: create secret with EAA certs
     shell: >
       kubectl create secret generic eaa-tls
-      --from-file={{ certs_dest }}/eaa/CA/rootCA.key
-      --from-file={{ certs_dest }}/eaa/CA/rootCA.pem
-      --from-file={{ certs_dest }}/eaa/server.key
-      --from-file={{ certs_dest }}/eaa/server.pem
+      --from-file=rootCA.key={{ certs_dest }}/eaa/CA/key.pem
+      --from-file=rootCA.pem={{ certs_dest }}/eaa/CA/cert.pem
+      --from-file=server.key={{ certs_dest }}/eaa/key.pem
+      --from-file=server.pem={{ certs_dest }}/eaa/cert.pem
       --namespace=openness
     when: get_secret_eaa.rc == 1
 
