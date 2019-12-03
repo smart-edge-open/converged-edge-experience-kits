@@ -34,5 +34,6 @@
     - role: os_setup
     - role: docker
     - role: git_repo
+    - role: golang
     - role: openness/onprem/master
     - role: cnca/onprem
