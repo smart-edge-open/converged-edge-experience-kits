@@ -14,6 +14,29 @@
 
 ---
 
+- name: openness' ovn configuration
+  block:
+  - name: apply CRD defining local subnet
+    command: "kubectl apply -f {{ git_repo_dest }}/kube-ovn/crd_local.yml"
+
+  - name: wait for OVN DB socket
+    wait_for:
+      path: /var/run/openvswitch/ovnnb_db.sock
+      timeout: 600
+
+  - name: add local-ovs-phy port to local switch
+    shell: ovn-nbctl --may-exist lsp-add local local-ovs-phy
+    register: result
+    until: not result.failed
+    retries: 20
+    delay: 30
+
+  - name: configure local-ovs-phy port
+    shell: |
+      ovn-nbctl lsp-set-addresses local-ovs-phy unknown
+      ovn-nbctl lsp-set-type local-ovs-phy localnet
+      ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
+
 - name: make sure /etc/openness, /etc/openness/certs and /etc/openness/configs exist
   file:
     path: "{{ item }}"
