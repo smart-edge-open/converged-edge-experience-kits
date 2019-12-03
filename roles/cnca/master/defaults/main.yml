@@ -15,4 +15,4 @@
 ---
 
 cnca_plugin_name: "kubectl-cnca"
-cnca_plugin_dest: "/usr/bin/kubectl-cnca"
+cnca_plugin_dest: "/usr/local/bin/kubectl-cnca"

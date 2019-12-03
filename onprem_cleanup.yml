@@ -24,7 +24,7 @@
   - include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
   - include_vars: ./roles/cnca/onprem/defaults/main.yml
-  - include_tasks: ./roles/cnca/common/tasks/cleanup.yml
+  - include_tasks: ./roles/cnca/onprem/tasks/cleanup.yml
 
 - hosts: edgenode_group
   serial: 1
