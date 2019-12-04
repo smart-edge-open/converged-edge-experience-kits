@@ -59,7 +59,6 @@
     volumes:
       - /etc/openness/certs/ngc:/etc/certs:rw
       - /etc/openness/configs/ngc:/etc/configs:rw
-    #published_ports: 8082:8082
   when: docker_service_status.rc == 0
 
 

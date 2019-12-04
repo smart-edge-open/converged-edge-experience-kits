@@ -14,8 +14,12 @@
 
 ---
 
-- name: remove AF definitions
-  command: kubectl delete pod af.ngc
+- name: remove AF service
+  command: kubectl delete service afservice --namespace=ngc
+  ignore_errors: yes
+
+- name: remove AF pod
+  command: kubectl delete pod af --namespace=ngc
   register: af_pod_removed_status
   ignore_errors: yes
 
@@ -25,8 +29,12 @@
   when:
     - af_pod_removed_status.rc == 0
 
-- name: remove NEF definitions
-  command: kubectl delete pod nef.ngc
+- name: remove NEF service
+  command: kubectl delete service nefservice --namespace=ngc
+  ignore_errors: yes
+
+- name: remove NEF pod
+  command: kubectl delete pod nef --namespace=ngc
   register: nef_pod_removed_status
   ignore_errors: yes
 
@@ -36,8 +44,12 @@
   when:
     - nef_pod_removed_status.rc == 0
 
-- name: remove OAM definitions
-  command: kubectl delete pod oam.ngc
+- name: remove OAM service
+  command: kubectl delete service oamservice --namespace=ngc
+  ignore_errors: yes
+
+- name: remove OAM pod
+  command: kubectl delete pod oam --namespace=ngc
   register: oam_pod_removed_status
   ignore_errors: yes
 
@@ -47,3 +59,4 @@
   when:
     - oam_pod_removed_status.rc == 0
 
+    

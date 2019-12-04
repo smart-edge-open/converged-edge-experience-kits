@@ -57,7 +57,7 @@
       - /etc/openness/certs/ngc:/etc/certs:rw
       - /etc/openness/configs/ngc:/etc/configs:rw
     published_ports:
-      - 0.0.0.0:8081:8081
+      - 8060:8060
   when: docker_service_status.rc == 0
 
 

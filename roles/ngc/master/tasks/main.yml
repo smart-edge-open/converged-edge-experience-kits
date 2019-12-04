@@ -14,8 +14,6 @@
 
 ---
 
-
-
 - name: build AF component
   make:
   args:
@@ -24,7 +22,7 @@
 
 - name: copy AF binaries to build folder
   copy:
-    src: "{{ git_repo_ngc_build_dir }}/af"
+    src: "{{ git_repo_ngc_dist_dir }}/af"
     dest: "{{ git_repo_ngc_build_dir }}/ne/ngc/af"
 
 - name: copy af.json configuration file
@@ -54,8 +52,9 @@
 - name: deploy AF
   shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/ne_k8s/ngc/podAF.yaml
 
-- name: deploy AF service
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/ne_k8s/ngc/serviceAF.yaml
+- name: deploy NEF
+  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/ne_k8s/ngc/podNEF.yaml
+
 
   
     

@@ -14,14 +14,13 @@
 
 ---
 
-
-- name: remove AF definitions
-  command: kubectl delete pod af.ngc
-  register: af_pod_removed_status
+- name: remove AF service
+  command: kubectl delete service afservice --namespace=ngc
   ignore_errors: yes
 
-- name: remove AF service
-  command: kubectl delete service afservice.ngc
+- name: remove AF pod
+  command: kubectl delete pod af --namespace=ngc
+  register: af_pod_removed_status
   ignore_errors: yes
 
 - name: remove AF image
@@ -29,4 +28,15 @@
   ignore_errors: yes
   when:
     - af_pod_removed_status.rc == 0
+
+- name: remove NEF service
+  command: kubectl delete service nefservice --namespace=ngc
+  ignore_errors: yes
+
+- name: remove NEF pod
+  command: kubectl delete pod nef --namespace=ngc
+  register: nef_pod_removed_status
+  ignore_errors: yes
+
+
 

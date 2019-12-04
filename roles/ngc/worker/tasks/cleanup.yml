@@ -14,17 +14,9 @@
 
 ---
 
-- name: remove NEF definitions
-  command: kubectl delete pod af.ngc
-  register: nef_pod_removed_status
-  ignore_errors: yes
-
-- name: remove NEF service
-  command: kubectl delete service nefservice.ngc
-  ignore_errors: yes
-
 - name: remove NEF image
   command: docker image rm -f nef-image:1.0
   ignore_errors: yes
   when:
     - nef_pod_removed_status.rc == 0
+
