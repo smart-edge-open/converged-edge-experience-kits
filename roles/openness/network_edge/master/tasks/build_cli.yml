@@ -49,7 +49,7 @@
         mode: '0755'
       with_items:
       - "{{ git_repo_dest }}/dist/edgednscli"
-      - "{{ git_repo_dest }}/kube-ovn/kubectl-edgednscli"
+      - "{{ git_repo_dest }}/kube-ovn/kubectl-edgedns"
 
   always:
   - name: remove .openness_gitconfig
