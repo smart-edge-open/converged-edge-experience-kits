@@ -23,7 +23,7 @@
 - name: copy oam binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/oam"
-    dest: "{{ git_repo_ngc_build_dir }}/onprem/ngctest/oam"
+    dest: "{{ git_repo_ngc_build_dir }}/onprem/oam"
 
 - name: copy oam.json configuration file
   copy:
@@ -43,7 +43,7 @@
     name: oam-image:1.0
     source: build
     build:
-      path: "{{git_repo_ngc_build_dir}}/onprem/ngctest/oam"
+      path: "{{git_repo_ngc_build_dir}}/onprem/oam"
       pull: no
   when: docker_service_status.rc == 0
 

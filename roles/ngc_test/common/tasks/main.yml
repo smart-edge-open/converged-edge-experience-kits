@@ -48,3 +48,5 @@
     name: "{{ configs_dir }}/ngc"
     state: directory
 
+- name: generate certificates for AF and NEF
+  include_tasks: gen_certs.yml

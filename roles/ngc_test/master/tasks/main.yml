@@ -14,6 +14,8 @@
 
 ---
 
+- include_tasks: subtasks/gen_certs.yml
+
 - name: create ngc namespace if needed
   block:
   - name: check if ngc namespace exists
