@@ -38,7 +38,8 @@
     - role: docker
     - role: kubernetes/master
     - role: kubeovn/master
-    - role: openness/master
+    - role: openness/network_edge/master
+    - role: cnca/master
     # - role: opae_fpga/master
     - role: multus
     - role: nfd

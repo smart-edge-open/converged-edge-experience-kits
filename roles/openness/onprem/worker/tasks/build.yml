@@ -14,25 +14,8 @@
 
 ---
 
-- name: create temporary custom gitconfig
-  template:
-    src: openness_gitconfig.j2
-    dest: /root/.openness_gitconfig
-
-- name: include openness gitconfig
-  block:
-    - name: create .gitconfig if needed
-      file:
-        path: /root/.gitconfig
-        state: touch
-        modification_time: preserve
-        access_time: preserve
-    - name: add include to .gitconfig
-      blockinfile:
-        path: /root/.gitconfig
-        block: |
-          [include]
-            path = /root/.openness_gitconfig
+- name: create temporary custom .openness_gitconfig
+  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
 
 - block:
   - name: binaries and images
@@ -40,14 +23,5 @@
     args:
       chdir: "{{ git_repo_dest }}"
   always:
-  - name: remove temporary gitconfig
-    file:
-      path: /root/.openness_gitconfig
-      state: absent
-  - name: remove include in gitconfig
-    blockinfile:
-      path: /root/.gitconfig
-      state: absent
-      block: |
-        [include]
-          path = /root/.openness_gitconfig
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

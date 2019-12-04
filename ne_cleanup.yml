@@ -27,11 +27,14 @@
   - include_vars: ./roles/opae_fpga/master/defaults/main.yml
   - include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
 
+  - include_vars: ./roles/cnca/master/defaults/main.yml
+  - include_tasks: ./roles/cnca/master/tasks/cleanup.yml
+
   - include_vars: ./roles/biosfw/master/defaults/main.yml
   - include_tasks: ./roles/biosfw/master/tasks/cleanup.yml
 
-  - include_vars: ./roles/openness/master/defaults/main.yml
-  - include_tasks: ./roles/openness/master/tasks/cleanup.yml
+  - include_vars: ./roles/openness/network_edge/master/defaults/main.yml
+  - include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
 
   - include_vars: ./roles/kubeovn/master/defaults/main.yml
   - include_tasks: ./roles/kubeovn/master/tasks/cleanup.yml
@@ -57,8 +60,8 @@
   tasks:
   # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
 
-  - include_vars: ./roles/openness/worker/defaults/main.yml
-  - include_tasks: ./roles/openness/worker/tasks/cleanup.yml
+  - include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+  - include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
 
   - include_vars: ./roles/kubeovn/worker/defaults/main.yml
   - include_tasks: ./roles/kubeovn/worker/tasks/cleanup.yml

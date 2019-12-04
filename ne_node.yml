@@ -38,7 +38,7 @@
     # - role: sriov/worker
     - role: kubernetes/worker
     - role: kubeovn/worker
-    - role: openness/worker
+    - role: openness/network_edge/worker
     # - role: biosfw/worker
     # - role: sriov/worker
     # - role: cmk/worker

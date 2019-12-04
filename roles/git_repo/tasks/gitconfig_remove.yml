@@ -14,26 +14,15 @@
 
 ---
 
-# Deploy EdgeController on given host(s)
+- name: remove temporary gitconfig
+  file:
+    path: /root/.openness_gitconfig
+    state: absent
 
-- hosts: controller_group
-  serial: 1
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail: 
-      msg: "Only one controller is supported"
-    when:
-    - groups['controller_group'] is defined
-    - (groups['controller_group']|length>1)
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
-
-  roles:
-    - role: os_setup
-    - role: docker
-    - role: git_repo
-    - role: golang
-    - role: openness/onprem/master
-    - role: cnca/onprem
+- name: remove include in gitconfig
+  blockinfile:
+    path: /root/.gitconfig
+    state: absent
+    block: |
+      [include]
+        path = /root/.openness_gitconfig

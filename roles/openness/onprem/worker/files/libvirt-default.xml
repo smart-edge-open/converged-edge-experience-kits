@@ -5,16 +5,16 @@
   <dns>
     <forwarder domain='local.mec' addr='192.168.122.128'/>
     <host ip="192.168.122.1">
-      <hostname>eaa.community.appliance.mec</hostname>
+      <hostname>eaa.openness</hostname>
     </host>
     <host ip="192.168.122.1">
-      <hostname>eva.community.appliance.mec</hostname>
+      <hostname>eva.openness</hostname>
     </host>
     <host ip="192.168.122.1">
-      <hostname>syslog.community.appliance.mec</hostname>
+      <hostname>syslog.openness</hostname>
     </host>
     <host ip="192.168.122.128">
-      <hostname>edgedns.community.appliance.mec</hostname>
+      <hostname>edgedns.openness</hostname>
     </host>
   </dns>
   <ip address="192.168.122.1" netmask="255.255.255.0">

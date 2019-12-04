@@ -52,4 +52,4 @@
       k8s_master_hostname: "{{ hostname_output.stdout }}"
 
 - name: label host as kube-ovn master
-  command: "kubectl label node {{ k8s_master_hostname }} kube-ovn/role=master --overwrite"
+  command: "kubectl label node {{ k8s_master_hostname | lower }} kube-ovn/role=master --overwrite"

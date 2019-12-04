@@ -23,6 +23,12 @@
   - include_vars: ./roles/git_repo/defaults/main.yml
   - include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
+  - include_vars: ./roles/cnca/onprem/defaults/main.yml
+  - include_tasks: ./roles/cnca/onprem/tasks/cleanup.yml
+
+  - include_vars: ./roles/golang/defaults/main.yml
+  - include_tasks: ./roles/golang/tasks/cleanup.yml
+
 - hosts: edgenode_group
   serial: 1
   tasks:
