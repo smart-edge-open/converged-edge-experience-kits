@@ -55,32 +55,6 @@
   command: "kubectl apply -f {{ item }}"
   with_items: "{{ kubeovn_yamls }}"
 
-- name: openness' ovn configuration
-  block:
-  - name: wait for OVN DB socket
-    wait_for:
-      path: /var/run/openvswitch/ovnnb_db.sock
-      timeout: 600
-
-  - name: configure ovn-cluster
-    shell: ovn-nbctl --may-exist lrp-add ovn-cluster ovn-cluster-local 02:0a:0a:0a:0a:01 192.168.1.1/24
-    register: result
-    until: not result.failed
-    retries: 20
-    delay: 30
-
-  - name: configure local-ovn-cluster
-    shell: |
-      ovn-nbctl --may-exist ls-add local
-      ovn-nbctl --may-exist lsp-add local local-ovn-cluster
-      ovn-nbctl lsp-set-type local-ovn-cluster router
-      ovn-nbctl lsp-set-addresses local-ovn-cluster 02:0a:0a:0a:0a:01
-      ovn-nbctl lsp-set-options local-ovn-cluster router-port=ovn-cluster-local
-      ovn-nbctl --may-exist lsp-add local local-ovs-phy
-      ovn-nbctl lsp-set-addresses local-ovs-phy unknown
-      ovn-nbctl lsp-set-type local-ovs-phy localnet
-      ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
-
 - name: Wait till k8s master starts
   shell: kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
   register: k8s_master_init_start

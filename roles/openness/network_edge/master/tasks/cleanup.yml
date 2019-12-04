@@ -55,6 +55,6 @@
     state: absent
   with_items:
   - "/usr/local/bin/edgednscli"
-  - "/usr/local/bin/kubectl-edgednscli"
+  - "/usr/local/bin/kubectl-edgedns"
   - "/usr/local/bin/interfaceservicecli"
   - "/usr/local/bin/kubectl-interfaceservice"
