@@ -40,6 +40,7 @@
     - role: kubeovn/master
     - role: openness/network_edge/master
     - role: cnca/master
+    - role: ngc_test/master
     # - role: opae_fpga/master
     - role: multus
     - role: nfd

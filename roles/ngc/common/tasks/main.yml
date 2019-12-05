@@ -23,12 +23,12 @@
   - "{{ certs_dest }}"
   - "{{ configs_dest }}"
   
-- name: checkout clean epcforedge repository
-  git:
-    repo: "{{ epcforedge_git_repo.dir }}"
-    dest: "{{ epcforedge_git_repo.download_dir }}"
-    version: "{{ epcforedge_git_repo.branch }}"
-    force: yes
+#- name: checkout clean epcforedge repository
+#  git:
+#    repo: "{{ epcforedge_git_repo.dir }}"
+#    dest: "{{ epcforedge_git_repo.download_dir }}"
+#    version: "{{ epcforedge_git_repo.branch }}"
+#    force: yes
 
 - name: make sure repository exists
   git:                                                                                                                                
@@ -38,13 +38,13 @@
     force: yes                                                                                          
     update: no
 
-- name: create directory for certs used by AF and NEF
-  file:
-    name: "{{ certs_dest }}/ngc"
-    state: directory
+#- name: create directory for certs used by AF and NEF
+#  file:
+#    name: "{{ certs_dest }}/ngc"
+#    state: directory
 
-- name: create directory for ngc configs
-  file:
-    name: "{{ configs_dir }}/ngc"
-    state: directory
+#- name: create directory for ngc configs
+#  file:
+#    name: "{{ configs_dir }}/ngc"
+#    state: directory
 

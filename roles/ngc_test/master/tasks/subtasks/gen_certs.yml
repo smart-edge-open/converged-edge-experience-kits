@@ -14,10 +14,11 @@
 
 - name: copy genCerts.json file
   copy:
-    src: "{{ git_repo_ngc_dir }}/scripts/networkedge/gen_certs.sh"
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
     dest: "{{ certs_dest }}/ngc"
 
 - name: run script to generate cerificates
-  shell: gen_certs.sh -t IP -n 172.17.0.2 -m 172.17.03
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
   args:
-    chdir: "{{certs_dir}}/ngc"
+    chdir: "{{ certs_dest }}/ngc"
+

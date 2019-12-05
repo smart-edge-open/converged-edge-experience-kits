@@ -37,3 +37,4 @@
     - role: golang
     - role: openness/onprem/master
     - role: cnca/onprem
+    - role: ngc_test/onprem/master

@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+- name: copy genCerts.json file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    dest: "{{ certs_dest }}/ngc"
+
+- name: run script to generate cerificates
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
+  args:
+    chdir: "{{certs_dest}}/ngc"
+

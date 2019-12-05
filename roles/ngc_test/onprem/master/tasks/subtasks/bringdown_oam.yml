@@ -1,38 +1,22 @@
-# Copyright 2019 Intel Corporation. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
 
 ---
 
-
 - name: check Docker service
   shell: systemctl status docker
-  ignore_errors: true
+  ignore_errors: yes
   changed_when: false
   args:
     warn: false
   register: docker_service_status
 
 - name: check Docker container OAM is running
-  shell: docker ps | grep oam-container
+  shell: docker ps -a | grep oam-container
   changed_when: false
+  ignore_errors: yes
   register: docker_container_running
   when: docker_service_status.rc == 0
-
-- name: stop OAM container
-  docker_container:
-    name: oam-container
-    state: stopped
 
 - name: remove OAM container
   shell: docker rm -f oam-container
