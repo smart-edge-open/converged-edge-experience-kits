@@ -3,15 +3,6 @@
 
 ---
 
-- name: make sure /etc/openness, /etc/openness/certs and /etc/openness/configs exist
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-  - /etc/openness
-  - "{{ certs_dest }}"
-  - "{{ configs_dest }}"
-
 - name: create temporary custom .openness_gitconfig
   include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
   

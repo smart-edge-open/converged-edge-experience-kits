@@ -3,9 +3,6 @@
 
 ---
 
-#- name: generate certificates for AF and NEF on master
-#  include_tasks: ./roles/ngc/common/tasks/gen_certs.yml 
-
 - name: build AF component
   make:
   args:

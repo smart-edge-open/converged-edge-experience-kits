@@ -49,3 +49,4 @@
       - 8050:8050
       - 8051-8051
   when: docker_service_status.rc == 0
+  

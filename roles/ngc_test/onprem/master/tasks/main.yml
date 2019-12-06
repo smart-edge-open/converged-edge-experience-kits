@@ -14,8 +14,3 @@
 
 - include_tasks: subtasks/bringup_af.yml
 
-
-
-
-
-

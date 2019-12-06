@@ -27,5 +27,3 @@
   register: nef_pod_removed_status
   ignore_errors: yes
 
-
-
