@@ -3,13 +3,11 @@
 
 ---
 
-
-
-#- name: build NEF component
-#  make:
-#  args:
-#    chdir: "{{ git_repo_ngc_dir }}"
-#    target: nef
+- name: build NEF component
+  make:
+  args:
+    chdir: "{{ git_repo_ngc_dir }}"
+    target: nef
 
 - name: copy nef binaries to build folder
   copy:
@@ -39,8 +37,7 @@
       use_config_proxy: yes
   when: docker_service_status.rc == 0
 
-
-- name: Run NEF container
+- name: run NEF container
   docker_container:
     name: nef-container
     image: nef-image:1.0
@@ -48,6 +45,7 @@
     volumes:
       - /etc/openness/certs/ngc:/etc/certs:rw
       - /etc/openness/configs/ngc:/root/configs:rw
-  when: docker_service_status.rc == 0
+   when: docker_service_status.rc == 0
+
 
 

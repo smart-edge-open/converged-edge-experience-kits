@@ -3,7 +3,10 @@
 
 ---
 
-- include_tasks: subtasks/gen_certs.yml
+- name: run script to generate cerificates
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
+  args:
+    chdir: "{{certs_dest}}/ngc"
 
 - name: create ngc namespace if needed
   block:

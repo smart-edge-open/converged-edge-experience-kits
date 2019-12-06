@@ -9,7 +9,6 @@
     chdir: "{{ git_repo_ngc_dir }}"
     target: af
   
-
 - name: copy AF binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/af"

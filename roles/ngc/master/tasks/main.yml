@@ -41,6 +41,11 @@
     shell: kubectl create namespace ngc
     when: get_ns_ngc.rc == 1
 
+- name: run script to generate cerificates
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
+  args:
+    chdir: "{{certs_dest}}/ngc"
+
 - name: deploy AF
   shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podAF.yaml
 
