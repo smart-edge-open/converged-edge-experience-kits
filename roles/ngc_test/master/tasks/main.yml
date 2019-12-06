@@ -3,6 +3,9 @@
 
 ---
 
+- name: include common vars
+  include_vars: ../common/defaults/main.yml
+
 - name: run script to generate cerificates
   shell: ./genCerts.sh -t DNS -n afservice -m nefservice
   args:

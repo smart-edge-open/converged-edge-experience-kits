@@ -45,4 +45,4 @@
     volumes:
       - /etc/openness/certs/ngc:/etc/certs:rw
       - /etc/openness/configs/ngc:/root/configs:rw
-   when: docker_service_status.rc == 0
+  when: docker_service_status.rc == 0

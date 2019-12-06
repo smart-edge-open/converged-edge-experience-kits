@@ -13,9 +13,9 @@
       dest: "{{ epcforedge_git_repo.download_dir }}"
       version: "{{ epcforedge_git_repo.branch }}"
       force: yes
-    always:
-    - name: remove .openness_gitconfig
-      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+  always:
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: make sure repository exists
   git:                                                                                                                                
@@ -32,7 +32,7 @@
 
 - name: create directory for ngc configs
   file:
-    name: "{{ configs_dir }}/ngc"
+    name: "{{ configs_dest }}/ngc"
     state: directory
 
 - name: copy genCerts.json file
