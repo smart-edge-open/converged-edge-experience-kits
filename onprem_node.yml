@@ -21,9 +21,7 @@
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
+  - include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
     - role: os_setup

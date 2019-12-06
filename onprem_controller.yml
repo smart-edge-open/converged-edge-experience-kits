@@ -26,9 +26,7 @@
     when:
     - groups['controller_group'] is defined
     - (groups['controller_group']|length>1)
-  - fail:
-      msg: "Hostname cannot be localhost"
-    when: '"localhost" in ansible_hostname'
+  - include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
     - role: os_setup
