@@ -21,8 +21,15 @@
 
 - name: initialize cluster
   block:
+  - name: Copy kubeadm init config
+    copy:
+      src: config.yaml
+      dest: /tmp/config.yaml
+      owner: root
+      group: root
+      mode: 0600
   - name: initialize cluster
-    command: kubeadm init
+    command: kubeadm init --config /tmp/config.yaml
     register: kubeadm_init_output
   - name: copy cluster admin config
     block:

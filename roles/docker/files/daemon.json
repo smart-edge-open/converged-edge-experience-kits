@@ -1,3 +1,17 @@
 {
-  "exec-opts": ["native.cgroupdriver=systemd"]
+  "exec-opts": [
+    "native.cgroupdriver=systemd"
+  ],
+  "default-ulimits": {
+    "nofile": {
+      "Name": "nofile",
+      "Hard": 4096,
+      "Soft": 4096
+    },
+    "nproc": {
+      "Name": "nproc",
+      "Hard": 2048,
+      "Soft": 2048
+    }
+  }
 }
