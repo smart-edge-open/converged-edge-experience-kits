@@ -25,17 +25,8 @@
     force: yes                                                                                          
     update: no
 
-- name: create directory for certs used by AF and NEF
-  file:
-    name: "{{ certs_dest }}/ngc"
-    state: directory
-
 - name: create directory for ngc configs
   file:
     name: "{{ configs_dest }}/ngc"
     state: directory
 
-- name: copy genCerts.json file
-  copy:
-    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
-    dest: "{{ certs_dest }}/ngc"

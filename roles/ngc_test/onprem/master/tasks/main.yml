@@ -6,11 +6,6 @@
 - name: include common vars
   include_vars: ../../common/defaults/main.yml
 
-- name: run script to generate cerificates
-  shell: ./genCerts.sh -t IP -n 172.17.0.3 -m 172.17.0.4
-  args:
-    chdir: "{{certs_dest}}/ngc"
-
 - include_tasks: subtasks/bringup_oam.yml
 
 - include_tasks: subtasks/bringup_nef.yml

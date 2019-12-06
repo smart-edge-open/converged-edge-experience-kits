@@ -6,6 +6,11 @@
 - name: include common vars
   include_vars: ../common/defaults/main.yml
 
+- name: create directory for certs used by AF and NEF
+  file:
+    name: "{{ certs_dest }}/ngc"
+    state: directory
+
 - name: build NEF component
   make:
   args:
