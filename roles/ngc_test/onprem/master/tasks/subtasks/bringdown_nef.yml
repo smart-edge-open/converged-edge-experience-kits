@@ -33,3 +33,4 @@
     - docker_container_removed.rc == 0
     - docker_service_status.rc == 0
     - docker_container_running.stdout != ""
+

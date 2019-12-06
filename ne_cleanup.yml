@@ -52,7 +52,6 @@
   tasks:
   # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
 
-
   - include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
   - include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
 

@@ -51,3 +51,4 @@
     published_ports:
       - 8060:8060
   when: docker_service_status.rc == 0
+

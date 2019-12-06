@@ -8,7 +8,7 @@ epcforedge_git_repo:
   download_dir: /opt/epcforedge
   branch: 5g_openness 
 
-configs_dest: /etc/openness/configS
+configs_dest: /etc/openness/configs
 certs_dest: /etc/openness/certs
 
 git_repo_ngc_dir: /opt/epcforedge/ngc

@@ -47,3 +47,4 @@
   ignore_errors: yes
   when:
     - oam_pod_removed_status.rc == 0
+
