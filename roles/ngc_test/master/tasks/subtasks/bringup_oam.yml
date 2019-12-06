@@ -30,5 +30,3 @@
 
 - name: deploy OAM
   shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podOAM.yaml
-
-

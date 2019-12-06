@@ -6,4 +6,3 @@
 - include_tasks: subtasks/bringdown_nef.yml
 
 - include_tasks: subtasks/bringdown_af.yml
-

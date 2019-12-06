@@ -48,7 +48,3 @@
 
 - name: deploy NEF
   shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podNEF.yaml
-
-
-  
-    

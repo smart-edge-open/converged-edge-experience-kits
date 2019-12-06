@@ -27,11 +27,3 @@
       path: "{{ git_repo_ngc_build_dir }}/networkedge/nef"
       pull: yes
       use_config_proxy: yes
-
-
-
-
-
-
-  
-    

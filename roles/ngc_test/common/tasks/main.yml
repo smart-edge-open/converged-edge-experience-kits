@@ -39,4 +39,3 @@
   copy:
     src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
     dest: "{{ certs_dest }}/ngc"
-

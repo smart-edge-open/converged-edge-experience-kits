@@ -10,4 +10,3 @@ epcforedge_git_repo:
 
 configs_dest: /etc/openness/configs
 certs_dest: /etc/openness/certs
-

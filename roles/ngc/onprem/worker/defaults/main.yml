@@ -9,4 +9,3 @@ git_repo_ngc_build_dir: /opt/epcforedge/ngc/build
 
 configs_dest: /etc/openness/configs
 certs_dest: /etc/openness/certs
-

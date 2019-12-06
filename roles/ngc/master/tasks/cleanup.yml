@@ -26,4 +26,3 @@
   command: kubectl delete pod nef --namespace=ngc
   register: nef_pod_removed_status
   ignore_errors: yes
-
