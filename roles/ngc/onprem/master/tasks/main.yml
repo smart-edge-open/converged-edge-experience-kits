@@ -2,6 +2,10 @@
 # Copyright © 2019 Intel Corporation
 
 ---
+
+- name: include common vars
+  include_vars: ../common/defaults/main.yml
+
   
 - name: build AF component
   make:
