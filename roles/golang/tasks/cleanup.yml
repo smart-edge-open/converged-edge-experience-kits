@@ -14,10 +14,13 @@
 
 ---
 
-- name: remove /usr/local/go
+- name: remove Go files
   file:
-    path: /usr/local/go
+    path: "{{ item }}"
     state: absent
+  with_items:
+  - /usr/local/go
+  - /root/go
 
 - name: remove exports from /etc/profile
   lineinfile:
