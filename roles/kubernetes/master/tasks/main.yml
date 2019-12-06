@@ -43,13 +43,13 @@
         remote_src: yes
   when: cluster_info.rc == 1
 
-- name: get master hostname
+- name: get master node name
   block:
   - name: hostname
     command: hostname
     register: hostname_output
   - set_fact:
-      k8s_master_hostname: "{{ hostname_output.stdout }}"
+      k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: label host as kube-ovn master
-  command: "kubectl label node {{ k8s_master_hostname | lower }} kube-ovn/role=master --overwrite"
+  command: "kubectl label node {{ k8s_master_node_name }} kube-ovn/role=master --overwrite"

@@ -17,16 +17,16 @@
 - name: customize kubelet for topology manager
   include_tasks: customize_kubelet.yml
 
-- name: get worker hostname
+- name: get worker node name
   block:
   - name: hostname
     command: hostname
     register: hostname_output
   - set_fact:
-      k8s_worker_hostname: "{{ hostname_output.stdout }}"
+      k8s_worker_node_name: "{{ hostname_output.stdout |lower }}"
 
 - name: check if already in cluster
-  command: kubectl get node {{ k8s_worker_hostname }}
+  command: kubectl get node {{ k8s_worker_node_name }}
   register: get_node
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
@@ -49,5 +49,5 @@
   when: get_node.rc == 1
 
 - name: label node as a worker
-  command: kubectl label node {{ k8s_worker_hostname }} node-role.kubernetes.io/worker=worker --overwrite
+  command: kubectl label node {{ k8s_worker_node_name }} node-role.kubernetes.io/worker=worker --overwrite
   delegate_to: "{{ groups['controller_group'][0] }}"

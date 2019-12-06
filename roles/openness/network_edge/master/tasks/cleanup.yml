@@ -14,13 +14,13 @@
 
 ---
 
-- name: get worker hostname
+- name: get worker node name
   block:
   - name: hostname
     command: hostname
     register: hostname_output
   - set_fact:
-      k8s_worker_hostname: "{{ hostname_output.stdout }}"
+      k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: remove openness definitions
   command: kubectl delete -f {{ item }}

@@ -14,13 +14,13 @@
 
 ---
 
-- name: get worker hostname
+- name: get worker node name
   block:
   - name: hostname
     command: hostname
     register: hostname_output
   - set_fact:
-      k8s_worker_hostname: "{{ hostname_output.stdout }}"
+      k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: create temporary custom .openness_gitconfig
   include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
@@ -37,5 +37,5 @@
 # since these pods are part of openness' DaemonSet will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
 - name: recreate openness pods
-  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_hostname }} -o=NAME | grep -v syslog)
+  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_node_name }} -o=NAME | grep -v syslog)
   delegate_to: "{{ groups['controller_group'][0] }}"
