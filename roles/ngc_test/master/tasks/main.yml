@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+- name: include common vars
+  include_vars: ../common/defaults/main.yml
+
+- name: create directory for certs used by AF and NEF
+  file:
+    name: "{{ certs_dest }}/ngc"
+    state: directory
+
+- name: copy genCerts.json file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    dest: "{{ certs_dest }}/ngc"
+
+- name: run script to generate cerificates
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
+  args:
+    chdir: "{{certs_dest}}/ngc"
+
+- name: create ngc namespace if needed
+  block:
+  - name: check if ngc namespace exists
+    shell: kubectl get ns ngc
+    ignore_errors: yes
+    register: get_ns_ngc
+  - name: create ngc namespace
+    shell: kubectl create namespace ngc
+    when: get_ns_ngc.rc == 1
+
+- include_tasks: subtasks/bringup_oam.yml
+
+- include_tasks: subtasks/bringup_nef.yml
+
+- include_tasks: subtasks/bringup_af.yml
+

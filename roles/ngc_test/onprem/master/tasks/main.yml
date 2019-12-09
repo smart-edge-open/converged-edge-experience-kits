@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+- name: include common vars
+  include_vars: ../../common/defaults/main.yml
+
+- include_tasks: subtasks/bringup_oam.yml
+
+- include_tasks: subtasks/bringup_nef.yml
+
+- include_tasks: subtasks/bringup_af.yml
+

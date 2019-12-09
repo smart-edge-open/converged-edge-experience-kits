@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+- name: remove NEF image
+  command: docker image rm -f nef-image:1.0
+  ignore_errors: yes

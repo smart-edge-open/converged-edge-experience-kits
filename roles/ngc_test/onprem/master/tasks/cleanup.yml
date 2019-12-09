@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+- include_tasks: subtasks/bringdown_oam.yml
+
+- include_tasks: subtasks/bringdown_nef.yml
+
+- include_tasks: subtasks/bringdown_af.yml
+

@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+epcforedge_git_repo:
+  dir: https://{{ git_repo_token }}@github.com/otcshare/epcforedge.git
+  download_dir: /opt/epcforedge
+  branch: 5g_openness 
+
+configs_dest: /etc/openness/configs
+certs_dest: /etc/openness/certs
+
+git_repo_ngc_dir: /opt/epcforedge/ngc
+git_repo_ngc_dist_dir: /opt/epcforedge/ngc/dist
+git_repo_ngc_build_dir: /opt/epcforedge/ngc/build

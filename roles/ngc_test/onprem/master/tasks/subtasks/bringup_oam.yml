@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+- name: build OAM component
+  make:
+  args:
+    chdir: "{{ git_repo_ngc_dir }}"
+    target: oam
+
+- name: copy oam binaries to build folder
+  copy:
+    src: "{{ git_repo_ngc_dist_dir }}/oam"
+    dest: "{{ git_repo_ngc_build_dir }}/onprem/oam"
+
+- name: copy oam.json configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oam.json"
+    dest: "{{ configs_dest }}/ngc"
+
+- name: check Docker service
+  shell: systemctl status docker
+  ignore_errors: true
+  changed_when: false
+  args:
+    warn: false
+  register: docker_service_status
+
+- name: build OAM docker image
+  docker_image:
+    name: oam-image:1.0
+    source: build
+    build:
+      path: "{{git_repo_ngc_build_dir}}/onprem/oam"
+      pull: no
+  when: docker_service_status.rc == 0
+
+- name: Run OAM container
+  docker_container:
+    name: oam-container
+    image: oam-image:1.0
+    state: started
+    volumes:
+      - /etc/openness/certs/ngc:/etc/certs:rw
+      - /etc/openness/configs/ngc:/root/configs:rw
+  when: docker_service_status.rc == 0
+

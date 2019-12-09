@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+- name: create temporary custom .openness_gitconfig
+  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+
+- block:
+  - name: checkout clean epcforedge repository
+    git:
+      repo: "{{ epcforedge_git_repo.dir }}"
+      dest: "{{ epcforedge_git_repo.download_dir }}"
+      version: "{{ epcforedge_git_repo.branch }}"
+      force: yes
+  always:
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+
+- name: create directory for ngc configs
+  file:
+    name: "{{ configs_dest }}/ngc"
+    state: directory
+
