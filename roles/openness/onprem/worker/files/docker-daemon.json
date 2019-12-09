@@ -6,6 +6,8 @@
     "8.8.8.8"
   ],
   "userland-proxy": false,
+  "no-new-privileges": true,
+  "live-restore": true,
   "default-ulimits": {
     "nofile": {
       "Name": "nofile",
