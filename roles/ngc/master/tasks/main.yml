@@ -6,6 +6,21 @@
 - name: include common vars
   include_vars: ../common/defaults/main.yml
 
+- name: create directory for certs used by AF and NEF
+  file:
+    name: "{{ certs_dest }}/ngc"
+    state: directory
+
+- name: copy genCerts.json file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    dest: "{{ certs_dest }}/ngc"
+
+- name: run script to generate cerificates
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
+  args:
+    chdir: "{{certs_dest}}/ngc"
+
 - name: build AF component
   make:
   args:
