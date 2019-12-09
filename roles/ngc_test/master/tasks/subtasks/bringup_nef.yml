@@ -17,7 +17,7 @@
 - name: copy nef.json configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/nef.json"
-    dest: "{{ configs_dest }}"
+    dest: "{{ configs_dest }}/ngc"
 
 - name: build NEF docker image
   docker_image:
