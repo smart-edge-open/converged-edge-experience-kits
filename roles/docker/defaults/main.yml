@@ -22,3 +22,14 @@ docker_repository_url: "https://download.docker.com/linux/centos/7/$basearch/sta
 docker_repository_key: "https://download.docker.com/linux/centos/gpg"
 
 docker_packages_to_remove: "docker,docker-client,docker-client-latest,docker-common,docker-latest,docker-latest-logrotate,docker-logrotate,docker-engine,docker-ce,docker-ce-cli,containerd.io"
+
+docker_audit_files:
+- "/usr/bin/docker"
+- "/var/lib/docker"
+- "/etc/docker"
+- "/usr/lib/systemd/system/docker.service"
+- "/usr/lib/systemd/system/docker.socket"
+- "/etc/default/docker"
+- "/etc/docker/daemon.json"
+- "/usr/bin/docker-containerd"
+- "/usr/bin/docker-runc"

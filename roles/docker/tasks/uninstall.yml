@@ -13,6 +13,13 @@
 # limitations under the License.
 
 ---
+- name: Remove auditd docker rules
+  file:
+    name: "/etc/audit/rules.d/docker.rules"
+    state: absent
+
+- name: Restart auditd
+  shell: service auditd restart
 
 - name: disable docker service
   systemd:

@@ -58,3 +58,20 @@
 
 - name: restart services if needed
   meta: flush_handlers
+
+- name:  Find docker audit files
+  stat:
+    path: "{{ item }}"
+  with_items: " {{ docker_audit_files }} "
+  register: stats
+
+- name: Add audit rules for docker
+  lineinfile:
+    path: /etc/audit/rules.d/docker.rules
+    line: "-w {{ item.item }} -k docker"
+    create: yes
+  when: item.stat.exists
+  with_items: "{{ stats.results }}"
+
+- name: Restart auditd
+  shell: service auditd restart
