@@ -39,6 +39,7 @@
       clusterDomain: cluster.local
       featureGates:
         TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
+      podPidsLimit: 100
   notify:
   - enable and restart kubelet
 
