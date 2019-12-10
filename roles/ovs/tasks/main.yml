@@ -1,0 +1,95 @@
+# Copyright 2019 Intel Corporation. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+- name: customize EVA config - Enable OVS
+  shell: jq '.OpenvSwitch=true | .OpenvSwitchBridge="{{ ovs_bridge_name }}"' {{ git_repo_dest }}/configs/eva.json | sponge {{ git_repo_dest }}/configs/eva.json
+
+- name: customize ELA config - add blacklisted ports
+  shell: jq '.PCIBlacklist +=  ["{{ item }}"]'  {{ git_repo_dest }}/configs/ela.json | sponge {{ git_repo_dest }}/configs/ela.json
+  loop: "{{ ovs_ports }}"
+
+- name: check if already installed
+  stat:
+    path: "{{ ovs_install_location }}"
+  register: ovs_dest_dir
+
+- name: download
+  get_url:
+    url: "{{ ovs_url }}"
+    dest: "{{ ovs_download_dest }}"
+  when: ovs_dest_dir.stat.exists == False
+
+- name: create ovs download directory
+  file:
+    path: "{{ ovs_download_dir }}"
+    state: directory
+
+- name: extract ovs
+  unarchive:
+    src: "{{ ovs_download_dest }}"
+    dest: "{{ ovs_install_location }}"
+    remote_src: yes
+    extra_opts: "--strip-components=1"
+
+- name: compile ovs
+  command: "{{ item }}"
+  with_items:
+    - ./boot.sh
+    - ./configure --with-dpdk="ansible_local['dpdk']['dpdk_install_dir']/{{ dpdk_make_target }}"   # TODO: Facts
+    - make -j
+    - make install
+  args:
+    chdir: "{{ ovs_install_location }}"
+
+- name: create and copy openvswitch-nonetwork.service
+  template:
+    src: openvswitch-nonetwork.service.j2
+    dest: /usr/lib/systemd/system/openvswitch-nonetwork.service
+
+- name: copy openvswitch.service
+  copy:
+    src: openvswitch.service
+    dest: /usr/lib/systemd/system
+
+- name: enable and start OVS daemon
+  systemd:
+    name: openvswitch
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: add OVS bridge
+  shell: |
+    export PATH=$PATH:/usr/local/share/openvswitch/scripts
+    # Remove bridges if there are any
+    ovs-vsctl list-br | while read line ; do ovs-vsctl del-br $line ; done
+    # Adding bridge
+    ovs-vsctl add-br {{ ovs_bridge_name }} -- set bridge {{ ovs_bridge_name }} datapath_type=netdev
+    mkdir /tmp/openvswitch
+    chown qemu:qemu /tmp/openvswitch
+
+- name: add ovs physical port
+  shell: ovs-vsctl add-port {{ ovs_bridge_name }} dpdk-p{{ index }} -- set Interface dpdk-p{{ index }} type=dpdk options:dpdk-devargs={{ item }}
+  loop: "{{ ovs_ports }}"
+  loop_control:
+    index_var: index
+
+- name: print interfaces
+  debug:
+    msg: "port dpdk-p{{ index }} connected to {{ item }}"
+  loop: "{{ ovs_ports }}"
+  loop_control:
+    index_var: index
