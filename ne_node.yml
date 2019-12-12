@@ -27,5 +27,4 @@
     - role: kubeovn/worker
     - role: openness/network_edge/worker
     # - role: biosfw/worker
-    # - role: sriov/worker
     # - role: cmk/worker
