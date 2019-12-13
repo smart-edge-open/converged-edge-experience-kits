@@ -3,28 +3,22 @@
 
 ---
 
-- name: Download repo GPG key (1/3)
-  get_url:
-    url: "{{ os_kernel_rt_repository_key }}"
-    dest: "{{ os_kernel_rt_repository_key_dest }}"
-    mode: 0644
-
-- name: Import repository GPG key (2/3)
-  rpm_key:
-    state: present
-    key: "{{ os_kernel_rt_repository_key_dest }}"
-
-- name: Download repository file (3/3)
-  get_url:
-    url: "{{ os_kernel_rt_repository_url }}"
-    dest: "{{ os_kernel_rt_repository_dest }}"
-    mode: 0644
+- name: Setup repository
+  include_tasks: setup_repository.yml
 
 - name: Install correct tuned package
   yum:
     name: "{{ os_kernel_rt_tuned_package_url }}"
     state: present
     allow_downgrade: yes
+  when: not offline_mode
+
+- name: Install correct tuned package - offline
+  yum:
+    name: "{{ os_kernel_rt_tuned_package_url.split('/')[-1] | regex_replace('.rpm$') }}"
+    state: present
+    allow_downgrade: yes
+  when: offline_mode
 
 - debug:
     msg: "kernel version to install: {{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
@@ -46,7 +40,7 @@
     name: grub
 
 - name: Reboot the machine if still needed
-  block: 
+  block:
   # because grub role does reboot as well we might have already booted with proper kernel
   - name: refresh ansible_kernel
     setup:

@@ -1,0 +1,122 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: create tmp folder
+  file:
+    path: "{{ offline_path_common }}/tmp"
+    state: directory
+
+- name: create temporary directory
+  tempfile:
+    state: directory
+    suffix: experiencekits
+  register: tmp_dir
+  delegate_to: localhost
+
+- name: copy OEK to tmp directory
+  synchronize:
+    src: "{{ playbook_dir }}/"
+    dest: "{{ tmp_dir.path }}/openness-experience-kits/"
+  delegate_to: localhost
+
+- name: remove OEK logs
+  file:
+    path: "{{ tmp_dir.path }}/openness-experience-kits/logs"
+    state: absent
+
+- name: create temporary archive
+  archive:
+    path:
+    - "{{ tmp_dir.path }}/openness-experience-kits"
+    dest: "{{ tmp_dir.path }}/openness-experience-kits.tar.gz"
+    format: gz
+  delegate_to: localhost
+
+- name: copy OpenNESS experience kits to build machine
+  copy:
+    src: "{{ tmp_dir.path }}/openness-experience-kits.tar.gz"
+    dest: "{{ offline_path_common }}"
+
+- name: remove temporary directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  delegate_to: localhost
+
+- name: unarchive temporary archive
+  unarchive:
+    src: "{{ offline_path_common }}/openness-experience-kits.tar.gz"
+    dest: "{{ offline_path_common }}"
+    remote_src: yes
+
+- name: remove temporary archive
+  file:
+    path: "{{ offline_path_common }}/openness-experience-kits.tar.gz"
+    state: absent
+
+- name: set offline mode to true
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'offline_mode:.*$'
+    line: 'offline_mode: True'
+
+- name: set proxy to false
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'proxy_os_enable:.*$'
+    line: 'proxy_os_enable: false'
+
+- name: set remove old proxy to true
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'proxy_os_remove_old:.*$'
+    line: 'proxy_os_remove_old: true'
+
+- name: clear yum proxy
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'proxy_yum_url:.*$'
+    line: 'proxy_yum_url: ""'
+  
+- name: clear http proxy
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'proxy_os_http:.*$'
+    line: 'proxy_os_http: "http://proxy.example.org:3128"'
+
+- name: clear https proxy
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'proxy_os_https:.*$'
+    line: 'proxy_os_https: "http://proxy.example.org:3129"'
+
+- name: clear ftp proxy
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'proxy_os_ftp:.*$'
+    line: 'proxy_os_ftp: "http://proxy.example.org:3128"'
+
+- name: clear git token
+  lineinfile:
+    path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'git_repo_token:.*$'
+    line: 'git_repo_token: ""'
+
+- name: remove .git directory
+  file:
+    state: absent
+    path: "{{ offline_experience_kits_path }}/.git"
+
+- name: remove .gitignore
+  file:
+    state: absent
+    path: "{{ offline_experience_kits_path }}/.gitignore"
+
+- name: create openness-experience-kits archive
+  archive:
+    path:
+    - "{{ offline_experience_kits_path }}"
+    dest: "{{ offline_path_common }}/tmp/openness-experience-kits.tar.gz"
+    format: gz

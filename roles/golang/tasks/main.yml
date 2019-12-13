@@ -3,6 +3,13 @@
 
 ---
 
+- name: offline | copy Go archive for offline
+  copy:
+    src: "{{ offline_archives_path }}/{{ golang_download_name }}"
+    dest: "{{ golang_download_dest }}"
+    remote_src: yes
+  when: offline_mode
+
 - name: check if already installed
   stat:
     path: /usr/local/go/bin/go

@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: delete old offline repo folder
+  file:
+    path: "{{ offline_yum_path }}"
+    state: absent
+  when: offline_always_redownload_packages == true
+
+- name: get os_kernelrt settings
+  include_vars: ../../../../os_kernelrt/defaults/main.yml
+
+- name: add kernel RT repository
+  include_tasks: ../../../../os_kernelrt/tasks/setup_repository.yml
+  when: offline_download_kernel == true
+
+- name: create offline repo folder
+  file:
+    path: "{{ offline_yum_path }}"
+    state: directory
+
+- name: check if a backup of original /etc/yum.conf file already exists
+  stat:
+    path: /etc/yum.conf.bak
+  register: yum_backup_file
+
+- name: make a backup of original /etc/yum.conf
+  copy:
+    src: /etc/yum.conf
+    dest: /etc/yum.conf.bak
+    remote_src: yes
+  when: yum_backup_file.stat.exists == false
+
+- name: temporarily disable yum excludes
+  replace:
+    path: /etc/yum.conf
+    regexp: '^exclude'
+    replace: '#exclude'
+
+- block:
+  - name: download RT kernel
+    shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+    with_items:
+      - "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
+      - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
+
+  - debug:
+      msg: "Kernel RT tuned package will be downloaded from: {{ os_kernel_rt_tuned_package_url }}"
+
+  - name: download kernel RT tuned package for offline use
+    get_url:
+      url: "{{ os_kernel_rt_tuned_package_url }}"
+      dest: "{{ offline_yum_path }}"
+  when: offline_download_kernel == true
+
+- name: download base packages for offline use
+  shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+  with_items:
+    - "{{ os_yum_base_packages.split(',') }}"
+    - "{{ docker_packages.split(',') }}"
+    - "mariadb"
+    - "audit"
+
+- name: download libvirt packages for offline use
+  shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+  with_items:
+    - "{{ libvirt_packages.split(',') }}"
+  when: libvirt_packages is defined
+
+- name: create offline repo
+  shell: createrepo {{ offline_yum_path }}
+
+- name: create yum repository file
+  template:
+    src: openness-offline.repo.j2
+    dest: "{{ offline_path }}/openness-offline-{{ inventory_hostname }}.repo"
+    mode: '0644'
+
+- name: revert /etc/yum.conf changes
+  copy:
+    src: /etc/yum.conf.bak
+    dest: /etc/yum.conf
+    remote_src: yes

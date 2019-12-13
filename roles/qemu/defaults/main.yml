@@ -3,7 +3,6 @@
 
 ---
 
-  
 qemu_version: "4.0.0"
 qemu_targets: "x86_64-softmmu"
 

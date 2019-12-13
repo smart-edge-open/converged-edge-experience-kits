@@ -3,12 +3,16 @@
 
 ---
 
-- name: Build CNCA plugin
-  shell: source /etc/profile && go build -o "{{ cnca_plugin_name }}"
+- set_fact:
+    gopath: "{{ offline_path }}/golang_modules/cnca"
+  when: offline_mode
+
+- name: build CNCA plugin
+  shell: source /etc/profile && GOPATH="{{ gopath }}" go build -o "{{ cnca_plugin_name }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"
 
-- name: Install CNCA plugin
+- name: install CNCA plugin
   shell: mv "{{ cnca_plugin_name }}" "{{ cnca_plugin_dest }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"

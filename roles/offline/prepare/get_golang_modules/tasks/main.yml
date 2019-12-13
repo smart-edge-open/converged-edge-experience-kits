@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: remove golang cache folder
+  file:
+    path: "{{ offline_path }}/golang_modules/main"
+    state: absent
+
+- name: create empty golang cache folder
+  file:
+    path: "{{ offline_path }}/golang_modules/main"
+    state: directory
+
+- name: download modules
+  block:
+    - include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    - name: download modules
+      shell: "PATH=$PATH:/usr/local/go/bin GOPATH={{ offline_path }}/golang_modules/main go mod download"
+      args:
+        chdir: "{{ git_repo_dest }}"
+  always:
+    - include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

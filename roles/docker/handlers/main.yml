@@ -9,3 +9,4 @@
     enabled: yes
     masked: no
     state: restarted
+    daemon_reload: yes

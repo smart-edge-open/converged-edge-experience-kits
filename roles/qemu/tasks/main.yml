@@ -2,7 +2,14 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
-  
+
+- name: offline | copy QEMU archive for offline
+  copy:
+    src: "{{ offline_archives_path }}/{{ qemu_name }}.tar.xz"
+    dest: "{{ qemu_download_dest }}"
+    remote_src: yes
+  when: offline_mode
+
 - name: remove qemu-img if installed
   shell: rpm -e --nodeps qemu-img
   ignore_errors: true
@@ -19,7 +26,9 @@
   get_url:
     url: "{{ qemu_download_url }}"
     dest: "{{ qemu_download_dest }}"
-  when: qemu_dest_dir.stat.exists == False
+  when:
+  - qemu_dest_dir.stat.exists == False
+  - not offline_mode
 
 - name: ensure install dir exists
   file:
@@ -28,20 +37,29 @@
 
 - name: extract archive
   unarchive:
-    src: "{{ qemu_download_url }}"
+    src: "{{ qemu_download_dest }}"
     dest: "{{ qemu_install_dir }}"
     extra_opts: "--strip-components=1"
     remote_src: yes
     creates: "{{ qemu_install_dir }}/README"
+
+- name: Install zlib-devel package
+  yum:
+    name: "zlib-devel"
+    state: present
 
 - name: configure
   command: ./configure --target-list={{ qemu_targets }} --enable-kvm
   args:
     chdir: "{{ qemu_install_dir }}"
 
+- name: detect amount of cores
+  shell: nproc
+  register: nproc_out
+
 - name: compile and install
   make:
     chdir: "{{ qemu_install_dir }}"
     target: install
   environment:
-    "MAKEFLAGS": "-j$(nproc)"
+    "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"

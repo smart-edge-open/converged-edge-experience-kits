@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+[openness-offline-{{ inventory_hostname }}]
+name=OpenNESS Offline {{ inventory_hostname }}
+baseurl=file://{{ offline_yum_path }}
+enabled=1
+gpgcheck=0

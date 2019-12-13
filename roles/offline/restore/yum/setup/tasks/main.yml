@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: check if a backup of /etc/yum.repos.d exists
+  stat:
+    path: /etc/yum.repos.d.backup
+  register: yum_backup_dir
+
+- name: create backup of /etc/yum.repos.d
+  copy:
+    src: /etc/yum.repos.d
+    dest: /etc/yum.repos.d.backup
+    remote_src: yes
+  when: yum_backup_dir.stat.exists == false
+
+- name: find openness .repo file
+  find:
+    paths: "{{ offline_path }}"
+    patterns: "openness-offline-*.repo"
+  register: repo_file
+
+- name: fail if no .repo file
+  fail:
+    msg: "OpenNESS' repository file not found in: {{ offline_path }}"
+  when: repo_file.files|length == 0
+
+- name: create openness-offline repository
+  copy:
+    src: "{{ repo_file.files[0].path }}"
+    dest: /etc/yum.repos.d/
+    remote_src: yes
+
+- name: install yum-utils package
+  yum:
+    name: yum-utils
+    state: present
+    disablerepo: "*"
+    enablerepo: "openness-offline-*"
+
+- name: disable all repositories
+  shell: yum-config-manager --disable \*
+
+- name: enable openness repository (controller)
+  shell: yum-config-manager --enable openness-offline-controller
+  when: "'controller_group' in group_names"
+
+- name: enable openness repository (node)
+  shell: yum-config-manager --enable openness-offline-node
+  when: "'edgenode_group' in group_names"

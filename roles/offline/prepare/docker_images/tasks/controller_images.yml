@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: create .env file with github token
+  copy:
+    content: |
+      GITHUB_TOKEN={{ git_repo_token }}
+    dest: "{{ git_repo_dest }}/.env"
+
+- name: customize docker-compose.yml
+  lineinfile:
+    path: "{{ git_repo_dest }}/docker-compose.yml"
+    insertafter: "context: ./ui/{{ item.dir }}"
+    line: "      target: {{ item.image }}-deps-image"
+  with_items:
+    - { image: "cce-ui", dir: "controller" }
+    - { image: "cups-ui", dir: "cups" }
+    - { image: "cnca-ui", dir: "cnca" }
+
+- name: change docker-compose.yml images names
+  lineinfile:
+    path: "{{ git_repo_dest }}/docker-compose.yml"
+    regexp: "    image: {{ item.original }}"
+    line: "    image: {{ item.new }}"
+  with_items:
+    - { original: "ui", new: "cce-ui-deps-image" }
+    - { original: "cups", new: "cups-ui-deps-image" }
+    - { original: "cnca", new: "cnca-ui-deps-image" }
+
+- name: pull, build & save controller images
+  block:
+    - name: build ui image
+      shell: docker-compose build ui
+      args:
+        chdir: "{{ git_repo_dest }}"
+      register: build_ui_output
+
+    - name: build cups-ui image
+      shell: docker-compose build cups-ui
+      args:
+        chdir: "{{ git_repo_dest }}"
+      register: build_cups_output
+
+    - name: build cnca-ui image
+      shell: docker-compose build cnca-ui
+      args:
+        chdir: "{{ git_repo_dest }}"
+      register: build_cnca_output
+
+    - name: build cce image
+      shell: docker-compose build cce
+      args:
+        chdir: "{{ git_repo_dest }}"
+      register: build_controller_output
+
+    - name: pull mysql image
+      shell: docker-compose pull --quiet mysql
+      args:
+        chdir: "{{ git_repo_dest }}"
+
+    - name: make sure dir for images exists
+      file:
+        path: "{{ offline_docker_images_path }}"
+        state: directory
+
+    - name: save all images
+      shell: docker save "{{ item.image }}" > "{{ offline_docker_images_path }}/{{ item.filename }}"
+      with_items:
+      - { image: "mysql", filename: "mysql.tar" }
+      - { image: "cce", filename: "cce.tar" }
+      - { image: "cce-ui-deps-image", filename: "ui-deps-image.tar" }
+      - { image: "cups-ui-deps-image", filename: "cups-deps-image.tar" }
+      - { image: "cnca-ui-deps-image", filename: "cnca-deps-image.tar" }
+      - { image: "node:lts-alpine", filename: "node.tar" }
+  always:
+  - name: remove .env
+    file:
+      path: "{{ git_repo_dest }}/.env"
+      state: absent
+  - name: remove docker-compose.yml customization
+    lineinfile:
+      path: "{{ git_repo_dest }}/docker-compose.yml"
+      line: '      target: {{ item }}-deps-image'
+      state: absent
+    with_items:
+    - cce-ui
+    - cups-ui
+    - cnca-ui
+  - name: restore docker-compose.yml images names
+    lineinfile:
+      path: "{{ git_repo_dest }}/docker-compose.yml"
+      regexp: "    image: {{ item.new }}"
+      line: "    image: {{ item.original }}"
+    with_items:
+      - { original: "ui", new: "cce-ui-deps-image" }
+      - { original: "cups", new: "cups-ui-deps-image" }
+      - { original: "cnca", new: "cnca-ui-deps-image" }

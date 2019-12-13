@@ -3,14 +3,61 @@
 
 ---
 
-- name: create temporary custom .openness_gitconfig
-  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+- name: offline | customizations for offline mode
+  block:
+  - name: offline | add cache_from to docker-compose.yml
+    lineinfile:
+      path: "{{ git_repo_dest }}/docker-compose.yml"
+      insertafter: 'dockerfile: "Dockerfile_{{ item.file }}"'
+      line: '      cache_from: ["{{ item.cache }}-deps-image"]'
+    with_items:
+    - { file: appliance, cache: appliance }
+    - { file: eaa, cache: eaa }
+    - { file: nts, cache: nts }
+    - { file: edgednssvr, cache: edgedns }
 
-- block:
+  - name: offline | load images
+    shell: docker load < {{ offline_docker_images_path }}/{{ item }}
+    with_items:
+    - centos.tar
+    - alpine.tar
+    - syslog.tar
+    - appliance-deps-image.tar
+    - eaa-deps-image.tar
+    - nts-deps-image.tar
+    - edgedns-deps-image.tar
+
+  # This is workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
+  # Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
+  # - not counting toward the |# resulting in |0 prepended to commands.
+  # So on proxy-less offline machine docker will not prepend it resulting in being two different RUN commands for docker
+  - name: offline | check if image was built with proxy
+    shell: docker history appliance-deps-image | grep -q "|0"
+    ignore_errors: yes
+    register: docker_history
+  - name: create .docker dir
+    file:
+      path: /root/.docker
+      state: directory
+    when: docker_history.rc == 0
+  - name: offline | add dummy noProxy
+    copy:
+      dest: /root/.docker/config.json
+      content: |
+        { "proxies": { "default": { "noProxy": "" } } }
+    when: docker_history.rc == 0
+  - set_fact:
+      gopath: "{{ offline_path }}/golang_modules/main"
+  when: offline_mode
+
+- name: build node docker images
+  block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: binaries and images
-    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local['dpdk']['dpdk_install_dir'] }} RTE_TARGET={{ dpdk_make_target }} make build-docker
+    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local['dpdk']['dpdk_install_dir'] }} RTE_TARGET={{ dpdk_make_target }} GOPATH={{ gopath }} make build-docker
     args:
       chdir: "{{ git_repo_dest }}"
   always:
-  - name: remove .openness_gitconfig
+  - name: remove temporary .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

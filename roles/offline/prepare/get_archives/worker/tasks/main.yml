@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: get dpdk settings
+  include_vars: ../../../../dpdk/defaults/main.yml
+
+- debug:
+    msg: "dpdk will be downloaded from: {{ dpdk_download_url }}"
+
+- name: download dpdk package
+  get_url:
+    url: "{{ dpdk_download_url }}"
+    dest: "{{ offline_path }}/archives/"
+
+- name: get qemu settings
+  include_vars: ../../../../qemu/defaults/main.yml
+
+- debug:
+    msg: "qemu will be downloaded from: {{ qemu_download_url }}"
+
+- name: download qemu package
+  get_url:
+    url: "{{ qemu_download_url }}"
+    dest: "{{ offline_path }}/archives/"

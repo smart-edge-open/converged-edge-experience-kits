@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: make sure dir exists
+  file:
+    path: "{{ offline_path_common }}"
+    state: directory
+
+- name: copy archive to remote machine
+  copy:
+    src: "{{ offline_path_common}}/{{ offline_archive }}"
+    dest: "{{ offline_path_common}}/{{ offline_archive }}"
+
+- name: unarchive
+  unarchive:
+    src: "{{ offline_path_common }}/{{ offline_archive }}"
+    dest: "{{ offline_path_common }}"
+    remote_src: yes

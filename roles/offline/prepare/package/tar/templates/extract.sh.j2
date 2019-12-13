@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+mkdir -p {{ offline_path_common }}
+mv offline-controller.tar.gz {{ offline_path_common }}
+if [ $? -eq 0 ]; then
+  echo "offline-controller.tar.gz moved to desired location"
+else
+  echo "FAILED: could not move offline-controller.tar.gz to the desired location"
+  exit 1
+fi
+
+mv offline-node.tar.gz {{ offline_path_common }}
+if [ $? -eq 0 ]; then
+  echo "offline-node.tar.gz moved to desired location"
+else
+  echo "FAILED: could not move offline-node.tar.gz to the desired location"
+  exit 2
+fi
+
+mkdir {{ offline_path_common }}/ansible_offline_packages
+
+command -v ansible-playbook 1>/dev/null
+if [[ $? -ne 0 ]]; then
+  ansible_tmp_dir=/temp/ansible_offline_packages
+  mkdir -p $ansible_tmp_dir
+  tar -xvf ansible.tar -C $ansible_tmp_dir
+  if [ $? -eq 0 ]; then
+    echo "Ansible archive extracted"
+  else
+    echo "FAILED: could not extract ansible archive"
+    exit 3
+  fi
+  (cd $ansible_tmp_dir && yum localinstall ./* -y )
+  rm -Rf ansible_tmp_dir
+fi
+
+tar -xzf openness-experience-kits.tar.gz
+if [ $? -eq 0 ]; then
+  echo "openness-experience-kits archive extracted"
+else
+  echo "FAILED: could not extract openness-experience-kits archive"
+  exit 4
+fi

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- include_tasks: controller_images.yml
+  when: "'controller_group' in group_names"
+
+- include_tasks: node_images.yml
+  when: "'edgenode_group' in group_names"

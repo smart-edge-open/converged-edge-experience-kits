@@ -13,6 +13,10 @@
   - include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
+    - role: offline/restore/transfer
+      when: offline_mode
+    - role: offline/restore/yum/setup
+      when: offline_mode
     - role: os_setup
     - role: os_kernelrt
     - role: dpdk
@@ -23,4 +27,5 @@
     - role: git_repo
     - role: openness/onprem/worker
     #- role: hddl
-
+    - role: offline/restore/yum/clean
+      when: offline_mode

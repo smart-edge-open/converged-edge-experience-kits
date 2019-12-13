@@ -3,6 +3,13 @@
 
 ---
 
+- name: offline | copy DPDK archive for offline
+  copy:
+    src: "{{ offline_archives_path }}/{{ dpdk_name }}.tar.xz"
+    dest: "{{ dpdk_download_dest }}"
+    remote_src: yes
+  when: offline_mode
+
 - name: check if already installed
   stat:
     path: "{{ dpdk_install_dir }}"
@@ -22,7 +29,7 @@
 
 - name: extract
   unarchive:
-    src: "{{ dpdk_download_url }}"
+    src: "{{ dpdk_download_dest }}"
     dest: "{{ dpdk_install_dir }}"
     extra_opts: "--strip-components=1"
     remote_src: yes
@@ -39,6 +46,10 @@
     state: absent
   when: igb_uio_module.stat.exists == False
 
+- name: detect amount of cores
+  shell: nproc
+  register: nproc_out
+
 - name: compile
   make:
     chdir: "{{ dpdk_install_dir }}"
@@ -46,7 +57,7 @@
     params:
       T: x86_64-native-linuxapp-gcc
   environment:
-    "MAKEFLAGS": "-j$(nproc)"
+    "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
   when: igb_uio_module.stat.exists == False
 
 - name: create Ansible dpdk facts.d folder

@@ -20,21 +20,69 @@
     src: .env.j2
     dest: "{{ git_repo_dest }}/.env"
 
-- name: create temporary custom .openness_gitconfig
-  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+- name: offline | build docker images
+  block:
+  - name: offline | import images
+    shell: docker load < {{ offline_docker_images_path }}/{{ item }}
+    with_items:
+    - mysql.tar
+    - cce.tar
+    - ui-deps-image.tar
+    - cups-deps-image.tar
+    - cnca-deps-image.tar
+    - node.tar
 
-- block:
-  - name: build controller
+  - name: offline | customize docker-compose.yml - use cached images
+    lineinfile:
+      path: "{{ git_repo_dest }}/docker-compose.yml"
+      insertafter: 'context: ./ui/{{ item.dir }}'
+      line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
+    with_items:
+    - { image: "cce-ui", dir: "controller"}
+    - { image: "cups-ui", dir: "cups"}
+    - { image: "cnca-ui", dir: "cnca"}
+
+  # This is workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
+  # Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
+  # - not counting toward the |# resulting in |0 prepended to commands.
+  # So on proxy-less offline machine docker will not prepend it resulting in being two different RUN commands for docker
+  - name: offline | check if image was built with proxy
+    shell: docker history cce-ui-deps-image | grep -q "|0"
+    ignore_errors: yes
+    register: docker_history_ui
+  - name: create .docker dir
+    file:
+      path: /root/.docker
+      state: directory
+    when: docker_history_ui.rc == 0
+  - name: offline | add dummy noProxy
+    copy:
+      dest: /root/.docker/config.json
+      content: |
+        { "proxies": { "default": { "noProxy": "" } } }
+    when: docker_history_ui.rc == 0
+
+  - name: offline | build CCE, CUPS, & CNCA UIs
+    shell: docker-compose build ui cups-ui cnca-ui
+    args:
+      chdir: "{{ git_repo_dest }}"
+  when: offline_mode
+
+- name: online build controller docker images
+  block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+  - name: build controller docker images
     make:
       chdir: "{{ git_repo_dest }}"
       target: build
     register: build_controller_output
+  - debug:
+      msg: "{{ build_controller_output.stdout }}"
   always:
-  - name: remove .openness_gitconfig
+  - name: remove temporary .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
-
-- debug:
-    msg: "{{ build_controller_output.stdout }}"
+  when: not offline_mode
 
 - name: start controller
   make:
@@ -42,5 +90,6 @@
     target: all-up
   register: start_controller_output
 
-- debug:
+- name: controller start output
+  debug:
     msg: "{{ start_controller_output.stdout }}"

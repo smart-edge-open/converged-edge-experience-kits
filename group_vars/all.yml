@@ -19,3 +19,19 @@ git_repo_token: ""
 # Controller settings
 mysql_root_password: "pass"
 cce_admin_password: "pass"
+
+## Offline On Premise mode
+
+# offline_mode setting:
+# - False - regular online mode,
+# - True - offline mode - RPMs, Python packages, etc. are installed from cache, Internet is not accessed
+offline_mode: False
+
+offline_path_common: "/opt/openness-offline"
+offline_archives_path: "{{ offline_path }}/archives"
+offline_pip_path: "{{ offline_path }}/pip"
+offline_yum_path: "{{ offline_path }}/yum"
+offline_docker_images_path: "{{ offline_path }}/docker_images"
+offline_experience_kits_path: "{{ offline_path_common }}/openness-experience-kits"
+
+offline_always_redownload_packages: false

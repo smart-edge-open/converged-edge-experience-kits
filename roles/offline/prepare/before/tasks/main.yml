@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: prepare for offline | create base directory with artifacts for offline mode
+  file:
+    path: "{{ offline_path }}"
+    state: directory

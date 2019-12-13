@@ -10,6 +10,8 @@
     baseurl: "{{ docker_repository_url }}"
     gpgkey: "{{ docker_repository_key }}"
     gpgcheck: yes
+  # Do not add remote repositories in offline mode
+  when: not offline_mode
 
 - name: clear yum cache
   command: yum clean all
@@ -25,8 +27,16 @@
 
 - name: install docker-compose
   pip:
-    name: docker-compose=={{ docker_compose_version }}
+    name: "{{ docker_compose_package }}"
     state: present
+  when: not offline_mode
+
+- name: offline | install docker-compose
+  pip:
+    name: "{{ docker_compose_package }}"
+    state: present
+    extra_args: "--no-index --find-links {{ offline_pip_path }}"
+  when: offline_mode
 
 - name: set up proxy
   include_tasks: proxy.yml

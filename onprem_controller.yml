@@ -10,7 +10,7 @@
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail: 
+  - fail:
       msg: "Only one controller is supported"
     when:
     - groups['controller_group'] is defined
@@ -18,6 +18,10 @@
   - include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
+    - role: offline/restore/transfer
+      when: offline_mode
+    - role: offline/restore/yum/setup
+      when: offline_mode
     - role: os_setup
     - role: docker
     - role: git_repo
@@ -25,3 +29,5 @@
     - role: openness/onprem/master
     - role: cnca/onprem
     #- role: ngc_test/onprem/master
+    - role: offline/restore/yum/clean
+      when: offline_mode

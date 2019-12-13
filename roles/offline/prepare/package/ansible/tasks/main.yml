@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: create tmp folder
+  file:
+    path: "{{ offline_path_common }}/tmp"
+    state: directory
+
+- name: create offline ansible archive
+  copy:
+    src: "/temp/ansible_offline_packages.tar"
+    dest: "{{ offline_path_common }}/tmp/ansible.tar"

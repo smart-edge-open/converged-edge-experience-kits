@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: create dir for pip downloads
+  file:
+    path: "{{ offline_pip_path }}"
+    state: directory
+
+- name: pip download docker-compose
+  shell: pip download {{ docker_compose_package }} --dest {{ offline_pip_path }}

@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: build intermediate images
+  shell: docker build -t {{ item.name }}-deps-image --target {{ item.name }}-deps-image {{ item.path }}
+  args:
+    chdir: "{{ git_repo_dest }}"
+  with_items:
+  - { name: appliance, path: ./build/appliance }
+  - { name: eaa, path: ./build/eaa }
+  - { name: nts, path: ./internal/nts/ }
+  - { name: edgedns, path: ./build/edgednssvr }
+
+- name: pull syslog-ng image
+  shell: docker-compose pull --quiet syslog-ng
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: pull alpine image
+  shell: docker pull --quiet alpine:latest
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: make sure dir for images exists
+  file:
+    path: "{{ offline_docker_images_path }}"
+    state: directory
+
+- name: save images
+  shell: docker save {{ item.name }} > {{ offline_docker_images_path }}/{{ item.filename }}
+  args:
+    creates: "{{ offline_docker_images_path }}/{{ item.filename }}"
+  with_items:
+  - { name: centos, filename: centos.tar }
+  - { name: alpine, filename: alpine.tar }
+  - { name: balabit/syslog-ng, filename: syslog.tar }
+  - { name: appliance-deps-image, filename: appliance-deps-image.tar }
+  - { name: eaa-deps-image, filename: eaa-deps-image.tar }
+  - { name: nts-deps-image, filename: nts-deps-image.tar }
+  - { name: edgedns-deps-image, filename: edgedns-deps-image.tar }

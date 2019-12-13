@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- block:
+  - name: download repo GPG key (1/3)
+    get_url:
+      url: "{{ os_kernel_rt_repository_key }}"
+      dest: "{{ os_kernel_rt_repository_key_dest }}"
+      mode: 0644
+
+  - name: import repository GPG key (2/3)
+    rpm_key:
+      state: present
+      key: "{{ os_kernel_rt_repository_key_dest }}"
+
+  - name: download repository file (3/3)
+    get_url:
+      url: "{{ os_kernel_rt_repository_url }}"
+      dest: "{{ os_kernel_rt_repository_dest }}"
+      mode: 0644
+  # Do not add keys in offline, we have the RPMs cached
+  when: not offline_mode

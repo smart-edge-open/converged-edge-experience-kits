@@ -5,3 +5,5 @@
 
 cnca_plugin_name: "cnca"
 cnca_plugin_dest: "/usr/local/bin/cnca"
+gopath: "$GOPATH"
+

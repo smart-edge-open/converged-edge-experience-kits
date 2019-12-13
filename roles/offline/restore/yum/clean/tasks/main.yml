@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: check if a backup of /etc/yum.repos.d exists
+  stat:
+    path: /etc/yum.repos.d.backup
+  register: yum_backup_dir
+
+- block:
+  - name: remove /etc/yum.repos.d
+    file:
+      state: absent
+      path: /etc/yum.repos.d
+  - name: revert /etc/yum.repos.d backup
+    shell: mv /etc/yum.repos.d.backup /etc/yum.repos.d
+  when: yum_backup_dir.stat.exists == true 
