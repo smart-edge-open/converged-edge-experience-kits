@@ -53,3 +53,6 @@
     state: "{{ 'absent' if topology_manager.policy == 'none' else 'present' }}"
   notify:
   - enable and restart kubelet
+
+- name: restart kubelet
+  meta: flush_handlers
