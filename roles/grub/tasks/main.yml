@@ -38,6 +38,11 @@
   register: cmdline_grep
   ignore_errors: yes
 
+# Only applied together with os_kernelrt role
+- name: Apply realtime tuned profile
+  shell: tuned-adm profile realtime
+  when: tuned_rt|default(False) == True
+
 - name: reboot the machine to apply new kernel params
   reboot:
   when: cmdline_grep.rc == 1

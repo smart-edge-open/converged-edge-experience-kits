@@ -6,9 +6,9 @@
 - name: Setup repository
   include_tasks: setup_repository.yml
 
-- name: Install correct tuned package
+- name: Install correct tuned packages
   yum:
-    name: "{{ os_kernel_rt_tuned_package_url }}"
+    name: "{{ os_kernel_rt_tuned_package_urls | join(',') }}"
     state: present
     allow_downgrade: yes
   when: not offline_mode
@@ -35,9 +35,19 @@
 - name: Set RT kernel as default
   shell: grubby --set-default /boot/vmlinuz-{{ os_kernel_rt_package_version }}
 
+- name: Copy tuned realtime profile config
+  copy:
+    content: "{{ os_kernel_rt_tuned_vars }}"
+    dest: /etc/tuned/realtime-variables.conf
+    owner: root
+    group: root
+    mode: 0644
+
 - name: Configure GRUB for new kernel
   include_role:
     name: grub
+  vars:
+    tuned_rt: true 
 
 - name: Reboot the machine if still needed
   block:

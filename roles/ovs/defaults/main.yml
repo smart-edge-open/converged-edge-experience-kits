@@ -7,7 +7,7 @@ ovs_version: "2.11.1"
 ovs_url: "https://www.openvswitch.org/releases/openvswitch-{{ ovs_version }}.tar.gz"
 ovs_download_dest: "/tmp/openvswitch-{{ ovs_version }}.tar.gz"
 ovs_install_location: "/opt/ovs-{{ ovs_version }}"
-ovs_cores_hex: "0x4"
+ovs_cores_hex: "0x10"
 ovs_bridge_name: "br0"
 ovs_socket_mem: "1024,0"
 ovs_ports: []
