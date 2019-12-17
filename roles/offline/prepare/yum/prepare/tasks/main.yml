@@ -47,12 +47,13 @@
       - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
 
   - debug:
-      msg: "Kernel RT tuned package will be downloaded from: {{ os_kernel_rt_tuned_package_url }}"
+      msg: "Kernel RT tuned packages will be downloaded from: {{ os_kernel_rt_tuned_package_urls }}"
 
-  - name: download kernel RT tuned package for offline use
+  - name: download kernel RT tuned packages for offline use
     get_url:
-      url: "{{ os_kernel_rt_tuned_package_url }}"
+      url: "{{ item }}"
       dest: "{{ offline_yum_path }}"
+    with_items: "{{ os_kernel_rt_tuned_package_urls }}"
   when: offline_download_kernel == true
 
 - name: download base packages for offline use

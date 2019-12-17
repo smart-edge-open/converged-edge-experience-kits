@@ -15,9 +15,10 @@
 
 - name: Install correct tuned package - offline
   yum:
-    name: "{{ os_kernel_rt_tuned_package_url.split('/')[-1] | regex_replace('.rpm$') }}"
+    name: "{{ item.split('/')[-1] | regex_replace('.rpm$') }}"
     state: present
     allow_downgrade: yes
+  with_items: "{{ os_kernel_rt_tuned_package_urls }}"
   when: offline_mode
 
 - debug:
@@ -47,7 +48,7 @@
   include_role:
     name: grub
   vars:
-    tuned_rt: true 
+    tuned_rt: true
 
 - name: Reboot the machine if still needed
   block:
