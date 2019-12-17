@@ -11,8 +11,8 @@ os_kernel_rt_repository_key_dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-cern
 os_kernel_rt_package_name: "kernel-rt-kvm"
 os_kernel_rt_package_version: "3.10.0-957.21.3.rt56.935.el7.x86_64"
 os_kernel_rt_tuned_package_urls:
-- "http://ftp.pbone.net/mirror/ftp.scientificlinux.org/linux/scientific/7.5/x86_64/os/Packages/tuned-2.9.0-1.el7.noarch.rpm"
-- "http://ftp.pbone.net/mirror/ftp.scientificlinux.org/linux/scientific/7.5/x86_64/os/Packages/tuned-profiles-realtime-2.9.0-1.el7.noarch.rpm"
+- "http://mirror.centos.org/centos/7/updates/x86_64/Packages/tuned-2.11.0-5.el7_7.1.noarch.rpm"
+- "http://lxsoft106.cern.ch/scientific/7x/x86_64/updates/fastbugs/tuned-profiles-realtime-2.11.0-5.el7_7.1.noarch.rpm"
 
 os_kernel_rt_grub_parameters: "hugepagesz=2M hugepages=5000 intel_iommu=on iommu=pt"
 os_kernel_rt_tuned_vars: |
