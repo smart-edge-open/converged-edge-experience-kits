@@ -28,3 +28,4 @@
 - name: recreate openness pods
   shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_node_name }} -o=NAME | grep -v syslog)
   delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
