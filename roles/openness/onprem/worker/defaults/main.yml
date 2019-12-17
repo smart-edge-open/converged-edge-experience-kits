@@ -5,8 +5,8 @@
 
 dpdk_make_target: "x86_64-native-linuxapp-gcc"
 docker_containers_ver: "1.0"
-docker_nts_mem_mb_s0: ""
-docker_nts_mem_mb_s1: ""
+docker_nts_mem_mb_s0: "2048"
+docker_nts_mem_mb_s1: "0"
 docker_syslog_container_name: "edgenode_syslog-ng_1"
 docker_appliance_container_name: "edgenode_appliance_1"
 docker_eaa_container_name: "edgenode_eaa_1"
