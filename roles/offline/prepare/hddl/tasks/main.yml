@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: get hddl settings
+  include_vars: "{{ playbook_dir }}/roles/hddl/defaults/main.yml"
+
+- name: download openvino package - may take a while (~750MB file)
+  get_url:
+    url: "{{ openvino_url }}"
+    dest: "{{ offline_path }}/archives/"
+
+- name: hddl docker images
+  block:
+  - name: build HDDL intermediate image
+    shell: docker build -t hddl-deps-image --target hddl-deps-image ./build/hddlservice
+    args:
+      chdir: "{{ git_repo_dest }}"
+
+  - name: save HDDL related images
+    shell: docker save {{ item.name }} > {{ offline_docker_images_path }}/{{ item.filename }}
+    args:
+      creates: "{{ offline_docker_images_path }}/{{ item.filename }}"
+    with_items:
+    - { name: hddl-deps-image, filename: hddl-deps-image.tar }
+    - { name: "ubuntu:16.04", filename: ubuntu1604.tar }
+
+
+- name: hddllog golang modules
+  block:
+  - name: remove hddllog golang cache folder
+    file:
+      path: "{{ offline_path }}/golang_modules/hddllog"
+      state: absent
+
+  - name: create empty hddllog golang cache folder
+    file:
+      path: "{{ offline_path }}/golang_modules/hddllog"
+      state: directory
+
+  - name: download hddllog golang modules
+    block:
+      - include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+      - name: download modules
+        shell: "PATH=$PATH:/usr/local/go/bin GOPATH={{ offline_path }}/golang_modules/hddllog go mod download"
+        args:
+          chdir: "{{ git_repo_dest }}/cmd/hddllog"
+    always:
+      - include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

@@ -24,6 +24,12 @@
     file:
       path: "/temp"
       state: directory
+  - name: offline | copy openvino archive for offline
+    copy:
+      src: "{{ offline_archives_path }}/{{ openvino_name }}"
+      dest: "{{ openvino_download_dest }}"
+      remote_src: yes
+    when: offline_mode
   - name: check if already downloaded
     stat:
       path: "{{ openvino_download_dir }}"
@@ -32,7 +38,9 @@
     get_url:
       url: "{{ openvino_url }}"
       dest: "{{ openvino_download_dest }}"
-    when: ov_dl_dir.stat.exists == False
+    when:
+    - ov_dl_dir.stat.exists == False
+    - not offline_mode
   - name: ensure download dir exists
     file:
       path: "{{ openvino_download_dir }}"
@@ -51,16 +59,21 @@
       line: ACCEPT_EULA=accept
   - name: install OpenVino
     command: "{{ openvino_install_command }}"
-    args: 
+    args:
       chdir: "{{ openvino_download_dir }}"
   - name: install OpenVino kernel drivers and udev rules
-    shell: "{{ openvino_hddl_dependency_install }}" 
+    shell: "{{ openvino_hddl_dependency_install }}"
   when: udev.stat.exists == false or vsc.stat.exists == False or ion.stat.exists == False
+
+- name: offline | build HDDL
+  include_tasks: offline_build.yml
+  when: offline_mode
 
 - name: build HDDL image
   shell: source /etc/profile && make build-docker-hddl
   args:
     chdir: "{{ git_repo_dest }}"
+  when: not offline_mode
 
 - name: bring up hddlservice container
   shell: "VER={{ docker_hddlservice_tag }} docker-compose up -d --no-build hddlservice"

@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+# Workaround for usage of target/cache_from is needed due to docker-compose.yml's version=2.4
+- name: offline | load intermediate images
+  shell: docker load < {{ offline_docker_images_path }}/{{ item }}
+  with_items:
+  - hddl-deps-image.tar
+  - ubuntu1604.tar
+
+- name: offline | build hddllog
+  shell: source /etc/profile && GOPATH={{ offline_path }}/golang_modules/hddllog make hddllog
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+- name: offline | create temp dir
+  tempfile:
+    state: directory
+    suffix: -hddl-build
+  register: tmp_dir
+
+- name: offline | copy files
+  copy:
+    src: "{{ git_repo_dest }}/{{ item }}"
+    dest: "{{ tmp_dir.path }}"
+    remote_src: yes
+    mode: preserve
+  with_items:
+  - build/hddlservice/Dockerfile
+  - build/hddlservice/start.sh
+  - dist/hddllog
+
+- name: offline | get VER variable
+  shell: grep "^VER:=" ./Makefile | cut -d= -f2
+  register: VER
+  args:
+    chdir: "{{ git_repo_dest }}"
+
+# This is a workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
+# Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
+# - not counting toward the |# resulting in |0 prepended to commands.
+# So on proxy-less offline machine docker will not prepend it resulting in being two different RUN commands for docker
+- block:
+  - set_fact:
+      hddl_build_arg: ''
+  - name: offline | check if image was built with proxy
+    shell: docker history hddl-deps-image | grep -q "|0"
+    ignore_errors: yes
+    register: docker_history
+  - set_fact:
+      hddl_build_arg: '--build-arg no_proxy=""'
+    when: docker_history.rc == 0
+
+- name: offline | build final hddl image
+  shell: docker build -t hddlservice:{{ VER.stdout }} --cache-from hddl-deps-image {{ hddl_build_arg }} .
+  args:
+    chdir: "{{ tmp_dir.path }}"
