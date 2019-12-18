@@ -10,6 +10,5 @@ ovs_install_location: "/opt/ovs-{{ ovs_version }}"
 ovs_cores_hex: "0x10"
 ovs_bridge_name: "br0"
 ovs_socket_mem: "1024,0"
-ovs_ports: []
 
 dpdk_make_target: "x86_64-native-linuxapp-gcc"

@@ -21,9 +21,9 @@
     dest: "{{ ovs_download_dest }}"
   when: ovs_dest_dir.stat.exists == False
 
-- name: create ovs download directory
+- name: create ovs installation directory
   file:
-    path: "{{ ovs_download_dir }}"
+    path: "{{ ovs_install_location }}"
     state: directory
 
 - name: extract ovs
@@ -37,7 +37,7 @@
   command: "{{ item }}"
   with_items:
     - ./boot.sh
-    - ./configure --with-dpdk="ansible_local['dpdk']['dpdk_install_dir']/{{ dpdk_make_target }}"   # TODO: Facts
+    - ./configure --with-dpdk="{{ ansible_local.dpdk.dpdk_install_dir }}/{{ dpdk_make_target }}"
     - make -j
     - make install
   args:

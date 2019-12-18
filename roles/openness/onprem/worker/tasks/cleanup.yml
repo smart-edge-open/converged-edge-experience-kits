@@ -11,7 +11,7 @@
     chdir: "{{ git_repo_dest }}"
     target: clean
     params:
-      RTE_SDK: "{{ ansible_local['dpdk']['dpdk_install_dir'] }}"
+      RTE_SDK: "{{ ansible_local.dpdk.dpdk_install_dir }}"
 
 - include_tasks: subtasks/remove_containers.yml
 - include_tasks: subtasks/remove_images.yml

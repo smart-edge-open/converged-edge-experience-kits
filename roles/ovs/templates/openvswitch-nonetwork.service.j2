@@ -17,7 +17,7 @@ ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpd
 ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket_mem={{ ovs_socket_mem }}
 ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask={{ ovs_cores_hex }}
 {% for port in ovs_ports %}
-ExecStart={{ ansible_local['dpdk']['dpdk_install_dir'] }}/usertools/dpdk-devbind.py --bind=uio_pci_generic {{ port }}
+ExecStart={{ ansible_local.dpdk.dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=uio_pci_generic {{ port }}
 {% endfor %}
 ExecStart=/usr/local/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --db-sock=/usr/local/var/run/openvswitch/db.sock start
 

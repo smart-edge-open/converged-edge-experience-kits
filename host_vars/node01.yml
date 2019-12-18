@@ -5,3 +5,5 @@
 
 sriov:
   network_interfaces: {}
+
+ovs_ports: []

@@ -25,7 +25,8 @@
     - role: libvirt
     - role: qemu
     - role: git_repo
+    # - role: ovs
     - role: openness/onprem/worker
-    #- role: hddl
+    # - role: hddl
     - role: offline/restore/yum/clean
       when: offline_mode

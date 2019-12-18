@@ -55,7 +55,7 @@
   - name: create temporary custom .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: binaries and images
-    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local['dpdk']['dpdk_install_dir'] }} RTE_TARGET={{ dpdk_make_target }} GOPATH={{ gopath }} make build-docker
+    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local.dpdk.dpdk_install_dir }} RTE_TARGET={{ dpdk_make_target }} GOPATH={{ gopath }} make build-docker
     args:
       chdir: "{{ git_repo_dest }}"
   always:
