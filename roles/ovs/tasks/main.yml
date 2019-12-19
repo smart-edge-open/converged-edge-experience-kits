@@ -33,11 +33,15 @@
     remote_src: yes
     extra_opts: "--strip-components=1"
 
+- name: reload ansible facts
+  gather_facts:
+    parallel: yes
+
 - name: compile ovs
   command: "{{ item }}"
   with_items:
     - ./boot.sh
-    - ./configure --with-dpdk="{{ ansible_local.dpdk.dpdk_install_dir }}/{{ dpdk_make_target }}"
+    - ./configure --with-dpdk="{{ ansible_local["dpdk"]["dpdk_install_dir"] }}/{{ dpdk_make_target }}"
     - make -j
     - make install
   args:

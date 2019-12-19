@@ -99,6 +99,7 @@
   with_items:
   - "igb_uio"
   - "rte_kni"
+  - "uio_pci_generic"
   - "uio"
 
 - name: load uio and igb_uio modules
