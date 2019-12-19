@@ -15,10 +15,19 @@
   register: unamer
 
 - name: install kernel-devel for non-RT environment
-  yum:
-    name: "kernel-devel-uname-r == {{ unamer.stdout }}"
-    state: present
-    disable_excludes: all
+  block:
+  - set_fact:
+      kernel_devel_to_install: "{{ non_rt_kernel_devel_download_url }}"
+  - set_fact:
+      kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
+    when: '"3.10.0-1062" in unamer.stdout'
+
+  - name: install kernel-devel for non-RT environment
+    yum:
+      name: "{{ kernel_devel_to_install }}"
+      state: present
+      disable_excludes: all
+      allow_downgrade: yes
   when: os_kernel_rt_package_version is not defined
 
 - name: check if already installed

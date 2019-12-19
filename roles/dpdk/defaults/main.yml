@@ -14,3 +14,5 @@ dpdk_install_dir: "/opt/{{ dpdk_name }}"
 
 dpdk_download_url: "http://fast.dpdk.org/rel/{{ dpdk_name }}.tar.xz"
 dpdk_download_dest: "/tmp/{{ dpdk_name }}.tar.xz"
+
+non_rt_kernel_devel_download_url: "http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm"
