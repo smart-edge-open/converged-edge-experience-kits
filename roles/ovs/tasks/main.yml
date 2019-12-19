@@ -63,6 +63,10 @@
     enabled: yes
     state: started
     daemon_reload: yes
+  register: ovs_daemon
+  retries: 30
+  delay: 10
+  until: ovs_daemon.status is defined
 
 - name: add OVS bridge
   shell: |
