@@ -11,7 +11,7 @@
   # - sriov/master
 
   #- include_vars: ./roles/ngc_test/common/defaults/main.yml
-  #- include_vars: ./roles/ngc_test/master/tasks/cleanup.yml
+  #- include_tasks: ./roles/ngc_test/master/tasks/cleanup.yml
 
   - include_vars: ./roles/sriov/common/defaults/main.yml
   - include_tasks: ./roles/sriov/common/tasks/cleanup.yml
