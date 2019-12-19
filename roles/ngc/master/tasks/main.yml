@@ -6,26 +6,27 @@
 - name: include common vars
   include_vars: ../common/defaults/main.yml
 
+- name: add firewall rules
+  include_tasks: add_firewall_rules.yml
+
+- block:
+  - name: output hostname
+    command: hostname
+    register: hostname_output
+  - set_fact:
+      k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
+  - name: set label on master node
+    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite 
+
 - name: create directory for certs used by AF and NEF
   file:
     name: "{{ certs_dest }}/ngc"
     state: directory
 
-- name: copy genCerts.json file
-  copy:
-    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
-    dest: "{{ certs_dest }}/ngc"
-
-- name: run script to generate cerificates
-  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
-  args:
-    chdir: "{{certs_dest}}/ngc"
-
 - name: build AF component
-  make:
+  shell: source /etc/profile && make af
   args:
     chdir: "{{ git_repo_ngc_dir }}"
-    target: af
 
 - name: copy AF binaries to build folder
   copy:
@@ -36,6 +37,9 @@
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
     dest: "{{ configs_dest }}/ngc"
+
+- name: update af config file
+  shell: jq '.ServerConfig.Hostname="afservice" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" | .CliConfig.NEFHostname="nefservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
 
 - name: build AF docker image
   docker_image:
@@ -61,3 +65,4 @@
 
 - name: deploy NEF
   shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podNEF.yaml
+

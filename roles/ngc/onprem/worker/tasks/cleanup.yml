@@ -18,11 +18,6 @@
   register: docker_container_running
   when: docker_service_status.rc == 0
 
-- name: stop NEF container
-  docker_container:
-    name: nef-container
-    state: stopped
-
 - name: remove NEF container
   shell: docker rm -f nef-container
   ignore_errors: yes
@@ -38,4 +33,7 @@
     - docker_container_removed.rc == 0
     - docker_service_status.rc == 0
     - docker_container_running.stdout != ""
+
+- name: remove firewall rules
+  include_tasks: rm_firewall_rules.yml
 

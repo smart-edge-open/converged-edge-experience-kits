@@ -15,3 +15,6 @@ git_repo_ngc_dir: /opt/epcforedge/ngc
 git_repo_ngc_dist_dir: /opt/epcforedge/ngc/dist
 git_repo_ngc_build_dir: /opt/epcforedge/ngc/build
 
+controller_name: "{{ groups['controller_group'][0] }}"
+controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+

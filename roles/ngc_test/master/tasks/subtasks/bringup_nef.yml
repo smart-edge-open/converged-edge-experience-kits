@@ -4,10 +4,9 @@
 ---
 
 - name: build NEF component
-  make:
+  shell: source /etc/profile && make nef 
   args:
     chdir: "{{ git_repo_ngc_dir }}"
-    target: nef
 
 - name: copy nef binaries to build folder
   copy:
@@ -30,3 +29,4 @@
 
 - name: deploy NEF
   shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podNEF.yaml
+

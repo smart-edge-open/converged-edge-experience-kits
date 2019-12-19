@@ -6,11 +6,35 @@
 - name: include common vars
   include_vars: ../../common/defaults/main.yml
 
+- name: prepare firewall
+  include_tasks: add_firewall_rules.yml
+
+- name: create directory for certs used by AF and NEF
+  file:
+    name: "{{ certs_dest }}/ngc"
+    state: directory
+
+- name: copy genCerts.json file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    dest: "{{ certs_dest }}/ngc"
+    mode: a+x
+
+- name: run script to generate cerificates
+  shell: './genCerts.sh -t DNS -n {{ controller_name }} -m {{ node_name }}'
+  args:
+    chdir: "{{certs_dest}}/ngc"
+
+- name: copy certs to remote nodes
+  copy:
+    src: "{{ certs_dest }}/ngc"
+    dest: "{{ certs_dest }}"
+  delegate_to: "{{ controller_ip }}"
+
 - name: build NEF component
-  make:
+  shell: source /etc/profile && make nef
   args:
     chdir: "{{ git_repo_ngc_dir }}"
-    target: nef
 
 - name: copy nef binaries to build folder
   copy:
@@ -50,5 +74,10 @@
       - /etc/openness/configs/ngc:/root/configs:rw
     published_ports:
       - 8060:8060
+    env:
+      no_proxy: "{{ proxy_os_noproxy}},{{ controller_name }},{{ node_name }}"
   when: docker_service_status.rc == 0
+
+- name: update container's /etc/hosts file
+  shell: 'docker exec -t nef-container /bin/bash -c "echo {{ controller_ip }} {{ controller_name }} | tee -a /etc/hosts"'
 

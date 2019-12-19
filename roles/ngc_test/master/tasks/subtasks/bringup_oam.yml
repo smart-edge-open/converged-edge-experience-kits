@@ -4,10 +4,9 @@
 ---
 
 - name: build OAM component
-  make:
+  shell: source /etc/profile && make oam
   args:
     chdir: "{{ git_repo_ngc_dir }}"
-    target: oam
 
 - name: copy oam binaries to build folder
   copy:
@@ -18,6 +17,9 @@
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/oam.json"
     dest: "{{ configs_dest }}/ngc"
+
+- name: update af config file
+  shell: jq '.UIEndpoint="http://{{ controller_ip }}:3020"' /etc/openness/configs/ngc/oam.json | sponge /etc/openness/configs/ngc/oam.json
 
 - name: build OAM docker image
   docker_image:

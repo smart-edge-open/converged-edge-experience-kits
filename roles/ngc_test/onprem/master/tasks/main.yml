@@ -6,6 +6,22 @@
 - name: include common vars
   include_vars: ../../common/defaults/main.yml
 
+- name: create directory for certs used by AF and NEF
+  file:
+    name: "{{ certs_dest }}/ngc"
+    state: directory
+
+- name: copy genCerts.json file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    dest: "{{ certs_dest }}/ngc"
+    mode: a+x
+
+- name: run script to generate cerificates
+  shell: './genCerts.sh -t DNS -n {{ controller_name }} -m {{ controller_name }}'
+  args:
+    chdir: "{{certs_dest}}/ngc"
+
 - include_tasks: subtasks/bringup_oam.yml
 
 - include_tasks: subtasks/bringup_nef.yml

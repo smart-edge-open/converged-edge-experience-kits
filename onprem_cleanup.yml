@@ -6,7 +6,7 @@
 - hosts: controller_group
   tasks:
   #- include_vars: ./roles/ngc_test/common/defaults/main.yml
-  #- include_vars: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
+  #- include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
 
   - include_vars: ./roles/docker/defaults/main.yml
   - include_tasks: ./roles/docker/tasks/prune.yml

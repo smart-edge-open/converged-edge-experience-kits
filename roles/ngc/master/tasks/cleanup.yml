@@ -26,3 +26,13 @@
   command: kubectl delete pod nef --namespace=ngc
   register: nef_pod_removed_status
   ignore_errors: yes
+
+- block:
+  - name: output hostname
+    command: hostname
+    register: hostname_output
+  - set_fact:
+      k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
+  - name: remove label on master node
+    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=false --overwrite
+

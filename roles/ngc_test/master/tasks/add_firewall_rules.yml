@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: Add firewall rules for AF port
+  shell: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 30050 -j ACCEPT
+
+- name: Add firewall rule for OAM port
+  shell: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 30070 -j ACCEPT
+
+- name: Reload firewall rules
+  shell: firewall-cmd --reload 
+  changed_when: false
+

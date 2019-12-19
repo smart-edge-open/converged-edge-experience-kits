@@ -4,10 +4,9 @@
 ---
 
 - name: build OAM component
-  make:
+  shell: source /etc/profile && make oam
   args:
-    chdir: "{{ git_repo_ngc_dir }}"
-    target: oam
+    chdir: "{{ git_repo_ngc_dir }}" 
 
 - name: copy oam binaries to build folder
   copy:
@@ -18,6 +17,9 @@
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/oam.json"
     dest: "{{ configs_dest }}/ngc"
+
+- name: update af config file
+  shell: jq '.UIEndpoint="http://{{ controller_ip }}:3020"' /etc/openness/configs/ngc/oam.json | sponge /etc/openness/configs/ngc/oam.json
 
 - name: check Docker service
   shell: systemctl status docker
@@ -33,7 +35,8 @@
     source: build
     build:
       path: "{{git_repo_ngc_build_dir}}/onprem/oam"
-      pull: no
+      pull: yes
+      use_config_proxy: yes
   when: docker_service_status.rc == 0
 
 - name: Run OAM container
@@ -41,6 +44,8 @@
     name: oam-container
     image: oam-image:1.0
     state: started
+    published_ports:
+      - 8070:8070
     volumes:
       - /etc/openness/certs/ngc:/etc/certs:rw
       - /etc/openness/configs/ngc:/root/configs:rw

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: Add firewall rule for NEF port
+  shell: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8060 -j ACCEPT
+  ignore_errors: yes
+
+- name: Reload firewall rules
+  shell: firewall-cmd --reload 
+  changed_when: false
+  ignore_errors: yes
+

@@ -6,3 +6,4 @@
 - name: remove NEF image
   command: docker image rm -f nef-image:1.0
   ignore_errors: yes
+

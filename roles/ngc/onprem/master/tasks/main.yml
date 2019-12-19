@@ -4,15 +4,16 @@
 ---
 
 - name: include common vars
-  include_vars: ../common/defaults/main.yml
+  include_vars: ../../common/defaults/main.yml
 
-  
+- name: prepare firewall
+  include_tasks: add_firewall_rules.yml  
+
 - name: build AF component
-  make:
+  shell: source /etc/profile && make af
   args:
-    chdir: "{{ git_repo_ngc_dir }}"
-    target: af
-  
+    chdir: "{{ git_repo_ngc_dir }}" 
+
 - name: copy AF binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/af"
@@ -22,6 +23,9 @@
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
     dest: "{{ configs_dest }}/ngc"
+
+- name: update af config file
+  shell: jq '.ServerConfig.Hostname="{{ controller_name }}" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" | .CliConfig.NEFHostname="{{ node_name }}"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
 
 - name: check Docker service
   shell: systemctl status docker
@@ -51,6 +55,11 @@
       - /etc/openness/configs/ngc:/root/configs:rw
     published_ports:
       - 8050:8050
-      - 8051-8051
+      - 8051:8051
+    env:
+      no_proxy: "{{ proxy_os_noproxy}},{{ node_name }},{{ controller_name}}"
   when: docker_service_status.rc == 0
-  
+
+- name: update container's /etc/hosts file
+  shell: 'docker exec -t af-container /bin/bash -c "echo {{ node_ip }} {{ node_name }} | tee -a /etc/hosts"'
+
