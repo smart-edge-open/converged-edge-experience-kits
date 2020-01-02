@@ -24,3 +24,14 @@
   get_url:
     url: "{{ qemu_download_url }}"
     dest: "{{ offline_path }}/archives/"
+
+- name: get ovs settings
+  include_vars: ../../../../ovs/defaults/main.yml
+
+- debug:
+    msg: "ovs will be downloaded from: {{ ovs_url }}"
+
+- name: download ovs package
+  get_url:
+    url: "{{ ovs_url }}"
+    dest: "{{ offline_path }}/archives/openvswitch-{{ ovs_version }}.tar.gz"

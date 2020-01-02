@@ -19,12 +19,17 @@
   get_url:
     url: "{{ ovs_url }}"
     dest: "{{ ovs_download_dest }}"
-  when: ovs_dest_dir.stat.exists == False
+  when: ovs_dest_dir.stat.exists == False and not offline_mode
 
 - name: create ovs installation directory
   file:
     path: "{{ ovs_install_location }}"
     state: directory
+
+- name: offline | select ovs archive
+  set_fact:
+    ovs_download_dest: "{{ offline_path }}/archives/openvswitch-{{ ovs_version }}.tar.gz"
+  when: offline_mode
 
 - name: extract ovs
   unarchive:
