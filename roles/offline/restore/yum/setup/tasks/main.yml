@@ -14,10 +14,10 @@
       path: /etc/yum.repos.d.backup
       state: directory
   - name: create backup of /etc/yum.repos.d
-    synchronize:
+    copy:
       src: /etc/yum.repos.d/
       dest: /etc/yum.repos.d.backup/
-    delegate_to: localhost
+      remote_src: yes
   when: yum_backup_dir.stat.exists == false
 
 - name: find openness .repo file
