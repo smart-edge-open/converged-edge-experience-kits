@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: copy git repository
+  copy:
+    src: "{{ epcforedge_git_repo.download_dir }}"
+    dest: "{{ offline_path }}"
+    remote_src: yes
+
+- name: remove .git directory
+  file:
+    state: absent
+    path: "{{ offline_path }}/epcforedge/.git"
+
+- name: remove .gitignore
+  file:
+    state: absent
+    path: "{{ offline_path }}/epcforedge/.gitignore"
+
+- name: pull centos:7.6.1810 image
+  shell: docker pull --quiet centos:7.6.1810
+
+- name: make sure dir for images exists
+  file:
+    path: "{{ offline_docker_images_path }}"
+    state: directory
+
+- name: save all images
+  shell: docker save "{{ item }}" > "{{ offline_docker_images_path }}/{{ item }}.tar"
+  with_items:
+    - af-image
+    - nef-image
+    - oam-image

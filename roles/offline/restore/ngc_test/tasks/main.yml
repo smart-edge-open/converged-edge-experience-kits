@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: copy git repository
+  copy:
+    src: "{{ offline_path }}/epcforedge"
+    dest: "{{ epcforedge_git_repo.download_dir | regex_replace('/epcforedge') }}"
+    remote_src: yes
+
+- name:  import images
+  shell: docker load < {{ offline_docker_images_path }}/{{ item }}.tar
+  with_items:
+    - af-image
+    - nef-image
+    - oam-image

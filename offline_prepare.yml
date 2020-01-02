@@ -17,6 +17,7 @@
     - role: offline/prepare/docker_images
     - role: offline/prepare/pip
     - role: offline/prepare/cnca
+    - role: offline/prepare/ngc_test
     - role: offline/prepare/package/ansible
     - role: offline/prepare/package/archive
 

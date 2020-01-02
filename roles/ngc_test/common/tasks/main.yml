@@ -16,9 +16,9 @@
   always:
   - name: remove .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+  when: not offline_mode
 
 - name: create directory for ngc configs
   file:
     name: "{{ configs_dest }}/ngc"
     state: directory
-
