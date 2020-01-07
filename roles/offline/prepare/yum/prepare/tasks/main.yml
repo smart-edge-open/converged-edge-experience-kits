@@ -3,6 +3,8 @@
 
 ---
 
+- include_vars: ../../../../../apache/defaults/main.yml
+
 - name: delete old offline repo folder
   file:
     path: "{{ offline_yum_path }}"
@@ -63,6 +65,7 @@
     - "{{ docker_packages.split(',') }}"
     - "mariadb"
     - "audit"
+    - "{{ apache_packages.split(',') }}"
 
 - name: download libvirt packages for offline use
   shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}

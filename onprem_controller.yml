@@ -31,5 +31,6 @@
     - role: offline/restore/ngc_test
       when: offline_mode
     #- role: ngc_test/onprem/master
+    - role: apache
     - role: offline/restore/yum/clean
       when: offline_mode
