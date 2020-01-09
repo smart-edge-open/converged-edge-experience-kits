@@ -14,11 +14,14 @@
   when: not offline_mode
 
 - name: Install correct tuned package - offline
-  yum:
-    name: "{{ item.split('/')[-1] | regex_replace('.rpm$') }}"
-    state: present
-    allow_downgrade: yes
-  with_items: "{{ os_kernel_rt_tuned_package_urls }}"
+  block:
+    - set_fact:
+        rpm_packages: "{{ os_kernel_rt_tuned_package_urls | map('regex_replace','^.*/(.*).rpm', '\\1') | list}}"
+    - name: Install packages from local repo
+      yum:
+        name: "{{ rpm_packages }}"
+        state: present
+        allow_downgrade: yes
   when: offline_mode
 
 - debug:
@@ -26,12 +29,9 @@
 
 - name: Install required RT kernel
   yum:
-    name: "{{ item }}"
+    name: "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }},kernel-rt-devel-{{ os_kernel_rt_package_version }}"
     state: present
     disable_excludes: all
-  with_items:
-    - "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
-    - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
 
 - name: Set RT kernel as default
   shell: grubby --set-default /boot/vmlinuz-{{ os_kernel_rt_package_version }}
