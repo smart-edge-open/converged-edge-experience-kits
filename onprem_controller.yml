@@ -29,7 +29,7 @@
     - role: openness/onprem/master
     - role: cnca/onprem
     - role: offline/restore/ngc_test
-      when: offline_mode
+      when: offline_mode and epcforedge_git_repo is defined
     #- role: ngc_test/onprem/master
     - role: apache
     - role: offline/restore/yum/clean
