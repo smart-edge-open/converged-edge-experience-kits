@@ -63,9 +63,10 @@
   with_items:
     - "{{ os_yum_base_packages.split(',') }}"
     - "{{ docker_packages.split(',') }}"
-    - "mariadb"
-    - "audit"
+    - mariadb
+    - audit
     - "{{ apache_packages.split(',') }}"
+    - ntp
 
 - name: download libvirt packages for offline use
   shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}

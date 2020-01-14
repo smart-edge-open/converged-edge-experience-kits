@@ -17,6 +17,8 @@
       when: offline_mode
     - role: offline/restore/yum/setup
       when: offline_mode
+    - role: time/ntp
+    - role: time/verify
     - role: os_setup
     - role: os_kernelrt
     - role: dpdk

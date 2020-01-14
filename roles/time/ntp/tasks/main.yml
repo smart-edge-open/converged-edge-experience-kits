@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: install ntp daemon
+  yum:
+    name: ntp
+    state: present
+    skip_broken: yes
+
+- name: set custom ntp servers
+  block:
+    - name: disable default servers
+      lineinfile:
+        dest: /etc/ntp.conf
+        regexp: "^server.*"
+        state: absent
+    - name: prepare values
+      set_fact:
+        servers_prepared: "{{ ntp_servers | map('regex_replace', '(.*)', 'server \\1 iburst') | join('\n') }}"
+    - name: add custom ntp server to ntp config
+      blockinfile:
+        path: /etc/ntp.conf
+        block: |
+          {{ servers_prepared }}
+        insertafter: "Please consider joining the pool.*"
+  when: (ntp_servers | length) > 0
+
+- name: update time, enable ntpd service and set hardware clock
+  block:
+    - name: temporarily stop ntpd service
+      systemd:
+        name: ntpd
+        enabled: yes
+        masked: no
+        state: stopped
+        daemon_reload: yes
+    - name: temporarily stop ntpd service
+      systemd:
+        name: ntpd
+        enabled: yes
+        masked: no
+        state: stopped
+        daemon_reload: yes
+    - name: kill all ntpd processes
+      command: killall ntpd
+      ignore_errors: yes
+    - name: update time
+      command: ntpd -gq
+    - name: enable and start ntpd service
+      systemd:
+        name: ntpd
+        enabled: yes
+        masked: no
+        state: restarted
+        daemon_reload: yes
+    - name: set hardware clock
+      command: hwclock -w

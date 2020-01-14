@@ -17,6 +17,8 @@
 
   roles:
     - role: os_setup
+    - role: time/ntp
+    - role: time/verify
     - role: grub
     - role: git_repo
     - role: golang

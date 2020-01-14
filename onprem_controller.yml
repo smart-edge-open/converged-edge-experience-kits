@@ -23,6 +23,7 @@
     - role: offline/restore/yum/setup
       when: offline_mode
     - role: os_setup
+    - role: time/ntp
     - role: docker
     - role: git_repo
     - role: golang
