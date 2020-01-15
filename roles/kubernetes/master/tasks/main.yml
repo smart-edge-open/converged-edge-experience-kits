@@ -10,9 +10,9 @@
 
 - name: initialize cluster
   block:
-  - name: Copy kubeadm init config
-    copy:
-      src: config.yaml
+  - name: create kubeadm init config from template
+    template:
+      src: config.yaml.j2
       dest: /tmp/config.yaml
       owner: root
       group: root
