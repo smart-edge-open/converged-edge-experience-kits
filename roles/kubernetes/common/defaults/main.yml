@@ -3,7 +3,7 @@
 
 ---
 
-kubernetes_version: "1.16.2"
+kubernetes_version: "1.17.0"
 
 kubernetes_packages: "kubelet-{{ kubernetes_version }},kubeadm-{{ kubernetes_version }},kubectl-{{ kubernetes_version }}"
 
