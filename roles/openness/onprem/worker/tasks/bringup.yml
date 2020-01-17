@@ -86,7 +86,9 @@
     content: "{{ verification_key }}"
     dest: "{{ git_repo_dest }}/verification_key.txt"
 
-# Restart containers
+- name: add the node to controller's db
+  include_tasks: subtasks/add_node_to_controller_db.yml
+
 - name: restart syslog_ng container
   docker_container:
     name: "{{ docker_syslog_container_name }}"
