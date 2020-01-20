@@ -7,3 +7,6 @@
   command: docker image rm -f nef-image:1.0
   ignore_errors: yes
 
+- name: remove firewall rules
+  include_tasks: rm_firewall_rules.yml
+

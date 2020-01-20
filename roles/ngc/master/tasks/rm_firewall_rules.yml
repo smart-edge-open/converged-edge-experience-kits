@@ -7,8 +7,8 @@
   shell: firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT 0 -p tcp --dport 30050 -j ACCEPT
   ignore_errors: yes
 
-- name: Remove firewall rule for OAM port
-  shell: firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT 0 -p tcp --dport 30070 -j ACCEPT
+- name: Remove firewall rule for AF notifications port
+  shell: firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT 0 -p tcp --dport 8051 -j ACCEPT
   ignore_errors: yes
 
 - name: Reload firewall rules

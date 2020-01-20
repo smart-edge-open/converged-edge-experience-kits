@@ -9,10 +9,19 @@
 - name: prepare firewall
   include_tasks: add_firewall_rules.yml  
 
-- name: build AF component
-  shell: source /etc/profile && make af
-  args:
-    chdir: "{{ git_repo_ngc_dir }}" 
+- name: generate and copy certificates
+  include_tasks: gen_certificates.yml
+
+- block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+  - name: build AF component
+    shell: source /etc/profile && make af
+    args:
+      chdir: "{{ git_repo_ngc_dir }}"
+  always:
+    - name: remove .openness_gitconfig
+      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: copy AF binaries to build folder
   copy:

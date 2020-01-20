@@ -3,12 +3,6 @@
 
 ---
 
-- name: include common vars
-  include_vars: ../../common/defaults/main.yml
-
-- name: prepare firewall
-  include_tasks: add_firewall_rules.yml
-
 - name: create directory for certs used by AF and NEF
   file:
     name: "{{ certs_dest }}/ngc"
@@ -21,13 +15,15 @@
     mode: a+x
 
 - name: run script to generate cerificates
-  shell: './genCerts.sh -t DNS -n {{ controller_name }} -m {{ controller_name }}'
+  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
   args:
     chdir: "{{certs_dest}}/ngc"
 
-- include_tasks: subtasks/bringup_oam.yml
-
-- include_tasks: subtasks/bringup_nef.yml
-
-- include_tasks: subtasks/bringup_af.yml
+- name: copy certs to remote nodes
+  copy:
+    src: "{{ item }}"
+    dest: "{{ certs_dest }}/ngc/"
+    remote_src: no
+  with_items: "{{ cert_files_to_copy }}"
+  delegate_to: "{{ node_ip }}"
 

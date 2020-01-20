@@ -36,3 +36,6 @@
   - name: remove label on master node
     command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=false --overwrite
 
+- name: remove firewall rules
+  include_tasks: rm_firewall_rules.yml
+

@@ -20,3 +20,10 @@ controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
 node_name: "{{ groups['edgenode_group'][0] }}"
 node_ip: "{{ hostvars[groups['edgenode_group'][0]]['ansible_host'] }}"
 
+cert_files_to_copy:
+- /etc/openness/certs/ngc/root-ca-cert.pem
+- /etc/openness/certs/ngc/root-ca-cert.srl
+- /etc/openness/certs/ngc/root-ca-key.pem
+- /etc/openness/certs/ngc/server-cert.pem
+- /etc/openness/certs/ngc/server-key.pem
+

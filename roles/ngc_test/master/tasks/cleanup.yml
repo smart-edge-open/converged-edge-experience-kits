@@ -2,51 +2,47 @@
 # Copyright © 2019 Intel Corporation
 
 ---
+- block:
+  - name: remove AF service
+    command: kubectl delete service afservice --namespace=ngc
+    ignore_errors: yes
+  - name: remove AF pod
+    command: kubectl delete pod af --namespace=ngc
+    register: af_pod_removed_status
+    ignore_errors: yes
+  - name: remove AF image
+    command: docker image rm -f af-image:1.0
+    ignore_errors: yes
+    when:
+      - af_pod_removed_status.rc == 0
 
-- name: remove AF service
-  command: kubectl delete service afservice --namespace=ngc
-  ignore_errors: yes
+- block:
+  - name: remove NEF service
+    command: kubectl delete service nefservice --namespace=ngc
+    ignore_errors: yes
+  - name: remove NEF pod
+    command: kubectl delete pod nef --namespace=ngc
+    register: nef_pod_removed_status
+    ignore_errors: yes
+  - name: remove NEF image
+    command: docker image rm -f nef-image:1.0
+    ignore_errors: yes
+    when:
+      - nef_pod_removed_status.rc == 0
 
-- name: remove AF pod
-  command: kubectl delete pod af --namespace=ngc
-  register: af_pod_removed_status
-  ignore_errors: yes
-
-- name: remove AF image
-  command: docker image rm -f af-image:1.0
-  ignore_errors: yes
-  when:
-    - af_pod_removed_status.rc == 0
-
-- name: remove NEF service
-  command: kubectl delete service nefservice --namespace=ngc
-  ignore_errors: yes
-
-- name: remove NEF pod
-  command: kubectl delete pod nef --namespace=ngc
-  register: nef_pod_removed_status
-  ignore_errors: yes
-
-- name: remove NEF image
-  command: docker image rm -f nef-image:1.0
-  ignore_errors: yes
-  when:
-    - nef_pod_removed_status.rc == 0
-
-- name: remove OAM service
-  command: kubectl delete service oamservice --namespace=ngc
-  ignore_errors: yes
-
-- name: remove OAM pod
-  command: kubectl delete pod oam --namespace=ngc
-  register: oam_pod_removed_status
-  ignore_errors: yes
-
-- name: remove OAM image
-  command: docker image rm -f oam-image:1.0
-  ignore_errors: yes
-  when:
-    - oam_pod_removed_status.rc == 0
+- block:
+  - name: remove OAM service
+    command: kubectl delete service oamservice --namespace=ngc
+    ignore_errors: yes
+  - name: remove OAM pod
+    command: kubectl delete pod oam --namespace=ngc
+    register: oam_pod_removed_status
+    ignore_errors: yes
+  - name: remove OAM image
+    command: docker image rm -f oam-image:1.0
+    ignore_errors: yes
+    when:
+      - oam_pod_removed_status.rc == 0
 
 - block:
   - name: output hostname
