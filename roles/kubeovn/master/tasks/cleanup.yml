@@ -16,7 +16,7 @@
       regexp: "kube-ovn/master"
       replace: "kube-ovn/{{ kubeovn_version }}"
   - name: execute kube-ovn cleanup script
-    shell: "timeout 120 {{ kubeovn_cleanup_dest }}"
+    command: "timeout 120 {{ kubeovn_cleanup_dest }}"
     ignore_errors: yes
   - name: remove ovs/ovn related files
     file:

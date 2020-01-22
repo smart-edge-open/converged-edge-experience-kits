@@ -5,8 +5,9 @@
 
 - include_tasks: subtasks/remove_containers.yml
 
-- name: Reseting ela confing
+- name: Reseting ela config
   shell: jq '.PCIBlacklist =  []'  {{ git_repo_dest }}/configs/ela.json | sponge {{ git_repo_dest }}/configs/ela.json
+  changed_when: true
 
 - include_tasks: subtasks/remove_additional_folder_structure.yml
 - include_tasks: subtasks/remove_certificates_and_keys.yml

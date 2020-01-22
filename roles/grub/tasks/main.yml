@@ -5,7 +5,9 @@
 
 - name: detect path to GRUB config
   block:
-  - set_fact:
+
+  - name: set grub file path
+    set_fact:
       grub_file_path: /boot/grub2/grub.cfg
 
   - name: check if host is using EFI
@@ -30,17 +32,19 @@
     line: 'GRUB_CMDLINE_LINUX_DEFAULT=" {{ additional_grub_params }} {{ default_grub_params }}"'
     insertafter: EOF
 
-- name: regenerate grub.cfg 
-  shell: "grub2-mkconfig -o {{ grub_file_path }}" 
+- name: regenerate grub.cfg
+  command: "grub2-mkconfig -o {{ grub_file_path }}"
+  changed_when: true
 
 - name: check current kernel CMDLINE for required params
-  shell: grep -q "{{ additional_grub_params }} {{ default_grub_params }}" /proc/cmdline
+  command: grep -q "{{ additional_grub_params }} {{ default_grub_params }}" /proc/cmdline
   register: cmdline_grep
   ignore_errors: yes
+  changed_when: false
 
 # Only applied together with os_kernelrt role
 - name: Apply realtime tuned profile
-  shell: tuned-adm profile realtime
+  command: tuned-adm profile realtime
   when: tuned_rt|default(False) == True
 
 - name: reboot the machine to apply new kernel params

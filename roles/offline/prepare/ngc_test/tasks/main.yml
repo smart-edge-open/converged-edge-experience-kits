@@ -20,7 +20,8 @@
     path: "{{ offline_path }}/epcforedge/.gitignore"
 
 - name: pull centos:7.6.1810 image
-  shell: docker pull --quiet centos:7.6.1810
+  command: docker pull --quiet centos:7.6.1810
+  changed_when: true
 
 - name: make sure dir for images exists
   file:
@@ -33,3 +34,4 @@
     - af-image
     - nef-image
     - oam-image
+  changed_when: true

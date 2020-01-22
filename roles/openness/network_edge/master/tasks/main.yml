@@ -14,7 +14,7 @@
       timeout: 600
 
   - name: add local-ovs-phy port to local switch
-    shell: ovn-nbctl --may-exist lsp-add local local-ovs-phy
+    command: ovn-nbctl --may-exist lsp-add local local-ovs-phy
     register: result
     until: not result.failed
     retries: 20
@@ -38,11 +38,11 @@
 - name: create openness namespace if needed
   block:
   - name: check if openness namespace exists
-    shell: kubectl get ns openness
+    command: kubectl get ns openness
     ignore_errors: yes
     register: get_ns_openness
   - name: create openness namespace
-    shell: kubectl create namespace openness
+    command: kubectl create namespace openness
     when: get_ns_openness.rc == 1
 
 - name: root CA creation
@@ -52,12 +52,12 @@
       name: "{{ certs_dest }}/CA"
       state: directory
   - name: create root CA
-    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh openness {{ certs_dest }}/CA"
+    command: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh openness {{ certs_dest }}/CA"
 
 - name: create root CA secret
   block:
   - name: check if root CA secret exists
-    shell: kubectl get secret root-ca --namespace=openness
+    command: kubectl get secret root-ca --namespace=openness
     ignore_errors: yes
     register: get_secret_rootca
   - name: create secret with root CA
@@ -71,7 +71,7 @@
 - name: create certificate generator secret
   block:
   - name: check if certificate generator secret exists
-    shell: kubectl get secret certgen --namespace=openness
+    command: kubectl get secret certgen --namespace=openness
     ignore_errors: yes
     register: get_secret_certgen
   - name: create secret with certificate generator
@@ -88,7 +88,7 @@
 - name: create EAA tls secret
   block:
   - name: check if EAA tls secret exists
-    shell: kubectl get secret eaa-tls --namespace=openness
+    command: kubectl get secret eaa-tls --namespace=openness
     ignore_errors: yes
     register: get_secret_eaa
   - name: create secret with EAA certs
@@ -104,7 +104,7 @@
 - name: create syslog configmap
   block:
   - name: check if syslog configmap exists
-    shell: kubectl get configmap syslog-conf --namespace=openness
+    command: kubectl get configmap syslog-conf --namespace=openness
     ignore_errors: yes
     register: get_configmap_syslog
   - name: create configmap with syslog configs
@@ -118,6 +118,7 @@
 - name: apply openness definitions
   command: kubectl apply -f {{ item }}
   with_items: "{{ openness_yamls }}"
+  changed_when: true
 
 - name: copy logrotate config
   copy:

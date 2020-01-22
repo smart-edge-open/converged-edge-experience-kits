@@ -34,19 +34,19 @@
 - name: pull, build & save controller images
   block:
     - name: build ui image
-      shell: docker-compose build ui
+      command: docker-compose build ui
       args:
         chdir: "{{ git_repo_dest }}"
       register: build_ui_output
 
     - name: build cups-ui image
-      shell: docker-compose build cups-ui
+      command: docker-compose build cups-ui
       args:
         chdir: "{{ git_repo_dest }}"
       register: build_cups_output
 
     - name: build cnca-ui image
-      shell: docker-compose build cnca-ui
+      command: docker-compose build cnca-ui
       args:
         chdir: "{{ git_repo_dest }}"
       register: build_cnca_output
@@ -58,13 +58,13 @@
       register: build_landing_output
 
     - name: build cce image
-      shell: docker-compose build cce
+      command: docker-compose build cce
       args:
         chdir: "{{ git_repo_dest }}"
       register: build_controller_output
 
     - name: pull mysql image
-      shell: docker-compose pull --quiet mysql
+      command: docker-compose pull --quiet mysql
       args:
         chdir: "{{ git_repo_dest }}"
 

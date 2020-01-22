@@ -5,6 +5,7 @@
 
 - name: Disable SWAP (current session) (1/2)
   command: swapoff -a
+  changed_when: true
 
 - name: Disable SWAP (in /etc/fstab) (2/2)
   replace:

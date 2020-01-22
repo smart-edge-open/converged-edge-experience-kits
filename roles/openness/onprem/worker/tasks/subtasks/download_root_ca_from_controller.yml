@@ -6,7 +6,7 @@
 - name: download rootCA from controller
   block:
     - name: extract controller rootCA
-      shell: docker cp edgecontroller_cce_1:/artifacts/certificates/ca/cert.pem /tmp/controller-root-ca.pem
+      command: docker cp edgecontroller_cce_1:/artifacts/certificates/ca/cert.pem /tmp/controller-root-ca.pem
       delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
 
     - name: get rootCA content
@@ -24,7 +24,7 @@
         dest: /etc/pki/tls/certs/controller-root-ca.pem
 
     - name: update CA database on node
-      shell: update-ca-trust
+      command: update-ca-trust
 
   always:
     - name: remove temporary cert file

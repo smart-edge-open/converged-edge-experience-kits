@@ -15,7 +15,8 @@
 
 - name: Install correct tuned package - offline
   block:
-    - set_fact:
+    - name: obtain a list of tuned packaged
+      set_fact:
         rpm_packages: "{{ os_kernel_rt_tuned_package_urls | map('regex_replace','^.*/(.*).rpm', '\\1') | list}}"
     - name: Install packages from local repo
       yum:
@@ -34,7 +35,8 @@
     disable_excludes: all
 
 - name: Set RT kernel as default
-  shell: grubby --set-default /boot/vmlinuz-{{ os_kernel_rt_package_version }}
+  command: grubby --set-default /boot/vmlinuz-{{ os_kernel_rt_package_version }}
+  changed_when: true
 
 - name: Copy tuned realtime profile config
   copy:

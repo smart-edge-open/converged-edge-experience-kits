@@ -9,3 +9,4 @@
     ip tuntap add mode tap edgedns-tap &&
     ip a a 192.168.122.128/24 dev edgedns-tap &&
     brctl addif virbr0 edgedns-tap
+  changed_when: true

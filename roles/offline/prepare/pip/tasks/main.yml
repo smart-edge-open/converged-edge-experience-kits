@@ -9,4 +9,5 @@
     state: directory
 
 - name: pip download docker-compose
-  shell: pip download {{ docker_compose_package }} --dest {{ offline_pip_path }}
+  command: pip download {{ docker_compose_package }} --dest {{ offline_pip_path }}
+  changed_when: true

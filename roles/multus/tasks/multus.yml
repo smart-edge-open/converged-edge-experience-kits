@@ -28,6 +28,7 @@
   shell: kubectl kustomize . | kubectl apply -f -
   args:
     chdir: "{{ tmp_dir.path }}"
+  changed_when: true
 
 - name: wait for Multus to start
   shell: kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
@@ -35,6 +36,7 @@
   retries: 30
   delay: 10
   until: multus_started.rc == 0
+  changed_when: false
 
 - name: remove temp directory
   file:

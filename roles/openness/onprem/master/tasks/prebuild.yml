@@ -22,5 +22,5 @@
   - 80/tcp
 
 - name: reload firewall rules
-  shell: firewall-cmd --reload
+  command: firewall-cmd --reload
   changed_when: false

@@ -2,8 +2,8 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
-
-- set_fact:
+- name: offline | set gopath
+  set_fact:
     gopath: "{{ offline_path }}/golang_modules/cnca"
   when: offline_mode
 
@@ -11,8 +11,10 @@
   shell: source /etc/profile && GOPATH="{{ gopath }}" go build -o "{{ cnca_plugin_name }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"
+  changed_when: true
 
 - name: install CNCA plugin
-  shell: mv "{{ cnca_plugin_name }}" "{{ cnca_plugin_dest }}"
+  command: mv "{{ cnca_plugin_name }}" "{{ cnca_plugin_dest }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"
+  changed_when: true

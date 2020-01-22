@@ -7,8 +7,10 @@
   shell: source /etc/profile && go build -o "{{ cnca_plugin_name }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"
+  changed_when: true
 
 - name: Install kube-cnca plugin
-  shell: mv "{{ cnca_plugin_name }}" "{{ cnca_plugin_dest }}"
+  command: mv "{{ cnca_plugin_name }}" "{{ cnca_plugin_dest }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"
+  changed_when: true

@@ -13,7 +13,7 @@
   file:
     state: absent
     path: "{{ offline_path }}/{{ item }}/.git"
-  with_items: 
+  with_items:
     - "edgecontroller"
     - "edgenode"
 
@@ -21,6 +21,6 @@
   file:
     state: absent
     path: "{{ offline_path }}/{{ item }}/.gitignore"
-  with_items: 
+  with_items:
     - "edgecontroller"
     - "edgenode"

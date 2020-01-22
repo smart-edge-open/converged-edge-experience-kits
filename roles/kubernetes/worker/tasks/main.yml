@@ -11,7 +11,9 @@
   - name: hostname
     command: hostname
     register: hostname_output
-  - set_fact:
+
+  - name: set k8s worker node name
+    set_fact:
       k8s_worker_node_name: "{{ hostname_output.stdout |lower }}"
 
 - name: check if already in cluster
@@ -19,6 +21,7 @@
   register: get_node
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
+  changed_when: false
 
 - name: join the cluster
   block:
@@ -34,9 +37,10 @@
     register: join_command
     delegate_to: "{{ groups['controller_group'][0] }}"
   - name: join the cluster
-    shell: "{{ join_command.stdout }} --v=2"
+    command: "{{ join_command.stdout }} --v=2"
   when: get_node.rc == 1
 
 - name: label node as a worker
   command: kubectl label node {{ k8s_worker_node_name }} node-role.kubernetes.io/worker=worker --overwrite
   delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true

@@ -10,12 +10,14 @@
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname | upper }} at {{ ansible_host }}"
-  - fail:
+  - name: Check if only one controller is enabled
+    fail:
       msg: "Only one controller is supported"
     when:
     - groups['controller_group'] is defined
     - (groups['controller_group']|length>1)
-  - include_tasks: ./tasks/precheck_hostname.yml
+  - name: Hostname precheck
+    include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
     - role: offline/restore/transfer

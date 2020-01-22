@@ -11,14 +11,19 @@
   when: offline_mode
 
 - name: get current kernel
-  shell: uname -r
+  command: uname -r
   register: unamer
+  changed_when: false
 
 - name: install kernel-devel for non-RT environment
   block:
-  - set_fact:
+
+  - name: set kernel-devel download url
+    set_fact:
       kernel_devel_to_install: "{{ non_rt_kernel_devel_download_url }}"
-  - set_fact:
+
+  - name: set kernel-devel version to 3.10.0-1062
+    set_fact:
       kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
     when: '"3.10.0-1062" in unamer.stdout'
 
@@ -67,8 +72,9 @@
   when: igb_uio_module.stat.exists == False
 
 - name: detect amount of cores
-  shell: nproc
+  command: nproc
   register: nproc_out
+  changed_when: false
 
 - name: compile
   make:
@@ -101,6 +107,7 @@
 
 - name: depmod
   command: depmod -a
+  changed_when: true
 
 - name: copy list of modules to load at boot
   copy:

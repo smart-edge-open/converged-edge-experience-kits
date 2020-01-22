@@ -65,7 +65,7 @@
     when: docker_history_ui.rc == 0
 
   - name: offline | finish building UI images
-    shell: docker-compose build ui cups-ui cnca-ui landing-ui
+    command: docker-compose build ui cups-ui cnca-ui landing-ui
     args:
       chdir: "{{ git_repo_dest }}"
   when: offline_mode

@@ -9,7 +9,7 @@
     state: touch
     owner: root
     group: root
-    mode: 600
+    mode: 0600
   with_items:
     - "/var/lib/appliance/certs/key.pem"
     - "/var/lib/appliance/certs/cert.pem"

@@ -50,3 +50,4 @@
   command: yum clean metadata
   args:
     warn: false
+  changed_when: true

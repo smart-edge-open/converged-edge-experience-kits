@@ -17,6 +17,7 @@
   command: yum clean all
   args:
     warn: false
+  changed_when: true
 
 - name: install Docker CE
   yum:
@@ -61,7 +62,7 @@
 - name:  Find docker audit files
   stat:
     path: "{{ item }}"
-  with_items: " {{ docker_audit_files }} "
+  with_items: "{{ docker_audit_files }}"
   register: stats
 
 - name: Add audit rules for docker
@@ -73,4 +74,5 @@
   with_items: "{{ stats.results }}"
 
 - name: Restart auditd
-  shell: service auditd restart
+  command: service auditd restart
+  changed_when: true

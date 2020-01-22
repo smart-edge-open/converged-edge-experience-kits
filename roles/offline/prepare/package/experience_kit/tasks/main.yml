@@ -79,7 +79,7 @@
     path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
     regexp: 'proxy_yum_url:.*$'
     line: 'proxy_yum_url: ""'
-  
+
 - name: clear http proxy
   lineinfile:
     path: "{{ offline_experience_kits_path }}/group_vars/all.yml"

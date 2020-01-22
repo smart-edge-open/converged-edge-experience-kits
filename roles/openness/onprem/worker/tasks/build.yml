@@ -46,7 +46,8 @@
       content: |
         { "proxies": { "default": { "noProxy": "" } } }
     when: docker_history.rc == 0
-  - set_fact:
+  - name: offline | set gopath
+    set_fact:
       gopath: "{{ offline_path }}/golang_modules/main"
   when: offline_mode
 

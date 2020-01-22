@@ -11,7 +11,7 @@
   when: offline_mode
 
 - name: remove qemu-img if installed
-  shell: rpm -e --nodeps qemu-img
+  command: rpm -e --nodeps qemu-img
   ignore_errors: true
   changed_when: false
   args:
@@ -52,10 +52,12 @@
   command: ./configure --target-list={{ qemu_targets }} --enable-kvm
   args:
     chdir: "{{ qemu_install_dir }}"
+  changed_when: true
 
 - name: detect amount of cores
-  shell: nproc
+  command: nproc
   register: nproc_out
+  changed_when: false
 
 - name: compile and install
   make:

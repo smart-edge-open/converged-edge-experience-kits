@@ -33,9 +33,11 @@
   shell: kubectl kustomize . | kubectl apply -f -
   args:
     chdir: "{{ tmp_dir.path }}"
+  changed_when: true
 
 - name: apply network policy
-  shell: kubectl apply -f {{ nfd_netpol }}
+  command: kubectl apply -f {{ nfd_netpol }}
+  changed_when: true
 
 - name: remove temp directory
   file:

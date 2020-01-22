@@ -10,7 +10,7 @@
       name: "{{ certs_dest }}/client/interfaceservice"
       state: directory
   - name: create Interface Service client certificate
-    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh interfaceservice.openness {{ certs_dest }}/client/interfaceservice {{ certs_dest }}/CA"
+    command: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh interfaceservice.openness {{ certs_dest }}/client/interfaceservice {{ certs_dest }}/CA"
   - name: create symbolic link to root's cert
     file:
       src: "{{ certs_dest }}/CA/cert.pem"
@@ -24,7 +24,7 @@
       name: "{{ certs_dest }}/client/edgedns"
       state: directory
   - name: create EdgeDNS client certificate
-    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh edgedns.openness {{ certs_dest }}/client/edgedns {{ certs_dest }}/CA"
+    command: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh edgedns.openness {{ certs_dest }}/client/edgedns {{ certs_dest }}/CA"
   - name: create symbolic link to root's cert
     file:
       src: "{{ certs_dest }}/CA/cert.pem"
@@ -38,11 +38,11 @@
       name: "{{ certs_dest }}/eaa/CA"
       state: directory
   - name: create EAA root CA certificate
-    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh ca.eaa.openness {{ certs_dest }}/eaa/CA"
+    command: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh ca.eaa.openness {{ certs_dest }}/eaa/CA"
   - name: create symbolic link to root's cert
     file:
       src: "{{ certs_dest }}/eaa/CA/cert.pem"
       dest: "{{ certs_dest }}/eaa/root.pem"
-      state: link 
+      state: link
   - name: create EAA certificate signed by EAA root CA certificate
-    shell: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh eaa.openness {{ certs_dest }}/eaa {{ certs_dest }}/eaa/CA"
+    command: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh eaa.openness {{ certs_dest }}/eaa {{ certs_dest }}/eaa/CA"

@@ -8,6 +8,7 @@
   args:
     warn: false
   register: rpm_grep
+  changed_when: false
 
 - name: (re)install ovs if needed
   block:
@@ -19,7 +20,7 @@
     yum:
       name: "{{ ovs_dependencies_yum }}"
   - name: installing OVS tool
-    shell: yum install -y {{ ovs_package_url }}
+    command: yum install -y {{ ovs_package_url }}
     args:
       warn: false
   when: "'1' not in rpm_grep.stdout"
@@ -50,3 +51,4 @@
   until: not result.failed
   retries: 5
   delay: 60
+  changed_when: true

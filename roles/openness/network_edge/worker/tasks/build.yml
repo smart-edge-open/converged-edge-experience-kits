@@ -8,7 +8,9 @@
   - name: hostname
     command: hostname
     register: hostname_output
-  - set_fact:
+
+  - name: set k8s worker node name
+    set_fact:
       k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: create temporary custom .openness_gitconfig
@@ -29,3 +31,4 @@
   shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_node_name }} -o=NAME | grep -v syslog)
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
+  changed_when: true

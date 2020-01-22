@@ -7,6 +7,7 @@
   command: kubectl cluster-info
   ignore_errors: yes
   register: cluster_info
+  changed_when: false
 
 - name: initialize cluster
   block:
@@ -44,8 +45,11 @@
   - name: hostname
     command: hostname
     register: hostname_output
-  - set_fact:
+
+  - name: set k8s master node name
+    set_fact:
       k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: label host as kube-ovn master
   command: "kubectl label node {{ k8s_master_node_name }} kube-ovn/role=master --overwrite"
+  changed_when: true

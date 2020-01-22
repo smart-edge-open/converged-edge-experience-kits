@@ -2,8 +2,8 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
-
-- include_vars: ../../../../../apache/defaults/main.yml
+- name: load apache variables
+  include_vars: ../../../../../apache/defaults/main.yml
 
 - name: delete old offline repo folder
   file:
@@ -43,7 +43,7 @@
 
 - block:
   - name: download RT kernel
-    shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+    command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
     with_items:
       - "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
       - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
@@ -59,7 +59,7 @@
   when: offline_download_kernel == true
 
 - name: download base packages for offline use
-  shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+  command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
   with_items:
     - "{{ os_yum_base_packages.split(',') }}"
     - "{{ docker_packages.split(',') }}"
@@ -67,15 +67,17 @@
     - audit
     - "{{ apache_packages.split(',') }}"
     - ntp
+  changed_when: true
 
 - name: download libvirt packages for offline use
-  shell: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+  command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
   with_items:
     - "{{ libvirt_packages.split(',') }}"
   when: libvirt_packages is defined
 
 - name: create offline repo
-  shell: createrepo {{ offline_yum_path }}
+  command: createrepo {{ offline_yum_path }}
+  changed_when: true
 
 - name: create yum repository file
   template:
