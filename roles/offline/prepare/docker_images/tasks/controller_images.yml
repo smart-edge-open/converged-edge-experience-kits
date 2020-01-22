@@ -18,6 +18,7 @@
     - { image: "cce-ui", dir: "controller" }
     - { image: "cups-ui", dir: "cups" }
     - { image: "cnca-ui", dir: "cnca" }
+    - { image: "landing-ui", dir: "landing" }
 
 - name: change docker-compose.yml images names
   lineinfile:
@@ -28,6 +29,7 @@
     - { original: "ui", new: "cce-ui-deps-image" }
     - { original: "cups", new: "cups-ui-deps-image" }
     - { original: "cnca", new: "cnca-ui-deps-image" }
+    - { original: "landing", new: "landing-ui-deps-image" }
 
 - name: pull, build & save controller images
   block:
@@ -48,6 +50,12 @@
       args:
         chdir: "{{ git_repo_dest }}"
       register: build_cnca_output
+
+    - name: build landing-ui image
+      shell: docker-compose build landing-ui
+      args:
+        chdir: "{{ git_repo_dest }}"
+      register: build_landing_output
 
     - name: build cce image
       shell: docker-compose build cce
@@ -73,6 +81,7 @@
       - { image: "cce-ui-deps-image", filename: "ui-deps-image.tar" }
       - { image: "cups-ui-deps-image", filename: "cups-deps-image.tar" }
       - { image: "cnca-ui-deps-image", filename: "cnca-deps-image.tar" }
+      - { image: "landing-ui-deps-image", filename: "landing-deps-image.tar" }
       - { image: "node:lts-alpine", filename: "node.tar" }
   always:
   - name: remove .env
@@ -88,6 +97,7 @@
     - cce-ui
     - cups-ui
     - cnca-ui
+    - landing-ui
   - name: restore docker-compose.yml images names
     lineinfile:
       path: "{{ git_repo_dest }}/docker-compose.yml"
@@ -97,3 +107,4 @@
       - { original: "ui", new: "cce-ui-deps-image" }
       - { original: "cups", new: "cups-ui-deps-image" }
       - { original: "cnca", new: "cnca-ui-deps-image" }
+      - { original: "landing", new: "landing-ui-deps-image" }
