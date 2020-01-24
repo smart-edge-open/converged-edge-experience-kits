@@ -11,12 +11,15 @@
     state: absent
   when: offline_always_redownload_packages == true
 
-- name: get os_kernelrt settings
-  include_vars: ../../../../os_kernelrt/defaults/main.yml
+- name: get custom_kernel settings
+  include_vars: ../../../../machine_setup/custom_kernel/defaults/main.yml
 
-- name: add kernel RT repository
-  include_tasks: ../../../../os_kernelrt/tasks/setup_repository.yml
-  when: offline_download_kernel == true
+- name: get tuned settings
+  include_vars: ../../../../machine_setup/configure_tuned/defaults/main.yml
+
+- name: add custom kernel repository
+  include_tasks: ../../../../machine_setup/custom_kernel/tasks/setup_repository.yml
+  when: offline_download_kernel
 
 - name: create offline repo folder
   file:
@@ -41,22 +44,27 @@
     regexp: '^exclude'
     replace: '#exclude'
 
-- block:
-  - name: download RT kernel
+- name: fetch machine setup related packages for offline use
+  block:
+  - name: download custom kernel
     command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
     with_items:
-      - "{{ os_kernel_rt_package_name }}-{{ os_kernel_rt_package_version }}"
-      - "kernel-rt-devel-{{ os_kernel_rt_package_version }}"
+      - "{{ kernel_package }}-{{ kernel_version }}"
+      - "{{ kernel_devel_package }}-{{ kernel_version }}"
+      - "{{ kernel_dependencies_packages }}"
 
-  - debug:
-      msg: "Kernel RT tuned packages will be downloaded from: {{ os_kernel_rt_tuned_package_urls }}"
-
-  - name: download kernel RT tuned packages for offline use
+  - name: download kernel deps URL packages
     get_url:
       url: "{{ item }}"
       dest: "{{ offline_yum_path }}"
-    with_items: "{{ os_kernel_rt_tuned_package_urls }}"
-  when: offline_download_kernel == true
+    with_items: "{{ kernel_dependencies_urls }}"
+
+  - name: download tuned package
+    get_url:
+      url: "{{ item }}"
+      dest: "{{ offline_yum_path }}"
+    with_items: "{{ tuned_packages }}"
+  when: offline_download_kernel
 
 - name: download base packages for offline use
   command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}

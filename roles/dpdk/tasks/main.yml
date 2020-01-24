@@ -15,25 +15,29 @@
   register: unamer
   changed_when: false
 
-- name: install kernel-devel for non-RT environment
+- name: install kernel-devel package
   block:
-
-  - name: set kernel-devel download url
-    set_fact:
-      kernel_devel_to_install: "{{ non_rt_kernel_devel_download_url }}"
-
-  - name: set kernel-devel version to 3.10.0-1062
+  - name: use kernel-devel-uname-r
     set_fact:
       kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
-    when: '"3.10.0-1062" in unamer.stdout'
+  - name: use kernel-devel from provided URL/package
+    set_fact:
+      kernel_devel_to_install: "{{ dpdk_kernel_devel }}"
+    when:
+    - dpdk_kernel_devel is defined
+    - dpdk_kernel_devel|length > 0
 
-  - name: install kernel-devel for non-RT environment
+  - name: install kernel-devel package
     yum:
       name: "{{ kernel_devel_to_install }}"
       state: present
       disable_excludes: all
       allow_downgrade: yes
-  when: os_kernel_rt_package_version is not defined
+  # install kernel-devel package if:
+  # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
+  # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
+  # OnPrem Offline does not support kernel customization so `custom_kernel` is enabled and `kernel_skip` is defined and false
+  when: (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
 
 - name: check if already installed
   stat:

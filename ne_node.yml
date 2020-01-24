@@ -9,6 +9,8 @@
   serial: 1
   vars:
     hugepage_amount: "500"
+    kernel_skip: true
+    tuned_skip: true
 
   pre_tasks:
   - debug:
@@ -16,10 +18,15 @@
   - include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
-    - role: os_setup
+    - role: machine_setup/os_setup
     - role: time/ntp
     - role: time/verify
-    - role: grub
+
+    - role: machine_setup/custom_kernel
+    - role: machine_setup/grub
+    - role: machine_setup/configure_tuned
+    - role: machine_setup/conditional_reboot
+
     - role: git_repo
     - role: golang
     - role: docker

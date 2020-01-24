@@ -1,0 +1,71 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- name: setup repository
+  include_tasks: setup_repository.yml
+
+- name: install kernel dependencies - tuned
+  yum:
+    name: "{{ tuned_packages | join(',') }}"
+    state: present
+    allow_downgrade: yes
+  when: not offline_mode
+
+- name: offline | install kernel dependencies - tuned
+  block:
+  - name: offline | cut tuned packages to get package names
+    set_fact:
+      tuned_rpm_packages: "{{ tuned_packages | map('regex_replace','^.*/(.*).rpm', '\\1') | list }}"
+  - name: offline | install packages from local repository
+    yum:
+      name: "{{ tuned_rpm_packages }}"
+      state: present
+      allow_downgrade: yes
+  when: offline_mode
+
+- name: install kernel dependencies - URLs
+  yum:
+    name: "{{ kernel_dependencies_urls | join(',') }}"
+    state: present
+    allow_downgrade: yes
+  when: not offline_mode
+
+- name: offline | install kernel dependencies - URLs
+  block:
+  - name: offline | cut URLs to get package names
+    set_fact:
+      rpm_packages: "{{ kernel_dependencies_urls | map('regex_replace','^.*/(.*).rpm', '\\1') | list }}"
+  - name: offline | install packages from local repository
+    yum:
+      name: "{{ rpm_packages }}"
+      state: present
+      allow_downgrade: yes
+  when: offline_mode
+
+- name: install kernel dependencies - packages
+  yum:
+    name: "{{ kernel_dependencies_packages | join(',') }}"
+    state: present
+    allow_downgrade: yes
+
+- name: install kernel and kernel devel
+  yum:
+    name: "{{ kernel_package }}-{{ kernel_version }},{{ kernel_devel_package }}-{{ kernel_version }}"
+    state: present
+    disable_excludes: all
+
+- name: set kernel as default
+  shell: grubby --set-default /boot/vmlinuz-{{ kernel_version }}
+
+- name: get current CMDLINE
+  command: cat /proc/cmdline
+  register: current_cmdline
+  changed_when: false
+
+# role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
+- name: request reboot (will be performed by `conditional_reboot` role)
+  set_fact:
+    perform_reboot: "{{ perform_reboot|default([]) + [ 'kernel' ] }}"
+  when: kernel_version not in current_cmdline.stdout

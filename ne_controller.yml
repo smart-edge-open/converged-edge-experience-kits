@@ -19,9 +19,10 @@
   - include_tasks: ./tasks/precheck_hostname.yml
 
   roles:
-    - role: os_setup
+    - role: machine_setup/os_setup
     - role: time/ntp
-    - role: grub
+    - role: machine_setup/grub
+    - role: machine_setup/conditional_reboot
     - role: git_repo
     - role: golang
     - role: docker
