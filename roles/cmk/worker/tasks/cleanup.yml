@@ -7,3 +7,8 @@
   file:
     path: "{{ cmk_download_dir }}"
     state: absent
+
+- name: remove CPU Manager config dir
+  file:
+    path: /etc/cmk
+    state: absent

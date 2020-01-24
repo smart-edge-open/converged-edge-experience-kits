@@ -14,3 +14,10 @@
   shell: source /etc/profile && make
   args:
     chdir: "{{ cmk_download_dir }}"
+
+- name: create CMK cluster-init pod, ns, svc and rbac rules
+  command: "kubectl apply -f /tmp/cmk.yml"
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true
+  changed_when: true
+

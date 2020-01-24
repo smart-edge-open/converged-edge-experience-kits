@@ -3,7 +3,7 @@
 
 ---
 
-cmk_commit: "e3df769521558cff7734c568ac5d3882d4f41af9"
+cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
 cmk_base_url: "https://raw.githubusercontent.com/intel/CPU-Manager-for-Kubernetes/{{ cmk_commit }}/resources"
 
 cmk_yamls:

@@ -26,7 +26,7 @@
     dest: "{{ tmp_dir.path }}/rewrite_args.yml"
 
 - name: setup CMK
-  shell: kubectl kustomize . | kubectl apply -f -
+  shell: kubectl kustomize . > /tmp/cmk.yml
   args:
     chdir: "{{ tmp_dir.path }}"
 

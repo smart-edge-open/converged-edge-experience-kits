@@ -88,6 +88,12 @@
   tasks:
   # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
 
+  - name: load cmk variables
+    include_vars: ./roles/cmk/worker/defaults/main.yml
+
+  - name: cleanup cmk
+    include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
+
   - name: load network edge variables
     include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
 

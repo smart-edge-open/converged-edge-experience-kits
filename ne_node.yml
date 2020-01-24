@@ -6,7 +6,6 @@
 # Deploy EdgeNode on given host(s)
 
 - hosts: edgenode_group
-  serial: 1
   vars:
     hugepage_amount: "500"
     kernel_skip: true
