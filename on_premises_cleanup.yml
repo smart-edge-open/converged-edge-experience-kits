@@ -5,9 +5,11 @@
 
 - hosts: controller_group
   tasks:
-  #-  name: include ngc_test cleanup
-    #include_vars: ./roles/ngc_test/common/defaults/main.yml
-    #include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
+  # - name: include ngc_test variables
+  #   include_vars: ./roles/ngc_test/common/defaults/main.yml
+
+  # - name: cleanup ngc_test
+  #   include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
 
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml

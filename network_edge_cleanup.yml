@@ -10,11 +10,11 @@
   # - multus
   # - sriov/master
 
-  #- name: load ngc_test variables
-    #include_vars: ./roles/ngc_test/common/defaults/main.yml
+  # - name: load ngc_test variables
+  #   include_vars: ./roles/ngc_test/common/defaults/main.yml
 
-  #- name: cleanup ngc_test
-    #include_tasks: ./roles/ngc_test/master/tasks/cleanup.yml
+  # - name: cleanup ngc_test
+  #   include_tasks: ./roles/ngc_test/master/tasks/cleanup.yml
 
   - name: load sriov variables
     include_vars: ./roles/sriov/common/defaults/main.yml

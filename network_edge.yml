@@ -3,7 +3,7 @@
 
 ---
 
-# Deploy OpenNESS Controller on given host
+# Playbook for Network Edge deployment
 
 - hosts: controller_group
   vars:
@@ -20,7 +20,7 @@
 
   roles:
     - role: machine_setup/os_setup
-    - role: time/ntp
+    # - role: time/ntp
     - role: machine_setup/grub
     - role: machine_setup/conditional_reboot
     - role: git_repo
@@ -37,3 +37,34 @@
     # - role: biosfw/master
     # - role: sriov/master
     # - role: cmk/master
+
+
+- hosts: edgenode_group
+  vars:
+    hugepage_amount: "500"
+
+  pre_tasks:
+  - debug:
+      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
+  - include_tasks: ./tasks/precheck_hostname.yml
+
+  roles:
+    - role: machine_setup/os_setup
+    # - role: time/ntp
+    - role: time/verify
+
+    - role: machine_setup/custom_kernel
+    - role: machine_setup/grub
+    - role: machine_setup/configure_tuned
+    - role: machine_setup/conditional_reboot
+
+    - role: git_repo
+    - role: golang
+    - role: docker
+    # - role: opae_fpga/worker
+    # - role: sriov/worker
+    - role: kubernetes/worker
+    - role: kubeovn/worker
+    - role: openness/network_edge/worker
+    # - role: biosfw/worker
+    # - role: cmk/worker

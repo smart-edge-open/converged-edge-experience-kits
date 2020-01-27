@@ -5,7 +5,8 @@
 
 source scripts/ansible-precheck.sh
 source scripts/task_log_file.sh
+source scripts/parse_args.sh
 
 ansible-playbook -vv \
-    ./ne_controller.yml \
-    --inventory inventory.ini
+    ./on_premises.yml \
+    --inventory inventory.ini ${limit_param}
