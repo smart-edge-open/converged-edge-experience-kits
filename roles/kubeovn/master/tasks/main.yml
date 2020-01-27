@@ -41,10 +41,42 @@
   - 6642/tcp
   - 6081/udp
 
-- name: apply kube-ovn
-  command: "kubectl apply -f {{ item }}"
+- name: create temp dir
+  tempfile:
+    state: directory
+    suffix: -kube-ovn
+  register: tmp_dir
+
+- name: download kube-ovn yaml files
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ tmp_dir.path }}"
   with_items: "{{ kubeovn_yamls }}"
+
+- name: remove kube-ovn-pinger from kube-ovn.yaml
+  shell: |
+    # Split kube-ovn.yaml into separate resource files(one YAML document per file)
+    csplit -z -f kube-ovn -b "%04d.yaml" kube-ovn.yaml '/^---$/' '{*}'
+    # Remove all files that contain 'kube-ovn-pinger'(including kube-ovn.yaml)
+    grep -l 'kube-ovn-pinger' kube-ovn* | xargs rm
+    # Merge files
+    cat kube-ovn000* > kube-ovn.yaml
+  args:
+    chdir: "{{ tmp_dir.path }}"
   changed_when: true
+
+- name: apply kube-ovn
+  command: "kubectl apply -f {{ item.split('/')[-1] }}"
+  with_items: "{{ kubeovn_yamls }}"
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  changed_when: true
+
+- name: remove temp directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
 
 - name: Wait till k8s master starts
   shell: kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
