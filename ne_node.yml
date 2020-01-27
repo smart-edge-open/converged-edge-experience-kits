@@ -8,8 +8,6 @@
 - hosts: edgenode_group
   vars:
     hugepage_amount: "500"
-    kernel_skip: true
-    tuned_skip: true
 
   pre_tasks:
   - debug:
