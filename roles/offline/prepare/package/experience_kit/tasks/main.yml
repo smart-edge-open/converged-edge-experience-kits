@@ -106,12 +106,9 @@
 
 - name: disable ntp role
   replace:
-    path: "{{ offline_experience_kits_path }}/{{ item }}"
+    path: "{{ offline_experience_kits_path }}/on_premises.yml"
     regexp: '^( *)(\- role: time/ntp)'
     replace: '\1# \2'
-  with_items:
-    - onprem_controller.yml
-    - onprem_node.yml
 
 - name: remove .git directory
   file:
