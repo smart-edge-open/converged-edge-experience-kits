@@ -41,7 +41,7 @@
 
 - name: set up proxy
   include_tasks: proxy.yml
-  when: proxy_os_enable
+  when: proxy_os_enable|bool
 
 - name: set cgroups driver to systemd
   block:

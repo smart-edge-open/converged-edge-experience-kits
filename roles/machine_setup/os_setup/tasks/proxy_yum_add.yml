@@ -7,4 +7,4 @@
   lineinfile:
     path: /etc/yum.conf
     line: proxy={{ proxy_yum_url }}
-  when: proxy_yum_url|bool
+  when: proxy_yum_url|length > 0

@@ -10,4 +10,4 @@
     state: absent
   when:
     - os_yum_exclude_rpm_packages is defined
-    - os_yum_exclude_rpm_packages|bool
+    - os_yum_exclude_rpm_packages|length > 0

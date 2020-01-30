@@ -7,7 +7,7 @@
   block:
     - debug:
         msg: "Using git token for repository checkout"
-      when: git_repo_token|bool
+      when: git_repo_token|length > 0
 
     - name: checkout clean repository
       git:
