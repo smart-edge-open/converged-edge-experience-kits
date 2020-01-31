@@ -52,7 +52,7 @@
       register: build_cnca_output
 
     - name: build landing-ui image
-      shell: docker-compose build landing-ui
+      command: docker-compose build landing-ui
       args:
         chdir: "{{ git_repo_dest }}"
       register: build_landing_output

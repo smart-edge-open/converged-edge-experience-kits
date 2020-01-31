@@ -57,7 +57,8 @@
     disable_excludes: all
 
 - name: set kernel as default
-  shell: grubby --set-default /boot/vmlinuz-{{ kernel_version }}
+  command: grubby --set-default /boot/vmlinuz-{{ kernel_version }}
+  changed_when: true
 
 - name: get current CMDLINE
   command: cat /proc/cmdline
