@@ -21,7 +21,7 @@
       src: "{{ syscfg_local_path }}"
       dest: "{{ syscfg_remote_path }}"
   - name: build BIOSFW worker image
-    shell: make build-docker-biosfw
+    shell: make biosfw
     args:
       chdir: "{{ git_repo_dest }}"
   when: syscfg_local_file.stat.exists == True

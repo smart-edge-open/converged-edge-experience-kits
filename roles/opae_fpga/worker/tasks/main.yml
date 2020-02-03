@@ -50,7 +50,7 @@
       src: "{{ opae_local_path_stp }}"
       dest: "{{ opae_remote_path }}"
   - name: build OPAE for PACN3000 FPGA worker image
-    shell: make build-docker-fpga-opae
+    shell: make fpga-opae
     args:
       chdir: "{{ git_repo_dest }}"
   when: opae_local_file_cfg.stat.exists == True and opae_local_file_stp.stat.exists == True
@@ -59,4 +59,3 @@
   file:
     path: "{{ vran_image_dir }}"
     state: directory
-

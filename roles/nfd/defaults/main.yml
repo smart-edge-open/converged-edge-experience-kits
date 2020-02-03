@@ -7,7 +7,7 @@ certs_dest: /etc/openness/certs
 
 nfd_version: "v0.4.0"
 
-nfd_netpol: "{{ git_repo_dest }}/kube-ovn/nfd_network_policy.yml"
+nfd_netpol: "{{ git_repo_dest }}/network-edge/nfd_network_policy.yml"
 
 nfd_base_url: "https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/{{ nfd_version }}"
 nfd_yamls:

@@ -41,6 +41,10 @@
   - 6642/tcp
   - 6081/udp
 
+- name: apply kube-ovn/role=master label to master node
+  command: "kubectl label node {{ ansible_hostname | lower }} kube-ovn/role=master --overwrite"
+  changed_when: true
+
 - name: create temp dir
   tempfile:
     state: directory
@@ -85,3 +89,28 @@
   delay: 10
   until: k8s_master_init_start.rc == 0
   changed_when: false
+
+- name: apply CRD defining local subnet
+  command: "kubectl apply -f {{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+  changed_when: true
+
+- name: wait for OVN DB socket
+  wait_for:
+    path: /var/run/openvswitch/ovnnb_db.sock
+    timeout: 600
+  changed_when: false
+
+- name: add local-ovs-phy port to local switch
+  command: ovn-nbctl --may-exist lsp-add local local-ovs-phy
+  register: result
+  until: not result.failed
+  retries: 20
+  delay: 30
+  changed_when: true
+
+- name: configure local-ovs-phy port
+  shell: |
+    ovn-nbctl lsp-set-addresses local-ovs-phy unknown
+    ovn-nbctl lsp-set-type local-ovs-phy localnet
+    ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
+  changed_when: true

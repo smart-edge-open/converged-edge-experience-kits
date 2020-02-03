@@ -10,7 +10,7 @@
   - name: check if FPGA SRIOV device is connected and get PCI address of devices
     shell: lspci | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
     register: pci_address
-    
+
   - name: bind FPGA SRIOV PF to IGB UIO
     shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
 
@@ -21,12 +21,12 @@
       line: "{{ item }}"
     with_items:
       - "echo \"{{ fpga_userspace_vf.vendor_id}} {{ fpga_userspace_vf.pf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
-    
+
   - name: create SRIOV VFs
     shell: "echo 0 | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs && echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
     with_items:
       - "{{ pci_address.stdout_lines }}"
-  
+
   - name: enable creation of SRIOV VFs on boot
     lineinfile:
       state: present
@@ -65,7 +65,7 @@
       src: "{{ syscfg_local_path }}"
       dest: "{{ syscfg_remote_path }}"
   - name: build FPGA Config utility worker image
-    shell: make build-docker-fpga-cfg
+    shell: make fpga-cfg
     args:
       chdir: "{{ git_repo_dest }}"
   when: syscfg_local_file.stat.exists == True

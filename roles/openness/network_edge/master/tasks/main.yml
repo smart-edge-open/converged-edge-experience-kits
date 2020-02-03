@@ -3,29 +3,6 @@
 
 ---
 
-- name: openness' ovn configuration
-  block:
-  - name: apply CRD defining local subnet
-    command: "kubectl apply -f {{ git_repo_dest }}/kube-ovn/crd_local.yml"
-
-  - name: wait for OVN DB socket
-    wait_for:
-      path: /var/run/openvswitch/ovnnb_db.sock
-      timeout: 600
-
-  - name: add local-ovs-phy port to local switch
-    command: ovn-nbctl --may-exist lsp-add local local-ovs-phy
-    register: result
-    until: not result.failed
-    retries: 20
-    delay: 30
-
-  - name: configure local-ovs-phy port
-    shell: |
-      ovn-nbctl lsp-set-addresses local-ovs-phy unknown
-      ovn-nbctl lsp-set-type local-ovs-phy localnet
-      ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
-
 - name: make sure /etc/openness, /etc/openness/certs and /etc/openness/configs exist
   file:
     path: "{{ item }}"
@@ -44,43 +21,6 @@
   - name: create openness namespace
     command: kubectl create namespace openness
     when: get_ns_openness.rc == 1
-
-- name: root CA creation
-  block:
-  - name: create directory for root CA
-    file:
-      name: "{{ certs_dest }}/CA"
-      state: directory
-  - name: create root CA
-    command: "{{ git_repo_dest }}/kube-ovn/tls_pair.sh openness {{ certs_dest }}/CA"
-
-- name: create root CA secret
-  block:
-  - name: check if root CA secret exists
-    command: kubectl get secret root-ca --namespace=openness
-    ignore_errors: yes
-    register: get_secret_rootca
-  - name: create secret with root CA
-    shell: >
-      kubectl create secret generic root-ca
-      --from-file={{ certs_dest }}/CA/key.pem
-      --from-file={{ certs_dest }}/CA/cert.pem
-      --namespace=openness
-    when: get_secret_rootca.rc == 1
-
-- name: create certificate generator secret
-  block:
-  - name: check if certificate generator secret exists
-    command: kubectl get secret certgen --namespace=openness
-    ignore_errors: yes
-    register: get_secret_certgen
-  - name: create secret with certificate generator
-    shell: >
-      kubectl create secret generic certgen
-      --from-file={{ git_repo_dest }}/kube-ovn/tls_pair.sh
-      --from-file={{ git_repo_dest }}/kube-ovn/entrypoint_tls.sh
-      --namespace=openness
-    when: get_secret_certgen.rc == 1
 
 - name: generate certs of openness components
   include_tasks: certs.yml
@@ -110,8 +50,8 @@
   - name: create configmap with syslog configs
     shell: >
       kubectl create configmap syslog-conf
-      --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-master.conf
-      --from-file={{ git_repo_dest }}/kube-ovn/syslog-ng-k8s-worker.conf
+      --from-file={{ git_repo_dest }}/network-edge/syslog-ng-k8s-master.conf
+      --from-file={{ git_repo_dest }}/network-edge/syslog-ng-k8s-worker.conf
       --namespace=openness
     when: get_configmap_syslog.rc == 1
 
@@ -128,3 +68,7 @@
 
 - name: build CLIs
   include_tasks: build_cli.yml
+
+- name: deploy interface service for kube-ovn
+  include_tasks: kube-ovn.yml
+  when: "'kubeovn/master' in ansible_play_role_names" # TODO(pm): change when using another approach (with multiple CNIs)

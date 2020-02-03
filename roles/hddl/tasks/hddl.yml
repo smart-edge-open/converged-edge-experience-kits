@@ -70,7 +70,7 @@
   when: offline_mode
 
 - name: build HDDL image
-  shell: source /etc/profile && make build-docker-hddl
+  shell: source /etc/profile && make hddllog
   args:
     chdir: "{{ git_repo_dest }}"
   when: not offline_mode

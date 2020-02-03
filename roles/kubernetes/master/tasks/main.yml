@@ -20,7 +20,6 @@
       mode: 0600
   - name: initialize cluster
     command: kubeadm init --config /tmp/config.yaml
-    register: kubeadm_init_output
   - name: copy cluster admin config
     block:
     - name: create /root/.kube dir
@@ -39,17 +38,3 @@
         mode: 0664
         remote_src: yes
   when: cluster_info.rc == 1
-
-- name: get master node name
-  block:
-  - name: hostname
-    command: hostname
-    register: hostname_output
-
-  - name: set k8s master node name
-    set_fact:
-      k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
-
-- name: label host as kube-ovn master
-  command: "kubectl label node {{ k8s_master_node_name }} kube-ovn/role=master --overwrite"
-  changed_when: true
