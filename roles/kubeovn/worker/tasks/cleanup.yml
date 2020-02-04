@@ -3,12 +3,6 @@
 
 ---
 
-- name: remove ovs/ovn related files
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items: "{{ kubeovn_cleanup_paths }}"
-
 - name: remove ovn packages
   yum:
     name: "{{ ovs_packages_to_remove }}"

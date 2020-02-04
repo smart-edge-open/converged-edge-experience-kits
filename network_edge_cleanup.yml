@@ -46,7 +46,13 @@
   - name: cleanup network edge
     include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
 
-  - name: load kubeovn variables
+  - name: load kubeovn common variables
+    include_vars: ./roles/kubeovn/common/defaults/main.yml
+    
+  - name: cleanup kubeovn common
+    include_tasks: ./roles/kubeovn/common/tasks/cleanup.yml
+
+  - name: load kubeovn master variables
     include_vars: ./roles/kubeovn/master/defaults/main.yml
 
   - name: cleanup kubeovn
@@ -100,12 +106,18 @@
   - name: cleanup network edge
     include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
 
-  - name: load kubeovn variables
+  - name: load kubeovn common variables
+    include_vars: ./roles/kubeovn/common/defaults/main.yml
+    
+  - name: cleanup kubeovn common
+    include_tasks: ./roles/kubeovn/common/tasks/cleanup.yml
+
+  - name: load kubeovn worker variables
     include_vars: ./roles/kubeovn/worker/defaults/main.yml
 
-  - name: cleanup kubeovn
+  - name: cleanup kubeovn worker
     include_tasks: ./roles/kubeovn/worker/tasks/cleanup.yml
-
+    
   - name: load kubernetes variables
     include_vars: ./roles/kubernetes/worker/defaults/main.yml
 

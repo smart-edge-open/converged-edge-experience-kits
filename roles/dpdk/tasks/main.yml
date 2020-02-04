@@ -80,6 +80,12 @@
   register: nproc_out
   changed_when: false
 
+- name: install numactl-devel
+  yum:
+    name: "numactl-devel"
+    state: present
+  when: igb_uio_module.stat.exists == False
+
 - name: compile
   make:
     chdir: "{{ dpdk_install_dir }}"

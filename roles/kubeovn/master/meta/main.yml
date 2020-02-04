@@ -5,3 +5,4 @@
 
 dependencies:
 - kubernetes/master
+- kubeovn/common

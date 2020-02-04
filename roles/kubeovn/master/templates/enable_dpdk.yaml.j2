@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: ovs-dpdk
+
+- op: replace
+  path: /spec/template/spec/containers/0/imagePullPolicy
+  value: Never
+
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /dev/hugepages
+    name: hugepage
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/requests/memory
+  value: {{ ovs_dpdk_resources_requests }}
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/memory
+  value: {{ ovs_dpdk_resources_limits }}
+
+- op: add
+  path: /spec/template/spec/containers/0/resources/limits/hugepages-{{ ovs_dpdk_hugepage_size }}
+  value: {{ ovs_dpdk_hugepages }}
+
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: hugepage
+    emptyDir:
+      medium: HugePages

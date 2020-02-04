@@ -4,7 +4,7 @@
 ---
 
 - name: check if packages installed in proper version
-  shell: rpm -q openvswitch ovn ovn-common | grep {{ ovn_version }} | wc -l
+  shell: rpm -q openvswitch ovn ovn-common | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l
   args:
     warn: false
   register: rpm_grep
@@ -68,6 +68,27 @@
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: true
+
+- name: enable DPDK support
+  block:
+    - name: create kustomization.yaml
+      copy:
+        src: kustomization.yaml
+        dest: "{{ tmp_dir.path }}/kustomization.yaml"
+    - name: create enable_dpdk.yaml
+      template:
+        src: enable_dpdk.yaml.j2
+        dest: "{{ tmp_dir.path }}/enable_dpdk.yaml"
+    - name: kustomize ovn.yaml
+      shell: kubectl kustomize . > ovn-dpdk.yaml
+      args:
+        chdir: "{{ tmp_dir.path }}"
+    - name: rename ovn-dpdk.yaml to ovn.yaml
+      copy:
+        src: "{{ tmp_dir.path }}/ovn-dpdk.yaml"
+        dest: "{{ tmp_dir.path }}/ovn.yaml"
+        remote_src: yes
+  when: ovs_dpdk
 
 - name: apply kube-ovn
   command: "kubectl apply -f {{ item.split('/')[-1] }}"

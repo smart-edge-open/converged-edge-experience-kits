@@ -4,7 +4,7 @@
 ---
 
 - name: check if packages installed in proper version
-  shell: rpm -q openvswitch | grep {{ ovn_version }} | wc -l
+  shell: rpm -q openvswitch | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l
   args:
     warn: false
   register: rpm_grep

@@ -4,5 +4,4 @@
 ---
 
 dependencies:
-- kubernetes/worker
-- kubeovn/common
+- dpdk
