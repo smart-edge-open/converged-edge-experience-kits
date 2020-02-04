@@ -3,6 +3,9 @@
 
 ---
 
+- name: load kubeovn common variables
+  include_vars: ./roles/kubernetes/cni/kubeovn/common/defaults/main.yml
+
 - name: kube-ovn cleanup
   block:
   - name: download kube-ovn cleanup script
@@ -18,3 +21,6 @@
   - name: execute kube-ovn cleanup script
     command: "timeout 120 {{ kubeovn_cleanup_dest }}"
     ignore_errors: yes
+
+- name: cleanup kubeovn common
+  include_tasks: ./roles/kubernetes/cni/kubeovn/common/tasks/cleanup.yml

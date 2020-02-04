@@ -16,7 +16,10 @@
     when:
     - groups['controller_group'] is defined
     - (groups['controller_group']|length>1)
-  - include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate hostname
+    include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate requested CNIs
+    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
 
   roles:
     - role: machine_setup/os_setup
@@ -27,15 +30,13 @@
     - role: golang
     - role: docker
     - role: kubernetes/master
-    - role: kubeovn/master
+    - role: kubernetes/cni
     - role: openness/network_edge/master
     - role: cnca/master
     # - role: ngc_test/master
     # - role: opae_fpga/master
-    - role: multus
     - role: nfd
     # - role: biosfw/master
-    # - role: sriov/master
     # - role: cmk/master
 
 
@@ -46,7 +47,10 @@
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate hostname
+    include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate requested CNIs
+    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
 
   roles:
     - role: machine_setup/os_setup
@@ -62,9 +66,8 @@
     - role: golang
     - role: docker
     # - role: opae_fpga/worker
-    # - role: sriov/worker
     - role: kubernetes/worker
-    - role: kubeovn/worker
+    - role: kubernetes/cni
     - role: openness/network_edge/worker
     # - role: biosfw/worker
     # - role: cmk/worker

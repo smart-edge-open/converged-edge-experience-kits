@@ -4,4 +4,4 @@
 ---
 
 dependencies:
-- role: sriov/common
+- kubernetes/cni/kubeovn/common

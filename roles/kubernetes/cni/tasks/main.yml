@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: do a precheck
+  include_tasks: precheck.yml
+
+- name: detect machine type and load available roles
+  include_tasks: common.yml
+
+- name: apply main CNI
+  include_role:
+    name: "kubernetes/cni/{{ kubernetes_cnis[0] }}/{{ role_postfix }}"
+
+- name: multiple CNIs
+  block:
+  - name: apply meta CNI - multus
+    include_role:
+      name: "kubernetes/cni/multus"
+    when: "'controller_group' in group_names"
+  - name: apply remaining CNIs
+    include_role:
+      name: "kubernetes/cni/{{ cni }}/{{ role_postfix }}"
+    with_items: "{{ kubernetes_cnis[1:] }}"
+    when: "cni + '/' + role_postfix in available_cni_roles" # run only if 'cni/node_type' is available in the roles/kubernetes/cni/ tree
+    loop_control:
+      loop_var: cni
+  when: kubernetes_cnis|length > 1

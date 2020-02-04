@@ -4,5 +4,4 @@
 ---
 
 dependencies:
-- kubernetes/master
-- kubeovn/common
+- role: kubernetes/cni/sriov/common

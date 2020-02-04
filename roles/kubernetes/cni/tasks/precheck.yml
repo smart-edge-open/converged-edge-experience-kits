@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: fail if no CNI is set up
+  fail:
+    msg: "At least 1 CNI is required"
+  when: kubernetes_cnis|length == 0
+
+- name: fail if first CNI is SRIOV
+  fail:
+    msg: "SRIOV cannot be main CNI"
+  when: kubernetes_cnis[0] == "sriov"
+
+- name: fail if requested CNI is not available
+  fail:
+    msg: "Requested CNI is not available: {{ item }}"
+  with_items: "{{ kubernetes_cnis }}"
+  when: "item not in available_kubernetes_cnis"

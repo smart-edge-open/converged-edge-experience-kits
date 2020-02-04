@@ -24,7 +24,7 @@
     dest: "{{ configs_dest }}/"
     directory_mode: yes
     remote_src: yes
-  when: "'kubeovn/worker' in ansible_play_role_names" # TODO(pm): change when using another approach (with multiple CNIs)
+  when: "'kubeovn' in kubernetes_cnis"
 
 - name: customize eaa.json
   block:

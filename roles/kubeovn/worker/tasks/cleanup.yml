@@ -1,9 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
-
----
-
-- name: remove ovn packages
-  yum:
-    name: "{{ ovs_packages_to_remove }}"
-    state: absent

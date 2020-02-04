@@ -71,4 +71,4 @@
 
 - name: deploy interface service for kube-ovn
   include_tasks: kube-ovn.yml
-  when: "'kubeovn/master' in ansible_play_role_names" # TODO(pm): change when using another approach (with multiple CNIs)
+  when: "'kubeovn' in kubernetes_cnis"

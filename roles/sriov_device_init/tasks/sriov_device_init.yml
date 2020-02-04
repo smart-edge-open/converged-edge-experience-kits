@@ -4,7 +4,7 @@
 ---
 
 - name: include sriov/common default vars
-  include_vars: ../../../sriov/common/defaults/main.yml
+  include_vars: ../../kubernetes/cni/sriov/common/defaults/main.yml
 
 - block:
   - name: check if FPGA SRIOV device is connected and get PCI address of devices

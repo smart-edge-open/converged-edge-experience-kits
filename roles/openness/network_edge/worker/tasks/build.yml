@@ -15,7 +15,7 @@
     shell: source /etc/profile && make interfaceservice
     args:
       chdir: "{{ git_repo_dest }}"
-    when: "'kubeovn/worker' in ansible_play_role_names" # TODO(pm): change when using another approach (with multiple CNIs)
+    when: "'kubeovn' in kubernetes_cnis"
   always:
   - name: remove .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
@@ -23,7 +23,7 @@
 # since these pods are part of openness' DaemonSet will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
 - name: recreate openness pods
-  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ ansible_hostname | lower }} -o=NAME | grep -v syslog)
+  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ ansible_hostname | lower }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
   changed_when: true
