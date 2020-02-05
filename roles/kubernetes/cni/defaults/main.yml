@@ -9,3 +9,4 @@ kubernetes_cnis: []
 available_kubernetes_cnis:
 - kubeovn
 - sriov
+- flannel
