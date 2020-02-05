@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: open calico firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: 179/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: patch node's Pod CIDR
+  command: kubectl patch node "{{ ansible_hostname }}" -p '{"spec":{"podCIDR":"10.244.0.0/16"}}'
+
+- name: add NetworkManager config - ignore calico's interfaces
+  copy:
+    dest: /etc/NetworkManager/conf.d/calico.conf
+    content: |
+      [keyfile]
+      unmanaged-devices=interface-name:cali*;interface-name:tunl*
+
+- name: create temp dir
+  tempfile:
+    state: directory
+    suffix: -calico
+  register: tmp_dir
+
+- name: download calico yml
+  get_url:
+    url: https://docs.projectcalico.org/manifests/calico.yaml
+    dest: "{{ tmp_dir.path }}/calico.yml"
+
+- name: create kustomization.yml
+  copy:
+    src: "{{ item }}"
+    dest: "{{ tmp_dir.path }}"
+  with_items:
+    - kustomization.yml
+    - customize_calico_container.yml
+    - change-cidr.yml
+
+- name: apply calico.yml with change
+  shell: kubectl kustomize . | kubectl apply -f -
+  args:
+    chdir: "{{ tmp_dir.path }}"

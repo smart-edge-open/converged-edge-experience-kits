@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: calico-node
+spec:
+  template:
+    spec:
+      containers:
+        - name: calico-node
+          env:
+            - name: CALICO_IPV4POOL_CIDR
+              value: "10.244.0.0/16"
