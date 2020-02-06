@@ -74,5 +74,5 @@
   with_items: "{{ stats.results }}"
 
 - name: Restart auditd
-  command: service auditd restart
+  command: service auditd restart # noqa 303
   changed_when: true

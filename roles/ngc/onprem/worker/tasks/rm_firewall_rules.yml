@@ -4,11 +4,11 @@
 ---
 
 - name: Add firewall rules for Docker containers traffic (nef)
-  shell: firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT 0 -p tcp --dport 8060 -j ACCEPT 
+  shell: firewall-cmd --permanent --direct --remove-rule ipv4 filter INPUT 0 -p tcp --dport 8060 -j ACCEPT
   ignore_errors: yes
 
 - name: Reload firewall rules
-  shell: firewall-cmd --reload 
+  shell: firewall-cmd --reload
   changed_when: false
   ignore_errors: yes
 

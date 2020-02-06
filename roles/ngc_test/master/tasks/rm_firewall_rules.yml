@@ -12,7 +12,7 @@
   ignore_errors: yes
 
 - name: Reload firewall rules
-  shell: firewall-cmd --reload 
+  shell: firewall-cmd --reload
   changed_when: false
   ignore_errors: yes
 

@@ -19,7 +19,7 @@
   - set_fact:
       k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
   - name: set label on master node
-    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite 
+    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite
 
 - block:
   - name: create temporary custom .openness_gitconfig

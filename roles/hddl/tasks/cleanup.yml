@@ -17,7 +17,7 @@
       line: PSET_MODE=uninstall
   - name: uninstall OpenVino
     command: "{{ openvino_install_command }}"
-    args: 
+    args:
       chdir: "{{ openvino_download_dir }}"
     ignore_errors: yes
   - name: remove OpenVino temporary download directory

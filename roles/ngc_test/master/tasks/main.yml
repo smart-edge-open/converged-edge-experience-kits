@@ -7,7 +7,7 @@
   include_vars: ../common/defaults/main.yml
 
 - name: prepare firewall
-  include_tasks: add_firewall_rules.yml 
+  include_tasks: add_firewall_rules.yml
 
 - block:
   - name: output hostname
@@ -16,7 +16,7 @@
   - set_fact:
       k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
   - name: set label on master node
-    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite  
+    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite
 
 - name: create directory for certs used by AF and NEF
   file:
@@ -27,7 +27,7 @@
   copy:
     src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
     dest: "{{ certs_dest }}/ngc"
-    mode: a+x 
+    mode: a+x
 
 - name: run script to generate cerificates
   shell: ./genCerts.sh -t DNS -n afservice -m nefservice

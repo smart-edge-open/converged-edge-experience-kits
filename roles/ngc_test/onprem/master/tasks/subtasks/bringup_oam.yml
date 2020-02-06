@@ -10,7 +10,7 @@
   - name: build OAM component
     shell: source /etc/profile && make oam
     args:
-      chdir: "{{ git_repo_ngc_dir }}" 
+      chdir: "{{ git_repo_ngc_dir }}"
   always:
     - name: remove .openness_gitconfig
       include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

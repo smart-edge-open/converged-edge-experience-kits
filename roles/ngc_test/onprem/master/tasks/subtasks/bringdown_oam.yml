@@ -26,7 +26,7 @@
     - docker_service_status.rc == 0
     - docker_container_running.stdout != ""
 
-- name: remove OAM image 
+- name: remove OAM image
   command: docker image rm -f oam-image:1.0
   ignore_errors: yes
   when:

@@ -12,6 +12,8 @@
   when:
   - item.state == 'directory'
   - (item.path.endswith('master')) or (item.path.endswith('worker'))
+  tags:
+  - skip_ansible_lint
 
 - name: set role postfix
   set_fact:

@@ -13,8 +13,8 @@
     enabled: true
     repo_gpgcheck: true
 
-- name: install packages 
-  yum: 
+- name: install packages
+  yum:
     name: "{{ kubernetes_packages }}"
     state: present
     skip_broken: yes
