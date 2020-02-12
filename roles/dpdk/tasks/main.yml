@@ -27,6 +27,11 @@
     - dpdk_kernel_devel is defined
     - dpdk_kernel_devel|length > 0
 
+  - name: fail if kernel-devel version is not correct
+    fail:
+      msg: "kernel-devel version does not match the current kernel"
+    when: '"{{ unamer.stdout }}" in kernel_devel_to_install'
+
   - name: install kernel-devel package
     yum:
       name: "{{ kernel_devel_to_install }}"
