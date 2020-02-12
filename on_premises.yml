@@ -30,9 +30,10 @@
     - role: golang
     - role: openness/onprem/master
     - role: cnca/onprem
+    - role: nfd/onprem/master
     - role: offline/restore/ngc_test
       when: offline_mode and epcforedge_git_repo is defined
-    #- role: ngc_test/onprem/master
+    # - role: ngc_test/onprem/master
     - role: apache
     - role: offline/restore/yum/clean
       when: offline_mode
@@ -67,5 +68,6 @@
     # - role: ovs
     - role: openness/onprem/worker
     # - role: hddl
+    - role: nfd/onprem/worker
     - role: offline/restore/yum/clean
       when: offline_mode

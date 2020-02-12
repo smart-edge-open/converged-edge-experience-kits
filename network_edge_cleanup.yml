@@ -6,7 +6,7 @@
 - hosts: controller_group
   tasks:
   # following roles are not cleaned up directly, they're cleaned when Kubernetes cluster is reset
-  # - nfd
+  # - nfd/network_edge
   # - multus
   # - sriov/master
 

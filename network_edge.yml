@@ -35,7 +35,7 @@
     - role: cnca/master
     # - role: ngc_test/master
     # - role: opae_fpga/master
-    - role: nfd
+    - role: nfd/network_edge
     # - role: biosfw/master
     # - role: cmk/master
 
