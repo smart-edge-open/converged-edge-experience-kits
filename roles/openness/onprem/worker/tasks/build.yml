@@ -8,13 +8,13 @@
   - name: offline | add cache_from to docker-compose.yml
     lineinfile:
       path: "{{ git_repo_dest }}/docker-compose.yml"
-      insertafter: 'dockerfile: "Dockerfile_{{ item.file }}"'
+      insertafter: 'context: {{ item.context }}'
       line: '      cache_from: ["{{ item.cache }}-deps-image"]'
     with_items:
-    - { file: appliance, cache: appliance }
-    - { file: eaa, cache: eaa }
-    - { file: nts, cache: nts }
-    - { file: edgednssvr, cache: edgedns }
+    - { context: ./dist/appliance, cache: appliance }
+    - { context: ./dist/eaa, cache: eaa }
+    - { context: ./internal/nts, cache: nts }
+    - { context: ./dist/edgednssvr, cache: edgedns }
 
   - name: offline | load images
     shell: docker load < {{ offline_docker_images_path }}/{{ item }}

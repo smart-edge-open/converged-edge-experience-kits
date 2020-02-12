@@ -14,12 +14,10 @@
   - { name: edgedns, path: ./build/edgednssvr }
   changed_when: true
 
-
 - name: pull syslog-ng image
-  command: docker-compose pull --quiet syslog-ng
-  args:
+  make:
     chdir: "{{ git_repo_dest }}"
-  changed_when: true
+    target: pull-syslog
 
 - name: pull alpine image
   command: docker pull --quiet alpine:latest

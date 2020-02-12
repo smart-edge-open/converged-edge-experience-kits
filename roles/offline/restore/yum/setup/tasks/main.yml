@@ -38,11 +38,8 @@
     remote_src: yes
 
 - name: install yum-utils package
-  yum:
-    name: yum-utils
-    state: present
-    disablerepo: "*"
-    enablerepo: "openness-offline-*"
+  # temporary fix for bug on 2.9.3 version: https://github.com/ansible/ansible/pull/66557
+  command: yum install -y yum-utils --disablerepo '*' --enablerepo 'openness-offline-*'
 
 - name: disable all repositories
   shell: yum-config-manager --disable \*
