@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: setting OVS_SOCKDIR
+  lineinfile:
+    path: "{{ kubernetes_env_file }}"
+    regexp: "^OVS_SOCKDIR=.*"
+    line: "OVS_SOCKDIR=/var/run/openvswitch/"
+  notify:
+  - enable and restart kubelet

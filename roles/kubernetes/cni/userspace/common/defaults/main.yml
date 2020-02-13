@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+userspace:
+  repository: "github.com/intel/userspace-cni-network-plugin"
+  bridgeName: "br-userspace"
+  logFile: "/var/log/userspace-openness.log"
+  logLevel: "info"

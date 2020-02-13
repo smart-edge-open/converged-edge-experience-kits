@@ -11,3 +11,4 @@ available_kubernetes_cnis:
 - sriov
 - flannel
 - calico
+- userspace

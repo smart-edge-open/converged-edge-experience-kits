@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: download userspace-cni-network-plugin
+  shell: "source /etc/profile && go get {{ userspace.repository }}"
+  ignore_errors: yes
+
+- name: install userspace-cni-network-plugin dependencies
+  shell: "source /etc/profile && cd $GOPATH/src/{{ userspace.repository }} && make install"
+
+- name: make userspace-cni-network-plugin
+  shell: "source /etc/profile && cd $GOPATH/src/{{ userspace.repository }} && make"
+
+- name: copy plugin to cni directory
+  shell: "source /etc/profile && cp $GOPATH/src/{{ userspace.repository }}/userspace/userspace /opt/cni/bin/."
+
+- name: clean
+  shell: "source /etc/profile && cd $GOPATH/src/{{ userspace.repository }} && make clean"

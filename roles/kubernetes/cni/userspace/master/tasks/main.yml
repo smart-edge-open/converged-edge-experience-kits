@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create temporary directory
+  tempfile:
+    state: directory
+    suffix: userspace-cni
+  register: tmp_dir
+
+- name: create openness-userspace-crd.yml
+  template:
+    src: openness-userspace-crd.yml.j2
+    dest: "{{ tmp_dir.path }}/openness-userspace-crd.yml"
+
+- name: apply OpenNESS Userspace CNI CRD
+  command: kubectl create -f openness-userspace-crd.yml
+  args:
+    chdir: "{{ tmp_dir.path }}"
+
+- name: remove temporary directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent

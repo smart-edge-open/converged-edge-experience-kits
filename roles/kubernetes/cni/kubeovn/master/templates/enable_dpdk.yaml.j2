@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 
 ---
 
@@ -11,11 +11,21 @@
   path: /spec/template/spec/containers/0/imagePullPolicy
   value: Never
 
+- op: replace
+  path: /spec/template/spec/containers/0/livenessProbe/initialDelaySeconds
+  value: 60
+
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:
-    mountPath: /dev/hugepages
+    mountPath: /hugepages
     name: hugepage
+
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: dev
+    mountPath: /dev
 
 - op: replace
   path: /spec/template/spec/containers/0/resources/requests/memory
@@ -28,6 +38,13 @@
 - op: add
   path: /spec/template/spec/containers/0/resources/limits/hugepages-{{ ovs_dpdk_hugepage_size }}
   value: {{ ovs_dpdk_hugepages }}
+
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: dev
+    hostPath:
+      path: /dev
 
 - op: add
   path: /spec/template/spec/volumes/-
