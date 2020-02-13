@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
----
-
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -14,4 +12,4 @@ spec:
         - name: calico-node
           env:
             - name: CALICO_IPV4POOL_CIDR
-              value: "10.244.0.0/16"
+              value: "{{ calico_cidr }}"

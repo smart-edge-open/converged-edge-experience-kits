@@ -4,16 +4,15 @@
 ---
 
 resources:
-- calico.yml
+- kube-flannel.yml
 
 patchesStrategicMerge:
-- change_cidr.yml
-- customize_calico_conf.yml
+- flannel_change_cidr.yml
 
 patchesJson6902:
 - target:
     group: apps
     version: v1
     kind: DaemonSet
-    name: calico-node
-  path: customize_calico_container.yml
+    name: kube-flannel-ds-amd64
+  path: customize_flannel_conf.yml

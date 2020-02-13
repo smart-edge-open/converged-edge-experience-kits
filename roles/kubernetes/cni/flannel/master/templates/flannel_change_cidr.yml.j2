@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kube-flannel-cfg
+  namespace: kube-system
+data:
+  net-conf.json: |
+    {
+      "Network": "{{ flannel_cidr }}",
+      "Backend": {
+        "Type": "vxlan"
+      }
+    }

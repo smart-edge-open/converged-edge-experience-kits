@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+calico_version: v3.12
+calico_url: https://docs.projectcalico.org/{{ calico_version }}/manifests/calico.yaml
+
+calico_cidr: "10.243.0.0/16"

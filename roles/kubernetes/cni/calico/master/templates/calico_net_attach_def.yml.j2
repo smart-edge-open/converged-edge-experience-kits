@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: openness-calico
+spec:
+  config: '{
+    "cniVersion": "0.3.1",
+    "name": "openness-calico",
+    "type": "calico",
+    "log_level": "info",
+    "datastore_type": "kubernetes",
+    "mtu": 1440,
+    "ipam": {
+      "type": "host-local",
+      "subnet": "{{ calico_cidr }}",
+      "routes": [{"dst": "{{ calico_cidr }}"}]
+    },
+    "policy": {
+      "type": "k8s"
+    },
+    "kubernetes": {
+      "kubeconfig": "/etc/cni/net.d/calico-kubeconfig"
+    }
+  }'

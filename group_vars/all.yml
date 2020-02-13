@@ -23,7 +23,11 @@ cce_admin_password: "pass"
 # List of requested CNIs to be used in Network Edge mode
 # CNIs are applied in order of definition
 # Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
-# Available CNIs: kubeovn, sriov (note: cannot be main or standalone)
+# Available CNIs:
+# - kubeovn (note: must be main/primary/first CNI),
+# - flannel,
+# - calico
+# - sriov (note: cannot be main or standalone)
 kubernetes_cnis:
 - kubeovn
 

@@ -12,13 +12,16 @@
 - name: apply main CNI
   include_role:
     name: "kubernetes/cni/{{ kubernetes_cnis[0] }}/{{ role_postfix }}"
+  vars:
+    cni_weight: 10
 
 - name: multiple CNIs
   block:
   - name: apply meta CNI - multus
     include_role:
-      name: "kubernetes/cni/multus"
+      name: kubernetes/cni/multus/master
     when: "'controller_group' in group_names"
+
   - name: apply remaining CNIs
     include_role:
       name: "kubernetes/cni/{{ cni }}/{{ role_postfix }}"
@@ -26,4 +29,13 @@
     when: "cni + '/' + role_postfix in available_cni_roles" # run only if 'cni/node_type' is available in the roles/kubernetes/cni/ tree
     loop_control:
       loop_var: cni
+      index_var: idx
+    vars:
+      apply_netdef: True
+      cni_weight: "{{ (idx+2) * 10 }}"
+
+  - name: apply meta CNI - multus
+    include_role:
+      name: kubernetes/cni/multus/worker
+    when: "'edgenode_group' in group_names"
   when: kubernetes_cnis|length > 1

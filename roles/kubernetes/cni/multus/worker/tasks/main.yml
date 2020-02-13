@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: wait until primary CNI is up on the node
+  shell: set -o pipefail && ls /etc/cni/net.d | grep -P '10-|00-(?!multus)'
+  register: result
+  until: not result.failed
+  retries: 30
+  delay: 10
+  changed_when: false
+
+- name: get name of Multus pod on the worker
+  shell: kubectl get pods --field-selector status.phase=Running -n kube-system --field-selector spec.nodeName={{ ansible_hostname }} | awk '/kube-multus-ds-amd64/ {print $1;}'
+  register: nodes_multus_pod
+  retries: 30
+  delay: 10
+  until: nodes_multus_pod.stdout != ""
+  changed_when: false
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: remove '.old' suffix from CNIs conflists so Multus will take it into consideration
+  # shell is required due to glob (*)
+  shell: rename --verbose '.old' '' /etc/cni/net.d/*
+
+- name: delete Multus pod to recreate 00-multus.conf
+  command: kubectl delete pod -n kube-system {{ nodes_multus_pod.stdout }}
+  register: nodes_multus_pod
+  changed_when: false
+  delegate_to: "{{ groups['controller_group'][0] }}"
