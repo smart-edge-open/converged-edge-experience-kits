@@ -63,6 +63,22 @@
         chdir: "{{ git_repo_dest }}"
       register: build_controller_output
 
+    - name: build NFD master image
+      block:
+      - name: create temporary custom .openness_gitconfig
+        include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+      - name: build NFD master binary
+        shell: source /etc/profile && go build -o dist/nfd-master ./cmd/nfd-master
+        args:
+          chdir: "{{ git_repo_dest }}"
+          creates: "{{ git_repo_dest }}/dist/nfd-master"
+      - name: build Docker image 
+        command: docker-compose build nfd-master
+        args:
+          chdir: "{{ git_repo_dest }}"
+      - name: remove temporary .openness_gitconfig
+        include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+
     - name: pull mysql image
       command: docker-compose pull --quiet mysql
       args:
@@ -83,6 +99,7 @@
       - { image: "cnca-ui-deps-image", filename: "cnca-deps-image.tar" }
       - { image: "landing-ui-deps-image", filename: "landing-deps-image.tar" }
       - { image: "node:lts-alpine", filename: "node.tar" }
+      - { image: "nfd-master", filename: "nfd-master.tar" }
   always:
   - name: remove .env
     file:

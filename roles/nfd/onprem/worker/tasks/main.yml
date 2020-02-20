@@ -30,7 +30,7 @@
 
 # Bring up nfd-worker container
 - name: bring up nfd-worker container
-  shell: "CONTAINER_NAME={{ nfd_worker_container_name }} VER={{ nfd_version }} CERTS_DIR={{ certs_dest }} ENDPOINT={{ nfd_master_endpoint }} NFD_MASTER_IP={{ nfd_master_ip }}  docker-compose up -d --no-build"
+  shell: "CONTAINER_NAME={{ nfd_worker_container_name }} VER={{ nfd_version }} CERTS_DIR={{ certs_dest }} ENDPOINT={{ nfd_master_endpoint }} HOSTNAME={{ ansible_hostname }} docker-compose up -d --no-build"
   args:
     chdir: "{{ tmp_dir.path }}"
 

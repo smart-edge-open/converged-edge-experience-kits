@@ -23,4 +23,5 @@ services:
      - HTTPS_PROXY=
      - http_proxy=
      - HTTP_PROXY=
+     - NODE_NAME=${HOSTNAME}
     network_mode: bridge
