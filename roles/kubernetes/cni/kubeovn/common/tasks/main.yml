@@ -51,7 +51,7 @@
         dest: "{{ kubeovn_destdir }}/start-ovs-dpdk.sh"
         basedir: "{{ kubeovn_destdir }}"
 
-    - name: copy files needded to build an image inside of dpdk folder
+    - name: copy files needed to build an image to dpdk folder
       copy:
         src: "{{ kubeovn_destdir }}/{{ item }}"
         dest: "{{ dpdk_install_dir }}"
