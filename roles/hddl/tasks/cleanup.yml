@@ -24,6 +24,14 @@
     file:
       path: "{{ openvino_download_dir }}"
       state: absent
-  - name: remove OpenVino old install directory
-    shell: rm -rf /opt/intel/openvino*
+  - name: OpenVino delete file glob
+    find:
+      paths: /opt/intel
+      patterns: openvino*
+    register: files_to_delete
+  - name: remove OpenVino old install directory via file glob
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ files_to_delete.files }}"
   when: ov_dl_dir.stat.exists

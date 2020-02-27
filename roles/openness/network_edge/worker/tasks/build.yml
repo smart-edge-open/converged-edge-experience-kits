@@ -23,7 +23,9 @@
 # since these pods are part of openness' DaemonSet will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
 - name: recreate openness pods
-  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ ansible_hostname | lower }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
+  shell: >
+    kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ ansible_hostname | lower }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
   changed_when: true

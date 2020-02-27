@@ -21,4 +21,4 @@
   shell: docker rm -f $(docker ps -a -q)
   when:
     - docker_service_status.rc == 0
-    - docker_containers_running.stdout != ""
+    - docker_containers_running.stdout

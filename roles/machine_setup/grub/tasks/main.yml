@@ -17,7 +17,9 @@
   - name: change GRUB config path (EFI)
     set_fact:
       grub_file_path: /boot/efi/EFI/centos/grub.cfg
-    when: efi_sys_dir.stat.exists and efi_sys_dir.stat.isdir == true
+    when:
+    - efi_sys_dir.stat.exists
+    - efi_sys_dir.stat.isdir
 
   - name: print grub.cfg path
     debug:

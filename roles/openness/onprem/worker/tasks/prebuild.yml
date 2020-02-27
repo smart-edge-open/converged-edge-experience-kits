@@ -6,7 +6,11 @@
 - include_tasks: subtasks/remove_containers.yml
 
 - name: Reseting ela config
-  shell: jq '.PCIBlacklist =  []'  {{ git_repo_dest }}/configs/ela.json | sponge {{ git_repo_dest }}/configs/ela.json
+  shell: >
+    set -o pipefail &&
+    jq '.PCIBlacklist =  []'  {{ git_repo_dest }}/configs/ela.json |
+    sponge {{ git_repo_dest }}/configs/ela.json
+  args:
   changed_when: true
 
 - include_tasks: subtasks/remove_additional_folder_structure.yml

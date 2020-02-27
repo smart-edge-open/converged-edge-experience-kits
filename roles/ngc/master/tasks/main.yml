@@ -16,7 +16,8 @@
   - name: output hostname
     command: hostname
     register: hostname_output
-  - set_fact:
+  - name: register k8s master node name
+    set_fact:
       k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
   - name: set label on master node
     command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite
@@ -43,7 +44,12 @@
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file
-  shell: jq '.ServerConfig.Hostname="afservice" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" | .CliConfig.NEFHostname="nefservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  shell: >
+    set -o pipefail &&
+    jq '.ServerConfig.Hostname="afservice" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" |
+    .CliConfig.NEFHostname="nefservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  args:
+  changed_when: true
 
 - name: build AF docker image
   docker_image:
@@ -57,16 +63,17 @@
 - name: create ngc namespace if needed
   block:
   - name: check if ngc namespace exists
-    shell: kubectl get ns ngc
+    command: kubectl get ns ngc
     ignore_errors: yes
     register: get_ns_ngc
   - name: create ngc namespace
-    shell: kubectl create namespace ngc
+    command: kubectl create namespace ngc
     when: get_ns_ngc.rc == 1
 
 - name: deploy AF
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podAF.yaml
+  command: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podAF.yaml
+  changed_when: true
 
 - name: deploy NEF
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podNEF.yaml
-
+  command: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngc/podNEF.yaml
+  changed_when: true

@@ -54,7 +54,7 @@
     url: "{{ dpdk_download_url }}"
     dest: "{{ dpdk_download_dest }}"
     checksum: "md5:{{ dpdk_checksum }}"
-  when: dpdk_dest_dir.stat.exists == False
+  when: not dpdk_dest_dir.stat.exists
 
 - name: ensure install dir exists
   file:
@@ -78,7 +78,7 @@
   file:
     path: /etc/ansible/facts.d/dpdk.fact
     state: absent
-  when: igb_uio_module.stat.exists == False
+  when: not igb_uio_module.stat.exists
 
 - name: detect amount of cores
   command: nproc
@@ -89,7 +89,7 @@
   yum:
     name: "numactl-devel"
     state: present
-  when: igb_uio_module.stat.exists == False
+  when: not igb_uio_module.stat.exists
 
 - name: compile
   make:
@@ -99,7 +99,7 @@
       T: x86_64-native-linuxapp-gcc
   environment:
     "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
-  when: igb_uio_module.stat.exists == False
+  when: not igb_uio_module.stat.exists
 
 - name: create Ansible dpdk facts.d folder
   file:

@@ -21,4 +21,4 @@
   shell: docker rmi -f $(docker images -q)
   when:
     - docker_service_status.rc == 0
-    - docker_images_present.stdout != ''
+    - docker_images_present.stdout

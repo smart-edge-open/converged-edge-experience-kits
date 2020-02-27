@@ -28,10 +28,15 @@
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file
-  shell: jq '.UIEndpoint="http://{{ controller_ip }}:3020"' /etc/openness/configs/ngc/oam.json | sponge /etc/openness/configs/ngc/oam.json
+  shell: >
+    set -o pipefail &&
+    jq '.UIEndpoint="http://{{ controller_ip }}:3020"' /etc/openness/configs/ngc/oam.json |
+    sponge /etc/openness/configs/ngc/oam.json
+  args:
+  changed_when: true
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -43,7 +48,7 @@
     name: oam-image:1.0
     source: build
     build:
-      path: "{{git_repo_ngc_build_dir}}/onprem/oam"
+      path: "{{ git_repo_ngc_build_dir }}/onprem/oam"
       pull: yes
       use_config_proxy: yes
   when: docker_service_status.rc == 0 and not offline_mode

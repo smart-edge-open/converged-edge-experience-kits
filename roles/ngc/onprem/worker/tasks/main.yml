@@ -35,7 +35,7 @@
   delegate_to: "{{ node_ip }}"
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -63,9 +63,13 @@
     published_ports:
       - 8060:8060
     env:
-      no_proxy: "{{ proxy_os_noproxy}},{{ controller_name }},{{ node_name }}"
+      no_proxy: "{{ proxy_os_noproxy }},{{ controller_name }},{{ node_name }}"
   when: docker_service_status.rc == 0
 
 - name: update container's /etc/hosts file
-  shell: 'docker exec -t nef-container /bin/bash -c "echo {{ controller_ip }} {{ controller_name }} | tee -a /etc/hosts"'
-
+  shell: >
+    set -o pipefail &&
+    'docker exec -t nef-container /bin/bash -c "echo {{ controller_ip }}
+    {{ controller_name }} | tee -a /etc/hosts"'
+  args:
+  changed_when: true

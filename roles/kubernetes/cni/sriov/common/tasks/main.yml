@@ -45,6 +45,7 @@
       pull: yes
 
 - name: build device plugin image
-  shell: make image
+  command: make image
   args:
     chdir: "{{ sriov_dev_plugin.download_dir }}"
+  changed_when: true

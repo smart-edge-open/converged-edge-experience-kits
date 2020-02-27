@@ -10,3 +10,4 @@
 
 - name: delete go files
   shell: "source /etc/profile && rm -rf $GOPATH/src/{{ userspace_repository }}"
+  changed_when: true

@@ -7,8 +7,10 @@
   shell: source /etc/profile && go build -o kubectl-rsu
   args:
     chdir: "{{ git_repo_dest }}/fpga/kube-rsu/"
+  changed_when: true
 
 - name: Install RSU kubectl plugin
-  shell: mv kubectl-rsu "{{ rsu_plugin_dest }}"
+  command: mv kubectl-rsu "{{ rsu_plugin_dest }}"
   args:
     chdir: "{{ git_repo_dest }}/fpga/kube-rsu/"
+  changed_when: true

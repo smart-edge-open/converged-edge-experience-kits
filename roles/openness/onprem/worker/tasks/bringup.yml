@@ -95,7 +95,11 @@
   changed_when: false
 
 - name: Generate key for controller
-  shell: openssl pkey -pubout -in /var/lib/appliance/certs/key.pem -inform pem -outform der | md5sum | xxd -r -p | openssl enc -a | tr -d '=' | tr '/+' '_-'
+  shell: >
+    set -o pipefail &&
+    openssl pkey -pubout -in /var/lib/appliance/certs/key.pem -inform pem -outform der |
+    md5sum | xxd -r -p | openssl enc -a | tr -d '=' | tr '/+' '_-'
+  args:
   register: key_msg
   changed_when: true
 

@@ -14,6 +14,7 @@
 - name: patch node's Pod CIDR
   # flannel's CIDR is read from node's PodCIDR
   command: kubectl patch node "{{ ansible_hostname }}" -p '{"spec":{"podCIDR":"{{ flannel_cidr }}"}}'
+  changed_when: true
 
 - name: create temp dir
   tempfile:
@@ -43,11 +44,13 @@
   shell: kubectl kustomize . > kustomized-flannel.yml
   args:
     chdir: "{{ tmp_dir.path }}"
+  changed_when: true
 
 - name: apply flannel.yml with changes
-  shell: kubectl apply -f kustomized-flannel.yml
+  command: kubectl apply -f kustomized-flannel.yml
   args:
     chdir: "{{ tmp_dir.path }}"
+  changed_when: true
 
 - name: apply Flannel's NetworkAttachmentDefinition
   block:

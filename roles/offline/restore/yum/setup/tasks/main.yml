@@ -18,7 +18,7 @@
       src: /etc/yum.repos.d/
       dest: /etc/yum.repos.d.backup/
       remote_src: yes
-  when: yum_backup_dir.stat.exists == false
+  when: not yum_backup_dir.stat.exists
 
 - name: find openness .repo file
   find:
@@ -39,7 +39,8 @@
 
 - name: install yum-utils package
   # temporary fix for bug on 2.9.3 version: https://github.com/ansible/ansible/pull/66557
-  command: yum install -y yum-utils --disablerepo '*' --enablerepo 'openness-offline-*'
+  command: yum install -y yum-utils --disablerepo '*' --enablerepo 'openness-offline-*' # noqa 303
+  changed_when: true
 
 - name: disable all repositories
   shell: yum-config-manager --disable \*

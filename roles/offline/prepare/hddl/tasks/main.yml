@@ -14,7 +14,7 @@
 - name: hddl docker images
   block:
   - name: build HDDL intermediate image
-    shell: docker build -t hddl-deps-image --target hddl-deps-image ./build/hddlservice
+    command: docker build -t hddl-deps-image --target hddl-deps-image ./build/hddlservice
     args:
       chdir: "{{ git_repo_dest }}"
 

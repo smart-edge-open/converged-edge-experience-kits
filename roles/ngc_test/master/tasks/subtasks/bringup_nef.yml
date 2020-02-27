@@ -34,5 +34,5 @@
       use_config_proxy: yes
 
 - name: deploy NEF
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podNEF.yaml
-
+  command: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podNEF.yaml
+  changed_when: true

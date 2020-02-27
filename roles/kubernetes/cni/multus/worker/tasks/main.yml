@@ -12,17 +12,22 @@
   changed_when: false
 
 - name: get name of Multus pod on the worker
-  shell: kubectl get pods --field-selector status.phase=Running -n kube-system --field-selector spec.nodeName={{ ansible_hostname }} | awk '/kube-multus-ds-amd64/ {print $1;}'
+  shell: >
+    set -o pipefail &&
+    kubectl get pods --field-selector status.phase=Running -n kube-system
+    --field-selector spec.nodeName={{ ansible_hostname }} | awk '/kube-multus-ds-amd64/ {print $1;}'
+  args:
   register: nodes_multus_pod
   retries: 30
   delay: 10
-  until: nodes_multus_pod.stdout != ""
+  until: nodes_multus_pod.stdout
   changed_when: false
   delegate_to: "{{ groups['controller_group'][0] }}"
 
 - name: remove '.old' suffix from CNIs conflists so Multus will take it into consideration
   # shell is required due to glob (*)
   shell: rename --verbose '.old' '' /etc/cni/net.d/*
+  changed_when: true
 
 - name: delete Multus pod to recreate 00-multus.conf
   command: kubectl delete pod -n kube-system {{ nodes_multus_pod.stdout }}

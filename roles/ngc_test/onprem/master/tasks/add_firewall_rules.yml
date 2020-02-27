@@ -4,15 +4,17 @@
 ---
 
 - name: Add firewall rules for AF notification port
-  shell: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8051 -j ACCEPT
+  command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8051 -j ACCEPT
   ignore_errors: yes
+  changed_when: true
 
 - name: Add firewall rule for NEF port
-  shell: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8060 -j ACCEPT
+  command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8060 -j ACCEPT
   ignore_errors: yes
+  changed_when: true
 
 - name: Reload firewall rules
-  shell: firewall-cmd --reload
+  command: firewall-cmd --reload
   changed_when: false
   ignore_errors: yes
 

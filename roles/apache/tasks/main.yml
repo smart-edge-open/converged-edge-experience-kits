@@ -38,12 +38,16 @@
 - name: set IP address - inventory
   set_fact:
     ip_address: "{{ ansible_host }}"
-  when: ansible_host != "127.0.0.1" and ip_address == ""
+  when:
+  - ansible_host != "127.0.0.1"
+  - not ip_address
 
 - name: set IP address - localhost installation
   set_fact:
     ip_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
-  when: ansible_host == "127.0.0.1" and ip_address == ""
+  when:
+  - ansible_host == "127.0.0.1"
+  - not ip_address
 
 - name: add extension to /etc/pki/tls/openssl.cnf
   blockinfile:
@@ -53,7 +57,9 @@
       subjectAltName=IP:"{{ ip_address }}"
 
 - name: generate self-signed Apache certificate
-  command: openssl x509 -req -in apache.csr -CA cert.pem -CAkey key.pem -CAcreateserial -out apache.crt -days 500 -sha256 -extensions req_ext -extfile /etc/pki/tls/openssl.cnf
+  command: >
+    openssl x509 -req -in apache.csr -CA cert.pem -CAkey key.pem -CAcreateserial -out apache.crt -days 500
+    -sha256 -extensions req_ext -extfile /etc/pki/tls/openssl.cnf
   args:
     chdir: "{{ certs_path }}/"
   changed_when: true

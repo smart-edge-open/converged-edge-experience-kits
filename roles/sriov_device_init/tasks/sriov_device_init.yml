@@ -20,10 +20,12 @@
       dest: /etc/rc.d/rc.local
       line: "{{ item }}"
     with_items:
-      - "echo \"{{ fpga_userspace_vf.vendor_id}} {{ fpga_userspace_vf.pf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
-
+      - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
+    args:
   - name: create SRIOV VFs
-    shell: "echo 0 | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs && echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
+    shell: >
+      echo 0 | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs &&
+      echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs
     with_items:
       - "{{ pci_address.stdout_lines }}"
 
@@ -56,7 +58,7 @@
 - name: file not present
   debug:
     msg: "{{ syscfg_local_path }} does not exists, FPGA Config utility won't be set up on the node"
-  when: syscfg_local_file.stat.exists == False
+  when: not syscfg_local_file.stat.exists
 
 - name: set up FPGA Config utility on the node
   block:
@@ -65,14 +67,15 @@
       src: "{{ syscfg_local_path }}"
       dest: "{{ syscfg_remote_path }}"
   - name: build FPGA Config utility worker image
-    shell: make fpga-cfg
+    command: make fpga-cfg
     args:
       chdir: "{{ git_repo_dest }}"
-  when: syscfg_local_file.stat.exists == True
+  when: syscfg_local_file.stat.exists
 
 - name: disable SR-IOV ethernet interfaces
   shell: echo 0 > {{ item }}
-  with_lines: cat /etc/rc.d/rc.local 2> /dev/null | grep sriov_numvfs | sed -e 's/.*> //'
+  with_lines: "{{ cat /etc/rc.d/rc.local 2> /dev/null | grep sriov_numvfs | sed -e 's/.*> //' }}"
+  changed_when: false
 
 - name: clear SR-IOV boot time setup
   lineinfile:
@@ -86,7 +89,8 @@
   loop: "{{ query('dict', sriov.network_interfaces) }}"
   register: sriov_support
 
-- fail:
+- name: checking if device support SR-IOV
+  fail:
     msg: 'The device does not support SR-IOV'
   with_items: "{{ sriov_support.results }}"
   when: not item.stat.exists
@@ -94,6 +98,7 @@
 - name: enable SR-IOV for network interfaces
   shell: echo 0 > /sys/class/net/{{ item.key }}/device/sriov_numvfs && echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs
   loop: "{{ query('dict', sriov.network_interfaces) }}"
+  changed_when: true
 
 - name: enable SR-IOV for network interfaces at boot time
   lineinfile:

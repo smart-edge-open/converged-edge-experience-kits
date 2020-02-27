@@ -4,7 +4,7 @@
 ---
 
 - name: check if packages installed in proper version
-  shell: rpm -q openvswitch ovn ovn-common | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l
+  shell: rpm -q openvswitch ovn ovn-common | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l # noqa 306
   args:
     warn: false
   register: rpm_grep
@@ -58,13 +58,13 @@
   with_items: "{{ kubeovn_yamls }}"
 
 - name: remove kube-ovn-pinger from kube-ovn.yaml
-  shell: |
-    # Split kube-ovn.yaml into separate resource files(one YAML document per file)
-    csplit -z -f kube-ovn -b "%04d.yaml" kube-ovn.yaml '/^---$/' '{*}'
-    # Remove all files that contain 'kube-ovn-pinger'(including kube-ovn.yaml)
-    grep -l 'kube-ovn-pinger' kube-ovn* | xargs rm
-    # Merge files
-    cat kube-ovn000* > kube-ovn.yaml
+  block:
+    - name: split kube-ovn.yaml into separate resource files(one YAML document per file)
+      shell: csplit -z -f kube-ovn -b "%04d.yaml" kube-ovn.yaml '/^---$/' '{*}'
+    - name: remove all files that contain 'kube-ovn-pinger'(including kube-ovn.yaml)
+      shell: grep -l 'kube-ovn-pinger' kube-ovn* | xargs rm # noqa 306
+    - name: merge files
+      shell: cat kube-ovn000* > kube-ovn.yaml
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: true
@@ -104,7 +104,10 @@
   when: tmp_dir.path is defined
 
 - name: Wait till k8s master starts
-  shell: kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
+  shell: >
+    set -o pipefail &&
+    kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
+  args:
   register: k8s_master_init_start
   retries: 30
   delay: 10

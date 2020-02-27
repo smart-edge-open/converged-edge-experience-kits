@@ -27,10 +27,16 @@
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file
-  shell: jq '.ServerConfig.Hostname="{{ controller_name }}" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" | .CliConfig.NEFHostname="{{ controller_name }}"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  shell: >
+    set -o pipefail &&
+    jq '.ServerConfig.Hostname="{{ controller_name }}" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" |
+    .CliConfig.NEFHostname="{{ controller_name }}"' /etc/openness/configs/ngc/af.json |
+    sponge /etc/openness/configs/ngc/af.json
+  args:
+  changed_when: true
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -61,5 +67,9 @@
   when: docker_service_status.rc == 0 and ngc_test_prepare is not defined
 
 - name: update container's /etc/hosts file
-  shell: 'docker exec -t af-container  /bin/bash -c "echo {{ controller_ip }} {{ controller_name }} | tee -a /etc/hosts"'
+  shell: >
+    set -o pipefail &&
+    'docker exec -t af-container  /bin/bash -c "echo {{ controller_ip }}
+    {{ controller_name }} | tee -a /etc/hosts"'
+  args:
   when: ngc_test_prepare is not defined

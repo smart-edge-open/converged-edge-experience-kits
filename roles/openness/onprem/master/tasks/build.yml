@@ -13,7 +13,7 @@
     src: "{{ git_repo_dest }}/.env"
     dest: "{{ git_repo_dest }}/.env.ansible.backup"
     remote_src: yes
-  when: env_backup_file.stat.exists == false
+  when: not env_backup_file.stat.exists
 
 - name: generate .env file
   template:

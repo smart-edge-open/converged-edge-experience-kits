@@ -5,7 +5,8 @@
 
 - name: build OVS-DPDK images
   block:
-    - fail:
+    - name: checking if dpdk version fulfils requirements
+      fail:
         msg: The ovs dpdk patches are created for version v0.10.2. Please rebase then in case of version change.
       when: kubeovn_version != "v0.10.2"
 

@@ -25,17 +25,22 @@
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file
-  shell: jq '.UIEndpoint="http://{{ controller_ip }}:3020"' /etc/openness/configs/ngc/oam.json | sponge /etc/openness/configs/ngc/oam.json
+  shell: >
+    set -o pipefail &&
+    jq '.UIEndpoint="http://{{ controller_ip }}:3020"' /etc/openness/configs/ngc/oam.json |
+    sponge /etc/openness/configs/ngc/oam.json
+  args:
+  changed_when: true
 
 - name: build OAM docker image
   docker_image:
     name: oam-image:1.0
     source: build
     build:
-      path: "{{git_repo_ngc_build_dir}}/networkedge/oam"
+      path: "{{ git_repo_ngc_build_dir }}/networkedge/oam"
       pull: yes
       use_config_proxy: yes
 
 - name: deploy OAM
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podOAM.yaml
-
+  command: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podOAM.yaml
+  changed_when: true

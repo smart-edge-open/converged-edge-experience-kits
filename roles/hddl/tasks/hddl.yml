@@ -39,7 +39,7 @@
       url: "{{ openvino_url }}"
       dest: "{{ openvino_download_dest }}"
     when:
-    - ov_dl_dir.stat.exists == False
+    - not ov_dl_dir.stat.exists
     - not offline_mode
   - name: ensure download dir exists
     file:
@@ -62,8 +62,8 @@
     args:
       chdir: "{{ openvino_download_dir }}"
   - name: install OpenVino kernel drivers and udev rules
-    shell: "{{ openvino_hddl_dependency_install }}"
-  when: udev.stat.exists == false or vsc.stat.exists == False or ion.stat.exists == False
+    shell: "{{ openvino_hddl_dependency_install }}" # noqa 305
+  when: not udev.stat.exists or not vsc.stat.exists or not ion.stat.exists
 
 - name: offline | build HDDL
   include_tasks: offline_build.yml
@@ -76,9 +76,12 @@
   when: not offline_mode
 
 - name: bring up hddlservice container
-  shell: "VER={{ docker_hddlservice_tag }} docker-compose up -d --no-build hddlservice"
+  command: "docker-compose up -d --no-build hddlservice"
   args:
     chdir: "{{ git_repo_dest }}/build/hddlservice"
+  environment:
+    VER: "{{ docker_hddlservice_tag }}"
+  changed_when: true
 
 - name: wait until VPU is bound to Myriad driver
   wait_for:

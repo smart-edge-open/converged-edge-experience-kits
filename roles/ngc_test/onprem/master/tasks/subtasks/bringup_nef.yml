@@ -27,7 +27,7 @@
     dest: "{{ configs_dest }}/ngc"
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -57,5 +57,9 @@
   when: docker_service_status.rc == 0 and ngc_test_prepare is not defined
 
 - name: update container's /etc/hosts file
-  shell: 'docker exec -t nef-container /bin/bash -c "echo {{ controller_ip }} {{ controller_name }} | tee -a /etc/hosts"'
+  shell: >
+    set -o pipefail &&
+    'docker exec -t nef-container /bin/bash -c "echo {{ controller_ip }}
+    {{ controller_name }} | tee -a /etc/hosts"'
+  args:
   when:  ngc_test_prepare is not defined

@@ -13,7 +13,8 @@
   - name: output hostname
     command: hostname
     register: hostname_output
-  - set_fact:
+  - name: register k8s master node name
+    set_fact:
       k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
   - name: set label on master node
     command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite
@@ -30,18 +31,19 @@
     mode: a+x
 
 - name: run script to generate cerificates
-  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
+  command: ./genCerts.sh -t DNS -n afservice -m nefservice
   args:
-    chdir: "{{certs_dest}}/ngc"
+    chdir: "{{ certs_dest }}/ngc"
+  changed_when: true
 
 - name: create ngc namespace if needed
   block:
   - name: check if ngc namespace exists
-    shell: kubectl get ns ngc
+    command: kubectl get ns ngc
     ignore_errors: yes
     register: get_ns_ngc
   - name: create ngc namespace
-    shell: kubectl create namespace ngc
+    command: kubectl create namespace ngc
     when: get_ns_ngc.rc == 1
 
 - include_tasks: subtasks/bringup_oam.yml

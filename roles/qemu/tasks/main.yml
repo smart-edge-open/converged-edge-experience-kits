@@ -27,7 +27,7 @@
     url: "{{ qemu_download_url }}"
     dest: "{{ qemu_download_dest }}"
   when:
-  - qemu_dest_dir.stat.exists == False
+  - not qemu_dest_dir.stat.exists
   - not offline_mode
 
 - name: ensure install dir exists

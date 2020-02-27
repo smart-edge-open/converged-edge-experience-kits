@@ -10,8 +10,8 @@
 
 - name: copy archive to remote machine
   copy:
-    src: "{{ offline_path_common}}/{{ offline_archive }}"
-    dest: "{{ offline_path_common}}/{{ offline_archive }}"
+    src: "{{ offline_path_common }}/{{ offline_archive }}"
+    dest: "{{ offline_path_common }}/{{ offline_archive }}"
 
 - name: unarchive
   unarchive:

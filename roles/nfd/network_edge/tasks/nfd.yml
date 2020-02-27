@@ -30,7 +30,9 @@
   - enable_nfd_worker_certs.yml
 
 - name: apply NFD plugin
-  shell: kubectl kustomize . | kubectl apply -f -
+  shell: >
+    set -o pipefail &&
+    kubectl kustomize . | kubectl apply -f -
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: true
