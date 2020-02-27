@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 currdir=${PWD##*/}
 BASE_PATH="$( cd "$(dirname "$0")" ; pwd -P )"

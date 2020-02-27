@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 
 # Check first parameter given to script and sets Ansible's --limit accordingly.
 # If it starts with 'c' ('c', 'controller', 'ctrl', etc.), then '--limit controller_group' is used.
