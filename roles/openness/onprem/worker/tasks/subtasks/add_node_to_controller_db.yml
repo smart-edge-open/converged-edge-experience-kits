@@ -57,3 +57,9 @@
   register: node_add_response
   failed_when: node_add_response.status != 201
   when: not node_already_added
+ 
+- name: save node ID in /etc/environment
+  lineinfile:
+    path: /etc/environment
+    state: present
+    line: "NODEID={{ node_add_response.json.id }}"
