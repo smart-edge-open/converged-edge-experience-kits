@@ -1,0 +1,14 @@
+diff --git a/start_ovs_ovn.sh b/start_ovs_ovn.sh
+index 1f6e8e3..d179b53 100644
+--- a/start_ovs_ovn.sh
++++ b/start_ovs_ovn.sh
+@@ -26,5 +26,9 @@ ovs-vsctl set open . external-ids:ovn-remote-probe-interval=10000
+ ovs-vsctl set open . external-ids:ovn-encap-type=geneve
+ 
+ 
++ovs-vsctl set open . external-ids:ovn-bridge-mappings=local-network:br-local
++
++# Add bridge local
++ovs-vsctl --may-exist add-br br-local
+ 
+ tail -f /var/log/openvswitch/ovs-vswitchd.log

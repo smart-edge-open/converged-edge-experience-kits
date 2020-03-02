@@ -28,6 +28,7 @@
     - role: docker
     - role: git_repo
     - role: golang
+    # - role: ovn/master
     - role: openness/onprem/master
     - role: cnca/onprem
     # - role: nfd/onprem/master
@@ -65,6 +66,7 @@
     - role: libvirt
     - role: qemu
     - role: git_repo
+    # - role: ovn/worker
     # - role: ovs
     - role: openness/onprem/worker
     # - role: hddl

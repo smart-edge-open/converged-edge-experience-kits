@@ -11,6 +11,12 @@
   # - name: cleanup ngc_test
   #   include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
 
+  - name: load ovn variables
+    include_vars: ./roles/ovn/common/defaults/main.yml
+
+  - name: clean ovn container
+    include_tasks: ./roles/ovn/common/tasks/cleanup.yml
+
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml
 
@@ -41,6 +47,12 @@
 - hosts: edgenode_group
   serial: 1
   tasks:
+
+  - name: load ovn variables
+    include_vars: ./roles/ovn/common/defaults/main.yml
+
+  - name: clean ovn container
+    include_tasks: ./roles/ovn/common/tasks/cleanup.yml
 
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml

@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+ovs_files_to_clean:
+- /var/run/openvswitch/
+
+dockerimage_files_to_rm:
+- Dockerfile
+- start_ovs_ovn.sh
+
+huge_dir: /dev/hugepages
+ovs_dir: /var/run/openvswitch
+
+ovs_dpdk: true
+dpdk_version: 18.11.2
+dpdk_install_dir: /opt/dpdk-{{ dpdk_version }}
+
+ovn_img_dpdk_version: "{{ dpdk_version }}"
+ovn_img_dpdk_dir: /usr/src/dpdk-{{ ovn_img_dpdk_version }}/
+ovn_img_dpdk_target: x86_64-native-linuxapp-gcc
+ovn_img_dpdk_build: "{{ ovn_img_dpdk_dir }}{{ ovn_img_dpdk_target }}"
+ovs_img_version: 2.12.0
+
+ovs_dpdk_socket_mem: "1024,0"
+ovs_dpdk_pmd_cpu_mask: "0x4"
+ovs_dpdk_lcore_mask: "0x2"
+#ovn_dpdk_hugepage_size: 2M
+#ovs_dpdk_hugepages: 1G
+#ovs_dpdk_resources_requests: 1G
+ovs_dpdk_resource_limits: 1G
+
+host_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+
