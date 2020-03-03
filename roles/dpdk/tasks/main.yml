@@ -143,7 +143,12 @@
   - "rte_kni"
   - "uio_pci_generic"
   - "uio"
-  - "vfio"
+
+  - name: unload vfio
+    modprobe:
+      name: vfio
+      state: absent
+    ignore_errors: yes
 
 - name: load uio and igb_uio modules
   modprobe:
