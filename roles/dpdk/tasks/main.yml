@@ -143,6 +143,7 @@
   - "rte_kni"
   - "uio_pci_generic"
   - "uio"
+  - "vfio"
 
 - name: load uio and igb_uio modules
   modprobe:
@@ -157,3 +158,8 @@
     name: "rte_kni"
     state: present
     params: 'carrier=on'
+
+- name: load vfio module
+  modprobe:
+    name: vfio
+    state: present
