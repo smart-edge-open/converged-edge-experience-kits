@@ -57,3 +57,24 @@
     path: /var/run/openvswitch/db.sock
     timeout: 600
 
+- name: build OVN CNI
+  block:
+  - name: build ovn cni executable
+    shell: source /etc/profile && make ovncni
+    args:
+      chdir: "{{ git_repo_dest }}"
+  - name: create /opt/cni/bin/
+    file:
+      path: /opt/cni/bin/
+      state: directory
+  - name: copy ovn cni to /
+    copy:
+      src: "{{ git_repo_dest }}/dist/ovncni/ovncni"
+      dest: /opt/cni/bin/ovn
+      remote_src: yes
+
+- name: add OVN_NB_DB env to /etc/environment
+  lineinfile:
+    path: /etc/environment
+    state: present
+    line: "OVN_NB_DB=tcp:{{ controller_ip }}:6641"

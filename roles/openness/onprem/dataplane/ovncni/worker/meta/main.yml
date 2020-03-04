@@ -5,5 +5,4 @@
 
 dependencies:
 - dpdk
-- ovn/common
-
+- openness/onprem/dataplane/ovncni/common

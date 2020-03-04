@@ -5,5 +5,4 @@
 
 dependencies:
 - role: dpdk
-- role: ovn/common
-
+- role: openness/onprem/dataplane/ovncni/common

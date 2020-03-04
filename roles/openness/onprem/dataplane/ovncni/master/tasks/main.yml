@@ -62,3 +62,16 @@
     timeout: 600
   changed_when: false
 
+- name: deploy OVN CNI configuration
+  block:
+  - name: create artifacts/controller/cni directory
+    file:
+      path: "{{ git_repo_dest }}/artifacts/controller/cni"
+      state: directory
+  - name: copy config files to edgecontroller/artifacts/controller/cni
+    copy:
+      src: "{{ item }}"
+      dest: "{{ git_repo_dest }}/artifacts/controller/cni"
+    with_items:
+    - cni_args.json
+    - cni.conf

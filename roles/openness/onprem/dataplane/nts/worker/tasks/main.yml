@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create /var/lib/appliance/nts
+  file:
+    path: /var/lib/appliance/nts
+    state: directory
+
+- name: create /var/lib/appliance/nts/qemu
+  file:
+    path: /var/lib/appliance/nts/qemu
+    state: directory
+    group: kvm
+    mode: g+s
+
+- name: copy nts.cfg -> /var/lib/appliance/nts/nts.cfg
+  copy:
+    src: "{{ git_repo_dest }}/internal/nts/nts.cfg"
+    dest: /var/lib/appliance/nts/nts.cfg
+    remote_src: yes
+
+- name: build NTS container
+  make:
+    target: nts
+    chdir: "{{ git_repo_dest }}"
+    params:
+      RTE_SDK: "{{ ansible_local.dpdk.dpdk_install_dir }}"
+      RTE_TARGET: "{{ dpdk_make_target }}"
+
+- name: remove old NTS container
+  docker_container:
+    name: "{{ docker_nts_container_name }}"
+    state: absent
+
+- name: set OVS-disabled default values
+  set_fact:
+    ovs_enabled: false
+    ovs_bridge_name: ""
+  when: ovs_version is not defined
+
+- name: set OVS-enabled default values
+  set_fact:
+    ovs_enabled: true
+  when: ovs_version is defined
+
+- name: up nts container
+  command: "docker-compose up --no-start --no-build nts"
+  args:
+    chdir: "{{ git_repo_dest }}"
+  environment:
+    VER: "{{ docker_containers_ver }}"
+    OVSE: "{{ ovs_enabled }}"
+    OVS_BRIDGE_NAME: "{{ ovs_bridge_name }}"
+    NTS_MEM_MB_S0: "{{ docker_nts_mem_mb_s0 }}"
+    NTS_MEM_MB_S1: "{{ docker_nts_mem_mb_s1 }}"
+  changed_when: true

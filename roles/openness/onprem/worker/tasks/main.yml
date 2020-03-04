@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -7,4 +7,9 @@
 - include_tasks: prebuild.yml
 - include_tasks: build.yml
 - include_tasks: deploy.yml
+
+- name: set up dataplane
+  include_role:
+    name: "openness/onprem/dataplane/{{ onprem_dataplane }}/worker"
+
 - include_tasks: bringup.yml

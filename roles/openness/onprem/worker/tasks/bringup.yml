@@ -26,11 +26,6 @@
     name: "{{ docker_edgednssvr_container_name }}"
     state: absent
 
-- name: remove nts container
-  docker_container:
-    name: "{{ docker_nts_container_name }}"
-    state: absent
-
 # Bring up containers
 - name: up syslog container
   command: "docker-compose up -d --no-build syslog-ng"
@@ -48,29 +43,6 @@
   environment:
     LOCAL_SYSLOG_IP: "192.168.122.1"
     VER: "{{ docker_containers_ver }}"
-  changed_when: true
-
-- name: set OVS-disabled default values
-  set_fact:
-    ovs_enabled: false
-    ovs_bridge_name: ""
-  when: ovs_version is not defined
-
-- name: set OVS-enabled default values
-  set_fact:
-    ovs_enabled: true
-  when: ovs_version is defined
-
-- name: up nts container
-  command: "docker-compose up --no-start --no-build nts"
-  args:
-    chdir: "{{ git_repo_dest }}"
-  environment:
-    VER: "{{ docker_containers_ver }}"
-    OVSE: "{{ ovs_enabled }}"
-    OVS_BRIDGE_NAME: "{{ ovs_bridge_name }}"
-    NTS_MEM_MB_S0: "{{ docker_nts_mem_mb_s0 }}"
-    NTS_MEM_MB_S1: "{{ docker_nts_mem_mb_s1 }}"
   changed_when: true
 
 - name: up EAA container

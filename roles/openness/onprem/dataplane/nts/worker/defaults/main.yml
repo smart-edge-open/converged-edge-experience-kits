@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+dpdk_make_target: "x86_64-native-linuxapp-gcc"
+docker_nts_mem_mb_s0: "2048"
+docker_nts_mem_mb_s1: "0"
+docker_nts_container_name: "nts"

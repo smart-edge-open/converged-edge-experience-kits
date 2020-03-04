@@ -32,6 +32,12 @@ cce_admin_password: "pass"
 kubernetes_cnis:
 - kubeovn
 
+# Dataplane to be used for On-Premises mode
+# Available dataplanes:
+# - nts
+# - ovncni
+onprem_dataplane: "nts"
+
 ## Offline On Premise mode
 
 # offline_mode setting:

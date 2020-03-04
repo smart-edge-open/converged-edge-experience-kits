@@ -1,8 +1,23 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - include_tasks: cleanup.yml
 - include_tasks: prebuild.yml
+
+- name: set up dataplane
+  block:
+  - name: check if dataplane role for master exists
+    stat:
+      path: "roles/openness/onprem/dataplane/{{ onprem_dataplane }}/master"
+    register: dataplane_role_dir
+    delegate_to: 127.0.0.1
+  - name: set up dataplane
+    include_role:
+      name: "openness/onprem/dataplane/{{ onprem_dataplane }}/master"
+    when:
+    - dataplane_role_dir.stat.isdir is defined
+    - dataplane_role_dir.stat.isdir
+
 - include_tasks: build.yml
