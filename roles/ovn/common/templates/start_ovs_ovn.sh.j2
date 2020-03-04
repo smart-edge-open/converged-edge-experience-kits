@@ -18,6 +18,11 @@ ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-hugepage-dir="{{ huge_d
 ovs-ctl restart --no-ovsdb-server  --system-id=random
 ovs-ctl --protocol=udp --dport=6081 enable-protocol
 
+{% if host_ip == controller_ip %}
+# Start northd only on controller (host_ip == controller_ip)
+ovn-ctl --db-nb-create-insecure-remote=yes --db-sb-create-insecure-remote=yes start_northd
+{% endif %}
+
 
 # Start ovn-controller
 ovn-ctl restart_controller
@@ -29,6 +34,7 @@ ovs-vsctl set open . external-ids:ovn-remote=tcp:{{ controller_ip }}:6642
 ovs-vsctl set open . external-ids:ovn-remote-probe-interval=10000
 ovs-vsctl set open . external-ids:ovn-encap-type=geneve
 
+source configure_ovn_net.sh
 
 tail -f /var/log/openvswitch/ovs-vswitchd.log
 

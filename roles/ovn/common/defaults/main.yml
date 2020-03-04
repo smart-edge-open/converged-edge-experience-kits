@@ -26,9 +26,6 @@ ovs_img_version: 2.12.0
 ovs_dpdk_socket_mem: "1024,0"
 ovs_dpdk_pmd_cpu_mask: "0x4"
 ovs_dpdk_lcore_mask: "0x2"
-#ovn_dpdk_hugepage_size: 2M
-#ovs_dpdk_hugepages: 1G
-#ovs_dpdk_resources_requests: 1G
 ovs_dpdk_resource_limits: 1G
 
 host_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"

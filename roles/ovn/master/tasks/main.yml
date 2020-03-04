@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 
 ---
 
@@ -8,12 +8,6 @@
 
 - name: build OVS-DPDK images
   block:
-    - name: apply patch to start_ovs_ovn.sh for controller
-      patch:
-        src: "start_ovs_ovn.patch"
-        dest: "{{ dpdk_install_dir }}/start_ovs_ovn.sh"
-        basedir: "{{ dpdk_install_dir }}"
-
     - name: build OVS-DPDK image (this may take some time...)
       docker_image:
         name: ovs-ovn
