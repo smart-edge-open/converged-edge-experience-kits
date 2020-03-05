@@ -61,13 +61,16 @@
   block:
     - name: split kube-ovn.yaml into separate resource files(one YAML document per file)
       shell: csplit -z -f kube-ovn -b "%04d.yaml" kube-ovn.yaml '/^---$/' '{*}'
+      args:
+        chdir: "{{ tmp_dir.path }}"
     - name: remove all files that contain 'kube-ovn-pinger'(including kube-ovn.yaml)
       shell: grep -l 'kube-ovn-pinger' kube-ovn* | xargs rm # noqa 306
+      args:
+        chdir: "{{ tmp_dir.path }}"
     - name: merge files
       shell: cat kube-ovn000* > kube-ovn.yaml
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: true
+      args:
+        chdir: "{{ tmp_dir.path }}"
 
 - name: enable DPDK support
   block:
