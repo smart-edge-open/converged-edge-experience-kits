@@ -6,6 +6,10 @@
 # Playbook for On-Premises deployment
 
 - hosts: controller_group
+  vars:
+    hugepage_amount: "1024"
+    hugepage_size: "2M"
+
   pre_tasks:
   - debug:
       msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"

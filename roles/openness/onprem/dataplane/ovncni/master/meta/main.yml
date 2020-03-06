@@ -4,5 +4,7 @@
 ---
 
 dependencies:
+- role: machine_setup/grub
+- role: machine_setup/conditional_reboot
 - role: dpdk
 - role: openness/onprem/dataplane/ovncni/common
