@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Delete PV directories
+  file:
+    path: "{{ default_pv_dir }}"
+    state: absent

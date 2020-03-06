@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove all vms
+  command: kubectl delete --all vm --wait=true
+  ignore_errors: yes
+
+- name: delete all DV
+  command: kubectl delete --all dv --wait=true
+  ignore_errors: yes
+
+- name: delete all PV
+  command: kubectl delete --all pv --wait=true
+  ignore_errors: yes
+
+- name: delete all SC
+  command: kubectl delete --all sc --wait=true
+  ignore_errors: yes
+
+- name: delete CDI network policy
+  command: kubectl delete networkpolicy cdi-upload-proxy-policy --wait=true
+  ignore_errors: yes
+
+- name: uninstall CDI
+  block:
+  - name: Delete namespace
+    command: kubectl delete -n cdi cdi cdi --wait=true
+    ignore_errors: yes
+  - name: Delete apiservice
+    command: kubectl delete apiservices v1alpha1.upload.cdi.kubevirt.io --wait=true
+    ignore_errors: yes
+  - name: Delete mutating webhook
+    command: kubectl delete mutatingwebhookconfigurations cdi-api-datavolume-mutate --wait=true
+    ignore_errors: yes
+  - name: Delete validating webhook
+    command: kubectl delete validatingwebhookconfigurations cdi-api-datavolume-validate --wait=true
+    ignore_errors: yes
+  - name: Delete operator
+    command: kubectl delete -f {{ cdi_operator_url }} --wait=true
+    ignore_errors: yes
+  - name: Delete controller
+    command: kubectl delete -f {{ cdi_cr_url }} --wait=true
+    ignore_errors: yes
+
+- name: delete vritctl
+  command: kubectl krew uninstall virt
+  ignore_errors: yes
+  
+- name: delete krew
+  file:
+    path: ~/.krew
+    state: absent
+
+- name: delete krew directory
+  file:
+    path: "{{ krew_dir }}"
+    state: absent
+
+- name: uninstall KuberVirt
+  block:
+  - name: Delete namespace
+    command: kubectl delete -n kubevirt kubevirt kubevirt --wait=true
+    ignore_errors: yes
+  - name: Delete apiservice
+    command: kubectl delete apiservices v1alpha3.subresources.kubevirt.io --wait=true
+    ignore_errors: yes
+  - name: Delete mutating webhook
+    command: kubectl delete mutatingwebhookconfigurations virt-api-mutator --wait=true
+    ignore_errors: yes
+  - name: Delete validating webhook
+    command: kubectl delete validatingwebhookconfigurations virt-api-validator --wait=true
+    ignore_errors: yes
+  - name: Delete operator
+    command: kubectl delete -f "{{ kubevirt_operator_url }}" --wait=true
+    ignore_errors: yes
+  - name: Delete controller
+    command: kubectl delete -f "{{ kubevirt_cr_url }}" --wait=true
+    ignore_errors: yes

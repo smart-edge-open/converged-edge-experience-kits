@@ -6,6 +6,17 @@
 - name: include sriov/common default vars
   include_vars: ../../kubernetes/cni/sriov/common/defaults/main.yml
 
+- name: Check if VFIO-PCI loaded
+  shell: lsmod | grep vfio_pci
+  register: vfio_loaded
+  ignore_errors: yes
+
+- name: Load VFIO-PCI
+  modprobe:
+    name: "vfio-pci"
+    state: present
+  when: vfio_loaded.rc != 0
+
 - block:
   - name: check if FPGA SRIOV device is connected and get PCI address of devices
     shell: lspci | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+default_pv_dir: /var/vd/
+default_pv_vol_name: vol
+pv_vm_max_num:  64
+

@@ -33,6 +33,7 @@
     - role: kubernetes/cni
     - role: openness/network_edge/master
     - role: cnca/master
+    - role: kubevirt/master
     # - role: ngc_test/master
     # - role: opae_fpga/master
     - role: nfd/network_edge
@@ -69,5 +70,6 @@
     - role: kubernetes/worker
     - role: kubernetes/cni
     - role: openness/network_edge/worker
+    - role: kubevirt/worker
     # - role: biosfw/worker
     # - role: cmk/worker

@@ -26,5 +26,11 @@ fpga_userspace_vf:
   vf_number: "2"
 
 # Config for master
-config_map_path: "{{ git_repo_dest }}/sriov/configMap.yaml"
-fpga_userspace_config_map_path: "{{ git_repo_dest }}/fpga/configMap.yaml"
+config_map_name: "configMap.yaml"
+fpga_map_name: "addFpgaConfigMap.yaml"
+vm_map_name: "addVmConfigMap.yaml"
+
+# VM support
+kubevirt:
+  enabled: false
+

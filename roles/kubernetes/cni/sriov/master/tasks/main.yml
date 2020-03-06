@@ -26,6 +26,13 @@
     src: openness-sriov-crd.yml
     dest: "{{ tmp_dir.path }}/openness-sriov-crd.yml"
 
+# Copy SR-IOV network CRD to temporary directory
+- name: create SR-IOV network CRD for VM
+  copy:
+    src: openness-sriov-vm-crd.yml
+    dest: "{{ tmp_dir.path }}/openness-sriov-vm-crd.yml"
+  when: kubevirt.enabled
+
 # Create SR-IOV network
 - name: deploy SR-IOV network CRD
   command: kubectl apply -f openness-sriov-crd.yml
@@ -33,15 +40,44 @@
     chdir: "{{ tmp_dir.path }}"
   changed_when: true
 
+# Create SR-IOV network for VM
+- name: deploy SR-IOV network CRD for VM
+  shell: kubectl apply -f openness-sriov-vm-crd.yml
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  when: kubevirt.enabled
+
+# Copy ConfigMap variants
+- name: Copy ConfigMap variants for SRIOV
+  block:
+  - name: Copy base config
+    copy:
+      src: "{{ config_map_name }}"
+      dest: "{{ tmp_dir.path }}/{{ config_map_name }}"
+  - name: Copy FPGA config
+    copy:
+      src: "{{ fpga_map_name }}"
+      dest: "{{ tmp_dir.path }}/{{ fpga_map_name }}"
+  - name: Copy VM config
+    copy:
+      src: "{{ vm_map_name }}"
+      dest: "{{ tmp_dir.path }}/{{ vm_map_name }}"
+
+# Add VM config to base config
+- name: Add VM config to base config
+  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ vm_map_name }}' {{ tmp_dir.path }}/{{ config_map_name }}
+  when: kubevirt.enabled
+
+# Add FPGA config to base config
+- name: Add FPGA config to base config
+  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ fpga_map_name }}' {{ tmp_dir.path }}/{{ config_map_name }}
+  when: fpga_sriov_userspace.enabled
+
 # Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
 - name: deploy dev plugin configMap
-  command: kubectl apply -f {{ config_map_path }}
-  when: not fpga_sriov_userspace.enabled
-
-# Create/deploy a sample configMap to be used for FPGA USERSPACE SRIOV-DEVICE plugin
-- name: deploy FPGA dev plugin configMap
-  command: kubectl apply -f {{ fpga_userspace_config_map_path }}
-  when: fpga_sriov_userspace.enabled
+  shell: kubectl apply -f {{ config_map_name }}
+  args:
+    chdir: "{{ tmp_dir.path }}"
 
 # Deploy SRIOV-DEVICE Plugin
 - name: deploy dev plugin

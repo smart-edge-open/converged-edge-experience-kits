@@ -22,6 +22,12 @@
   - name: cleanup fpga
     include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
 
+  - name: load kubevirt variables
+    include_vars: ./roles/kubevirt/master/defaults/main.yml
+
+  - name: cleanup kubevirt
+    include_tasks: ./roles/kubevirt/master/tasks/cleanup.yml
+
   - name: load cnca variables
     include_vars: ./roles/cnca/master/defaults/main.yml
 
@@ -78,6 +84,12 @@
   serial: 1
   tasks:
   # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
+
+  - name: load kubevirt variables
+    include_vars: ./roles/kubevirt/worker/defaults/main.yml
+
+  - name: cleanup kubevirt
+    include_tasks: ./roles/kubevirt/worker/tasks/cleanup.yml
 
   - name: load cmk variables
     include_vars: ./roles/cmk/worker/defaults/main.yml
