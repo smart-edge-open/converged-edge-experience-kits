@@ -67,14 +67,32 @@
     file:
       path: /opt/cni/bin/
       state: directory
-  - name: copy ovn cni to /
+  - name: copy ovn cni to /opt/cni/bin/ovn
     copy:
       src: "{{ git_repo_dest }}/dist/ovncni/ovncni"
       dest: /opt/cni/bin/ovn
       remote_src: yes
+      mode: '0755'
 
 - name: add OVN_NB_DB env to /etc/environment
   lineinfile:
     path: /etc/environment
     state: present
     line: "OVN_NB_DB=tcp:{{ controller_ip }}:6641"
+
+- name: update EVA config file
+  shell: >
+    set -o pipefail &&
+    jq '.UseCNI=true' /var/lib/appliance/configs/eva.json | sponge /var/lib/appliance/configs/eva.json
+  changed_when: true
+
+- name: create NTS config for ELA's InterfaceService compatibility
+  block:
+  - name: create /var/lib/appliance/nts
+    file:
+      path: /var/lib/appliance/nts
+      state: directory
+  - name: create empty nts.cfg
+    file:
+      path: /var/lib/appliance/nts/nts.cfg
+      state: touch
