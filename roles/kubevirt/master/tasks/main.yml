@@ -34,6 +34,7 @@
     unarchive:
       src: "{{ krew_dest }}"
       dest: "{{ krew_dir }}"
+      remote_src: True
       extra_opts: "--strip-components=1"
 
 - name: Install Krew plugin
@@ -46,8 +47,6 @@
     shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" update
     args:
       chdir: "{{ krew_dir }}"
-  - name: Update path to Krew
-    shell: export PATH="${PATH}:${HOME}/.krew/bin"
   - name: Add path to profile
     lineinfile:
       state: present
@@ -55,7 +54,7 @@
       line: export PATH="${PATH}:${HOME}/.krew/bin"
 
 - name: Install Virtctl plugin
-  shell: kubectl krew install virt
+  shell: ${HOME}/.krew/bin/kubectl-krew install virt
 
 - name: Install CDI
   block:
@@ -78,7 +77,7 @@
     src: cdiNetworkPolicy.yaml
     dest: "{{ kv_dir.path }}/cdiNetworkPolicy.yaml"
 
-- name: Copy Local Volume Storage Class 
+- name: Copy Local Volume Storage Class
   copy:
     src: localStorageClass.yaml
     dest: "{{ kv_dir.path }}/localStorageClass.yaml"
