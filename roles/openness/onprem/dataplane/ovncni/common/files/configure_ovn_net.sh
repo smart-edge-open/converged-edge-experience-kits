@@ -70,6 +70,13 @@ if [ -f "${OVN_NB_DB_PATH}" ]; then
     ovn-nbctl lsp-set-type local-ovs-phy localnet
     ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
     #-------------------------------------------
+
+    # Configure DHCP options
+    if [[ ! $(ovn-nbctl find dhcp_options cidr="${Cluster_Subnet}/${Cluster_Mask}") ]]; then
+        mac=$(ovn-nbctl get logical_router_port "${Cluster_Switch}-to-${Cluster_Router}" mac | tr -d '"')
+        ovn-nbctl create dhcp_options cidr="${Cluster_Subnet}/${Cluster_Mask}" \
+            options="\"lease_time\"=\"3600\" \"router\"=\"${Cluster_Gateway}\" \"server_id\"=\"${Cluster_Gateway}\" \"server_mac\"=\"${mac}\""
+    fi
 fi
 #------------------------------------
 
@@ -97,6 +104,8 @@ ip addr flush dev "${Node_Port}"
 ip addr add "${portIP}/${Node_Mask}" dev "${Node_Port}"
 ip link set dev "${Node_Port}" address "${portMAC}"
 ip link set dev "${Node_Port}" up
+ip route add "${Cluster_Subnet}/${Cluster_Mask}" via "${Node_Gateway}"
+
 
 ping "${Node_Gateway}" -c 1
 #---------------------------------

@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Remove old dns entry
+  xml:
+    path: /usr/share/libvirt/networks/default.xml
+    xpath: /network/dns
+    state: absent
+
+- name: Add new dns entry
+  xml:
+    path: /usr/share/libvirt/networks/default.xml
+    xpath: /network/dns
+    attribute: enable
+    value: "no"
+
+- virt_net:
+    command: destroy
+    name: default
+
+- virt_net:
+    command: undefine
+    name: default
+
+- name: Load DNS settings
+  shell: virsh net-define /usr/share/libvirt/networks/default.xml
+
+- virt_net:
+    command: start
+    name: default
+    autostart: yes
+
+- name: Change /etc/dnsmasq.conf
+  blockinfile:
+    path: /etc/dnsmasq.conf
+    block: |
+      strict-order
+      server=/local.mec/192.168.122.128
+      except-interface=lo
+      bind-dynamic
+      interface=virbr0
+      interface=ovn-local
+      address=/eaa.openness/eva.openness/syslog.openness/192.168.122.1
+
+- name: Enable dnsmasq service
+  systemd:
+    name: dnsmasq
+    enabled: yes
+    masked: no
+    state: restarted

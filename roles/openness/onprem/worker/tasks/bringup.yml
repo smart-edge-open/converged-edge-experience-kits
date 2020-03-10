@@ -59,6 +59,7 @@
     chdir: "{{ git_repo_dest }}"
   environment:
     VER: "{{ docker_containers_ver }}"
+    HOSTNAME: "{{ ansible_hostname }}"
   changed_when: true
 
 # Certificates and keys exchange

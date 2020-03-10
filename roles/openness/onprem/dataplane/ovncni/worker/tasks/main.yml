@@ -6,6 +6,8 @@
 - name: include common vars
   include_vars: ../common/defaults/main.yml
 
+- include_tasks: dnsmasq.yml
+
 - name: build OVS-DPDK images
   block:
     - name: build OVS-DPDK image (this may take some time...)

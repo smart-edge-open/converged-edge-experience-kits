@@ -24,3 +24,16 @@
     name: patch
     state: present
 
+#TODO: Use variables(Currently defined in configure_ovn_net.sh)
+- name: Add firewall rules for OVN masquerade
+  command: firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 0 -s 100.0.0.0/16 -o {{ ansible_default_ipv4.interface }} -j MASQUERADE
+  changed_when: true
+
+- name: Add firewall rules to accept ovn-local interface
+  command: firewall-cmd --permanent --zone=trusted --change-interface=ovn-local
+  changed_when: true
+
+- name: Reload firewall rules
+  command: firewall-cmd --reload
+  changed_when: true
+  
