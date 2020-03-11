@@ -3,7 +3,7 @@
                 "selectors": {
                     "vendors": ["1172"],
                     "devices": ["5050"],
-                    "drivers": ["igb_uio"]
+                    "drivers": ["igb_uio", "vfio-pci"]
                 }
             },
             {
@@ -11,6 +11,6 @@
                 "selectors": {
                     "vendors": ["8086"],
                     "devices": ["0d90"],
-                    "drivers": ["igb_uio"]
+                    "drivers": ["igb_uio", "vfio-pci"]
                 }
             },

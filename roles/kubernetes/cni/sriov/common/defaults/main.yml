@@ -24,6 +24,7 @@ fpga_userspace_vf:
   vf_device_id: "0d90"
   pf_device_id: "0d8f"
   vf_number: "2"
+  vf_driver: "vfio-pci"
 
 # Config for master
 config_map_name: "configMap.yaml"
