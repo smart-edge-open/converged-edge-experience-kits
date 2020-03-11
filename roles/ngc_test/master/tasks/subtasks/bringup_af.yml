@@ -24,6 +24,11 @@
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
     dest: "{{ configs_dest }}/ngc"
 
+- name: copy OAUTH2 configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    dest: "{{ configs_dest }}/ngc"
+
 - name: update af config file
   shell: >
     set -o pipefail &&

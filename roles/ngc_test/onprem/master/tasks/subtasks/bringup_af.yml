@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright © 2019 Intel Corporation
+# Copyright © 2019-2020 Intel Corporation
 
 ---
 
@@ -24,6 +24,11 @@
 - name: copy AF configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
+    dest: "{{ configs_dest }}/ngc"
+
+- name: copy oauth2 configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file
@@ -69,7 +74,7 @@
 - name: update container's /etc/hosts file
   shell: >
     set -o pipefail &&
-    'docker exec -t af-container  /bin/bash -c "echo {{ controller_ip }}
-    {{ controller_name }} | tee -a /etc/hosts"'
+    docker exec -t af-container  /bin/bash -c "echo {{ controller_ip }}
+    {{ controller_name }} | tee -a /etc/hosts"
   args:
   when: ngc_test_prepare is not defined

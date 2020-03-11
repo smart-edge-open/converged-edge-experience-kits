@@ -34,6 +34,13 @@
     remote_src: yes
   delegate_to: "{{ node_ip }}"
 
+- name: copy oauth2.json configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    dest: "{{ configs_dest }}/ngc"
+    remote_src: yes
+  delegate_to: "{{ node_ip }}"
+
 - name: check Docker service
   command: systemctl status docker
   ignore_errors: true

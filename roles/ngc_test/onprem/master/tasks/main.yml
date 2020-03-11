@@ -21,7 +21,7 @@
     mode: a+x
 
 - name: run script to generate cerificates
-  shell: './genCerts.sh -t DNS -n {{ controller_name }} -m {{ controller_name }}' # noqa 305
+  shell: './genCerts.sh -t DNS -h {{ controller_name }}' # noqa 305
   args:
     chdir: "{{ certs_dest }}/ngc"
   changed_when: true
