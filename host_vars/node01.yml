@@ -1,9 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 sriov:
   network_interfaces: {}
+  interface_subnets: []
+  interface_ips: []
+  network_name: []
+  vm_vf_ports: 0
 
 ovs_ports: []

@@ -68,6 +68,7 @@
     - role: docker
     - role: libvirt
     - role: qemu
+    - role: sriov_device_init/onprem
     - role: git_repo
     # - role: ovs
     - role: openness/onprem/worker

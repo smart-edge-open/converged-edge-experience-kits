@@ -1,0 +1,104 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: load DPDK install path
+  include_vars: ./roles/dpdk/defaults/main.yml
+
+- name: checking network interfaces for SR-IOV support
+  stat:
+    path: /sys/class/net/{{ item.key }}/device/sriov_numvfs
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+  register: sriov_support
+
+- fail:
+    msg: 'The device does not support SR-IOV'
+  with_items: "{{ sriov_support.results }}"
+  when: not item.stat.exists
+
+- name: enable SR-IOV for network interfaces
+  shell: echo 0 > /sys/class/net/{{ item.key }}/device/sriov_numvfs && echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+
+- name: enable SR-IOV for network interfaces at boot time
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    line: "echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs"
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+
+- name: enable SR-IOV startup
+  file:
+    dest: /etc/rc.d/rc.local
+    mode: a+x
+
+- name: get list of PCI addresses of created VFs
+  shell: lspci -D | grep "Ethernet Virtual" | cut -d E -f 1
+  register: pci_addrs
+
+- name: get list of paths to the interface names
+  shell: find /sys/devices/pci* -name {{ item }}
+  loop: "{{ pci_addrs.stdout_lines }}"
+  register: interface_paths
+
+- name: get list of interface names
+  shell: ls {{ item.stdout }}/net
+  loop: "{{ interface_paths.results }}"
+  register: interface_names
+
+- name: get vendor ID for each VF
+  shell: cat /sys/class/net/{{ item.stdout }}/device/vendor | cut -d x -f 2
+  loop: "{{ interface_names.results }}"
+  register: vf_vendor_id
+
+- name: get device ID for each VF
+  shell: cat /sys/class/net/{{ item.stdout }}/device/device | cut -d x -f 2
+  loop: "{{ interface_names.results }}"
+  register: vf_device_id
+
+- name: set ids for PCI Stub
+  shell: echo "{{ item.0.stdout }} {{ item.1.stdout }}" > /sys/bus/pci/drivers/pci-stub/new_id
+  loop: "{{ query('together', vf_vendor_id.results, vf_device_id.results) }}"
+
+- name: bind ports to PCI Stub
+  shell: "{{ dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=pci-stub {{ interface_names.results[loop_index].stdout }}"
+  with_sequence: start=0 count={{ sriov.vm_vf_ports }}
+  loop_control:
+    index_var: loop_index
+
+- name: check that docker is installed and running
+  shell: systemctl status docker
+  ignore_errors: yes
+  changed_when: false
+  args:
+    warn: false
+  register: docker_status
+
+- block:
+  - name: get list of VF interfaces not bound to VFIO or UIO
+    shell: "{{ dpdk_install_dir }}/usertools/dpdk-devbind.py --status | grep 'Ethernet Virtual' | grep 'unused=igb_uio' | cut -d ' ' -f 1"
+    register: interface_addr
+
+  - name: get the interface paths
+    shell: find /sys/devices/pci* -name {{ item }}
+    loop: "{{ interface_addr.stdout_lines }}"
+    register: ifnames_path
+
+  - name: get the interface names
+    shell: ls {{ item.stdout }}/net
+    loop: "{{ ifnames_path.results }}"
+    register: ifnames
+
+  - name: check ifnames
+    shell: echo {{ item.stdout }}
+    loop: "{{ ifnames.results }}"
+
+  - name: Reset docker networks
+    shell: docker network rm {{ item }}
+    ignore_errors: yes
+    loop: "{{ sriov.network_name }}"
+
+  - name: configure the docker network for each VF port
+    shell: docker network create -d macvlan --subnet={{ item.0 }} --gateway={{ item.1 }} -o parent={{ item.2.stdout }} {{ item.3 }}
+    loop: "{{ query('together', sriov.interface_subnets, sriov.interface_ips, ifnames.results, sriov.network_name) }}"
+  when: docker_status.rc == 0

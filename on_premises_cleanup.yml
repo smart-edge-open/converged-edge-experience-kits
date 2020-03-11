@@ -81,6 +81,9 @@
   - name: cleanup qemu
     include_tasks: ./roles/qemu/tasks/cleanup.yml
 
+  - name: cleanup sriov
+    include_tasks: ./roles/sriov_device_init/onprem/tasks/cleanup.yml
+
   - name: load dpdk variables
     include_vars: ./roles/dpdk/defaults/main.yml
 
