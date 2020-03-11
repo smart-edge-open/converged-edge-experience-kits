@@ -10,5 +10,6 @@
 - name: Disable SWAP (in /etc/fstab) (2/2)
   replace:
     path: /etc/fstab
-    regexp: '^([\/\s].*swap.*)$'
+    # Cannot use \b or \s to delimit 'swap' word, since they would match newlines
+    regexp: '^([^#\n]*[ \t]swap[ \t].*)$'
     replace: '# \1'
