@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: download intel-device-plugins
+  git:
+    repo: "{{ device_plugins.url }}"
+    dest: "{{ device_plugins.download_dir }}"
+    clone: yes
+    update: no
+    version: "{{ device_plugins.commit }}"
+

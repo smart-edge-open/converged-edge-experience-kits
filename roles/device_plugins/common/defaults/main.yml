@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+device_plugins:
+  url: "https://github.com/intel/intel-device-plugins-for-kubernetes"
+  download_dir : "/opt/intel_deviceplugins"
+  commit: "2f142aa9422dc64a28c0c99c48d132e8ca1b9f83"

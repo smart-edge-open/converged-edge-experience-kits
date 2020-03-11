@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: check if downloaded
+  stat:
+    path: "{{ openvino_download_dir }}"
+  register: ov_dl_dir
+
+- name: remove openvino
+  block:
+  - name: configure installation mode to uninstall OpenVino
+    lineinfile:
+      path: "{{ openvino_silent_config }}"
+      regexp: '^PSET_MODE='
+      line: PSET_MODE=uninstall
+  - name: uninstall OpenVino
+    command: "{{ openvino_install_command }}"
+    args:
+      chdir: "{{ openvino_download_dir }}"
+    ignore_errors: yes
+  - name: remove OpenVino temporary download directory
+    file:
+      path: "{{ openvino_download_dir }}"
+      state: absent
+  - name: OpenVino delete file glob
+    find:
+      paths: /opt/intel
+      patterns: openvino*
+    register: files_to_delete
+  - name: remove OpenVino old install directory via file glob
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ files_to_delete.files }}"
+  when: ov_dl_dir.stat.exists

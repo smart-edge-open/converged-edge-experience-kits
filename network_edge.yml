@@ -39,6 +39,8 @@
     - role: nfd/network_edge
     # - role: biosfw/master
     # - role: cmk/master
+    # - role: hddl/network_edge/master
+    # - role: device_plugins/master
 
 
 - hosts: edgenode_group
@@ -73,3 +75,5 @@
     - role: kubevirt/worker
     # - role: biosfw/worker
     # - role: cmk/worker
+    # - role: hddl/network_edge/worker
+    # - role: device_plugins/worker

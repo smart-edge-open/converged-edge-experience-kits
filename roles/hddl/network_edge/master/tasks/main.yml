@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: create kustomization files for daemonSet yaml from templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/script/{{ item }}"
+  with_items:
+  - setup_hddl_daemonset.yaml

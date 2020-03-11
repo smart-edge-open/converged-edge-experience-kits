@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+resources:
+  - intel-vpu-plugin.yaml
+
+patchesStrategicMerge:
+  - add_node_selector.yaml
+

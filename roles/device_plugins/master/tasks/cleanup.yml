@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Delete vpu-plugin DaemonSet
+  command: kubectl delete -k deployments/vpu_plugin
+  args:
+    chdir: "{{ device_plugins.download_dir }}"
+  changed_when: true
+
+
+- name: remove downloaded all intel-device-plugins
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ device_plugins.download_dir }}"
+
+
+# No Docker images are removed

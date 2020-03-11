@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+#!/bin/bash
+
+while [ ! -c /dev/ion ] ; do
+        echo "waiting for myd_ion to be ready"
+        sleep 1
+done
+
+sed -i '/"abort_if_hw_reset_failed"/ s/true/false/' /opt/intel/hddl/deployment_tools/inference_engine/external/hddl/config/hddl_autoboot.config
+source /opt/intel/hddl/bin/setupvars.sh
+cd /opt/intel/hddl/deployment_tools/inference_engine/external/hddl/bin
+./hddldaemon

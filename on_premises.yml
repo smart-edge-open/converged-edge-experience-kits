@@ -71,7 +71,7 @@
     - role: git_repo
     # - role: ovs
     - role: openness/onprem/worker
-    # - role: hddl
+    # - role: hddl/onprem/worker
     # - role: nfd/onprem/worker
     - role: offline/restore/yum/clean
       when: offline_mode
