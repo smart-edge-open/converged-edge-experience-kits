@@ -10,6 +10,7 @@
   shell: lsmod | grep vfio_pci
   register: vfio_loaded
   ignore_errors: yes
+  changed_when: false
 
 - name: Load VFIO-PCI
   modprobe:

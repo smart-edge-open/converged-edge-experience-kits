@@ -48,7 +48,7 @@
     published_ports:
       - 6081:6081/udp
     volumes:
-      - "{{ huge_dir }}:{{ huge_dir}}:rw"
+      - "{{ huge_dir }}:{{ huge_dir }}:rw"
       - "{{ ovs_dir }}:{{ ovs_dir }}:rw"
       - /dev:/dev:rw
       - /lib/modules:/lib/modules:rw

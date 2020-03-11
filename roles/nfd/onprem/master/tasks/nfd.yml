@@ -31,7 +31,7 @@
     args:
       chdir: "{{ git_repo_dest }}"
       creates: "{{ git_repo_dest }}/dist/nfd-master"
-  - name: build Docker image 
+  - name: build Docker image
     command: docker-compose build nfd-master
     args:
       chdir: "{{ git_repo_dest }}"
@@ -44,4 +44,5 @@
   command: docker-compose up -d --no-build nfd-master
   args:
     chdir: "{{ git_repo_dest }}"
+  changed_when: true
 

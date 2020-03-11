@@ -6,9 +6,9 @@
 - name: Install KubeVirt
   block:
   - name: KV Operator Install
-    shell: kubectl apply -f "{{ kubevirt_operator_url }}"
+    command: kubectl apply -f "{{ kubevirt_operator_url }}"
   - name: KV Controller Install
-    shell: kubectl apply -f "{{ kubevirt_cr_url }}"
+    command: kubectl apply -f "{{ kubevirt_cr_url }}"
 
 - name: Download Krew plugin
   block:
@@ -24,12 +24,12 @@
     get_url:
       url: "{{ krew_tar_url }}"
       dest: "{{ krew_dir }}"
-    when: krew_download.stat.exists == False
+    when: not krew_download.stat.exists
   - name: Download Krew tar.gz
     get_url:
       url: "{{ krew_yaml_url }}"
       dest: "{{ krew_dir }}"
-    when: krew_download.stat.exists == False
+    when: not krew_download.stat.exists
   - name: Unpack Krew
     unarchive:
       src: "{{ krew_dest }}"
@@ -55,16 +55,18 @@
 
 - name: Install Virtctl plugin
   shell: ${HOME}/.krew/bin/kubectl-krew install virt
+  changed_when: true
 
 - name: Install CDI
   block:
   - name: CDI Operator Install
-    shell: kubectl apply -f "{{ cdi_operator_url }}"
+    command: kubectl apply -f "{{ cdi_operator_url }}"
   - name: CDI Controller Install
-    shell: kubectl apply -f "{{ cdi_cr_url }}"
+    command: kubectl apply -f "{{ cdi_cr_url }}"
 
 - name: Label CDI namespace
-  shell: kubectl label namespace/cdi ns=cdi --overwrite=true
+  command: kubectl label namespace/cdi ns=cdi --overwrite=true
+  changed_when: true
 
 - name: Create temp directory for KubeVirt related yaml
   tempfile:
@@ -83,12 +85,13 @@
     dest: "{{ kv_dir.path }}/localStorageClass.yaml"
 
 - name: Set CDI traffic rule
-  shell: kubectl create -f cdiNetworkPolicy.yaml
+  command: kubectl create -f cdiNetworkPolicy.yaml
   args:
     chdir: "{{ kv_dir.path }}"
+  changed_when: true
 
 - name: Create Local Volume Storage Class
-  shell: kubectl create -f localStorageClass.yaml
+  command: kubectl create -f localStorageClass.yaml
   args:
     chdir: "{{ kv_dir.path }}"
   when: storage_class == "local_volume"

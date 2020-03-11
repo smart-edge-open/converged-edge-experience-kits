@@ -7,5 +7,5 @@
   file:
     path: "{{ default_pv_dir }}{{ default_pv_vol_name }}{{ item }}"
     state: directory
-  with_sequence: start=0 end="{{pv_vm_max_num}}"
+  with_sequence: start=0 end="{{ pv_vm_max_num }}"
 

@@ -4,9 +4,10 @@
 ---
 
 - name: remove OVN container
-  shell: docker rm -f ovs-ovn
+  command: docker rm -f ovs-ovn
   ignore_errors: yes
   register: docker_container_removed
+  changed_when: true
 
 - name: remove OVN image
   command: docker image rm -f ovs-ovn

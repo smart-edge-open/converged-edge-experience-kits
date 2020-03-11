@@ -42,7 +42,7 @@
 
 # Create SR-IOV network for VM
 - name: deploy SR-IOV network CRD for VM
-  shell: kubectl apply -f openness-sriov-vm-crd.yml
+  command: kubectl apply -f openness-sriov-vm-crd.yml
   args:
     chdir: "{{ tmp_dir.path }}"
   when: kubevirt.enabled
@@ -75,9 +75,10 @@
 
 # Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
 - name: deploy dev plugin configMap
-  shell: kubectl apply -f {{ config_map_name }}
+  command: kubectl apply -f {{ config_map_name }}
   args:
     chdir: "{{ tmp_dir.path }}"
+  changed_when: true
 
 # Deploy SRIOV-DEVICE Plugin
 - name: deploy dev plugin

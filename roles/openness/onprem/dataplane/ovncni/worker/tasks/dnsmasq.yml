@@ -3,36 +3,40 @@
 
 ---
 
-- name: Remove old dns entry
+- name: remove old dns entry
   xml:
     path: /usr/share/libvirt/networks/default.xml
     xpath: /network/dns
     state: absent
 
-- name: Add new dns entry
+- name: add new dns entry
   xml:
     path: /usr/share/libvirt/networks/default.xml
     xpath: /network/dns
     attribute: enable
     value: "no"
 
-- virt_net:
+- name: destroy libvirt default network
+  virt_net:
     command: destroy
     name: default
 
-- virt_net:
+- name: undefine libvirt default network
+  virt_net:
     command: undefine
     name: default
 
-- name: Load DNS settings
-  shell: virsh net-define /usr/share/libvirt/networks/default.xml
+- name: load DNS settings
+  command: virsh net-define /usr/share/libvirt/networks/default.xml
+  changed_when: true
 
-- virt_net:
+- name: start libvirt default network
+  virt_net:
     command: start
     name: default
     autostart: yes
 
-- name: Change /etc/dnsmasq.conf
+- name: change /etc/dnsmasq.conf
   blockinfile:
     path: /etc/dnsmasq.conf
     block: |
@@ -44,7 +48,7 @@
       interface=ovn-local
       address=/eaa.openness/eva.openness/syslog.openness/192.168.122.1
 
-- name: Enable dnsmasq service
+- name: enable dnsmasq service
   systemd:
     name: dnsmasq
     enabled: yes

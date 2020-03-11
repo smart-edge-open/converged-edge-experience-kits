@@ -6,22 +6,27 @@
 - name: remove all vms
   command: kubectl delete --all vm --wait=true
   ignore_errors: yes
+  changed_when: true
 
 - name: delete all DV
   command: kubectl delete --all dv --wait=true
   ignore_errors: yes
+  changed_when: true
 
 - name: delete all PV
   command: kubectl delete --all pv --wait=true
   ignore_errors: yes
+  changed_when: true
 
 - name: delete all SC
   command: kubectl delete --all sc --wait=true
   ignore_errors: yes
+  changed_when: true
 
 - name: delete CDI network policy
   command: kubectl delete networkpolicy cdi-upload-proxy-policy --wait=true
   ignore_errors: yes
+  changed_when: true
 
 - name: uninstall CDI
   block:
@@ -47,7 +52,8 @@
 - name: delete vritctl
   command: kubectl krew uninstall virt
   ignore_errors: yes
-  
+  changed_when: true
+
 - name: delete krew
   file:
     path: ~/.krew
