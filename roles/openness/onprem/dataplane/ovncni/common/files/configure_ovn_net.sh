@@ -43,10 +43,11 @@ function AddOVNNetwork {
         "${ME}" acl-add "${switch}" to-lport 1000 ip4.src=="${Node_Subnet}/${Node_Mask}" allow-related
 
     # Add the gateway port to the switch
+    mac=$(ovn-nbctl get logical_router_port "${rp}" mac | tr -d '"')
     ovn-nbctl "${ME}" lsp-add "${switch}" "${lp}" -- \
         set logical_switch_port "${lp}" type=router -- \
         set logical_switch_port "${lp}" options:router-port="${rp}" -- \
-        set logical_switch_port "${lp}" addresses=\""${MAC}"\"
+        set logical_switch_port "${lp}" addresses=\""${mac}"\"
 }
 
 
@@ -73,7 +74,7 @@ if [ -f "${OVN_NB_DB_PATH}" ]; then
 
     # Configure DHCP options
     if [[ ! $(ovn-nbctl find dhcp_options cidr="${Cluster_Subnet}/${Cluster_Mask}") ]]; then
-        mac=$(ovn-nbctl get logical_router_port "${Cluster_Switch}-to-${Cluster_Router}" mac | tr -d '"')
+        mac=$(ovn-nbctl get logical_router_port "${Cluster_Router}-to-${Cluster_Switch}" mac | tr -d '"')
         ovn-nbctl create dhcp_options cidr="${Cluster_Subnet}/${Cluster_Mask}" \
             options="\"lease_time\"=\"3600\" \"router\"=\"${Cluster_Gateway}\" \"server_id\"=\"${Cluster_Gateway}\" \"server_mac\"=\"${mac}\""
     fi
