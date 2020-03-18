@@ -54,3 +54,7 @@
     enabled: yes
     masked: no
     state: restarted
+
+- name: reload firewall rules
+  command: firewall-cmd --reload
+  changed_when: true

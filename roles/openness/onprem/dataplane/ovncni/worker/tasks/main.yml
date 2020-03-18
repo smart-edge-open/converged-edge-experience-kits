@@ -8,6 +8,24 @@
 
 - include_tasks: dnsmasq.yml
 
+- name: allow bridged packets to traverse iptables rules
+  block:
+    - name: load br_netfiler module
+      modprobe:
+        name: br_netfilter
+        state: present
+    - name: copy net.bridge.bridge-nf-call-ip(6)tables settings
+      copy:
+        src: sysctl_ovncni.conf
+        dest: /etc/sysctl.d/sysctl_ovncni.conf
+    - name: get current sysctl vars
+      command: grep 0 /proc/sys/net/bridge/bridge-nf-call-iptables /proc/sys/net/bridge/bridge-nf-call-ip6tables
+      register: sysctl_out
+      ignore_errors: yes
+    - name: refresh sysctl only if desired vars are disabled
+      command: sysctl --system
+      when: sysctl_out.rc == 0
+
 - name: build OVS-DPDK images
   block:
     - name: build OVS-DPDK image (this may take some time...)

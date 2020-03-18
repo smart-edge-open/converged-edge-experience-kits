@@ -44,6 +44,17 @@
     LOCAL_SYSLOG_IP: "192.168.122.1"
     VER: "{{ docker_containers_ver }}"
   changed_when: true
+  when: "onprem_dataplane == 'nts'"
+
+- name: start edgednssvr container
+  command: "docker-compose up --no-build --detach edgednssvr"
+  args:
+    chdir: "{{ git_repo_dest }}"
+  environment:
+    LOCAL_SYSLOG_IP: "192.168.122.1"
+    VER: "{{ docker_containers_ver }}"
+  changed_when: true
+  when: "onprem_dataplane == 'ovncni'"
 
 - name: up EAA container
   command: "docker-compose up -d --no-build eaa"
