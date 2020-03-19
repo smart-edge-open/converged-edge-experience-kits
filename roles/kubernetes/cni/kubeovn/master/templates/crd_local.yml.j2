@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+{% for item in groups['edgenode_group'] %}
+---
+apiVersion: kubeovn.io/v1
+kind: Subnet
+metadata:
+  name: "{{ item }}-local"
+spec:
+  protocol: IPv4
+  default: false
+  cidrBlock: "192.168.{{ loop.index0 + 1 }}.0/24"
+  gateway: "192.168.{{ loop.index0 + 1 }}.1"
+  excludeIps:
+  - "192.168.{{ loop.index0 + 1 }}.1"
+{% endfor %}

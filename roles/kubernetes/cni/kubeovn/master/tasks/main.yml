@@ -117,9 +117,19 @@
   until: k8s_master_init_start.rc == 0
   changed_when: false
 
+- name: create temp crd_local.yml
+  template:
+    src: crd_local.yml.j2
+    dest: "{{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+
 - name: apply CRD defining local subnet
   command: "kubectl apply -f {{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
   changed_when: true
+
+- name: remove temp crd_local.yml
+  file:
+    path: "{{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+    state: absent
 
 - name: wait for OVN DB socket
   wait_for:
@@ -128,16 +138,18 @@
   changed_when: false
 
 - name: add local-ovs-phy port to local switch
-  command: ovn-nbctl --may-exist lsp-add local local-ovs-phy
+  command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
   register: result
   until: not result.failed
   retries: 20
   delay: 30
   changed_when: true
+  with_items: "{{ groups['edgenode_group'] }}"
 
 - name: configure local-ovs-phy port
   shell: |
-    ovn-nbctl lsp-set-addresses local-ovs-phy unknown
-    ovn-nbctl lsp-set-type local-ovs-phy localnet
-    ovn-nbctl lsp-set-options local-ovs-phy network_name=local-network
+    ovn-nbctl lsp-set-addresses "{{ item }}"-ovs-phy unknown
+    ovn-nbctl lsp-set-type "{{ item }}"-ovs-phy localnet
+    ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
   changed_when: true
+  with_items: "{{ groups['edgenode_group'] }}"

@@ -45,7 +45,7 @@
 
 - name: configure OVS
   shell: |
-    ovs-vsctl set open . external-ids:ovn-bridge-mappings=local-network:br-local
+    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
   register: result
   until: not result.failed
