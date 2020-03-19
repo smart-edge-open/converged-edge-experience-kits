@@ -8,6 +8,11 @@
     src: Dockerfile.j2
     dest: "{{ dpdk_install_dir }}/Dockerfile"
 
+- name: copy .dockerignore
+  copy:
+    src: .dockerignore
+    dest: "{{ dpdk_install_dir }}/.dockerignore"
+
 - name: copy configure_ovn_net.sh
   copy:
     src: configure_ovn_net.sh
@@ -18,11 +23,6 @@
     src: start_ovs_ovn.sh.j2
     dest: "{{ dpdk_install_dir }}/start_ovs_ovn.sh"
     mode: '0744'
-
-- name: install patch utility
-  yum:
-    name: patch
-    state: present
 
 #TODO: Use variables(Currently defined in configure_ovn_net.sh)
 - name: Add firewall rules for OVN masquerade

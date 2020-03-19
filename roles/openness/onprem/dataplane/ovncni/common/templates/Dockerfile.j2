@@ -5,37 +5,6 @@ FROM centos:7
 
 ENV PYTHONDONTWRITEBYTECODE yes
 
-RUN yum --enablerepo=extras install -y epel-release
-
-RUN yum install -y wget \ 
-        numactl-devel \
-        kernel-devel \
-        libpcap-devel \
-        libmnl-devel \
-        libibumad \
-        libibverbs-devel \
-        libibverbs \
-        libmlx5 \
-        libibverbs-utils \
-        dpdk-devel \
-        python3 \
-        python-pip
-
-RUN yum install -y  \
-        vim net-tools \
-        PyYAML bind-utils \
-        openssl \
-        numactl-libs \
-        firewalld-filesystem \
-        libpcap \
-        hostname \
-        iproute strace socat nc \
-        unbound unbound-devel && \
-        yum clean all
-
-RUN pip3 install six
-RUN yum groupinstall -y 'Development Tools'
-
 ENV DPDK_VERSION={{ ovn_img_dpdk_version }}
 ENV DPDK_DIR=/usr/src/dpdk-$DPDK_VERSION
 ENV DPDK_TARGET={{ ovn_img_dpdk_target }}
@@ -45,31 +14,39 @@ ENV OVS_VERSION={{ ovs_img_version }}
 ENV OVN_NB_DB=tcp:{{ controller_ip }}:6641
 {% endif %}
 
+RUN yum install -y \
+  gcc gcc-c++ make autoconf automake libtool \
+  libcap-ng libcap-ng-devel libcap-devel \
+  numactl-devel numactl-libs \
+  unbound unbound-devel \
+  openssl openssl-devel \
+  itables iproute \
+  && \
+  yum install -y epel-release \
+  && \
+  yum install -y python-pip
+
+RUN pip install six
+
 COPY lib $DPDK_DIR/lib
 COPY drivers $DPDK_DIR/drivers
 COPY x86_64-native-linuxapp-gcc $DPDK_DIR/x86_64-native-linuxapp-gcc
 WORKDIR /root
 
-RUN wget https://www.openvswitch.org/releases/openvswitch-$OVS_VERSION.tar.gz && \
+RUN curl -OL https://www.openvswitch.org/releases/openvswitch-$OVS_VERSION.tar.gz && \
     tar xf openvswitch-$OVS_VERSION.tar.gz && \
     rm -f openvswitch-$OVS_VERSION.tar.gz && \
     cd openvswitch-$OVS_VERSION && \
-    sed -e 's/@VERSION@/0.0.1/' rhel/openvswitch-fedora.spec.in > /tmp/tmp_ovs.spec && \
-    yum-builddep -y /tmp/tmp_ovs.spec && \
     ./boot.sh && \
     ./configure --prefix=/usr/ --localstatedir=/var --with-dpdk=$DPDK_BUILD && \
-    make rpm-fedora -j$(nproc) RPMBUILD_OPT="--with dpdk --without check" && \
+    make -j$(nproc) && \
     make install
 
-RUN mkdir -p /var/run/openvswitch && \
-    mkdir -p /etc/cni/net.d && \
-    mkdir -p /opt/cni/bin
+RUN mkdir -p /var/run/openvswitch /etc/cni/net.d /opt/cni/bin
 
 COPY configure_ovn_net.sh /root
 COPY start_ovs_ovn.sh /root
 
-RUN rm -rf /openvswitch-${OVS_VERSION}
-RUN rm -rf $DPDK_DIR
- 
-CMD ["/bin/bash", "start_ovs_ovn.sh"]
+RUN rm -rf openvswitch-${OVS_VERSION} $DPDK_DIR
 
+CMD ["/bin/bash", "start_ovs_ovn.sh"]
