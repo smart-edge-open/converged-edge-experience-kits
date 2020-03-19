@@ -36,7 +36,6 @@
   shell: >
     set -o pipefail &&
     kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
-  args:
   register: multus_started
   retries: 30
   delay: 10
