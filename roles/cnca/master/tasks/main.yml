@@ -4,7 +4,7 @@
 ---
 
 - name: Build kube-cnca plugin
-  shell: source /etc/profile && go build -o "{{ cnca_plugin_name }}"
+  shell: source /etc/profile && go build -ldflags "-X cnca.HTTP2ClientTLSCAPath={{ certs_dest }}/ngc" -o "{{ cnca_plugin_name }}"
   args:
     chdir: "{{ git_repo_dest }}/cnca/"
   changed_when: true
