@@ -4,4 +4,5 @@
 ---
 
 # enable VPU device plugin only for VCAC-A or Mustang(HDDL) EdgeNode
-- include_tasks: vpu.yml
+- name: delegate master to label this node 
+  import_tasks: label_node.yml

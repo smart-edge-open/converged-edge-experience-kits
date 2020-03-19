@@ -4,31 +4,42 @@
 ---
 - name: remove old centos directory for hddldaemon
   file:
-    path: {{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810
+    path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
     state: absent
 
 - name: create centos directory for hddldaemon
-  file:
-    path: {{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810
-    state: directory
+  block:
+    - name: create 1st level folder
+      file:
+        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
+        state: directory
+    - name: create 2nd level folder
+      file:
+        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
+        state: directory
+    - name: create 3rd level folder
+      file:
+        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
+        state: directory
 
-- name: create centos folder for hddldaemon
+- name: copy files from ubuntu for hddldaemon
   copy:
-    src: {{ hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/
-    dest: {{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810
+    src: "{{ hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/analytics/hddldaemon"
+    dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
+    remote_src: yes
 
 - name: create kustomization files from templates
   template:
     src: "{{ item }}.j2"
     dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon/{{ item }}"
+    mode: 0777
   with_items:
   - build.sh
   - shell.sh
-  - run_hddl.sh
-  - Dockerfile 
+  - Dockerfile
 
 - name: build hddlaaemon container image
-  command: ./build.sh
+  shell: ./build.sh
   args:
     chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
   changed_when: true   

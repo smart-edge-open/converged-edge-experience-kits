@@ -8,4 +8,11 @@
   command: "kubectl label node {{ ansible_hostname }} --overwrite hddl-zone=yes"
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true
+  when: hddl_enabled
 
+
+- name: label vca-zone=yes for edgenode with VCAC-A card
+  command: "kubectl label node {{ ansible_hostname }} --overwrite vca-zone=yes"
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+  when: vca_enabled

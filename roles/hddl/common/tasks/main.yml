@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: get kernel value
+  shell: uname -r 
+  ignore_errors: yes
+  register: grep_kernel_version
+  changed_when: False
+
+- name: print the kernel
+  debug:
+    msg: "The host kernel: {{ grep_kernel_version.stdout }}"
+
+- name: get kernel value
+  shell: uname -r | grep -E ".rt"
+  ignore_errors: yes
+  register: grep_kernelrt_flag
+  failed_when: grep_kernelrt_flag.rc == 1
+  changed_when: False
+
+- name: fail if rt-kernel is enabled
+  fail:
+    msg: "HDDL cannot be work well on the host rt kernel: {{ grep_kernel_version.stdout }}"
+  when: grep_kernelrt_flag.rc == 0
+
+- name: print the kernel
+  debug:
+    msg: "HDDL will run on the host kernel: {{ grep_kernel_version.stdout }}"
+  when: grep_kernelrt_flag.rc == 1
+
+- name: HDDL kernel-devel installed
+  block:
+  - name: print kernel devel src path
+    debug:
+      msg: " The kernel devel src path - /lib/modules/{{ hddl_kernel_devel }}"
+  - name: check if already installed
+    stat:
+      path: "/lib/modules/{{ hddl_kernel_devel }}"
+    register: hddl_kernel_devel_src_dir
+  - name: install kernel-devel package for hddl
+    yum:
+      name: "{{ hddl_kernel_devel_url }}"
+      state: present
+      disable_excludes: all
+      allow_downgrade: yes
+    when: not hddl_kernel_devel_src_dir.stat.exists
+  when: ((kernel_package is not defined) or (kernel_skip is defined and kernel_skip)) and (dpdk_kernel_devel is not defined) 

@@ -2,13 +2,22 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+- name: include common vars
+  include_vars: ../../common/defaults/main.yml
 
 - name: Delete vpu-plugin DaemonSet
   command: kubectl delete -k deployments/vpu_plugin
   args:
     chdir: "{{ device_plugins.download_dir }}"
   changed_when: true
+  ignore_errors: yes
 
+- name: Delete gpu-plugin DaemonSet
+  command: kubectl delete -k deployments/gpu_plugin
+  args:
+    chdir: "{{ device_plugins.download_dir }}"
+  changed_when: true
+  ignore_errors: yes
 
 - name: remove downloaded all intel-device-plugins
   file:
@@ -17,5 +26,3 @@
   with_items:
   - "{{ device_plugins.download_dir }}"
 
-
-# No Docker images are removed

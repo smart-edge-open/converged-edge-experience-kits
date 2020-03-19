@@ -47,6 +47,7 @@ FROM centos:7.6.1810
 
 SHELL ["/bin/bash", "-c"]
 RUN yum update -y 
+RUN yum install -y sudo
 RUN yum install -y nasm \
     boost-filesystem-1.53.0-27.el7.x86_64 \
     boost-program-options-1.53.0-27.el7.x86_64 \
@@ -60,6 +61,8 @@ RUN yum install -y nasm \
 
 COPY --from=builder /usr/lib64/libusb-1.0.so.0 /usr/lib64/libusb-1.0.so.0
 COPY --from=builder /home/opt/intel/openvino /opt/intel/hddl
-RUN ls /opt/intel/hddl
-RUN ls /opt/intel
+RUN sed -i '/"abort_if_hw_reset_failed"/ s/true/false/' /opt/intel/hddl/deployment_tools/inference_engine/external/hddl/config/hddl_autoboot.config
 COPY *_hddl.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init_hddl.sh
+RUN chmod +x /usr/local/bin/run_hddl.sh
+
