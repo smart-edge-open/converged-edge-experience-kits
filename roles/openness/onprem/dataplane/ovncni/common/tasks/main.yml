@@ -25,8 +25,9 @@
     mode: '0744'
 
 #TODO: Use variables(Currently defined in configure_ovn_net.sh)
+#TODO: Find a working solution for selective masquerade
 - name: Add firewall rules for OVN masquerade
-  command: firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 10 -s 100.0.0.0/16 -o {{ ansible_default_ipv4.interface }} -j MASQUERADE
+  command: firewall-cmd --zone=public --add-masquerade --permanent
   changed_when: true
 
 - name: Add firewall rules to accept ovn-local interface
