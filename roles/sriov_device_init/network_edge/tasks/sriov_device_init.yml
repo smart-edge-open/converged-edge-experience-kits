@@ -84,10 +84,16 @@
       chdir: "{{ git_repo_dest }}"
   when: syscfg_local_file.stat.exists
 
+- name: get SR-IOV ethernet interfaces from /etc/rc.d/rc.local
+  # ignore missing pipefail - we don't want to fail when grep does not find a line - we can continue with no lines
+  shell: cat /etc/rc.d/rc.local 2> /dev/null | grep sriov_numvfs | sed -e 's/.*> //' # noqa 306
+  register: sriov_ifaces
+  changed_when: false
+
 - name: disable SR-IOV ethernet interfaces
   shell: echo 0 > {{ item }}
-  with_lines: "{{ cat /etc/rc.d/rc.local 2> /dev/null | grep sriov_numvfs | sed -e 's/.*> //' }}"
-  changed_when: false
+  with_lines: "{{ sriov_ifaces.stdout_lines }}"
+  changed_when: true
 
 - name: clear SR-IOV boot time setup
   lineinfile:
