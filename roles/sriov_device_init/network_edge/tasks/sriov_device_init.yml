@@ -92,7 +92,7 @@
 
 - name: disable SR-IOV ethernet interfaces
   shell: echo 0 > {{ item }}
-  with_lines: "{{ sriov_ifaces.stdout_lines }}"
+  with_items: "{{ sriov_ifaces.stdout_lines }}"
   changed_when: true
 
 - name: clear SR-IOV boot time setup
