@@ -30,6 +30,9 @@ ovn-ctl --db-nb-create-insecure-remote=yes --db-sb-create-insecure-remote=yes st
 ovn-ctl restart_controller
 ovn-ctl restart_controller_vtep
 
+# Set local MAC prefix
+ovn-nbctl --wait=hv set NB_Global . options:mac_prefix="0e:00:00"
+
 # Configure ovn-sb
 ovs-vsctl set open . external-ids:ovn-encap-ip={{ host_ip }}
 ovs-vsctl set open . external-ids:ovn-remote=tcp:{{ controller_ip }}:6642
