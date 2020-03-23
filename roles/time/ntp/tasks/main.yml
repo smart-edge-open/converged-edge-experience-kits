@@ -3,6 +3,15 @@
 
 ---
 
+- name: stop and disable chronyd service if available
+  systemd:
+    name: chronyd
+    enabled: no
+    masked: no
+    state: stopped
+    daemon_reload: yes
+  ignore_errors: yes
+
 - name: install ntp daemon
   yum:
     name: ntp
