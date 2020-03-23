@@ -14,7 +14,7 @@ data:
                 "selectors": {
                     "vendors": ["8086"],
                     "devices": ["154c", "10ed"],
-                    "drivers": ["i40evf", "ixgbevf"]
+                    "drivers": ["iavf", "i40evf", "ixgbevf"]
                 }
             },
             {
