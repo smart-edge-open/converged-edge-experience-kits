@@ -31,7 +31,7 @@
 - name: uninstall CDI
   block:
   - name: Delete namespace
-    command: kubectl delete -n cdi cdi cdi --wait=true
+    command: kubectl delete -n cdi cdi cdi --timeout=60s
     ignore_errors: yes
   - name: Delete apiservice
     command: kubectl delete apiservices v1alpha1.upload.cdi.kubevirt.io --wait=true
@@ -43,10 +43,10 @@
     command: kubectl delete validatingwebhookconfigurations cdi-api-datavolume-validate --wait=true
     ignore_errors: yes
   - name: Delete operator
-    command: kubectl delete -f {{ cdi_operator_url }} --wait=true
+    command: kubectl delete -f {{ cdi_operator_url }} --timeout=60s
     ignore_errors: yes
   - name: Delete controller
-    command: kubectl delete -f {{ cdi_cr_url }} --wait=true
+    command: kubectl delete -f {{ cdi_cr_url }} --timeout=60s
     ignore_errors: yes
 
 - name: delete vritctl
@@ -67,7 +67,7 @@
 - name: uninstall KuberVirt
   block:
   - name: Delete namespace
-    command: kubectl delete -n kubevirt kubevirt kubevirt --wait=true
+    command: kubectl delete -n kubevirt kubevirt kubevirt --timeout=60s
     ignore_errors: yes
   - name: Delete apiservice
     command: kubectl delete apiservices v1alpha3.subresources.kubevirt.io --wait=true
@@ -79,8 +79,8 @@
     command: kubectl delete validatingwebhookconfigurations virt-api-validator --wait=true
     ignore_errors: yes
   - name: Delete operator
-    command: kubectl delete -f "{{ kubevirt_operator_url }}" --wait=true
+    command: kubectl delete -f "{{ kubevirt_operator_url }}" --timeout=60s
     ignore_errors: yes
   - name: Delete controller
-    command: kubectl delete -f "{{ kubevirt_cr_url }}" --wait=true
+    command: kubectl delete -f "{{ kubevirt_cr_url }}" --timeout=60s
     ignore_errors: yes
