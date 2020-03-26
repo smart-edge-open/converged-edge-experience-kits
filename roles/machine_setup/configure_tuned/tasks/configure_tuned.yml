@@ -22,6 +22,16 @@
       allow_downgrade: yes
   when: offline_mode
 
+- name: setup isolated cores
+  block:
+  - name: find isolcpus value if applied as grub parameter
+    set_fact:
+      isol_cpus: "{{ additional_grub_params | regex_search('isolcpus=[0-9-,\n]*') | regex_replace('isolcpus=') }}"
+  - name: change isolcpus tuned setting
+    set_fact:
+      tuned_vars: "{{ tuned_vars | regex_replace('isolated_cores=[0-9-,\n]*', 'isolated_cores={{ isol_cpus }}\n') }}"
+  when: additional_grub_params is defined and additional_grub_params is search("isolcpus")
+
 - name: copy tuned variables into the file
   copy:
     content: "{{ tuned_vars }}"
