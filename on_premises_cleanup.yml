@@ -48,6 +48,9 @@
   serial: 1
   tasks:
 
+  - name: cleanup openness
+    include_tasks: ./roles/openness/onprem/worker/tasks/cleanup.yml
+
   - name: load ovn variables
     include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
 
