@@ -2,7 +2,7 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-## only apply for specific label - hddl-zone=yes
+
 - name: create vpu-plugin kustomization.yml
   copy:
     src: kustomization.yaml
@@ -15,7 +15,7 @@
     dest: "{{ device_plugins.download_dir }}/deployments/vpu_plugin/base/add_node_selector.yaml"
   changed_when: true
 
-- name: Deploy vpu-plugin as DaemonSet
+- name: deploy vpu-plugin kustomization
   command: kubectl apply -k deployments/vpu_plugin
   args:
     chdir: "{{ device_plugins.download_dir }}"

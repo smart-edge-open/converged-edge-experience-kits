@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2020 Intel Corporation
-
----
-
-# enable VPU device plugin only for VCAC-A or Mustang(HDDL) EdgeNode
-- name: delegate master to label this node 
-  import_tasks: label_node.yml

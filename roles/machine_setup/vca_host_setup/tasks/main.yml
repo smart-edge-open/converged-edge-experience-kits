@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# create folder for docker builds in /home for larger disk storage
+# (the folder is under the /dev/mapper/cl-root is limited to 50GB by default)
+- name: create /docker directory at /home
+  file:
+    path: "/home/docker"
+    state: directory
+
+- name: edit docker configuration to use new directory
+  replace:
+    path: /usr/lib/systemd/system/docker.service
+    regexp: 'dockerd -H'
+    replace: 'dockerd --graph /home/docker -H'
+
+- name: restart docker service
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+
+- name: create VCA directory
+  file:
+    path: "{{ vca_dest }}"
+    state: directory
+
+- name: download VCA image
+  unarchive:
+    src: "{{ vca_image_url }}"
+    dest: "{{ vca_dest }}"
+    remote_src: yes
+    creates: "{{ vca_dest }}/README"
+    extra_opts: [--strip-components=1]
+
+- name: create VCA cache directory
+  file:
+    dest: "{{ vca_dest }}/VCAC-A/cache"
+    state: directory
+
+- name: download VCA pre-requisites
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ vca_dest }}/VCAC-A/cache"
+  with_items: "{{ vca_download_files }}"
+
+- name: build Host Kernel and VCA Driver
+  command: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/scripts/build.sh -c"
+  args:
+    creates: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/"
+  ignore_errors: yes
+  register: ret
+  failed_when: >
+    ('ERROR' in ret.stderr) or
+    ('Error' in ret.stderr) or
+    ('error' in ret.stderr)
+
+- name: install daemon-vca dependencies
+  yum:
+    state: present
+    name:
+      - gdisk
+      - mtools
+
+- name: get current kernel
+  command: uname -r
+  register: installed_kernel
+  changed_when: false
+
+- name: install VCA kernel packages, driver and utility
+  command: "rpm -ivh {{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}"
+  with_items: "{{ vca_rpm_files }}"
+  when: "'VCA' not in installed_kernel.stdout"
+
+- name: configure VCA kernel to be the default at boot
+  command: grub2-set-default 0
+  when: "'VCA' not in installed_kernel.stdout"
+
+- name: request reboot if VCA kernel is newly installed
+  set_fact:
+    perform_reboot: "{{ perform_reboot|default([]) + [ 'vca' ] }}"
+  when: "'VCA' not in installed_kernel.stdout"

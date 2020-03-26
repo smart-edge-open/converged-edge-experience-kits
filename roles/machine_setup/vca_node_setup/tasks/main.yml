@@ -1,0 +1,146 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: run vca_load_modules
+  command: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/vcaa_kernel/download/VCAC-SW-VCAC-A_R2/apps/scripts/vca_load_modules.sh"
+  changed_when: true
+
+- name: build system image of VCA node
+  command: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/scripts/vcad_build.sh -c -o BASIC"
+  args:
+    creates: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
+  ignore_errors: yes
+  register: ret
+  failed_when: >
+    ('ERROR' in ret.stderr) or
+    ('Error' in ret.stderr) or
+    ('error' in ret.stderr)
+
+- name: unarchive VCAC-A vcad image
+  command: "gzip -d {{ vca_vcad_image }}.gz"
+  args:
+    chdir: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
+    creates: "{{ vca_vcad_image }}"
+
+- name: copy vca init & shutdown script
+  copy:
+    src: "{{ item }}"
+    dest: "{{ vca_dest }}"
+    mode: a+x
+  with_items:
+    - init_vca.sh
+    - shutdown_vca.sh
+
+- name: unload VCAC-A vcad image
+  shell: |
+    "{{ vca_dest }}"/shutdown_vca.sh
+    vcactl blockio close vcablk0
+  changed_when: true
+
+- name: load VCAC-A vcad image
+  command: "vcactl blockio open vcablk0 RW {{ vca_vcad_image }}"
+  args:
+    chdir: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
+  changed_when: true
+
+- name: set VCAC-A init script at system boot
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    regexp: '^{{ vca_dest }}'
+    line: '{{ vca_dest }}/init_vca.sh'
+    insertafter: EOF
+    mode: u+x,g+x,o+x
+
+- name: initialize VCAC-A
+  command: "{{ vca_dest }}/init_vca.sh"
+  register: init_vca
+  failed_when: init_vca.rc != 0
+  changed_when: init_vca.rc == 0
+
+- name: get VCA node IP address
+  set_fact:
+    vca_node_ip: "{{ init_vca.stdout_lines[3] }}"
+
+- debug: msg="{{ init_vca.stdout }}"
+
+- name: Delete VCAC-A node from ~/.ssh/known_hosts
+  lineinfile:
+    path: ~/.ssh/known_hosts
+    regexp: '^{{ vca_node_ip }}'
+    state: absent
+  ignore_errors: yes
+
+- name: establish password-less access from host to VCAC-A node
+  shell: |
+    ssh-keygen -q -N '' -C "$HOSTNAME" -f ~/.ssh/id_rsa <<< y > /dev/null
+    sshpass -p "{{ vca_img_pswd }}" ssh-copy-id -o StrictHostKeyChecking=no root@"{{ vca_node_ip }}"
+  changed_when: true
+
+- name: remove resolv.conf soft link file (../run/systemd/resolve/stub-resolv.conf) on VCA node
+  command: "ssh {{ vca_node_ip }} rm -f /etc/resolv.conf"
+  changed_when: true
+
+- name: copy resolv & env files to VCAC-A node
+  command: "scp /etc/{{ item }} {{ vca_node_ip }}:/etc/"
+  with_items:
+    - resolv.conf
+    - environment
+  changed_when: true
+
+- name: install timezone on VCA node
+  shell: |
+    set -o pipefail
+    ssh "{{ vca_node_ip }}" apt update
+    ssh "{{ vca_node_ip }}" apt install -y dbus tzdata
+    ssh "{{ vca_node_ip }}" timedatectl set-timezone $(timedatectl | awk '/Time zone:/{print$3}')
+  changed_when: true
+
+# Start configuration on vca-node.
+# Because vca-node is behind NAT and not in the ansible inventory, need below mitigation for the configuration.
+- name: copy install scripts to VCA node
+  block:
+    - name: copy install scripts to host
+      copy:
+        src: "{{ item }}"
+        dest: "{{ vca_dest }}"
+        mode: a+x
+      with_items:
+        - install_docker.sh
+        - install_kubernetes.sh
+    - name: scp install scripts to VCA node
+      command: "scp {{ vca_dest }}/{{ item }} {{ vca_node_ip }}:/root/"
+      with_items:
+        - install_docker.sh
+        - install_kubernetes.sh
+    - name: scp proxy to node
+      command: "scp /etc/systemd/system/docker.service.d/http-proxy.conf {{ vca_node_ip }}:/root/"
+    - name: scp config to node
+      command: "scp /root/.docker/config.json {{ vca_node_ip }}:/root/"
+
+- name: install docker & kubernetes on VCA node
+  command: "ssh {{ vca_node_ip }} ./{{ item }}"
+  with_items:
+    - install_docker.sh
+    - install_kubernetes.sh
+  changed_when: true
+
+- name: download hddl-daemon yaml
+  get_url:
+    url: "{{ vca_hddl_yaml }}"
+    dest: /tmp/hddl_daemonset.yaml
+    force: yes
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: update hddl-daemon yaml to use vcaca-ubuntu1804-analytics-hddldaemon:20.2
+  replace:
+    path: /tmp/hddl_daemonset.yaml
+    regexp: 'vcaca-ubuntu1804-analytics-hddldaemon'
+    replace: 'vcaca-ubuntu1804-analytics-hddldaemon:20.2'
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: deploy hddl-daemon for VCA node
+  command: kubectl apply -f /tmp/hddl_daemonset.yaml
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true

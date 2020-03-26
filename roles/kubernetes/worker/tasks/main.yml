@@ -44,3 +44,7 @@
   command: kubectl label node {{ k8s_worker_node_name }} node-role.kubernetes.io/worker=worker --overwrite
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true
+
+- name: join VCA node
+  include_tasks: vca_node.yml
+  when: inventory_hostname in groups['edgenode_vca_group']

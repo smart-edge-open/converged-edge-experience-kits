@@ -3,24 +3,45 @@
 
 ---
 
-- name: "[k8s master] drain the node"
-  command: kubectl drain {{ k8s_worker_node_name }} --ignore-daemonsets --timeout=60s
-  delegate_to: "{{ groups['controller_group'][0] }}"
-  ignore_errors: yes
-  changed_when: true
+- name: remove VCA node from the cluster
+  block:
+  - name: "[k8s master] drain the VCA node"
+    command: kubectl drain {{ vca_node_name }} --ignore-daemonsets --timeout=60s
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    ignore_errors: yes
+    changed_when: true
+  - name: "[k8s master] delete the VCA node"
+    command: kubectl delete node {{ vca_node_name }}
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    ignore_errors: yes
+    changed_when: true
+  - name: check if kubeadm is installed
+    shell: ssh {{ vca_node_name }} command -v kubeadm >/dev/null 2>&1
+    register: kubeadm_exec
+    ignore_errors: yes
+    changed_when: false
+  - name: reset kubeadm on VCA node
+    command: ssh {{ vca_node_name }} kubeadm reset --force
+    when: kubeadm_exec.rc == 0
+  when: inventory_hostname in groups['edgenode_vca_group']
 
-- name: "[k8s master] delete the node"
-  command: kubectl delete node {{ k8s_worker_node_name }}
-  delegate_to: "{{ groups['controller_group'][0] }}"
-  ignore_errors: yes
-  changed_when: true
-
-- name: check if kubeadm is installed
-  shell: command -v kubeadm >/dev/null 2>&1
-  register: kubeadm_exec
-  ignore_errors: yes
-  changed_when: false
-
-- name: reset kubeadm
-  command: kubeadm reset --force
-  when: kubeadm_exec.rc == 0
+- name: remove the node from the cluster
+  block:
+  - name: "[k8s master] drain node"
+    command: kubectl drain {{ k8s_worker_node_name }} --ignore-daemonsets --timeout=60s
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    ignore_errors: yes
+    changed_when: true
+  - name: "[k8s master] delete node"
+    command: kubectl delete node {{ k8s_worker_node_name }}
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    ignore_errors: yes
+    changed_when: true
+  - name: check if kubeadm is installed
+    shell: command -v kubeadm >/dev/null 2>&1
+    register: kubeadm_exec
+    ignore_errors: yes
+    changed_when: false
+  - name: reset kubeadm on the node
+    command: kubeadm reset --force
+    when: kubeadm_exec.rc == 0

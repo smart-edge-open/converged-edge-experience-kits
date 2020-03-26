@@ -8,6 +8,7 @@ kubernetes_cnis: []
 # List of CNIs that user can use
 available_kubernetes_cnis:
 - kubeovn
+- weavenet
 - sriov
 - flannel
 - calico

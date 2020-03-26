@@ -31,6 +31,7 @@
     - role: docker
     - role: kubernetes/master
     - role: kubernetes/cni
+    # - role: kubernetes/device_plugins
     - role: openness/network_edge/master
     - role: cnca/master
     - role: kubevirt/master
@@ -40,7 +41,6 @@
     # - role: biosfw/master
     # - role: cmk/master
     # - role: hddl/network_edge/master
-    # - role: device_plugins/master
 
 
 - hosts: edgenode_group
@@ -64,7 +64,6 @@
     - role: machine_setup/grub
     - role: machine_setup/configure_tuned
     - role: machine_setup/conditional_reboot
-
     - role: git_repo
     - role: golang
     - role: docker
@@ -76,4 +75,31 @@
     # - role: biosfw/worker
     # - role: cmk/worker
     # - role: hddl/network_edge/worker
-    # - role: device_plugins/worker
+
+
+# Play for edge nodes that have VCAC-A card installed
+- hosts: edgenode_vca_group
+
+  pre_tasks:
+  - debug:
+      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
+  - name: validate hostname
+    include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate requested CNIs
+    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+
+  roles:
+    - role: machine_setup/os_setup
+    # - role: time/ntp
+    - role: time/verify
+
+    - role: git_repo
+    - role: golang
+    - role: docker
+    - role: machine_setup/vca_host_setup
+    - role: machine_setup/conditional_reboot
+    - role: machine_setup/vca_node_setup
+    - role: kubernetes/worker
+    - role: kubernetes/cni
+    - role: openness/network_edge/worker
+    - role: kubevirt/worker

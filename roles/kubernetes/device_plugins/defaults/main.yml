@@ -5,5 +5,5 @@
 
 device_plugins:
   url: "https://github.com/intel/intel-device-plugins-for-kubernetes"
-  download_dir : "/opt/intel_deviceplugins"
+  download_dir : "/opt/intel_device_plugins"
   commit: "2f142aa9422dc64a28c0c99c48d132e8ca1b9f83"

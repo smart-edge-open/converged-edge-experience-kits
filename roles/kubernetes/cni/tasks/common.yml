@@ -21,4 +21,4 @@
 - name: change role postfix for worker
   set_fact:
     role_postfix: worker
-  when: "'edgenode_group' in group_names"
+  when: inventory_hostname not in groups['controller_group']

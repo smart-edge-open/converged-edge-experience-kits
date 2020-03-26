@@ -3,7 +3,7 @@
 
 ---
 
-- name: download intel-device-plugins
+- name: clone intel-device-plugins-for-kubernetes repo
   git:
     repo: "{{ device_plugins.url }}"
     dest: "{{ device_plugins.download_dir }}"
@@ -11,3 +11,8 @@
     update: no
     version: "{{ device_plugins.commit }}"
 
+- name: VPU device plugin
+  import_tasks: vpu_plugin.yml
+
+- name: GPU device plugin
+  import_tasks: gpu_plugin.yml
