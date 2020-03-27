@@ -131,11 +131,50 @@
     path: "{{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
     state: absent
 
-- name: wait for OVN DB socket
-  wait_for:
-    path: /var/run/openvswitch/ovnnb_db.sock
-    timeout: 600
-  changed_when: false
+- name: wait for OVS & OVN databases
+  block:
+  - name: wait for running ovs-ovn & ovn-central pods
+    shell: >
+      set -o pipefail &&
+      kubectl get pods -n kube-ovn
+      -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
+      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep -E "ovs-ovn|ovn-central"
+    register: kubeovn_pods
+    retries: 30
+    delay: 30
+    until:
+    - kubeovn_pods.stdout_lines | length == 2
+    - kubeovn_pods.stdout_lines[0].find("Running") != -1
+    - kubeovn_pods.stdout_lines[1].find("Running") != -1
+    changed_when: false
+
+  - name: waiting for OVS DB socket
+    wait_for:
+      path: /var/run/openvswitch/db.sock
+      timeout: 300
+  rescue:
+  - name: events of ovs-ovn & ovn-central pods
+    shell: >
+      set -o pipefail &&
+      kubectl describe pod -n kube-ovn $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name | grep {{ item }}) |
+      sed -n '/^Events:/,//p'
+    changed_when: false
+    ignore_errors: true
+    with_items:
+    - ovs-ovn
+    - ovn-central
+  - name: try to get ovs-ovn execution logs
+    shell: >
+      set -o pipefail &&
+      kubectl logs -n kube-ovn $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name | grep {{ item }})
+    changed_when: false
+    ignore_errors: true
+    with_items:
+    - ovs-ovn
+    - ovn-central
+  - name: end the playbook
+    fail:
+      msg: "end the playbook: either ovs-ovn or ovn-central pod did not start or the socket was not created"
 
 - name: add local-ovs-phy port to local switch
   command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
