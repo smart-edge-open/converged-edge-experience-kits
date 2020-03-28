@@ -17,16 +17,19 @@
 - name: copy AF binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/af"
+    remote_src: yes
     dest: "{{ git_repo_ngc_build_dir }}/networkedge/af"
 
 - name: copy AF configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
+    remote_src: yes
     dest: "{{ configs_dest }}/ngc"
 
 - name: copy OAUTH2 configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    remote_src: yes
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file

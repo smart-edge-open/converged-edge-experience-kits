@@ -17,16 +17,19 @@
 - name: copy nef binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/nef"
+    remote_src: yes
     dest: "{{ git_repo_ngc_build_dir }}/networkedge/nef"
 
 - name: copy nef.json configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/nef.json"
+    remote_src: yes
     dest: "{{ configs_dest }}/ngc"
 
 - name: copy oauth2.json configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    remote_src: yes
     dest: "{{ configs_dest }}/ngc"
 
 - name: build NEF docker image

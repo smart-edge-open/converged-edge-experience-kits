@@ -17,11 +17,13 @@
 - name: copy oam binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/oam"
+    remote_src: yes
     dest: "{{ git_repo_ngc_build_dir }}/networkedge/oam"
 
 - name: copy oam.json configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/oam.json"
+    remote_src: yes
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file

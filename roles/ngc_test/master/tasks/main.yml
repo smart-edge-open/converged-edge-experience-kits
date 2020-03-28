@@ -27,6 +27,7 @@
 - name: copy genCerts.json file
   copy:
     src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    remote_src: yes
     dest: "{{ certs_dest }}/ngc"
     mode: a+x
 
