@@ -22,6 +22,24 @@
 - include_tasks: subtasks/create_custom_docker_daemon_config_file.yml
 - include_tasks: subtasks/create_edgedns_tap.yml
 
+- name: allow bridged packets to traverse iptables rules
+  block:
+  - name: load br_netfiler module
+    modprobe:
+      name: br_netfilter
+      state: present
+  - name: copy net.bridge.bridge-nf-call-ip(6)tables settings
+    copy:
+      src: openness_sysctl.conf
+      dest: /etc/sysctl.d/openness_sysctl.conf
+  - name: get current sysctl vars
+    command: grep 0 /proc/sys/net/bridge/bridge-nf-call-iptables /proc/sys/net/bridge/bridge-nf-call-ip6tables
+    register: sysctl_out
+    ignore_errors: yes
+  - name: refresh sysctl only if desired vars are disabled
+    command: sysctl --system
+    when: sysctl_out.rc == 0
+
 - name: restart Docker
   systemd:
     name: docker
