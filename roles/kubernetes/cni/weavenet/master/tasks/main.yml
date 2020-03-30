@@ -20,7 +20,7 @@
   changed_when: true
 
 - name: wait for weavenet pods become running
-  shell: kubectl get pods -n kube-system -l name=weave-net | awk '$3=="Running"'
+  shell: set -o pipefail && kubectl get pods -n kube-system -l name=weave-net | awk '$3=="Running"'
   register: weavenet_pods_running
   retries: 30
   delay: 10
