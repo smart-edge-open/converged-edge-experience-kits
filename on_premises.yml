@@ -7,7 +7,7 @@
 
 - hosts: controller_group
   vars:
-    hugepage_amount: "1024"
+    hugepage_amount: "1024" # only applicable for ovncni deployment
 
   pre_tasks:
   - debug:
