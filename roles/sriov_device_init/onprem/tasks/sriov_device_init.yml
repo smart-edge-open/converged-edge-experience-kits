@@ -21,6 +21,7 @@
 - name: enable SR-IOV for network interfaces
   shell: echo 0 > /sys/class/net/{{ item.key }}/device/sriov_numvfs && echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs
   loop: "{{ query('dict', sriov.network_interfaces) }}"
+  changed_when: true
 
 - name: enable SR-IOV for network interfaces at boot time
   lineinfile:
@@ -34,38 +35,45 @@
     mode: a+x
 
 - name: get list of PCI addresses of created VFs
-  shell: lspci -D | grep "Ethernet Virtual" | cut -d E -f 1
+  shell: lspci -D | grep "Ethernet Virtual" | cut -d E -f 1 # noqa 306
   register: pci_addrs
+  changed_when: false
 
 - name: get list of paths to the interface names
   shell: find /sys/devices/pci* -name {{ item }}
   loop: "{{ pci_addrs.stdout_lines }}"
   register: interface_paths
+  changed_when: false
 
 - name: get list of interface names
   command: ls {{ item.stdout }}/net
   loop: "{{ interface_paths.results }}"
   register: interface_names
+  changed_when: false
 
 - name: get vendor ID for each VF
-  shell: cat /sys/class/net/{{ item.stdout }}/device/vendor | cut -d x -f 2
+  shell: set -o pipefail && cat /sys/class/net/{{ item.stdout }}/device/vendor | cut -d x -f 2
   loop: "{{ interface_names.results }}"
   register: vf_vendor_id
+  changed_when: false
 
 - name: get device ID for each VF
-  shell: cat /sys/class/net/{{ item.stdout }}/device/device | cut -d x -f 2
+  shell: set -o pipefail && cat /sys/class/net/{{ item.stdout }}/device/device | cut -d x -f 2
   loop: "{{ interface_names.results }}"
   register: vf_device_id
+  changed_when: false
 
 - name: set ids for PCI Stub
   shell: echo "{{ item.0.stdout }} {{ item.1.stdout }}" > /sys/bus/pci/drivers/pci-stub/new_id
   loop: "{{ query('together', vf_vendor_id.results, vf_device_id.results) }}"
+  changed_when: true
 
 - name: bind ports to PCI Stub
   shell: "{{ dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=pci-stub {{ interface_names.results[loop_index].stdout }}"
   with_sequence: start=0 count={{ sriov.vm_vf_ports }}
   loop_control:
     index_var: loop_index
+  changed_when: true
 
 - name: check that docker is installed and running
   command: systemctl status docker

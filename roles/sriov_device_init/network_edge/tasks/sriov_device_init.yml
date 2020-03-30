@@ -50,7 +50,9 @@
       - "{{ pci_address.stdout_lines }}"
 
   - name: bind FPGA SRIOV VFs to userspace driver
-    shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}" | sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id
+    shell: >
+      echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}" |
+      sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id
 
   - name: enable VFs binding to userspace driver on boot
     lineinfile:
@@ -58,7 +60,9 @@
       dest: /etc/rc.d/rc.local
       line: "{{ item }}"
     with_items:
-      - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" | sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id"
+      - >
+        "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" |
+        sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id"
   when: fpga_userspace_vf.enabled
 
 - name: check local bbdev_config_service_directory

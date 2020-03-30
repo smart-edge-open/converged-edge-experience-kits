@@ -16,3 +16,4 @@
 - name: docker stop and rmi
   shell: docker images | grep vcaca-centos7618-analytics-hddldaemon | awk '{print $1 ":" $2}' | xargs docker rmi -f
   ignore_errors: yes
+  changed_when: true

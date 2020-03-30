@@ -130,3 +130,4 @@
     warn: false
   register: yum_result
   failed_when: "yum_result.rc != 0 and 'Nothing to do' not in yum_result.stderr"
+  changed_when: true
