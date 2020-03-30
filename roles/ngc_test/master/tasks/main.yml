@@ -32,7 +32,7 @@
     mode: a+x
 
 - name: run script to generate cerificates
-  shell: './genCerts.sh -t DNS -h afservice nefservice localhost'
+  shell: './genCerts.sh -t DNS -h afservice nefservice localhost -t IP -h 127.0.0.1'
   args:
     chdir: "{{ certs_dest }}/ngc"
   changed_when: true
