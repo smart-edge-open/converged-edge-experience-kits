@@ -21,10 +21,10 @@
 
   - name: cleanup fpga
     include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
-    
+
   # - name: uninstall hddl 
-  #  include_tasks: ./roles/hddl/network_edge/master/tasks/cleanup.yml    
-    
+  #  include_tasks: ./roles/hddl/network_edge/master/tasks/cleanup.yml
+
   - name: load kubevirt variables
     include_vars: ./roles/kubevirt/master/defaults/main.yml
 
@@ -108,7 +108,7 @@
 
   # - name: uninstall hddl 
   #   include_tasks: ./roles/hddl/network_edge/worker/tasks/cleanup.yml
-        
+
   - name: load network edge variables
     include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
 
