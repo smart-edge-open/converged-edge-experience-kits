@@ -57,6 +57,12 @@
   - name: clean ovn
     include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
 
+  #- name: load onprem hddl variables
+  #  include_vars: ./roles/hddl/onprem/worker/defaults/main.yml
+
+  #- name: clean onprem hddl
+  #  include_tasks: ./roles/hddl/onprem/worker/tasks/cleanup.yml
+
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml
 

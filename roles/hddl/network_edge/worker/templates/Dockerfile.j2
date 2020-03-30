@@ -3,8 +3,6 @@
 
 FROM centos:7.6.1810 as builder
 WORKDIR /home
-ENV http_proxy http://changpin:datuan.1234@child-prc.intel.com:914
-ENV https_proxy http://changpin:datuan.1234@child-prc.intel.com:914
 
 RUN yum update -y
 RUN yum install -y \

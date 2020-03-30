@@ -47,6 +47,7 @@
   - debug:
       msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
   - include_tasks: ./tasks/precheck_hostname.yml
+  # - include_tasks: ./roles/hddl/common/tasks/precheck.yml
 
   roles:
     - role: offline/restore/transfer
