@@ -42,7 +42,7 @@
   shell: ./build.sh
   args:
     chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
-  changed_when: true   
+  changed_when: true
 
 - name: create hddldaemonSet
   command: "kubectl apply -f setup_hddl_daemonset.yaml"

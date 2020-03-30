@@ -12,7 +12,8 @@
   loop: "{{ query('dict', sriov.network_interfaces) }}"
   register: sriov_support
 
-- fail:
+- name: fail if device does not support SR-IOV
+  fail:
     msg: 'The device does not support SR-IOV'
   with_items: "{{ sriov_support.results }}"
   when: not item.stat.exists
@@ -42,7 +43,7 @@
   register: interface_paths
 
 - name: get list of interface names
-  shell: ls {{ item.stdout }}/net
+  command: ls {{ item.stdout }}/net
   loop: "{{ interface_paths.results }}"
   register: interface_names
 
@@ -67,7 +68,7 @@
     index_var: loop_index
 
 - name: check that docker is installed and running
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: yes
   changed_when: false
   args:
@@ -85,16 +86,16 @@
     register: ifnames_path
 
   - name: get the interface names
-    shell: ls {{ item.stdout }}/net
+    command: ls {{ item.stdout }}/net
     loop: "{{ ifnames_path.results }}"
     register: ifnames
 
   - name: check ifnames
-    shell: echo {{ item.stdout }}
+    command: echo {{ item.stdout }}
     loop: "{{ ifnames.results }}"
 
   - name: Reset docker networks
-    shell: docker network rm {{ item }}
+    command: docker network rm {{ item }}
     ignore_errors: yes
     loop: "{{ sriov.network_name }}"
 

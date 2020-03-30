@@ -3,7 +3,7 @@
 
 ---
 - name: get kernel value
-  shell: uname -r 
+  command: uname -r
   ignore_errors: yes
   register: grep_kernel_version
   changed_when: False
@@ -45,4 +45,4 @@
       disable_excludes: all
       allow_downgrade: yes
     when: not hddl_kernel_devel_src_dir.stat.exists
-  when: ((kernel_package is not defined) or (kernel_skip is defined and kernel_skip)) and (dpdk_kernel_devel is not defined) 
+  when: ((kernel_package is not defined) or (kernel_skip is defined and kernel_skip)) and (dpdk_kernel_devel is not defined)
