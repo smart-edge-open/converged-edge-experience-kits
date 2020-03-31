@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+openvino_name: "l_openvino_toolkit_p_2019.3.334.tgz"
+
+openvino_url: "http://registrationcenter-download.intel.com/akdlm/irc_nas/15944/{{ openvino_name }}"
+
+openvino_download_dest: "/temp/{{ openvino_name }}"
+openvino_download_dir: "/temp/openvino"
+openvino_silent_config: "{{ openvino_download_dir }}/silent.cfg"
+openvino_install_command: "./install.sh -s silent.cfg"
+openvino_hddl_dependency_install: "source /opt/intel/openvino/bin/setupvars.sh && ${HDDL_INSTALL_DIR}/install_IVAD_VPU_dependencies.sh"
+
+docker_hddlservice_tag: "1.0"

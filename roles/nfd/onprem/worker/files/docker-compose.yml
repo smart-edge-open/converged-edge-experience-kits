@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+version: '3.2'
+services:
+  nfdworkerservice:
+    container_name: ${CONTAINER_NAME}
+    image: "quay.io/kubernetes_incubator/node-feature-discovery:${VER}"
+    read_only: true
+    restart: always
+    security_opt:
+     - no-new-privileges:false
+    volumes:
+     - "${CERTS_DIR}:/certs"
+    command:
+     - "nfd-worker"
+     - "--ca-file=/certs/root.pem"
+     - "--cert-file=/certs/cert.pem"
+     - "--key-file=/certs/key.pem"
+     - "--server=${ENDPOINT}"
+     - "--server-name-override=nfd-master.openness"
+     - "--sleep-interval=${INTERVAL}"
+    environment:
+     - https_proxy=
+     - HTTPS_PROXY=
+     - http_proxy=
+     - HTTP_PROXY=
+     - NODE_NAME=${NODEID}
+    network_mode: bridge

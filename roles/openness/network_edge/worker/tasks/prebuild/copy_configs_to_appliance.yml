@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -17,7 +17,14 @@
   with_items:
   - appliance.json
   - eaa.json
-  - interfaceservice.json
+
+- name: copy interfaceservice config
+  copy:
+    src: "{{ git_repo_dest }}/configs/interfaceservice.json"
+    dest: "{{ configs_dest }}/"
+    directory_mode: yes
+    remote_src: yes
+  when: "'kubeovn' in kubernetes_cnis"
 
 - name: customize eaa.json
   block:
@@ -31,5 +38,3 @@
     src: logrotate_edgenode
     dest: /etc/logrotate.d/edgenode
     remote_src: no
-
-

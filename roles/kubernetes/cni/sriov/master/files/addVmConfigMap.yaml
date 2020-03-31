@@ -1,0 +1,8 @@
+            {
+                "resourceName": "intel_sriov_vm",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["154c", "10ed"],
+                    "drivers": ["vfio-pci"]
+                }
+            },

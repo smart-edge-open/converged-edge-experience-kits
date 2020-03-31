@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
-kubernetes_version: "1.16.2"
+kubernetes_version: "1.17.0"
 
 kubernetes_packages: "kubelet-{{ kubernetes_version }},kubeadm-{{ kubernetes_version }},kubectl-{{ kubernetes_version }}"
 
 kubernetes_repository_url: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
-kubernetes_repository_key: 
-  - https://packages.cloud.google.com/yum/doc/yum-key.gpg 
+kubernetes_repository_key:
+  - https://packages.cloud.google.com/yum/doc/yum-key.gpg
   - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
 kubernetes_packages_to_remove: "kubelet,kubeadm,kubectl"

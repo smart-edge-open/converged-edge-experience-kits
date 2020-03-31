@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
-os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel,createrepo"
+os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel,createrepo,psmisc"
 
 git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgecontroller.git
 git_repo_branch: master

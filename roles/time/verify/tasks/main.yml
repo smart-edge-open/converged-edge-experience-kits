@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: get controller's date
+  command: date +%s
+  register: controller_date
+  delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+  changed_when: false
+
+- name: get node's date
+  command: date +%s
+  register: node_date
+  changed_when: false
+
+- name: calculate absolute time difference
+  set_fact:
+    difference: "{{ ((node_date.stdout | int) - (controller_date.stdout | int)) | abs }}"
+
+- name: fail if time difference exceeds threshold
+  fail:
+    msg: "The date difference between Edge Controller and Edge Node is too big. Please update time on both machines and retry the installation scripts."
+  when: (difference | int) > date_threshold_seconds

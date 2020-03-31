@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+vca_dest: "/home/vca"
+vca_vcad_image: "vca_disk48_k4.19_ubuntu18.04_1.0.1.vcad"
+vca_img_pswd: "vista1"
+vca_node_docker_packages_url:
+  - "https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/containerd.io_1.2.6-3_amd64.deb"
+  - "https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce-cli_19.03.2~3-0~ubuntu-xenial_amd64.deb"
+  - "https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce_19.03.2~3-0~ubuntu-xenial_amd64.deb"
+
+vca_hddl_yaml: "https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/master/VCAC-A/script/setup_hddl_daemonset.yaml"

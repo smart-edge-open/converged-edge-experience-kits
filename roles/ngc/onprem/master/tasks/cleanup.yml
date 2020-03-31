@@ -4,7 +4,7 @@
 ---
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -19,12 +19,12 @@
   when: docker_service_status.rc == 0
 
 - name: remove AF container
-  shell: docker rm -f af-container
+  command: docker rm -f af-container
   ignore_errors: yes
   register: docker_container_removed
   when:
     - docker_service_status.rc == 0
-    - docker_container_running.stdout != ""
+    - docker_container_running.stdout
 
 - name: remove AF image
   command: docker image rm -f af-image:1.0
@@ -32,7 +32,7 @@
   when:
     - docker_container_removed.rc == 0
     - docker_service_status.rc == 0
-    - docker_container_running.stdout != ""
+    - docker_container_running.stdout
 
 - name: remove firewall rules
   include_tasks: rm_firewall_rules.yml

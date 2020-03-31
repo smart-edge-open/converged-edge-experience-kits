@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- hosts: controller_group
+  tasks:
+  # - name: include ngc_test variables
+  #   include_vars: ./roles/ngc_test/common/defaults/main.yml
+
+  # - name: cleanup ngc_test
+  #   include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
+
+  - name: load ovn variables
+    include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
+
+  - name: clean ovn
+    include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
+
+  - name: load docker variables
+    include_vars: ./roles/docker/defaults/main.yml
+
+  - name: prune docker
+    include_tasks: ./roles/docker/tasks/prune.yml
+
+  - name: uninstall docker
+    include_tasks: ./roles/docker/tasks/uninstall.yml
+
+  - name: load git variables
+    include_vars: ./roles/git_repo/defaults/main.yml
+
+  - name: cleanup git
+    include_tasks: ./roles/git_repo/tasks/cleanup.yml
+
+  - name: load cnca variables
+    include_vars: ./roles/cnca/onprem/defaults/main.yml
+
+  - name: cleanup cnca
+    include_tasks: ./roles/cnca/onprem/tasks/cleanup.yml
+
+  - name: load golang variables
+    include_vars: ./roles/golang/defaults/main.yml
+
+  - name: cleanup golang
+    include_tasks: ./roles/golang/tasks/cleanup.yml
+
+- hosts: edgenode_group
+  serial: 1
+  tasks:
+
+  - name: cleanup openness
+    include_tasks: ./roles/openness/onprem/worker/tasks/cleanup.yml
+
+  - name: load ovn variables
+    include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
+
+  - name: clean ovn
+    include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
+
+  #- name: load onprem hddl variables
+  #  include_vars: ./roles/hddl/onprem/worker/defaults/main.yml
+
+  #- name: clean onprem hddl
+  #  include_tasks: ./roles/hddl/onprem/worker/tasks/cleanup.yml
+
+  - name: load docker variables
+    include_vars: ./roles/docker/defaults/main.yml
+
+  - name: prune docker
+    include_tasks: ./roles/docker/tasks/prune.yml
+
+  - name: uninstall docker
+    include_tasks: ./roles/docker/tasks/uninstall.yml
+
+  - name: load golang variables
+    include_vars: ./roles/golang/defaults/main.yml
+
+  - name: cleanup golang
+    include_tasks: ./roles/golang/tasks/cleanup.yml
+
+  - name: load libvirt variables
+    include_vars: ./roles/libvirt/defaults/main.yml
+
+  - name: cleanup libvirt
+    include_tasks: ./roles/libvirt/tasks/cleanup.yml
+
+  - name: load qemu variables
+    include_vars: ./roles/qemu/defaults/main.yml
+
+  - name: cleanup qemu
+    include_tasks: ./roles/qemu/tasks/cleanup.yml
+
+  - name: cleanup sriov
+    include_tasks: ./roles/sriov_device_init/onprem/tasks/cleanup.yml
+
+  - name: load dpdk variables
+    include_vars: ./roles/dpdk/defaults/main.yml
+
+  - name: cleanup dpdk
+    include_tasks: ./roles/dpdk/tasks/cleanup.yml
+
+  - name: load git variables
+    include_vars: ./roles/git_repo/defaults/main.yml
+
+  - name: cleanup git
+    include_tasks: ./roles/git_repo/tasks/cleanup.yml

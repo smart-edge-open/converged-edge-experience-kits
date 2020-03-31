@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: apply tuned profile and variables
+  include_tasks: configure_tuned.yml
+  when: not tuned_skip

@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# Get and save nfd-worker image
+- name: get nfd settings
+  include_vars: "{{ playbook_dir }}/roles/nfd/onprem/worker/defaults/main.yml"
+
+- name: nfd-worker docker images
+  block:
+  - name: pull nfd-worker image
+    docker_image:
+      name: quay.io/kubernetes_incubator/node-feature-discovery
+      tag: "{{ nfd_version }}"
+      source: pull
+  - name: archive nfd-worker image
+    docker_image:
+      name: quay.io/kubernetes_incubator/node-feature-discovery
+      tag: "{{ nfd_version }}"
+      archive_path: "{{ offline_docker_images_path }}/nfd-worker.tar"
+      source: local
+

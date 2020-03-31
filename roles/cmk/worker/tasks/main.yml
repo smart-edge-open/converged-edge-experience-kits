@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -14,3 +14,11 @@
   shell: source /etc/profile && make
   args:
     chdir: "{{ cmk_download_dir }}"
+  changed_when: true
+
+- name: create CMK cluster-init pod, ns, svc and rbac rules
+  command: "kubectl apply -f /tmp/cmk.yml"
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true
+  changed_when: true
+

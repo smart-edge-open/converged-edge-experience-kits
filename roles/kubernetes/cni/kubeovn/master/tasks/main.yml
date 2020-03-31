@@ -1,0 +1,194 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: check if packages installed in proper version
+  shell: rpm -q openvswitch ovn ovn-common | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l # noqa 306
+  args:
+    warn: false
+  register: rpm_grep
+  changed_when: false
+
+- name: (re)install openvswitch tools if needed
+  block:
+  - name: remove old packages
+    yum:
+      name: "{{ ovn_packages_to_remove }}"
+      state: absent
+  - name: install OVN tools dependencies
+    yum:
+      name: "{{ ovn_packages_yum }}"
+      state: installed
+      update_cache: yes
+      allow_downgrade: true
+      validate_certs: no
+  - name: install OVN tools
+    command: "yum install -y {{ ovn_packages_urls | join(' ') }}"
+    args:
+      warn: false
+  when: "'3' not in rpm_grep.stdout"
+
+- name: open kube-ovn firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+  - 6641/tcp
+  - 6642/tcp
+  - 6081/udp
+
+- name: apply kube-ovn/role=master label to master node
+  command: "kubectl label node {{ ansible_hostname | lower }} kube-ovn/role=master --overwrite"
+  changed_when: true
+
+- name: create temp dir
+  tempfile:
+    state: directory
+    suffix: -kube-ovn
+  register: tmp_dir
+
+- name: download kube-ovn yaml files
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ tmp_dir.path }}"
+  with_items: "{{ kubeovn_yamls }}"
+
+- name: remove kube-ovn-pinger from kube-ovn.yaml
+  block:
+    - name: split kube-ovn.yaml into separate resource files(one YAML document per file)
+      shell: csplit -z -f kube-ovn -b "%04d.yaml" kube-ovn.yaml '/^---$/' '{*}'
+      args:
+        chdir: "{{ tmp_dir.path }}"
+    - name: remove all files that contain 'kube-ovn-pinger'(including kube-ovn.yaml)
+      shell: grep -l 'kube-ovn-pinger' kube-ovn* | xargs rm # noqa 306
+      args:
+        chdir: "{{ tmp_dir.path }}"
+    - name: merge files
+      shell: cat kube-ovn000* > kube-ovn.yaml
+      args:
+        chdir: "{{ tmp_dir.path }}"
+
+- name: enable DPDK support
+  block:
+    - name: create kustomization.yaml
+      copy:
+        src: kustomization.yaml
+        dest: "{{ tmp_dir.path }}/kustomization.yaml"
+    - name: create enable_dpdk.yaml
+      template:
+        src: enable_dpdk.yaml.j2
+        dest: "{{ tmp_dir.path }}/enable_dpdk.yaml"
+    - name: kustomize ovn.yaml
+      shell: kubectl kustomize . > ovn-dpdk.yaml
+      args:
+        chdir: "{{ tmp_dir.path }}"
+    - name: rename ovn-dpdk.yaml to ovn.yaml
+      copy:
+        src: "{{ tmp_dir.path }}/ovn-dpdk.yaml"
+        dest: "{{ tmp_dir.path }}/ovn.yaml"
+        remote_src: yes
+  when: ovs_dpdk
+
+- name: apply kube-ovn
+  command: "kubectl apply -f {{ item.split('/')[-1] }}"
+  with_items: "{{ kubeovn_yamls }}"
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  changed_when: true
+
+- name: remove temp directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
+
+- name: Wait till k8s master starts
+  shell: >
+    set -o pipefail &&
+    kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
+  args:
+  register: k8s_master_init_start
+  retries: 30
+  delay: 10
+  until: k8s_master_init_start.rc == 0
+  changed_when: false
+
+- name: create temp crd_local.yml
+  template:
+    src: crd_local.yml.j2
+    dest: "{{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+
+- name: apply CRD defining local subnet
+  command: "kubectl apply -f {{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+  changed_when: true
+
+- name: remove temp crd_local.yml
+  file:
+    path: "{{ git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+    state: absent
+
+- name: wait for OVS & OVN databases
+  block:
+  - name: wait for running ovs-ovn & ovn-central pods
+    shell: >
+      set -o pipefail &&
+      kubectl get pods -n kube-ovn
+      -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
+      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep -E "ovs-ovn|ovn-central"
+    register: kubeovn_pods
+    retries: 30
+    delay: 30
+    until:
+    - kubeovn_pods.stdout_lines | length == 2
+    - kubeovn_pods.stdout_lines[0].find("Running") != -1
+    - kubeovn_pods.stdout_lines[1].find("Running") != -1
+    changed_when: false
+
+  - name: waiting for OVS DB socket
+    wait_for:
+      path: /var/run/openvswitch/db.sock
+      timeout: 300
+  rescue:
+  - name: events of ovs-ovn & ovn-central pods
+    shell: >
+      set -o pipefail &&
+      kubectl describe pod -n kube-ovn $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name | grep {{ item }}) |
+      sed -n '/^Events:/,//p'
+    changed_when: false
+    ignore_errors: true
+    with_items:
+    - ovs-ovn
+    - ovn-central
+  - name: try to get ovs-ovn execution logs
+    shell: >
+      set -o pipefail &&
+      kubectl logs -n kube-ovn $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name | grep {{ item }})
+    changed_when: false
+    ignore_errors: true
+    with_items:
+    - ovs-ovn
+    - ovn-central
+  - name: end the playbook
+    fail:
+      msg: "end the playbook: either ovs-ovn or ovn-central pod did not start or the socket was not created"
+
+- name: add local-ovs-phy port to local switch
+  command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
+  register: result
+  until: not result.failed
+  retries: 20
+  delay: 30
+  changed_when: true
+  with_items: "{{ groups['edgenode_group'] }}"
+
+- name: configure local-ovs-phy port
+  shell: |
+    ovn-nbctl lsp-set-addresses "{{ item }}"-ovs-phy unknown
+    ovn-nbctl lsp-set-type "{{ item }}"-ovs-phy localnet
+    ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
+  changed_when: true
+  with_items: "{{ groups['edgenode_group'] }}"

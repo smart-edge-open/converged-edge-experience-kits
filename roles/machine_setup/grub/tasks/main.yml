@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: detect path to GRUB config
+  block:
+  - name: set GRUB config path (BIOS)
+    set_fact:
+      grub_file_path: /boot/grub2/grub.cfg
+
+  - name: check if host is using EFI
+    stat:
+      path: /sys/firmware/efi
+    register: efi_sys_dir
+
+  - name: change GRUB config path (EFI)
+    set_fact:
+      grub_file_path: /boot/efi/EFI/centos/grub.cfg
+    when:
+    - efi_sys_dir.stat.exists
+    - efi_sys_dir.stat.isdir
+
+  - name: print grub.cfg path
+    debug:
+      msg: "grub.cfg file path: {{ grub_file_path }}"
+
+- name: set GRUB_CMDLINE_LINUX_DEFAULT variable
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT=" {{ additional_grub_params }} {{ default_grub_params }}"'
+    insertafter: EOF
+
+- name: regenerate grub.cfg
+  command: grub2-mkconfig -o {{ grub_file_path }}
+  changed_when: true
+
+- name: get current CMDLINE
+  command: cat /proc/cmdline
+  register: current_cmdline
+  changed_when: false
+
+# role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
+- name: request reboot (will be performed by `conditional_reboot` role)
+  set_fact:
+    perform_reboot: "{{ perform_reboot|default([]) + [ 'grub' ] }}"
+  when: (additional_grub_params not in current_cmdline.stdout) or (default_grub_params not in current_cmdline.stdout)

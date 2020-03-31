@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: include common vars
+  include_vars: ../../common/defaults/main.yml
+
+- name: remove downloaded all ovc dockerfile
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ hddldaemon_container.download_dir }}"
+  ignore_errors: yes
+
+- name: docker stop and rmi
+  shell: docker images | grep vcaca-centos7618-analytics-hddldaemon | awk '{print $1 ":" $2}' | xargs docker rmi -f
+  ignore_errors: yes
+  changed_when: true

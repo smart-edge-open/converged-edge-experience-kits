@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create list of available CNIs roles
+  # it creates an array with CNI roles, e.g.: [ 'kubeovn/master', 'kubeovn/worker', 'calico' ]
+  # it is used later to call only roles that exists (skip worker role if it doesn't exist)
+  set_fact:
+    available_cni_roles: "{{ available_cni_roles|default([]) + [item.path] }}"
+  with_filetree: roles/kubernetes/cni/
+  when:
+  - item.state == 'directory'
+  - (item.path.endswith('master')) or (item.path.endswith('worker'))
+  tags:
+  - skip_ansible_lint
+
+- name: set role postfix
+  set_fact:
+    role_postfix: master
+- name: change role postfix for worker
+  set_fact:
+    role_postfix: worker
+  when: inventory_hostname not in groups['controller_group']

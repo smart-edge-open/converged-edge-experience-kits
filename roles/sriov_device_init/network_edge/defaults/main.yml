@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+syscfg_local_path: "./fpga_config/bbdev_config_service"
+syscfg_remote_path: "{{ git_repo_dest }}/build/fpga_config/"
+sriov:
+    network_interfaces: {}
+    interface_subnets: []
+    interface_ips: []
+    network_name: []
+    vm_vf_ports: 0

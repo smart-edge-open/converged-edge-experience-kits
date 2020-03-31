@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: load kubeovn common variables
+  include_vars: ./roles/kubernetes/cni/kubeovn/common/defaults/main.yml
+
+- name: cleanup kubeovn common
+  include_tasks: ./roles/kubernetes/cni/kubeovn/common/tasks/cleanup.yml
+
+- name: remove ovn packages
+  yum:
+    name: "{{ ovs_packages_to_remove }}"
+    state: absent

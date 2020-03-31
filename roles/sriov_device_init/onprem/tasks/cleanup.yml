@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: get list of PCI addresses of created VFs
+  shell: lspci -D | grep "Ethernet Virtual" | cut -d E -f 1 # noqa 306
+  register: pci_addrs
+  changed_when: false
+
+- name: get list of paths to the interface names
+  shell: find /sys/devices/pci* -name {{ item }}
+  loop: "{{ pci_addrs.stdout_lines }}"
+  register: interface_paths
+  changed_when: false
+
+- name: get vendor ID for each VF
+  shell: set -o pipefail && cat {{ item.stdout }}/vendor | cut -d x -f 2
+  loop: "{{ interface_paths.results }}"
+  register: vf_vendor_id
+  changed_when: false
+
+- name: get device ID for each VF
+  shell: set -o pipefail && cat {{ item.stdout }}/device | cut -d x -f 2
+  loop: "{{ interface_paths.results }}"
+  register: vf_device_id
+  changed_when: false
+
+- name: remove VFs id from PCI Stub driver
+  shell: echo "{{ item.0.stdout }} {{ item.1.stdout }}" > /sys/bus/pci/drivers/pci-stub/remove_id
+  loop: "{{ query('together', vf_vendor_id.results, vf_device_id.results) }}"
+  ignore_errors: yes
+  changed_when: true
+
+- name: disable SR-IOV for network interfaces
+  shell: echo 0 > /sys/class/net/{{ item.key }}/device/sriov_numvfs
+  loop: "{{ query('dict', sriov.network_interfaces) }}"
+  changed_when: true
+
+- name: disable SR-IOV ethernet interfaces
+  shell: echo 0 > {{ item }}
+  with_lines: grep sriov_numvfs /etc/rc.d/rc.local | sed -e 's/.*> //'
+  changed_when: true
+
+- name: clear SR-IOV boot time setup
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    regexp: '(.*)sriov_numvfs(.*)'
+    state: absent

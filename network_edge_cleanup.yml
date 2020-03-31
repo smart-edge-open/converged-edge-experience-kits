@@ -1,0 +1,211 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- hosts: controller_group
+  tasks:
+  # following roles are not cleaned up directly, they're cleaned when Kubernetes cluster is reset
+  # - nfd/network_edge
+  # - multus
+  # - sriov/master
+
+  # - name: load ngc_test variables
+  #   include_vars: ./roles/ngc_test/common/defaults/main.yml
+
+  # - name: cleanup ngc_test
+  #   include_tasks: ./roles/ngc_test/master/tasks/cleanup.yml
+
+  - name: load fpga variables
+    include_vars: ./roles/opae_fpga/master/defaults/main.yml
+
+  - name: cleanup fpga
+    include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
+
+  # - name: uninstall hddl 
+  #  include_tasks: ./roles/hddl/network_edge/master/tasks/cleanup.yml
+
+  - name: load kubevirt variables
+    include_vars: ./roles/kubevirt/master/defaults/main.yml
+
+  - name: cleanup kubevirt
+    include_tasks: ./roles/kubevirt/master/tasks/cleanup.yml
+
+  - name: load cnca variables
+    include_vars: ./roles/cnca/master/defaults/main.yml
+
+  - name: cleanup cnca
+    include_tasks: ./roles/cnca/master/tasks/cleanup.yml
+
+  - name: load biosfw variables
+    include_vars: ./roles/biosfw/master/defaults/main.yml
+
+  - name: cleanup biosfw
+    include_tasks: ./roles/biosfw/master/tasks/cleanup.yml
+
+  - name: load network edge variables
+    include_vars: ./roles/openness/network_edge/master/defaults/main.yml
+
+  - name: cleanup network edge
+    include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
+
+  # - name: load device plugins variables
+  #   include_vars: ./roles/kubernetes/device_plugins/defaults/main.yml
+
+  # - name: uninstall device plugins
+  #   include_tasks: ./roles/kubernetes/device_plugins/tasks/cleanup.yml
+
+  - name: run CNIs cleanup
+    include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
+
+  - name: cleanup kubernetes
+    include_tasks: ./roles/kubernetes/master/tasks/cleanup.yml
+
+  - name: load kubernetes variables
+    include_vars: ./roles/kubernetes/common/defaults/main.yml
+
+  - name: uninstall kubernetes
+    include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
+
+  - name: load docker variables
+    include_vars: ./roles/docker/defaults/main.yml
+
+  - name: prune docker
+    include_tasks: ./roles/docker/tasks/prune.yml
+
+  - name: uninstall docker
+    include_tasks: ./roles/docker/tasks/uninstall.yml
+
+  - name: load golang variables
+    include_vars: ./roles/golang/defaults/main.yml
+
+  - name: cleanup | include golang cleanup.yml
+    include_tasks: ./roles/golang/tasks/cleanup.yml
+
+  - name: load git variables
+    include_vars: ./roles/git_repo/defaults/main.yml
+
+  - name: cleanup git
+    include_tasks: ./roles/git_repo/tasks/cleanup.yml
+
+
+- hosts: edgenode_group
+  serial: 1
+  tasks:
+  # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
+
+  - name: load kubevirt variables
+    include_vars: ./roles/kubevirt/worker/defaults/main.yml
+
+  - name: cleanup kubevirt
+    include_tasks: ./roles/kubevirt/worker/tasks/cleanup.yml
+
+  - name: load cmk variables
+    include_vars: ./roles/cmk/worker/defaults/main.yml
+
+  - name: cleanup cmk
+    include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
+
+  # - name: uninstall hddl 
+  #   include_tasks: ./roles/hddl/network_edge/worker/tasks/cleanup.yml
+
+  - name: load network edge variables
+    include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+
+  - name: cleanup network edge
+    include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
+
+  - name: run CNIs cleanup
+    include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
+
+  - name: load kubernetes variables
+    include_vars: ./roles/kubernetes/worker/defaults/main.yml
+
+  - name: cleanup kubernetes
+    include_tasks: ./roles/kubernetes/worker/tasks/cleanup.yml
+
+  - name: load kubernetes variables
+    include_vars: ./roles/kubernetes/common/defaults/main.yml
+
+  - name: uninstall kubernetes
+    include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
+
+  - name: load fpga variables
+    include_vars: ./roles/opae_fpga/worker/defaults/main.yml
+
+  - name: cleanup fpga
+    include_tasks: ./roles/opae_fpga/worker/tasks/cleanup.yml
+
+  - name: load docker variables
+    include_vars: ./roles/docker/defaults/main.yml
+
+  - name: prune docker
+    include_tasks: ./roles/docker/tasks/prune.yml
+
+  - name: uninstall docker
+    include_tasks: ./roles/docker/tasks/uninstall.yml
+
+  - name: load golang variables
+    include_vars: ./roles/golang/defaults/main.yml
+
+  - name: cleanup golang
+    include_tasks: ./roles/golang/tasks/cleanup.yml
+
+  - name: load git variables
+    include_vars: ./roles/git_repo/defaults/main.yml
+
+  - name: cleanup git
+    include_tasks: ./roles/git_repo/tasks/cleanup.yml
+
+
+- hosts: edgenode_vca_group
+  serial: 1
+  tasks:
+
+  - name: load cmk variables
+    include_vars: ./roles/cmk/worker/defaults/main.yml
+
+  - name: cleanup cmk
+    include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
+
+  - name: load network edge variables
+    include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+
+  - name: cleanup network edge
+    include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
+
+  - name: run CNIs cleanup
+    include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
+
+  - name: load kubernetes variables
+    include_vars: ./roles/kubernetes/worker/defaults/main.yml
+
+  - name: cleanup kubernetes
+    include_tasks: ./roles/kubernetes/worker/tasks/cleanup.yml
+
+  - name: load kubernetes variables
+    include_vars: ./roles/kubernetes/common/defaults/main.yml
+
+  - name: uninstall kubernetes
+    include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
+
+  - name: load docker variables
+    include_vars: ./roles/docker/defaults/main.yml
+
+  - name: prune docker
+    include_tasks: ./roles/docker/tasks/prune.yml
+
+  - name: uninstall docker
+    include_tasks: ./roles/docker/tasks/uninstall.yml
+
+  - name: load golang variables
+    include_vars: ./roles/golang/defaults/main.yml
+
+  - name: cleanup golang
+    include_tasks: ./roles/golang/tasks/cleanup.yml
+
+  - name: load git variables
+    include_vars: ./roles/git_repo/defaults/main.yml
+
+  - name: cleanup git
+    include_tasks: ./roles/git_repo/tasks/cleanup.yml

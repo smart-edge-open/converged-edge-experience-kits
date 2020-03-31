@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -11,24 +11,38 @@
   when: offline_mode
 
 - name: get current kernel
-  shell: uname -r
+  command: uname -r
   register: unamer
+  changed_when: false
 
-- name: install kernel-devel for non-RT environment
+- name: install kernel-devel package
   block:
-  - set_fact:
-      kernel_devel_to_install: "{{ non_rt_kernel_devel_download_url }}"
-  - set_fact:
+  - name: use kernel-devel-uname-r
+    set_fact:
       kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
-    when: '"3.10.0-1062" in unamer.stdout'
+  - name: use kernel-devel from provided URL/package
+    set_fact:
+      kernel_devel_to_install: "{{ dpdk_kernel_devel }}"
+    when:
+    - dpdk_kernel_devel is defined
+    - dpdk_kernel_devel|length > 0
 
-  - name: install kernel-devel for non-RT environment
+  - name: fail if kernel-devel version is not correct
+    fail:
+      msg: "kernel-devel version({{ kernel_devel_to_install }}) does not match the current kernel({{ unamer.stdout }})"
+    when: 'unamer.stdout not in kernel_devel_to_install'
+
+  - name: install kernel-devel package
     yum:
       name: "{{ kernel_devel_to_install }}"
       state: present
       disable_excludes: all
       allow_downgrade: yes
-  when: os_kernel_rt_package_version is not defined
+  # install kernel-devel package if:
+  # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
+  # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
+  # OnPrem Offline does not support kernel customization so `custom_kernel` is enabled and `kernel_skip` is defined and false
+  when: (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
 
 - name: check if already installed
   stat:
@@ -40,7 +54,7 @@
     url: "{{ dpdk_download_url }}"
     dest: "{{ dpdk_download_dest }}"
     checksum: "md5:{{ dpdk_checksum }}"
-  when: dpdk_dest_dir.stat.exists == False
+  when: not dpdk_dest_dir.stat.exists
 
 - name: ensure install dir exists
   file:
@@ -64,11 +78,18 @@
   file:
     path: /etc/ansible/facts.d/dpdk.fact
     state: absent
-  when: igb_uio_module.stat.exists == False
+  when: not igb_uio_module.stat.exists
 
 - name: detect amount of cores
-  shell: nproc
+  command: nproc
   register: nproc_out
+  changed_when: false
+
+- name: install numactl-devel
+  yum:
+    name: "numactl-devel"
+    state: present
+  when: not igb_uio_module.stat.exists
 
 - name: compile
   make:
@@ -78,7 +99,7 @@
       T: x86_64-native-linuxapp-gcc
   environment:
     "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
-  when: igb_uio_module.stat.exists == False
+  when: not igb_uio_module.stat.exists
 
 - name: create Ansible dpdk facts.d folder
   file:
@@ -101,6 +122,7 @@
 
 - name: depmod
   command: depmod -a
+  changed_when: true
 
 - name: copy list of modules to load at boot
   copy:
@@ -122,6 +144,12 @@
   - "uio_pci_generic"
   - "uio"
 
+  - name: unload vfio
+    modprobe:
+      name: vfio
+      state: absent
+    ignore_errors: yes
+
 - name: load uio and igb_uio modules
   modprobe:
     name: "{{ item }}"
@@ -135,3 +163,8 @@
     name: "rte_kni"
     state: present
     params: 'carrier=on'
+
+- name: load vfio module
+  modprobe:
+    name: vfio
+    state: present

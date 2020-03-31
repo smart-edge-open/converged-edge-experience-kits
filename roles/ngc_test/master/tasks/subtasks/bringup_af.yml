@@ -3,23 +3,42 @@
 
 ---
 
-- name: build AF component
-  shell: source /etc/profile && make af
-  args:
-    chdir: "{{ git_repo_ngc_dir }}"
+- block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+  - name: build AF component
+    shell: source /etc/profile && make af
+    args:
+      chdir: "{{ git_repo_ngc_dir }}"
+  always:
+    - name: remove .openness_gitconfig
+      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: copy AF binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/af"
+    remote_src: yes
     dest: "{{ git_repo_ngc_build_dir }}/networkedge/af"
 
 - name: copy AF configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
+    remote_src: yes
+    dest: "{{ configs_dest }}/ngc"
+
+- name: copy OAUTH2 configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    remote_src: yes
     dest: "{{ configs_dest }}/ngc"
 
 - name: update af config file
-  shell: jq '.ServerConfig.Hostname="afservice" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" | .CliConfig.NEFHostname="nefservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  shell: >
+    set -o pipefail &&
+    jq '.ServerConfig.Hostname="afservice" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" |
+    .CliConfig.NEFHostname="nefservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  args:
+  changed_when: true
 
 - name: build AF docker image
   docker_image:
@@ -31,5 +50,5 @@
       use_config_proxy: yes
 
 - name: deploy AF
-  shell: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podAF.yaml
-
+  command: kubectl create -f {{ git_repo_ngc_dir }}/scripts/networkedge/ngctest/podAF.yaml
+  changed_when: true

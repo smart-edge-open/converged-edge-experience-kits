@@ -1,14 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - name: customize EVA config - Enable OVS
-  shell: jq '.OpenvSwitch=true | .OpenvSwitchBridge="{{ ovs_bridge_name }}"' {{ git_repo_dest }}/configs/eva.json | sponge {{ git_repo_dest }}/configs/eva.json
+  shell: >
+    set -o pipefail &&
+    jq '.OpenvSwitch=true | .OpenvSwitchBridge="{{ ovs_bridge_name }}"' {{ git_repo_dest }}/configs/eva.json |
+    sponge {{ git_repo_dest }}/configs/eva.json
+  args:
+  changed_when: true
 
 - name: customize ELA config - add blacklisted ports
-  shell: jq '.PCIBlacklist +=  ["{{ item }}"]'  {{ git_repo_dest }}/configs/ela.json | sponge {{ git_repo_dest }}/configs/ela.json
+  shell: >
+    set -o pipefail &&
+    jq '.PCIBlacklist +=  ["{{ item }}"]'  {{ git_repo_dest }}/configs/ela.json |
+    sponge {{ git_repo_dest }}/configs/ela.json
+  args:
   loop: "{{ ovs_ports }}"
+  changed_when: true
 
 - name: check if already installed
   stat:
@@ -19,12 +29,19 @@
   get_url:
     url: "{{ ovs_url }}"
     dest: "{{ ovs_download_dest }}"
-  when: ovs_dest_dir.stat.exists == False
+  when:
+  - not ovs_dest_dir.stat.exists
+  - not offline_mode
 
 - name: create ovs installation directory
   file:
     path: "{{ ovs_install_location }}"
     state: directory
+
+- name: offline | select ovs archive
+  set_fact:
+    ovs_download_dest: "{{ offline_path }}/archives/openvswitch-{{ ovs_version }}.tar.gz"
+  when: offline_mode
 
 - name: extract ovs
   unarchive:
@@ -46,6 +63,7 @@
     - make install
   args:
     chdir: "{{ ovs_install_location }}"
+  changed_when: true
 
 - name: create and copy openvswitch-nonetwork.service
   template:
@@ -70,6 +88,7 @@
 
 - name: add OVS bridge
   shell: |
+    set -o pipefail
     export PATH=$PATH:/usr/local/share/openvswitch/scripts
     # Remove bridges if there are any
     ovs-vsctl list-br | while read line ; do ovs-vsctl del-br $line ; done
@@ -77,12 +96,15 @@
     ovs-vsctl add-br {{ ovs_bridge_name }} -- set bridge {{ ovs_bridge_name }} datapath_type=netdev
     mkdir /tmp/openvswitch
     chown qemu:qemu /tmp/openvswitch
+  args:
+  changed_when: true
 
 - name: add ovs physical port
-  shell: ovs-vsctl add-port {{ ovs_bridge_name }} dpdk-p{{ index }} -- set Interface dpdk-p{{ index }} type=dpdk options:dpdk-devargs={{ item }}
+  command: ovs-vsctl add-port {{ ovs_bridge_name }} dpdk-p{{ index }} -- set Interface dpdk-p{{ index }} type=dpdk options:dpdk-devargs={{ item }}
   loop: "{{ ovs_ports }}"
   loop_control:
     index_var: index
+  changed_when: true
 
 - name: print interfaces
   debug:

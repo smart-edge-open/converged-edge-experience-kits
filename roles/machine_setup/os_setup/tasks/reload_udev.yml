@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Reload udev rules (1/2)
+  command: udevadm control --reload-rules
+  changed_when: true
+
+- name: Retrigger udev (2/2)
+  command: udevadm trigger
+  changed_when: true

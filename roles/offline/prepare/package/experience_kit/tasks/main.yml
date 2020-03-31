@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -79,7 +79,7 @@
     path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
     regexp: 'proxy_yum_url:.*$'
     line: 'proxy_yum_url: ""'
-  
+
 - name: clear http proxy
   lineinfile:
     path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
@@ -103,6 +103,12 @@
     path: "{{ offline_experience_kits_path }}/group_vars/all.yml"
     regexp: 'git_repo_token:.*$'
     line: 'git_repo_token: ""'
+
+- name: disable ntp role
+  replace:
+    path: "{{ offline_experience_kits_path }}/on_premises.yml"
+    regexp: '^( *)(\- role: time/ntp)'
+    replace: '\1# \2'
 
 - name: remove .git directory
   file:

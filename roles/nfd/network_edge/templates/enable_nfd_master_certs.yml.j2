@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- op: add
+  path: /spec/template/spec/containers/0/args
+  value:
+    - "--ca-file=/root/certs/root.pem"
+    - "--key-file=/root/certs/key.pem"
+    - "--cert-file=/root/certs/cert.pem"
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts
+  value:
+  - name: certs
+    mountPath: /root/certs
+    readOnly: true
+- op: add
+  path: /spec/template/spec/volumes
+  value:
+    - name: ca
+      secret:
+        secretName: root-ca
+    - name: certgen
+      secret:
+        secretName: certgen
+        defaultMode: 0777
+    - name: certs
+      hostPath:
+        path: "{{ certs_dest }}/nfd"
+- op: add
+  path: /spec/template/spec/initContainers
+  value:
+    - name: openssl
+      image: emberstack/openssl:latest
+      command: ["sh", "-c"]
+      args: ["mkdir /root/ca && 
+        cp /root/CA/* /root/ca/ && 
+        cp /root/CA/cert.pem /root/certs/root.pem && 
+        (sh /root/certgen/tls_pair.sh nfd-master /root/certs /root/ca)"]
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+      - name: ca
+        mountPath: /root/CA
+      - name: certs
+        mountPath: /root/certs
+      - name: certgen
+        mountPath: /root/certgen

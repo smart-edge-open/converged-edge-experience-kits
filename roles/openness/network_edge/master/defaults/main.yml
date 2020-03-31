@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -7,5 +7,7 @@ certs_dest: /etc/openness/certs
 configs_dest: /etc/openness/configs
 
 openness_yamls:
-- "{{ git_repo_dest }}/kube-ovn/openness.yaml"
-- "{{ git_repo_dest }}/kube-ovn/default_network_policy.yaml"
+- "{{ git_repo_dest }}/network-edge/openness.yaml"
+- "{{ git_repo_dest }}/network-edge/default_network_policy.yaml"
+
+kubeovn_openness_yaml: "{{ git_repo_dest }}/network-edge/kube-ovn/interfaceservice.yaml"

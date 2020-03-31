@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Disable yum plugins
+  lineinfile:
+    dest: /etc/yum.conf
+    regexp: "^plugins=.*"
+    state: absent
+  when: os_remove_yum_plugins

@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# If true, tuned role will be skipped even if is included
+# Can be overridden in host_vars if host shouldn't have customized tuned
+tuned_skip: false
+
+tuned_packages:
+  - http://linuxsoft.cern.ch/cern/centos/7/updates/x86_64/Packages/tuned-2.11.0-5.el7_7.1.noarch.rpm
+  - http://linuxsoft.cern.ch/scientific/7x/x86_64/updates/fastbugs/tuned-profiles-realtime-2.11.0-5.el7_7.1.noarch.rpm
+
+tuned_profile: realtime
+tuned_vars: |
+  isolated_cores=2-3
+  nohz=on
+  nohz_full=2-3

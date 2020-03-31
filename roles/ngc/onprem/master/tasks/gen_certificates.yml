@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+---
+
+- name: create directory for certs used by AF and NEF
+  file:
+    name: "{{ certs_dest }}/ngc"
+    state: directory
+
+- name: copy genCerts.json file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    dest: "{{ certs_dest }}/ngc"
+    mode: a+x
+
+- name: run script to generate cerificates
+  command: './genCerts.sh -t DNS -n {{ controller_name }} -m {{ node_name }}'
+  args:
+    chdir: "{{ certs_dest }}/ngc"
+  changed_when: true
+
+- name: copy certs to remote nodes
+  copy:
+    src: "{{ item }}"
+    dest: "{{ certs_dest }}/ngc/"
+    remote_src: no
+  with_items: "{{ cert_files_to_copy }}"
+  delegate_to: "{{ node_ip }}"
+

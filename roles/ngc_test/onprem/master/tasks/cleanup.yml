@@ -7,3 +7,6 @@
 
 - include_tasks: subtasks/bringdown_af.yml
 
+- name: remove firewall rules
+  include_tasks: rm_firewall_rules.yml
+

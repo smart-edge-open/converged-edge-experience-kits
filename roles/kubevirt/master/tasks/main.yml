@@ -1,0 +1,112 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Install KubeVirt
+  block:
+  - name: KV Operator Install
+    command: kubectl apply -f "{{ kubevirt_operator_url }}"
+  - name: KV Controller Install
+    command: kubectl apply -f "{{ kubevirt_cr_url }}"
+
+- name: Download Krew plugin
+  block:
+  - name: Make Krew directory
+    file:
+      path: "{{ krew_dir }}"
+      state: directory
+  - name: Check if already downloaded
+    stat:
+      path: "{{ krew_dir }}/krew.tar.gz"
+    register: krew_download
+  - name: Download Krew yaml
+    get_url:
+      url: "{{ krew_tar_url }}"
+      dest: "{{ krew_dir }}"
+    when: not krew_download.stat.exists
+  - name: Download Krew tar.gz
+    get_url:
+      url: "{{ krew_yaml_url }}"
+      dest: "{{ krew_dir }}"
+    when: not krew_download.stat.exists
+  - name: Unpack Krew
+    unarchive:
+      src: "{{ krew_dest }}"
+      dest: "{{ krew_dir }}"
+      remote_src: True
+      extra_opts: "--strip-components=1"
+
+- name: Install Krew plugin
+  block:
+  - name: Install Krew
+    shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" install --manifest=krew.yaml --archive=krew.tar.gz
+    args:
+      chdir: "{{ krew_dir }}"
+  - name: Update Krew
+    shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" update
+    args:
+      chdir: "{{ krew_dir }}"
+  - name: Add path to profile
+    lineinfile:
+      state: present
+      dest: /etc/profile
+      line: export PATH="${PATH}:${HOME}/.krew/bin"
+
+- name: Install Virtctl plugin
+  shell: ${HOME}/.krew/bin/kubectl-krew install virt
+  changed_when: true
+
+- name: Install CDI
+  block:
+  - name: CDI Operator Install
+    command: kubectl apply -f "{{ cdi_operator_url }}"
+  - name: CDI Controller Install
+    command: kubectl apply -f "{{ cdi_cr_url }}"
+
+- name: Label CDI namespace
+  command: kubectl label namespace/cdi ns=cdi --overwrite=true
+  changed_when: true
+
+- name: Create temp directory for KubeVirt related yaml
+  tempfile:
+    state: directory
+    suffix: -kubevirt
+  register: kv_dir
+
+- name: Copy traffic rule file for CDI
+  copy:
+    src: cdiNetworkPolicy.yaml
+    dest: "{{ kv_dir.path }}/cdiNetworkPolicy.yaml"
+
+- name: Copy Local Volume Storage Class
+  copy:
+    src: localStorageClass.yaml
+    dest: "{{ kv_dir.path }}/localStorageClass.yaml"
+
+- name: Check if CDI traffic rule exists
+  command: kubectl get networkpolicy cdi-upload-proxy-policy
+  ignore_errors: yes
+  register: cdi_exist
+  changed_when: false
+
+- name: Set CDI traffic rule
+  command: kubectl create -f cdiNetworkPolicy.yaml
+  args:
+    chdir: "{{ kv_dir.path }}"
+  changed_when: true
+  when: cdi_exist.rc != 0
+
+- name: Check if LVSC exists
+  command: kubectl get sc local-storage
+  ignore_errors: yes
+  register: lvsc_exist
+  changed_when: false
+
+- name: Create Local Volume Storage Class
+  command: kubectl create -f localStorageClass.yaml
+  args:
+    chdir: "{{ kv_dir.path }}"
+  when: storage_class == "local-volume" and lvsc_exist.rc != 0
+
+

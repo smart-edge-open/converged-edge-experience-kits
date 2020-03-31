@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - name: Check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -12,13 +12,13 @@
   register: docker_service_status
 
 - name: Check Docker images
-  shell: docker images -q
+  command: docker images -q
   changed_when: false
   register: docker_images_present
   when: docker_service_status.rc == 0
-    
-- name: Remove Docker images  
+
+- name: Remove Docker images
   shell: docker rmi -f $(docker images -q)
-  when: 
+  when:
     - docker_service_status.rc == 0
-    - docker_images_present.stdout != ''
+    - docker_images_present.stdout

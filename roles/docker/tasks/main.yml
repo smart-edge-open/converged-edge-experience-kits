@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -17,6 +17,7 @@
   command: yum clean all
   args:
     warn: false
+  changed_when: true
 
 - name: install Docker CE
   yum:
@@ -40,7 +41,7 @@
 
 - name: set up proxy
   include_tasks: proxy.yml
-  when: proxy_os_enable
+  when: proxy_os_enable|bool
 
 - name: set cgroups driver to systemd
   block:
@@ -61,7 +62,7 @@
 - name:  Find docker audit files
   stat:
     path: "{{ item }}"
-  with_items: " {{ docker_audit_files }} "
+  with_items: "{{ docker_audit_files }}"
   register: stats
 
 - name: Add audit rules for docker
@@ -73,4 +74,5 @@
   with_items: "{{ stats.results }}"
 
 - name: Restart auditd
-  shell: service auditd restart
+  command: service auditd restart # noqa 303
+  changed_when: true

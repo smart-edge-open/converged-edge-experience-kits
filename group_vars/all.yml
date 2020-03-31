@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -10,7 +10,8 @@ proxy_os_remove_old: true
 proxy_os_http: "http://proxy.example.org:3128"
 proxy_os_https: "http://proxy.example.org:3129"
 proxy_os_ftp: "http://proxy.example.org:3128"
-proxy_os_noproxy: "localhost,127.0.0.1,10.244.0.0/16,10.96.0.0/24,10.16.0.0/16"
+# NOTE - VCA: 172.32.1.0/24 is used for VCA node.
+proxy_os_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,cdi.svc,127.0.0.1,10.244.0.0/16,10.96.0.0/16,10.16.0.0/16,10.32.0.0/12,172.32.1.0/24"
 
 os_remove_yum_plugins: true
 
@@ -19,6 +20,26 @@ git_repo_token: ""
 # Controller settings
 mysql_root_password: "pass"
 cce_admin_password: "pass"
+
+# List of requested CNIs to be used in Network Edge mode
+# CNIs are applied in order of definition
+# Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
+# Available CNIs:
+# - kubeovn (note: must be main/primary/first CNI),
+# - weavenet
+# - flannel
+# - calico
+# - sriov (note: cannot be main or standalone)
+# - userspace (note: cannot be main or standalone)
+# NOTE - For VCAC-A setup, use `weavenet` CNI
+kubernetes_cnis:
+- kubeovn
+
+# Dataplane to be used for On-Premises mode
+# Available dataplanes:
+# - nts
+# - ovncni
+onprem_dataplane: "nts"
 
 ## Offline On Premise mode
 

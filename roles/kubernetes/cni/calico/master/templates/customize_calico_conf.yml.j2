@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: calico-node
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: install-cni
+          env:
+            - name: CNI_CONF_NAME
+              value: "{{ cni_weight }}-calico.conflist"

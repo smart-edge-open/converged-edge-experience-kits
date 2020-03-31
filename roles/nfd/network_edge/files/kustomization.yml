@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+resources:
+- nfd-master.yaml
+- nfd-worker-daemonset.yaml
+
+patchesJson6902:
+- target:
+    group: apps
+    version: v1
+    kind: DaemonSet
+    name: nfd-master
+  path: enable_nfd_master_certs.yml
+- target:
+    group: apps
+    version: v1
+    kind: DaemonSet
+    name: nfd-master
+  path: add_nfd_namespace.yml
+- target:
+    group: apps
+    version: v1
+    kind: DaemonSet
+    name: nfd-worker
+  path: enable_nfd_worker_certs.yml
+- target:
+    group: apps
+    version: v1
+    kind: DaemonSet
+    name: nfd-worker
+  path: add_nfd_namespace.yml
+- target:
+    version: v1
+    kind: ServiceAccount
+    name: nfd-master
+  path: replace_service_account_namespace.yml
+- target:
+    group: rbac.authorization.k8s.io
+    version: v1
+    kind: ClusterRoleBinding
+    name: nfd-master
+  path: replace_cluster_role_binding_namespace.yml
+- target:
+    version: v1
+    kind: Service
+    name: nfd-master
+  path: add_nfd_namespace.yml

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# TODO: sriov_device_init cleanup
+
+- name: load common variables for SR-IOV
+  include_vars: ../../common/defaults/main.yml
+
+- name: run common cleanup for SR-IOV
+  include_tasks: ../../common/tasks/cleanup.yml

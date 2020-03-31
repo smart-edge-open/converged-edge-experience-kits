@@ -1,24 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-- name: get worker node name
-  block:
-  - name: hostname
-    command: hostname
-    register: hostname_output
-  - set_fact:
-      k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: create temporary custom .openness_gitconfig
   include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
 
 - block:
   - name: build binaries and images
-    shell: source /etc/profile && KUBE_OVN_MODE=True make build-docker
+    shell: source /etc/profile && make networkedge
     args:
       chdir: "{{ git_repo_dest }}"
+  - name: build interface service image for kube-ovn
+    shell: source /etc/profile && make interfaceservice
+    args:
+      chdir: "{{ git_repo_dest }}"
+    when: "'kubeovn' in kubernetes_cnis"
   always:
   - name: remove .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
@@ -26,6 +23,9 @@
 # since these pods are part of openness' DaemonSet will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
 - name: recreate openness pods
-  shell: kubectl delete --namespace=openness $(kubectl get pods --namespace=openness --field-selector spec.nodeName={{ k8s_worker_node_name }} -o=NAME | grep -v syslog)
+  shell: >
+    kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ ansible_hostname | lower }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
+  changed_when: true

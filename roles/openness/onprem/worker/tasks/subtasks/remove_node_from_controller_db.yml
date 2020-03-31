@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: try remove node from the list of added nodes
+  block:
+  - name: extract node's serial
+    shell: openssl pkey -pubout -in /var/lib/appliance/certs/key.pem -inform pem -outform der | md5sum | xxd -r -p | openssl enc -a | tr -d '=' | tr '/+' '_-'
+    register: key_msg
+
+  - name: get node's serial & controller's IP
+    set_fact:
+      verification_key: "{{ key_msg.stdout }}"
+      controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+
+  - name: make an auth request
+    uri:
+      url: http://{{ controller_ip }}:8080/auth
+      method: POST
+      body_format: json
+      body:
+        username: admin
+        password: "{{ cce_admin_password }}"
+    environment:
+      HTTP_PROXY: ""
+      http_proxy: ""
+    register: auth_response
+    failed_when: auth_response.status != 201
+
+  - name: extract auth token
+    set_fact:
+      auth_token: "{{ auth_response.json.token }}"
+
+  - name: get list of added nodes
+    uri:
+      url: http://{{ controller_ip }}:8080/nodes
+      method: GET
+      headers:
+        Authorization: Bearer {{ auth_token }}
+    environment:
+      HTTP_PROXY: ""
+      http_proxy: ""
+    register: added_nodes
+
+  - name: get nodes' uuids for given serial
+    set_fact:
+      node_uuids: "{{ added_nodes.json | json_query(query) }}"
+    vars:
+      query: "nodes[?serial=='{{ verification_key }}'].id"
+
+  - name: remove the node from the controller
+    uri:
+      url: http://{{ controller_ip }}:8080/nodes/{{ item }}
+      method: DELETE
+      headers:
+        Authorization: Bearer {{ auth_token }}
+    environment:
+      HTTP_PROXY: ""
+      http_proxy: ""
+    with_items: "{{ node_uuids }}"
+
+  rescue:
+  - name: discard error
+    debug:
+      msg: "Removing the node failed, but continuing with node cleanup"

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+hugepage_size: "2M" # Or 1G
+hugepage_amount: "5000"
+
+default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
+
+# Place for additional GRUB parameters, e.g. for CMK
+additional_grub_params: ""

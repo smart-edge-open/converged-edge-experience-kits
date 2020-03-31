@@ -6,42 +6,40 @@
 - name: include common vars
   include_vars: ../common/defaults/main.yml
 
-- name: create directory for certs used by AF and NEF
-  file:
-    name: "{{ certs_dest }}/ngc"
-    state: directory
+- name: add firewall rules
+  include_tasks: add_firewall_rules.yml
 
-- name: copy genCerts.json file
-  copy:
-    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
-    dest: "{{ certs_dest }}/ngc"
-    mode: a+x
-
-- name: run script to generate cerificates
-  shell: ./genCerts.sh -t DNS -n afservice -m nefservice
-  args:
-    chdir: "{{certs_dest}}/ngc"
-
-- name: copy certs to remote nodes
-  copy:
-    src: "{{ certs_dest }}/ngc" 
-    dest: "{{ certs_dest }}"
-  delegate_to: "{{ controller_ip }}"
-
-- name: build NEF component
-  shell: source /etc/profile && make nef
-  args:
-    chdir: "{{ git_repo_ngc_dir }}"
+- block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+  - name: build NEF component
+    shell: source /etc/profile && make nef
+    args:
+      chdir: "{{ git_repo_ngc_dir }}"
+  always:
+    - name: remove .openness_gitconfig
+      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: copy NEF binaries to build folder
   copy:
     src: "{{ git_repo_ngc_dist_dir }}/nef"
     dest: "{{ git_repo_ngc_build_dir }}/networkedge/nef"
+    remote_src: yes
+  delegate_to: "{{ node_ip }}"
 
 - name: copy nef.json configuration file
   copy:
     src: "{{ git_repo_ngc_dir }}/configs/nef.json"
     dest: "{{ configs_dest }}/ngc"
+    remote_src: yes
+  delegate_to: "{{ node_ip }}"
+
+- name: copy oauth2.json configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    dest: "{{ configs_dest }}/ngc"
+    remote_src: yes
+  delegate_to: "{{ node_ip }}"
 
 - name: build NEF docker image
   docker_image:

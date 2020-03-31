@@ -7,12 +7,21 @@
   include_vars: ../../common/defaults/main.yml
 
 - name: prepare firewall
-  include_tasks: add_firewall_rules.yml  
+  include_tasks: add_firewall_rules.yml
 
-- name: build AF component
-  shell: source /etc/profile && make af
-  args:
-    chdir: "{{ git_repo_ngc_dir }}" 
+- name: generate and copy certificates
+  include_tasks: gen_certificates.yml
+
+- block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+  - name: build AF component
+    shell: source /etc/profile && make af
+    args:
+      chdir: "{{ git_repo_ngc_dir }}"
+  always:
+    - name: remove .openness_gitconfig
+      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: copy AF binaries to build folder
   copy:
@@ -24,11 +33,21 @@
     src: "{{ git_repo_ngc_dir }}/configs/af.json"
     dest: "{{ configs_dest }}/ngc"
 
+- name: copy oauth2 configuration file
+  copy:
+    src: "{{ git_repo_ngc_dir }}/configs/oauth2.json"
+    dest: "{{ configs_dest }}/ngc"
+
 - name: update af config file
-  shell: jq '.ServerConfig.Hostname="{{ controller_name }}" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" | .CliConfig.NEFHostname="{{ node_name }}"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  shell: >
+    set -o pipefail &&
+    jq '.ServerConfig.Hostname="{{ controller_name }}" | .ServerConfig.UIEndpoint="http://{{ controller_ip }}:3020" |
+    .CliConfig.NEFHostname="{{ node_name }}"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+  args:
+  changed_when: true
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -57,9 +76,13 @@
       - 8050:8050
       - 8051:8051
     env:
-      no_proxy: "{{ proxy_os_noproxy}},{{ node_name }},{{ controller_name}}"
+      no_proxy: "{{ proxy_os_noproxy }},{{ node_name }},{{ controller_name }}"
   when: docker_service_status.rc == 0
 
 - name: update container's /etc/hosts file
-  shell: 'docker exec -t af-container /bin/bash -c "echo {{ node_ip }} {{ node_name }} | tee -a /etc/hosts"'
-
+  shell: >
+    set -o pipefail &&
+    'docker exec -t af-container /bin/bash -c "echo {{ node_ip }}
+    {{ node_name }} | tee -a /etc/hosts"'
+  args:
+  changed_when: true

@@ -1,28 +1,28 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - include_tasks: remove_virbr0_interface.yml
 
-# Stop and remove network
-- virt_net:
+- name: stop and remove libvirt network
+  virt_net:
     command: destroy
     name: default
     state: absent
 
-# Create new network config file
-- virt_net:
+- name: create new libvirt network config file
+  virt_net:
     command: define
     name: default
     xml: '{{ lookup("file", "files/libvirt-default.xml") }}'
 
-# Enable now
-- virt_net:
+- name: libvirt network enable now
+  virt_net:
     name: default
     state: active
 
-# Activate at boot
-- virt_net:
+- name: libvirt network activate at boot
+  virt_net:
     name: default
     autostart: yes

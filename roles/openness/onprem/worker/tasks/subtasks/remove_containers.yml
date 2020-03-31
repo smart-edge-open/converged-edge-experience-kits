@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - name: check Docker service
-  shell: systemctl status docker
+  command: systemctl status docker
   ignore_errors: true
   changed_when: false
   args:
@@ -12,7 +12,7 @@
   register: docker_service_status
 
 - name: check Docker containers running
-  shell: docker ps -a -q
+  command: docker ps -a -q
   changed_when: false
   register: docker_containers_running
   when: docker_service_status.rc == 0
@@ -21,4 +21,4 @@
   shell: docker rm -f $(docker ps -a -q)
   when:
     - docker_service_status.rc == 0
-    - docker_containers_running.stdout != ""
+    - docker_containers_running.stdout

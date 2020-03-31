@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -10,8 +10,8 @@
 
 - name: copy archive to remote machine
   copy:
-    src: "{{ offline_path_common}}/{{ offline_archive }}"
-    dest: "{{ offline_path_common}}/{{ offline_archive }}"
+    src: "{{ offline_path_common }}/{{ offline_archive }}"
+    dest: "{{ offline_path_common }}/{{ offline_archive }}"
 
 - name: unarchive
   unarchive:

@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Add firewall rules for AF notification port
+  command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8051 -j ACCEPT
+  ignore_errors: yes
+  changed_when: true
+
+- name: Add firewall rule for NEF port
+  command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 8060 -j ACCEPT
+  ignore_errors: yes
+  changed_when: true
+
+- name: Reload firewall rules
+  command: firewall-cmd --reload
+  changed_when: false
+  ignore_errors: yes
+

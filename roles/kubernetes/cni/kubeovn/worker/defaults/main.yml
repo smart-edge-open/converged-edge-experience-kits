@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+ovs_package_url: "https://github.com/alauda/ovs/releases/download/{{ ovn_version.main }}-{{ ovn_version.subversion }}/openvswitch-{{ ovn_version.main }}-{{ ovn_version.subversion }}.el7.x86_64.rpm"
+ovs_dependencies_yum: "unbound"
+ovs_packages_to_remove: "openvswitch,unbound"

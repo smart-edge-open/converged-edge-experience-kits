@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Remove excludes (rpm packages) from /etc/yum.conf
+  lineinfile:
+    dest: /etc/yum.conf
+    regexp: "^exclude=.*"
+    state: absent
+  when:
+    - os_yum_exclude_rpm_packages is defined
+    - os_yum_exclude_rpm_packages|length > 0

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -26,9 +26,10 @@
     dest: "{{ tmp_dir.path }}/rewrite_args.yml"
 
 - name: setup CMK
-  shell: kubectl kustomize . | kubectl apply -f -
+  shell: kubectl kustomize . > /tmp/cmk.yml
   args:
     chdir: "{{ tmp_dir.path }}"
+  changed_when: true
 
 - name: remove temp directory
   file:

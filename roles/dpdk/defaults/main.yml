@@ -1,13 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 dpdk_version: "18.11.2"
 dpdk_checksum: "0ad396d18be01db57b6de8270ebdf651"
-
-# dpdk_version: "19.05"
-# dpdk_checksum: "fe22ad1bab1539945119047b0fdf1105"
 
 dpdk_name: "dpdk-{{ dpdk_version }}"
 dpdk_install_dir: "/opt/{{ dpdk_name }}"
@@ -15,4 +12,5 @@ dpdk_install_dir: "/opt/{{ dpdk_name }}"
 dpdk_download_url: "http://fast.dpdk.org/rel/{{ dpdk_name }}.tar.xz"
 dpdk_download_dest: "/tmp/{{ dpdk_name }}.tar.xz"
 
-non_rt_kernel_devel_download_url: "http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm"
+# URL or package name providing kernel-devel package when role `custom_kernel` is disabled (commented) or skipped for specific host (`customize_kernel_skip` variable)
+dpdk_kernel_devel: http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm

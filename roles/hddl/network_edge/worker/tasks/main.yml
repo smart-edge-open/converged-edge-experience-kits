@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: remove old centos directory for hddldaemon
+  file:
+    path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
+    state: absent
+
+- name: create centos directory for hddldaemon
+  block:
+    - name: create 1st level folder
+      file:
+        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
+        state: directory
+    - name: create 2nd level folder
+      file:
+        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
+        state: directory
+    - name: create 3rd level folder
+      file:
+        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
+        state: directory
+
+- name: copy files from ubuntu for hddldaemon
+  copy:
+    src: "{{ hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/analytics/hddldaemon"
+    dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
+    remote_src: yes
+
+- name: create kustomization files from templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon/{{ item }}"
+    mode: 0777
+  with_items:
+  - build.sh
+  - shell.sh
+  - Dockerfile
+
+- name: build hddlaaemon container image
+  shell: ./build.sh
+  args:
+    chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
+  changed_when: true
+
+- name: create hddldaemonSet
+  command: "kubectl apply -f setup_hddl_daemonset.yaml"
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true
+  changed_when: true
+  args:
+    chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/script"

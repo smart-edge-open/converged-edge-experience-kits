@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -13,7 +13,7 @@
     src: "{{ git_repo_dest }}/.env"
     dest: "{{ git_repo_dest }}/.env.ansible.backup"
     remote_src: yes
-  when: env_backup_file.stat.exists == false
+  when: not env_backup_file.stat.exists
 
 - name: generate .env file
   template:
@@ -30,6 +30,7 @@
     - ui-deps-image.tar
     - cups-deps-image.tar
     - cnca-deps-image.tar
+    - landing-deps-image.tar
     - node.tar
 
   - name: offline | customize docker-compose.yml - use cached images
@@ -38,9 +39,10 @@
       insertafter: 'context: ./ui/{{ item.dir }}'
       line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
     with_items:
-    - { image: "cce-ui", dir: "controller"}
-    - { image: "cups-ui", dir: "cups"}
-    - { image: "cnca-ui", dir: "cnca"}
+    - { image: "cce-ui", dir: "controller" }
+    - { image: "cups-ui", dir: "cups" }
+    - { image: "cnca-ui", dir: "cnca" }
+    - { image: "landing-ui", dir: "landing" }
 
   # This is workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
   # Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
@@ -62,8 +64,8 @@
         { "proxies": { "default": { "noProxy": "" } } }
     when: docker_history_ui.rc == 0
 
-  - name: offline | build CCE, CUPS, & CNCA UIs
-    shell: docker-compose build ui cups-ui cnca-ui
+  - name: offline | finish building UI images
+    command: docker-compose build ui cups-ui cnca-ui landing-ui
     args:
       chdir: "{{ git_repo_dest }}"
   when: offline_mode

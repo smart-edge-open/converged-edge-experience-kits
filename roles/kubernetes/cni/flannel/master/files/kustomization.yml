@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+resources:
+- kube-flannel.yml
+
+patchesStrategicMerge:
+- flannel_change_cidr.yml
+
+patchesJson6902:
+- target:
+    group: apps
+    version: v1
+    kind: DaemonSet
+    name: kube-flannel-ds-amd64
+  path: customize_flannel_conf.yml

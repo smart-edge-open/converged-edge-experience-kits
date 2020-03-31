@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - name: build intermediate images
-  shell: docker build -t {{ item.name }}-deps-image --target {{ item.name }}-deps-image {{ item.path }}
+  command: docker build -t {{ item.name }}-deps-image --target {{ item.name }}-deps-image {{ item.path }}
   args:
     chdir: "{{ git_repo_dest }}"
   with_items:
@@ -12,16 +12,18 @@
   - { name: eaa, path: ./build/eaa }
   - { name: nts, path: ./internal/nts/ }
   - { name: edgedns, path: ./build/edgednssvr }
+  changed_when: true
 
 - name: pull syslog-ng image
-  shell: docker-compose pull --quiet syslog-ng
-  args:
+  make:
     chdir: "{{ git_repo_dest }}"
+    target: pull-syslog
 
 - name: pull alpine image
-  shell: docker pull --quiet alpine:latest
+  command: docker pull --quiet alpine:latest
   args:
     chdir: "{{ git_repo_dest }}"
+  changed_when: true
 
 - name: make sure dir for images exists
   file:

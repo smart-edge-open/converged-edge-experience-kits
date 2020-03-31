@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: open calico firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: 179/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: add NetworkManager config - ignore calico's interfaces
+  copy:
+    dest: /etc/NetworkManager/conf.d/calico.conf
+    content: |
+      [keyfile]
+      unmanaged-devices=interface-name:cali*;interface-name:tunl*
+
+- name: create temp dir
+  tempfile:
+    state: directory
+    suffix: -calico
+  register: tmp_dir
+
+- name: download calico yml
+  get_url:
+    url: "{{ calico_url }}"
+    dest: "{{ tmp_dir.path }}/calico.yml"
+
+- name: copy kustomization.yml
+  copy:
+    src: "{{ item }}"
+    dest: "{{ tmp_dir.path }}"
+  with_items:
+  - kustomization.yml
+  - customize_calico_container.yml
+
+- name: create kustomization files from templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ tmp_dir.path }}/{{ item }}"
+  with_items:
+  - customize_calico_conf.yml
+  - change_cidr.yml
+
+- name: apply calico.yml with change
+  shell: >
+    set -o pipefail &&
+    kubectl kustomize . | kubectl apply -f -
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  changed_when: true
+
+- name: apply NetworkAttachmentDefinition
+  block:
+  - name: copy NetworkAttachmentDefinition to remote from template
+    template:
+      src: calico_net_attach_def.yml.j2
+      dest: "{{ tmp_dir.path }}/calico_net_attach_def.yml"
+  - name: apply Calico's NetworkAttachmentDefinition
+    command: kubectl apply -f {{ tmp_dir.path }}/calico_net_attach_def.yml
+  when:
+  - apply_netdef is defined
+  - apply_netdef

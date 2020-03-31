@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -14,5 +14,5 @@
       state: absent
       path: /etc/yum.repos.d
   - name: revert /etc/yum.repos.d backup
-    shell: mv /etc/yum.repos.d.backup /etc/yum.repos.d
-  when: yum_backup_dir.stat.exists == true 
+    command: mv /etc/yum.repos.d.backup /etc/yum.repos.d
+  when: yum_backup_dir.stat.exists

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -8,24 +8,29 @@
   - name: hostname
     command: hostname
     register: hostname_output
-  - set_fact:
+
+  - name: set k8s worker node name
+    set_fact:
       k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
 
 - name: remove openness definitions
   command: kubectl delete -f {{ item }}
   with_items: "{{ openness_yamls }}"
   ignore_errors: yes
+  changed_when: true
 
 - name: remove secrets (root CA and certgen)
-  shell: kubectl delete secret {{ item }} --namespace=openness
+  command: kubectl delete secret {{ item }} --namespace=openness
   with_items:
   - certgen
   - root-ca
   ignore_errors: yes
+  changed_when: true
 
 - name: remove openness namespace
-  shell: kubectl delete ns openness
+  command: kubectl delete ns openness
   ignore_errors: yes
+  changed_when: true
 
 - name: remove generated files
   file:

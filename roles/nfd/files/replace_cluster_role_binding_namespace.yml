@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
-
----
-
-- op: replace
-  path: /subjects/0/namespace
-  value: openness

@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# Load image from offline package
+- name: load nfd-worker image
+  docker_image:
+    name: quay.io/kubernetes_incubator/node-feature-discovery
+    load_path: "{{ offline_docker_images_path }}/nfd-worker.tar"
+    source: load
+  when: offline_mode
+
+# Stop nfd-worker container
+- name: remove nfd-worker container
+  docker_container:
+    name: "{{ nfd_worker_container_name }}"
+    state: absent
+
+- name: create temp directory
+  tempfile:
+    state: directory
+    suffix: .nfd-worker
+  register: tmp_dir
+
+- name: copy docker-compose.yml file
+  copy:
+    src: docker-compose.yml
+    dest: "{{ tmp_dir.path }}"
+
+# Bring up nfd-worker container
+- name: bring up nfd-worker container
+  command: docker-compose up -d --no-build
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  environment:
+    CONTAINER_NAME: "{{ nfd_worker_container_name }}"
+    VER: "{{ nfd_version }}"
+    CERTS_DIR: "{{ certs_dest }}"
+    ENDPOINT: "{{ nfd_master_endpoint }}"
+    NODEID: "{{ node_add_response.json.id }}"
+    INTERVAL: "{{ nfd_update_interval }}"
+  changed_when: true
+
+- name: remove temp directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
+

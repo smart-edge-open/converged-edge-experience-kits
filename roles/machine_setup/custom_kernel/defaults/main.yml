@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# If true, role will be skipped despite being included
+# Can be overridden in host_vars if shouldn't have customized kernel
+kernel_skip: false
+
+kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7/rt/CentOS-RT.repo
+kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern
+kernel_package: kernel-rt-kvm
+kernel_devel_package: kernel-rt-devel
+kernel_version: 3.10.0-1062.12.1.rt56.1042.el7.x86_64
+
+# list of URLs to RPMs
+kernel_dependencies_urls: []
+
+# list of packages in the repositories
+kernel_dependencies_packages: []
+
+# ---
+
+kernel_repo_dest: /etc/yum.repos.d/CentOS-RT.repo

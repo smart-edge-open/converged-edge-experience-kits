@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: include common vars
+  include_vars: ../../common/defaults/main.yml
+
+- name: Delete HDDL DaemonSet
+  command: kubectl delete -f setup_hddl_daemonset.yaml
+  args:
+    chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/script"
+  changed_when: true
+  ignore_errors: yes
+
+- name: remove downloaded all ovc dockerfile
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ hddldaemon_container.download_dir }}"
+  ignore_errors: yes

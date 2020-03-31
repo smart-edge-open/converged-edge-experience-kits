@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- debug:
+    msg: "Setting up OS"
+
+- include_tasks: disable_swap.yml
+- include_tasks: disable_selinux.yml
+- include_tasks: proxy_yum_remove.yml
+- include_tasks: proxy_yum_add.yml
+- include_tasks: proxy_os_env_remove.yml
+- include_tasks: proxy_os_env_add.yml
+- include_tasks: add_udev_kvm_system_rule.yml
+- include_tasks: enable_ipv4_forwarding.yml
+- include_tasks: reload_udev.yml
+
+- block:
+  - include_tasks: disable_yum_plugins.yml
+  - include_tasks: remove_yum_excludes.yml
+  - include_tasks: add_yum_excludes.yml
+  - include_tasks: install_epel_repository.yml
+  when: not offline_mode
+
+- include_tasks: install_base_os_packages.yml

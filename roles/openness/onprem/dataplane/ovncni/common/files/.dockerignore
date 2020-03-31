@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Add everything to the ignored
+*
+
+# Add following to whitelist:
+!lib
+!drivers
+!x86_64-native-linuxapp-gcc
+!configure_ovn_net.sh
+!start_ovs_ovn.sh

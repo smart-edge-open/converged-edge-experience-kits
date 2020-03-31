@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: setup repository for kernel
+  block:
+  - name: setup repository for kernel | get repository file
+    get_url:
+      url: "{{ kernel_repo_url }}"
+      dest: "{{ kernel_repo_dest }}"
+      mode: 0644
+
+  - name: find out place for GPG key
+    command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ kernel_repo_dest }}
+    register: gpg_key_filepath
+
+  - name: set GPG key filepath
+    set_fact:
+      repo_gpg_filepath: "{{ gpg_key_filepath.stdout }}"
+
+  - name: fail if GPG key required, but not supplied
+    fail:
+      msg: "Requested kernel repository requires GPG key, but the kernel_repo_key is either undefined or empty"
+    when:
+    - repo_gpg_filepath|length > 0
+    - kernel_repo_key is not defined or kernel_repo_key|length == 0
+
+  - name: setup repository for kernel | get GPG key
+    get_url:
+      url: "{{ kernel_repo_key }}"
+      dest: "{{ repo_gpg_filepath }}"
+      mode: 0644
+  - name: setup repository for kernel | import GPG key
+    rpm_key:
+      state: present
+      key: "{{ repo_gpg_filepath }}"
+
+  when:
+  - not offline_mode # online mode only, for offline RPMs are cached
+  - kernel_repo_url is defined and kernel_repo_url|length > 0 # url to repository file not be empty

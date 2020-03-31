@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: delete userspace executable
+  file:
+    path: /opt/cni/bin/userspace
+    state: absent
+
+- name: delete go files
+  shell: "source /etc/profile && rm -rf $GOPATH/src/{{ userspace_repository }}"
+  changed_when: true

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: open calico firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: 179/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes

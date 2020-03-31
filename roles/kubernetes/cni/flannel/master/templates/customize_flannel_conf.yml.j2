@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- op: replace
+  path: /spec/template/spec/initContainers/0/args/2
+  value: "/etc/cni/net.d/{{ cni_weight }}-flannel.conflist"

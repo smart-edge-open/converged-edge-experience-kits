@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -24,3 +24,14 @@
   get_url:
     url: "{{ qemu_download_url }}"
     dest: "{{ offline_path }}/archives/"
+
+- name: get ovs settings
+  include_vars: ../../../../ovs/defaults/main.yml
+
+- debug:
+    msg: "ovs will be downloaded from: {{ ovs_url }}"
+
+- name: download ovs package
+  get_url:
+    url: "{{ ovs_url }}"
+    dest: "{{ offline_path }}/archives/openvswitch-{{ ovs_version }}.tar.gz"

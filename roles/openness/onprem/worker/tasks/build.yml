@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -8,13 +8,13 @@
   - name: offline | add cache_from to docker-compose.yml
     lineinfile:
       path: "{{ git_repo_dest }}/docker-compose.yml"
-      insertafter: 'dockerfile: "Dockerfile_{{ item.file }}"'
+      insertafter: 'context: {{ item.context }}'
       line: '      cache_from: ["{{ item.cache }}-deps-image"]'
     with_items:
-    - { file: appliance, cache: appliance }
-    - { file: eaa, cache: eaa }
-    - { file: nts, cache: nts }
-    - { file: edgednssvr, cache: edgedns }
+    - { context: ./dist/appliance, cache: appliance }
+    - { context: ./dist/eaa, cache: eaa }
+    - { context: ./internal/nts, cache: nts }
+    - { context: ./dist/edgednssvr, cache: edgedns }
 
   - name: offline | load images
     shell: docker load < {{ offline_docker_images_path }}/{{ item }}
@@ -46,7 +46,8 @@
       content: |
         { "proxies": { "default": { "noProxy": "" } } }
     when: docker_history.rc == 0
-  - set_fact:
+  - name: offline | set gopath
+    set_fact:
       gopath: "{{ offline_path }}/golang_modules/main"
   when: offline_mode
 
@@ -55,7 +56,7 @@
   - name: create temporary custom .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: binaries and images
-    shell: source /etc/profile && KUBE_OVN_MODE=False RTE_SDK={{ ansible_local.dpdk.dpdk_install_dir }} RTE_TARGET={{ dpdk_make_target }} GOPATH={{ gopath }} make build-docker
+    shell: source /etc/profile && GOPATH={{ gopath }} make onprem-{{ onprem_dataplane }}
     args:
       chdir: "{{ git_repo_dest }}"
   always:

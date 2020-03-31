@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -7,7 +7,7 @@
   block:
     - debug:
         msg: "Using git token for repository checkout"
-      when: git_repo_token|bool
+      when: git_repo_token|length > 0
 
     - name: checkout clean repository
       git:

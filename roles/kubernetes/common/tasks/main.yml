@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -13,8 +13,8 @@
     enabled: true
     repo_gpgcheck: true
 
-- name: install packages 
-  yum: 
+- name: install packages
+  yum:
     name: "{{ kubernetes_packages }}"
     state: present
     skip_broken: yes
@@ -38,7 +38,7 @@
         src: sysctl_k8s.conf
         dest: /etc/sysctl.d/sysctl_k8s.conf
     - name: get current sysctl vars
-      shell: grep 0 /proc/sys/net/bridge/bridge-nf-call-iptables /proc/sys/net/bridge/bridge-nf-call-ip6tables
+      command: grep 0 /proc/sys/net/bridge/bridge-nf-call-iptables /proc/sys/net/bridge/bridge-nf-call-ip6tables
       register: sysctl_out
       ignore_errors: yes
     - name: refresh sysctl only if desired vars are disabled

@@ -1,0 +1,92 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: check if packages installed in proper version
+  shell: rpm -q openvswitch | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l # noqa 306
+  args:
+    warn: false
+  register: rpm_grep
+  changed_when: false
+
+- name: (re)install ovs if needed
+  block:
+  - name: remove old packages
+    yum:
+      name: "{{ ovs_packages_to_remove }}"
+      state: absent
+  - name: installing OVS tool dependencies
+    yum:
+      name: "{{ ovs_dependencies_yum }}"
+  - name: installing OVS tool
+    command: yum install -y {{ ovs_package_url }}
+    args:
+      warn: false
+  when: "'1' not in rpm_grep.stdout"
+
+- name: open kube-ovn firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+  - 10250/tcp
+  - 30000-32767/tcp
+  - 8285/udp
+  - 8472/udp
+
+- name: wait for OVS database
+  block:
+  - name: wait for running ovs-ovn pod
+    shell: >
+      set -o pipefail &&
+      kubectl get pods -n kube-ovn
+      -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
+      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep -E "ovs-ovn"
+    register: kubeovn_pods
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    retries: 30
+    delay: 30
+    until: kubeovn_pods.stdout.find("Running") != -1
+    changed_when: false
+
+  - name: waiting for OVS DB socket
+    wait_for:
+      path: /var/run/openvswitch/db.sock
+      timeout: 300
+  rescue:
+  - name: events of ovs-ovn pod
+    shell: >
+      set -o pipefail &&
+      kubectl describe pod -n kube-ovn
+      $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name
+      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep ovs-ovn) |
+      sed -n '/^Events:/,//p'
+    changed_when: false
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    ignore_errors: true
+  - name: try to get ovs-ovn execution logs
+    shell: >
+      set -o pipefail &&
+      kubectl logs -n kube-ovn
+      $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name
+      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep ovs-ovn)
+    changed_when: false
+    delegate_to: "{{ groups['controller_group'][0] }}"
+    ignore_errors: true
+  - name: end the playbook
+    fail:
+      msg: "end the playbook: either ovs-ovn pod did not start or the socket was not created"
+
+- name: configure OVS
+  shell: |
+    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
+    ovs-vsctl --may-exist add-br br-local
+  register: result
+  until: not result.failed
+  retries: 5
+  delay: 60
+  changed_when: true

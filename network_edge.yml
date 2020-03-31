@@ -1,0 +1,105 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+# Playbook for Network Edge deployment
+
+- hosts: controller_group
+  vars:
+    hugepage_amount: "1024"
+
+  pre_tasks:
+  - name: fail if more than 1 controller
+    fail:
+      msg: "Only one controller is supported"
+    when:
+    - groups['controller_group'] is defined
+    - (groups['controller_group']|length>1)
+  - name: validate hostname
+    include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate requested CNIs
+    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+
+  roles:
+    - role: machine_setup/os_setup
+    # - role: time/ntp
+    - role: machine_setup/grub
+    - role: machine_setup/conditional_reboot
+    - role: git_repo
+    - role: golang
+    - role: docker
+    - role: kubernetes/master
+    - role: kubernetes/cni
+    # - role: kubernetes/device_plugins
+    - role: openness/network_edge/master
+    - role: cnca/master
+    - role: kubevirt/master
+    # - role: ngc_test/master
+    # - role: opae_fpga/master
+    - role: nfd/network_edge
+    # - role: biosfw/master
+    # - role: cmk/master
+    # - role: hddl/network_edge/master
+
+
+- hosts: edgenode_group
+  vars:
+    hugepage_amount: "1024"
+
+  pre_tasks:
+  - debug:
+      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
+  - name: validate hostname
+    include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate requested CNIs
+    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+
+  roles:
+    - role: machine_setup/os_setup
+    # - role: time/ntp
+    - role: time/verify
+
+    - role: machine_setup/custom_kernel
+    - role: machine_setup/grub
+    - role: machine_setup/configure_tuned
+    - role: machine_setup/conditional_reboot
+    - role: git_repo
+    - role: golang
+    - role: docker
+    # - role: opae_fpga/worker
+    - role: kubernetes/worker
+    - role: kubernetes/cni
+    - role: openness/network_edge/worker
+    - role: kubevirt/worker
+    # - role: biosfw/worker
+    # - role: cmk/worker
+    # - role: hddl/network_edge/worker
+
+
+# Play for edge nodes that have VCAC-A card installed
+- hosts: edgenode_vca_group
+
+  pre_tasks:
+  - debug:
+      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
+  - name: validate hostname
+    include_tasks: ./tasks/precheck_hostname.yml
+  - name: validate requested CNIs
+    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+
+  roles:
+    - role: machine_setup/os_setup
+    # - role: time/ntp
+    - role: time/verify
+
+    - role: git_repo
+    - role: golang
+    - role: docker
+    - role: machine_setup/vca_host_setup
+    - role: machine_setup/conditional_reboot
+    - role: machine_setup/vca_node_setup
+    - role: kubernetes/worker
+    - role: kubernetes/cni
+    - role: openness/network_edge/worker
+    - role: kubevirt/worker

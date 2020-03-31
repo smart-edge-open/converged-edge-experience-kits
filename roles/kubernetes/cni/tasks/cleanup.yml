@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: detect machine type and load available roles
+  include_tasks: common.yml
+
+- name: load vars for CNIs
+  include_vars: "./roles/kubernetes/cni/{{ cni }}/{{ role_postfix }}/defaults/main.yml"
+  with_items: "{{ kubernetes_cnis }}"
+  when: "cni + '/' + role_postfix in available_cni_roles"
+  loop_control:
+    loop_var: cni
+  # role might not have defaults, couldn't use `ignore_errors` because in case of an error it would erase all previously loaded vars in this loop
+  failed_when: False
+
+- name: run cleanup tasks for CNIs
+  include_tasks: "./roles/kubernetes/cni/{{ cni }}/{{ role_postfix }}/tasks/cleanup.yml"
+  with_items: "{{ kubernetes_cnis }}"
+  when: "cni + '/' + role_postfix in available_cni_roles"
+  loop_control:
+    loop_var: cni
+  ignore_errors: yes # role might not have cleanup tasks (e.g. cleaned during cluster reset)

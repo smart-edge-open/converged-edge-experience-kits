@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -12,7 +12,7 @@
 - name: file not present
   debug:
     msg: "{{ syscfg_local_path }} does not exists, BIOSFW won't be set up on the node"
-  when: syscfg_local_file.stat.exists == False
+  when: not syscfg_local_file.stat.exists
 
 - name: set up biosfw for the node
   block:
@@ -21,7 +21,7 @@
       src: "{{ syscfg_local_path }}"
       dest: "{{ syscfg_remote_path }}"
   - name: build BIOSFW worker image
-    shell: make build-docker-biosfw
+    command: make biosfw
     args:
       chdir: "{{ git_repo_dest }}"
-  when: syscfg_local_file.stat.exists == True
+  when: syscfg_local_file.stat.exists

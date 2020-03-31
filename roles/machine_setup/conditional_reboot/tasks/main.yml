@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: reboot if requested
+  block:
+  - name: display reboot requesters
+    debug:
+      msg: "Performing reboot requested by: {{ perform_reboot }}"
+  - name: reboot the machine
+    reboot:
+  when: perform_reboot is defined
+
+- name: get current kernel version and cmdline string after reboot
+  block:
+  - name: refresh ansible_kernel
+    setup:
+      filter: ansible_kernel
+  - name: get current cmdline
+    command: cat /proc/cmdline
+    register: cmdline
+  - name: print current kernel and cmdline
+    debug:
+      msg:
+      - "Current kernel: {{ ansible_kernel }}"
+      - "/proc/cmdline: {{ cmdline.stdout }}"

@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 cmk_url: "https://github.com/intel/CPU-Manager-for-Kubernetes"
-cmk_commit: "e3df769521558cff7734c568ac5d3882d4f41af9"
-cmk_download_dir: "/temp/cmk"
+cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
+cmk_download_dir: "/tmp/cmk"

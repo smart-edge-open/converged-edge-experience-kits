@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Add udev kvm system rule
+  lineinfile:
+    dest: /etc/udev/rules.d/80-kvm.rules
+    line: KERNEL=="kvm", GROUP="kvm", MODE="0666"
+    state: present
+    create: yes

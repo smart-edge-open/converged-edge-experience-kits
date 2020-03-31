@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -8,22 +8,6 @@
 
 - name: Build CLIs
   block:
-  - name: build and copy InterfaceService CLI
-    block:
-    - name: build interface service cli
-      shell: source /etc/profile && go build -o dist/interfaceservicecli ./cmd/interfaceservicecli
-      args:
-        chdir: "{{ git_repo_dest }}"
-    - name: copy interface service cli
-      copy:
-        src: "{{ item }}"
-        dest: /usr/local/bin
-        remote_src: yes
-        mode: '0755'
-      with_items:
-      - "{{ git_repo_dest }}/dist/interfaceservicecli"
-      - "{{ git_repo_dest }}/kube-ovn/kubectl-interfaceservice"
-
   - name: build and copy EdgeDNS CLI
     block:
     - name: build EdgeDNS cli
@@ -38,7 +22,7 @@
         mode: '0755'
       with_items:
       - "{{ git_repo_dest }}/dist/edgednscli"
-      - "{{ git_repo_dest }}/kube-ovn/kubectl-edgedns"
+      - "{{ git_repo_dest }}/network-edge/kubectl-edgedns"
 
   always:
   - name: remove .openness_gitconfig

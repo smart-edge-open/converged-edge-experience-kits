@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -16,4 +16,4 @@
       command: ip addr flush dev virbr0
     - name: remove interface from system
       command: brctl delbr virbr0
-  when: virbr0_interface_result.stat.exists == true
+  when: virbr0_interface_result.stat.exists

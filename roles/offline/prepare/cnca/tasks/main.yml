@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -17,8 +17,11 @@
   block:
     - include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
     - name: download modules
-      shell: "PATH=$PATH:/usr/local/go/bin GOPATH={{ offline_path }}/golang_modules/cnca go mod download"
+      command: "go mod download"
       args:
         chdir: "{{ git_repo_dest }}/cnca"
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+        GOPATH: "{{ offline_path }}/golang_modules/cnca"
   always:
     - include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

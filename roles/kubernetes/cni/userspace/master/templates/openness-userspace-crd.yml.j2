@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: userspace-openness
+spec:
+  config: '{
+    "cniVersion": "0.3.1",
+    "type": "userspace",
+    "kubeconfig": "/etc/cni/net.d/multus.d/multus.kubeconfig",
+    "logFile": "{{ userspace.logFile }}",
+    "logLevel": "{{ userspace.logLevel }}",
+    "host": {
+      "engine": "ovs-dpdk",
+      "iftype": "vhostuser",
+      "bridge": {
+        "bridgeName": "{{ userspace.bridgeName }}"
+      }
+    }
+  }'
