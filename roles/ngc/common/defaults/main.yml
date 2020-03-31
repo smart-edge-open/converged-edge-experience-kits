@@ -4,7 +4,7 @@
 ---
 
 epcforedge_git_repo:
-  dir: https://{{ git_repo_token }}@github.com/otcshare/epcforedge.git
+  dir: https://{{ git_repo_token }}@github.com/open-ness/epcforedge.git
   download_dir: /opt/epcforedge
   branch: master
 
