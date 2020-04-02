@@ -24,7 +24,7 @@
 - name: build and copy InterfaceService CLI
   block:
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
 
   - name: build interface service cli
     shell: source /etc/profile && go build -o dist/interfaceservicecli ./cmd/interfaceservicecli
@@ -44,4 +44,4 @@
 
   always:
   - name: remove .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml

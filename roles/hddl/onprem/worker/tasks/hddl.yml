@@ -72,14 +72,14 @@
 - name: build HDDL image
   block: 
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: build HDDL 
     shell: source /etc/profile && make hddllog
     args:
       chdir: "{{ git_repo_dest }}"
   always:
   - name: remove temporary .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
   when: not offline_mode
 
 - name: bring up hddlservice container

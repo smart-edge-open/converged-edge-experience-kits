@@ -5,14 +5,14 @@
 
 - block:
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    include_tasks: ../../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: build AF component
     shell: source /etc/profile && make af
     args:
       chdir: "{{ git_repo_ngc_dir }}"
   always:
     - name: remove .openness_gitconfig
-      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+      include_tasks: ../../../../../git_repo/tasks/gitconfig_remove.yml
   when: not offline_mode
 
 - name: copy AF binaries to build folder

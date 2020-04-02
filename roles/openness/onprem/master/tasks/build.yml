@@ -73,7 +73,7 @@
 - name: online build controller docker images
   block:
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: build controller docker images
     make:
       chdir: "{{ git_repo_dest }}"
@@ -83,7 +83,7 @@
       msg: "{{ build_controller_output.stdout }}"
   always:
   - name: remove temporary .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
   when: not offline_mode
 
 - name: start controller

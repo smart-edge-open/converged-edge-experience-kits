@@ -11,14 +11,14 @@
 
 - block:
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: build NEF component
     shell: source /etc/profile && make nef
     args:
       chdir: "{{ git_repo_ngc_dir }}"
   always:
     - name: remove .openness_gitconfig
-      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+      include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: copy nef binaries to build folder
   copy:

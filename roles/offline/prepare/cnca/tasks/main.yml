@@ -15,7 +15,7 @@
 
 - name: download cnca golang modules
   block:
-    - include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    - include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
     - name: download modules
       command: "go mod download"
       args:
@@ -24,4 +24,4 @@
         PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
         GOPATH: "{{ offline_path }}/golang_modules/cnca"
   always:
-    - include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+    - include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml

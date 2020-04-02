@@ -23,4 +23,4 @@
     ignore_errors: yes
 
 - name: cleanup kubeovn common
-  include_tasks: ./roles/kubernetes/cni/kubeovn/common/tasks/cleanup.yml
+  include_tasks: ../../common/tasks/cleanup.yml

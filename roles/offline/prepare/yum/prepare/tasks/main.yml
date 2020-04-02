@@ -18,7 +18,7 @@
   include_vars: ../../../../machine_setup/configure_tuned/defaults/main.yml
 
 - name: add custom kernel repository
-  include_tasks: ../../../../machine_setup/custom_kernel/tasks/setup_repository.yml
+  include_tasks: ../../../../../machine_setup/custom_kernel/tasks/setup_repository.yml
   when: offline_download_kernel
 
 - name: create offline repo folder

@@ -66,7 +66,7 @@
     - name: build NFD master image
       block:
       - name: create temporary custom .openness_gitconfig
-        include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+        include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
       - name: build NFD master binary
         shell: source /etc/profile && go build -o dist/nfd-master ./cmd/nfd-master
         args:
@@ -77,7 +77,7 @@
         args:
           chdir: "{{ git_repo_dest }}"
       - name: remove temporary .openness_gitconfig
-        include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+        include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
 
     - name: pull mysql image
       command: docker-compose pull --quiet mysql
