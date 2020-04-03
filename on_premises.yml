@@ -23,9 +23,9 @@
 
   roles:
     - role: offline/restore/transfer
-      when: offline_mode
+      when: _offline_mode
     - role: offline/restore/yum/setup
-      when: offline_mode
+      when: _offline_mode
     - role: machine_setup/os_setup
     # - role: time/ntp
     - role: docker
@@ -35,11 +35,11 @@
     - role: cnca/onprem
     - role: nfd/onprem/master
     - role: offline/restore/ngc_test
-      when: offline_mode and epcforedge_git_repo is defined
+      when: _offline_mode and _epcforedge_git_repo is defined
     #- role: ngc_test/onprem/master
     - role: apache
     - role: offline/restore/yum/clean
-      when: offline_mode
+      when: _offline_mode
 
 
 - hosts: edgenode_group
@@ -51,9 +51,9 @@
 
   roles:
     - role: offline/restore/transfer
-      when: offline_mode
+      when: _offline_mode
     - role: offline/restore/yum/setup
-      when: offline_mode
+      when: _offline_mode
     - role: machine_setup/os_setup
     # - role: time/ntp
     - role: time/verify
@@ -75,4 +75,4 @@
     # - role: hddl/onprem/worker
     - role: nfd/onprem/worker
     - role: offline/restore/yum/clean
-      when: offline_mode
+      when: _offline_mode

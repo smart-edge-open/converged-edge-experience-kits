@@ -6,17 +6,17 @@
 - name: create vpu-plugin kustomization.yml
   copy:
     src: kustomization.yaml
-    dest: "{{ device_plugins.download_dir }}/deployments/vpu_plugin/base/kustomization.yaml"
+    dest: "{{ _device_plugins.download_dir }}/deployments/vpu_plugin/base/kustomization.yaml"
   changed_when: true
 
 - name: copy vpu-plugin nodeselector
   copy:
     src: add_node_selector.yaml
-    dest: "{{ device_plugins.download_dir }}/deployments/vpu_plugin/base/add_node_selector.yaml"
+    dest: "{{ _device_plugins.download_dir }}/deployments/vpu_plugin/base/add_node_selector.yaml"
   changed_when: true
 
 - name: deploy vpu-plugin kustomization
   command: kubectl apply -k deployments/vpu_plugin
   args:
-    chdir: "{{ device_plugins.download_dir }}"
+    chdir: "{{ _device_plugins.download_dir }}"
   changed_when: true

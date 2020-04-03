@@ -5,21 +5,21 @@
 
 - name: remove archives folder
   file:
-    path: "{{ offline_path }}/archives"
+    path: "{{ _offline_path }}/archives"
     state: absent
 
 - name: create empty archives folder
   file:
-    path: "{{ offline_path }}/archives"
+    path: "{{ _offline_path }}/archives"
     state: directory
 
 - name: get golang settings
   include_vars: ../../../../golang/defaults/main.yml
 
 - debug:
-    msg: "golang will be downloaded from: {{ golang_download_url }}"
+    msg: "golang will be downloaded from: {{ _golang_download_url }}"
 
 - name: download golang package
   get_url:
-    url: "{{ golang_download_url }}"
-    dest: "{{ offline_path }}/archives/"
+    url: "{{ _golang_download_url }}"
+    dest: "{{ _offline_path }}/archives/"

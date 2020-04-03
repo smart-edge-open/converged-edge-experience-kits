@@ -21,6 +21,6 @@
   - include_tasks: remove_yum_excludes.yml
   - include_tasks: add_yum_excludes.yml
   - include_tasks: install_epel_repository.yml
-  when: not offline_mode
+  when: not _offline_mode
 
 - include_tasks: install_base_os_packages.yml

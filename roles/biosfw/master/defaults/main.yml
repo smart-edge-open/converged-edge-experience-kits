@@ -3,4 +3,4 @@
 
 ---
 
-biosfw_plugin_dest: "/usr/bin/kubectl-biosfw"
+_biosfw_plugin_dest: "/usr/bin/kubectl-biosfw"

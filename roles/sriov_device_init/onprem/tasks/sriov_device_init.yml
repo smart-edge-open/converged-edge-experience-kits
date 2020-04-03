@@ -69,7 +69,7 @@
   changed_when: true
 
 - name: bind ports to PCI Stub
-  shell: "{{ dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=pci-stub {{ interface_names.results[loop_index].stdout }}"
+  shell: "{{ _dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=pci-stub {{ interface_names.results[loop_index].stdout }}"
   with_sequence: start=0 count={{ sriov.vm_vf_ports }}
   loop_control:
     index_var: loop_index
@@ -85,7 +85,7 @@
 
 - block:
   - name: get list of VF interfaces not bound to VFIO or UIO
-    shell: "{{ dpdk_install_dir }}/usertools/dpdk-devbind.py --status | grep 'Ethernet Virtual' | grep 'unused=igb_uio' | cut -d ' ' -f 1"
+    shell: "{{ _dpdk_install_dir }}/usertools/dpdk-devbind.py --status | grep 'Ethernet Virtual' | grep 'unused=igb_uio' | cut -d ' ' -f 1"
     register: interface_addr
 
   - name: get the interface paths

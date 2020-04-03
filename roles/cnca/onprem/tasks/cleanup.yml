@@ -5,5 +5,5 @@
 
 - name: Remove CNCA plugin
   file:
-    path: "{{ cnca_plugin_dest }}"
+    path: "{{ _cnca_plugin_dest }}"
     state: absent

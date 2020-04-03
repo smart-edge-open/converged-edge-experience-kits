@@ -5,7 +5,7 @@
 
 - name: install libvirt
   yum:
-    name: "{{ libvirt_packages }}"
+    name: "{{ _libvirt_packages }}"
     state: present
     skip_broken: yes
 

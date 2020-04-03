@@ -6,14 +6,14 @@
 - name: delete vpu-plugin kustomization
   command: kubectl delete -k deployments/vpu_plugin
   args:
-    chdir: "{{ device_plugins.download_dir }}"
+    chdir: "{{ _device_plugins.download_dir }}"
   changed_when: true
   ignore_errors: yes
 
 - name: delete gpu-plugin kustomization
   command: kubectl delete -k deployments/gpu_plugin
   args:
-    chdir: "{{ device_plugins.download_dir }}"
+    chdir: "{{ _device_plugins.download_dir }}"
   changed_when: true
   ignore_errors: yes
 
@@ -22,4 +22,4 @@
     name: "{{ item }}"
     state: absent
   with_items:
-  - "{{ device_plugins.download_dir }}"
+  - "{{ _device_plugins.download_dir }}"

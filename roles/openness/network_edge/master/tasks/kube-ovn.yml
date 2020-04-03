@@ -7,18 +7,18 @@
   block:
   - name: create directory for Interface Service client certificate
     file:
-      name: "{{ certs_dest }}/client/interfaceservice"
+      name: "{{ _certs_dest }}/client/interfaceservice"
       state: directory
   - name: create Interface Service client certificate
-    command: "{{ git_repo_dest }}/network-edge/tls_pair.sh interfaceservice.openness {{ certs_dest }}/client/interfaceservice {{ certs_dest }}/CA"
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh interfaceservice.openness {{ _certs_dest }}/client/interfaceservice {{ _certs_dest }}/CA"
   - name: create symbolic link to root's cert
     file:
-      src: "{{ certs_dest }}/CA/cert.pem"
-      dest: "{{ certs_dest }}/client/interfaceservice/root.pem"
+      src: "{{ _certs_dest }}/CA/cert.pem"
+      dest: "{{ _certs_dest }}/client/interfaceservice/root.pem"
       state: link
 
 - name: add interface service for kube-ovn
-  command: kubectl apply -f {{ kubeovn_openness_yaml }}
+  command: kubectl apply -f {{ _kubeovn_openness_yaml }}
   changed_when: true
 
 - name: build and copy InterfaceService CLI
@@ -29,8 +29,8 @@
   - name: build interface service cli
     shell: source /etc/profile && go build -o dist/interfaceservicecli ./cmd/interfaceservicecli
     args:
-      chdir: "{{ git_repo_dest }}"
-      creates: "{{ git_repo_dest }}/dist/interfaceservicecli"
+      chdir: "{{ _git_repo_dest }}"
+      creates: "{{ _git_repo_dest }}/dist/interfaceservicecli"
 
   - name: copy interface service cli
     copy:
@@ -39,8 +39,8 @@
       remote_src: yes
       mode: '0755'
     with_items:
-    - "{{ git_repo_dest }}/dist/interfaceservicecli"
-    - "{{ git_repo_dest }}/network-edge/kube-ovn/kubectl-interfaceservice"
+    - "{{ _git_repo_dest }}/dist/interfaceservicecli"
+    - "{{ _git_repo_dest }}/network-edge/kube-ovn/kubectl-interfaceservice"
 
   always:
   - name: remove .openness_gitconfig

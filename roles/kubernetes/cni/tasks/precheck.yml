@@ -26,4 +26,4 @@
   fail:
     msg: "Requested CNI is not available: {{ item }}"
   with_items: "{{ kubernetes_cnis }}"
-  when: "item not in available_kubernetes_cnis"
+  when: "item not in _available_kubernetes_cnis"

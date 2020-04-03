@@ -3,10 +3,10 @@
 
 ---
 
-cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
-cmk_base_url: "https://raw.githubusercontent.com/intel/CPU-Manager-for-Kubernetes/{{ cmk_commit }}/resources"
+_cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
+_cmk_base_url: "https://raw.githubusercontent.com/intel/CPU-Manager-for-Kubernetes/{{ _cmk_commit }}/resources"
 
-cmk_yamls:
+_cmk_yamls:
 - "authorization/cmk-namespace.yaml"
 - "authorization/cmk-serviceaccount.yaml"
 - "authorization/cmk-rbac-rules.yaml"

@@ -24,7 +24,7 @@
 
 - name: download flannel yml
   get_url:
-    url: "{{ flannel_url }}"
+    url: "{{ _flannel_url }}"
     dest: "{{ tmp_dir.path }}/kube-flannel.yml"
 
 - name: copy kustomization.yml

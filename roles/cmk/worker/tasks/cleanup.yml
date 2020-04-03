@@ -5,7 +5,7 @@
 
 - name: remove CPU Manager download dir
   file:
-    path: "{{ cmk_download_dir }}"
+    path: "{{ _cmk_download_dir }}"
     state: absent
 
 - name: remove CPU Manager config dir

@@ -16,7 +16,7 @@
 
 - name: uninstall
   yum:
-    name: "{{ libvirt_packages }}"
+    name: "{{ _libvirt_packages }}"
     state: absent
   when: "'libvirtd.service' in services"
 

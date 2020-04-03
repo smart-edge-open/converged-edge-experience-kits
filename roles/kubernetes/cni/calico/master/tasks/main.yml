@@ -26,7 +26,7 @@
 
 - name: download calico yml
   get_url:
-    url: "{{ calico_url }}"
+    url: "{{ _calico_url }}"
     dest: "{{ tmp_dir.path }}/calico.yml"
 
 - name: copy kustomization.yml

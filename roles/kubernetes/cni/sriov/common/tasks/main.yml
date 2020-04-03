@@ -5,19 +5,19 @@
 
 - name: download CNI plugin
   git:
-    repo: "{{ sriov_cni.url }}"
-    dest: "{{ sriov_cni.download_dir }}"
+    repo: "{{ _sriov_cni.url }}"
+    dest: "{{ _sriov_cni.download_dir }}"
     clone: yes
     update: no
-    version: "{{ sriov_cni.commit }}"
+    version: "{{ _sriov_cni.commit }}"
 
 - name: download device plugin
   git:
-    repo: "{{ sriov_dev_plugin.url }}"
-    dest: "{{ sriov_dev_plugin.download_dir }}"
+    repo: "{{ _sriov_dev_plugin.url }}"
+    dest: "{{ _sriov_dev_plugin.download_dir }}"
     clone: yes
     update: no
-    version: "{{ sriov_dev_plugin.commit }}"
+    version: "{{ _sriov_dev_plugin.commit }}"
 
 - name: patch device plugin for FPGA SRIOV USERSPACE functionality
   block:
@@ -28,7 +28,7 @@
   - name: patch device plugin for FPGA SRIOV USERSPACE functionality
     patch:
       src: "{{ fpga_sriov_userspace.patch_path }}"
-      basedir: "{{ sriov_dev_plugin.download_dir }}"
+      basedir: "{{ _sriov_dev_plugin.download_dir }}"
       strip: 1
       binary: no
       remote_src: yes
@@ -40,12 +40,12 @@
     name: nfvpe/sriov-cni
     source: build
     build:
-      path: "{{ sriov_cni.download_dir }}"
+      path: "{{ _sriov_cni.download_dir }}"
       use_config_proxy: yes
       pull: yes
 
 - name: build device plugin image
   command: make image
   args:
-    chdir: "{{ sriov_dev_plugin.download_dir }}"
+    chdir: "{{ _sriov_dev_plugin.download_dir }}"
   changed_when: true

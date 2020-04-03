@@ -5,11 +5,11 @@
 
 - name: clone intel-device-plugins-for-kubernetes repo
   git:
-    repo: "{{ device_plugins.url }}"
-    dest: "{{ device_plugins.download_dir }}"
+    repo: "{{ _device_plugins.url }}"
+    dest: "{{ _device_plugins.download_dir }}"
     clone: yes
     update: no
-    version: "{{ device_plugins.commit }}"
+    version: "{{ _device_plugins.commit }}"
 
 - name: VPU device plugin
   import_tasks: vpu_plugin.yml

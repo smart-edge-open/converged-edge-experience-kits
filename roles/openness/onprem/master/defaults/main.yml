@@ -3,14 +3,13 @@
 
 ---
 
-cce_orchestration_mode: "native"
+_cce_orchestration_mode: "native"
 cce_log_level: "debug"
-react_app_controller_api: "http://{{ ansible_host }}:8080"
-react_app_cups_api: "http://{{ ansible_host }}:8080"
-react_app_cnca_af_api: "https://{{ ansible_host }}:8050"
-react_app_cnca_5goam_api: "https://{{ ansible_host }}:8070"
-infrastructure_ui_url: "http://{{ ansible_host }}:3000"
-landing_ui_url: "http://{{ ansible_host }}:3000"
-cups_ui_url: "http://{{ ansible_host }}:3010"
-cnca_ui_url: "http://{{ ansible_host }}:3020"
-
+_react_app_controller_api: "http://{{ ansible_host }}:8080"
+_react_app_cups_api: "http://{{ ansible_host }}:8080"
+_react_app_cnca_af_api: "https://{{ ansible_host }}:8050"
+_react_app_cnca_5goam_api: "https://{{ ansible_host }}:8070"
+_infrastructure_ui_url: "http://{{ ansible_host }}:3000"
+_landing_ui_url: "http://{{ ansible_host }}:3000"
+_cups_ui_url: "http://{{ ansible_host }}:3010"
+_cnca_ui_url: "http://{{ ansible_host }}:3020"

@@ -5,12 +5,12 @@
 
 - name: remove golang cache folder
   file:
-    path: "{{ offline_path }}/golang_modules/main"
+    path: "{{ _offline_path }}/golang_modules/main"
     state: absent
 
 - name: create empty golang cache folder
   file:
-    path: "{{ offline_path }}/golang_modules/main"
+    path: "{{ _offline_path }}/golang_modules/main"
     state: directory
 
 - name: download modules
@@ -19,9 +19,9 @@
     - name: download modules
       command: "go mod download"
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
       environment:
         PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
-        GOPATH: "{{ offline_path }}/golang_modules/main"
+        GOPATH: "{{ _offline_path }}/golang_modules/main"
   always:
     - include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml

@@ -22,13 +22,13 @@
 
 - name: find openness .repo file
   find:
-    paths: "{{ offline_path }}"
+    paths: "{{ _offline_path }}"
     patterns: "openness-offline-*.repo"
   register: repo_file
 
 - name: fail if no .repo file
   fail:
-    msg: "OpenNESS' repository file not found in: {{ offline_path }}"
+    msg: "OpenNESS' repository file not found in: {{ _offline_path }}"
   when: repo_file.files|length == 0
 
 - name: create openness-offline repository

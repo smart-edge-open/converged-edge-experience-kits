@@ -5,9 +5,9 @@
 
 - name: create dir for pip downloads
   file:
-    path: "{{ offline_pip_path }}"
+    path: "{{ _offline_pip_path }}"
     state: directory
 
 - name: pip download docker-compose
-  command: pip download {{ docker_compose_package }} --dest {{ offline_pip_path }}
+  command: pip download {{ _docker_compose_package }} --dest {{ _offline_pip_path }}
   changed_when: true

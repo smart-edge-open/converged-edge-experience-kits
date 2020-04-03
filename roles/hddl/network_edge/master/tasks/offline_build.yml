@@ -5,16 +5,16 @@
 
 # Workaround for usage of target/cache_from is needed due to docker-compose.yml's version=2.4
 - name: offline | load intermediate images
-  shell: docker load < {{ offline_docker_images_path }}/{{ item }}
+  shell: docker load < {{ _offline_docker_images_path }}/{{ item }}
   with_items:
   - hddl-deps-image.tar
   - ubuntu1604.tar
   changed_when: true
 
 - name: offline | build hddllog
-  shell: source /etc/profile && GOPATH={{ offline_path }}/golang_modules/hddllog make hddllog
+  shell: source /etc/profile && GOPATH={{ _offline_path }}/golang_modules/hddllog make hddllog
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   changed_when: true
 
 - name: offline | create temp dir
@@ -25,7 +25,7 @@
 
 - name: offline | copy files
   copy:
-    src: "{{ git_repo_dest }}/{{ item }}"
+    src: "{{ _git_repo_dest }}/{{ item }}"
     dest: "{{ tmp_dir.path }}"
     remote_src: yes
     mode: preserve
@@ -38,7 +38,7 @@
   command: awk -F= '/^VER/ {gsub(/ /, "", $2); print $2;}' ./Makefile
   register: VER
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   changed_when: false
 
 # This is a workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.

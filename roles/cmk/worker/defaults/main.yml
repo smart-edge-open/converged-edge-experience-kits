@@ -3,6 +3,6 @@
 
 ---
 
-cmk_url: "https://github.com/intel/CPU-Manager-for-Kubernetes"
-cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
-cmk_download_dir: "/tmp/cmk"
+_cmk_url: "https://github.com/intel/CPU-Manager-for-Kubernetes"
+_cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
+_cmk_download_dir: "/tmp/cmk"

@@ -7,9 +7,9 @@
 
 - name: delete old offline repo folder
   file:
-    path: "{{ offline_yum_path }}"
+    path: "{{ _offline_yum_path }}"
     state: absent
-  when: offline_always_redownload_packages
+  when: _offline_always_redownload_packages
 
 - name: get custom_kernel settings
   include_vars: ../../../../machine_setup/custom_kernel/defaults/main.yml
@@ -19,11 +19,11 @@
 
 - name: add custom kernel repository
   include_tasks: ../../../../../machine_setup/custom_kernel/tasks/setup_repository.yml
-  when: offline_download_kernel
+  when: _offline_download_kernel
 
 - name: create offline repo folder
   file:
-    path: "{{ offline_yum_path }}"
+    path: "{{ _offline_yum_path }}"
     state: directory
 
 - name: check if a backup of original /etc/yum.conf file already exists
@@ -47,7 +47,7 @@
 - name: fetch machine setup related packages for offline use
   block:
   - name: download custom kernel
-    command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+    command: repotrack --arch={{ ansible_architecture }} -p {{ _offline_yum_path }} {{ item }}
     with_items:
       - "{{ kernel_package }}-{{ kernel_version }}"
       - "{{ kernel_devel_package }}-{{ kernel_version }}"
@@ -56,41 +56,41 @@
   - name: download kernel deps URL packages
     get_url:
       url: "{{ item }}"
-      dest: "{{ offline_yum_path }}"
+      dest: "{{ _offline_yum_path }}"
     with_items: "{{ kernel_dependencies_urls }}"
 
   - name: download tuned package
     get_url:
       url: "{{ item }}"
-      dest: "{{ offline_yum_path }}"
+      dest: "{{ _offline_yum_path }}"
     with_items: "{{ tuned_packages }}"
-  when: offline_download_kernel
+  when: _offline_download_kernel
 
 - name: download base packages for offline use
-  command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+  command: repotrack --arch={{ ansible_architecture }} -p {{ _offline_yum_path }} {{ item }}
   with_items:
     - "{{ os_yum_base_packages.split(',') }}"
-    - "{{ docker_packages.split(',') }}"
+    - "{{ _docker_packages.split(',') }}"
     - mariadb
     - audit
-    - "{{ apache_packages.split(',') }}"
+    - "{{ _apache_packages.split(',') }}"
     - ntp
   changed_when: true
 
 - name: download libvirt packages for offline use
-  command: repotrack --arch={{ ansible_architecture }} -p {{ offline_yum_path }} {{ item }}
+  command: repotrack --arch={{ ansible_architecture }} -p {{ _offline_yum_path }} {{ item }}
   with_items:
-    - "{{ libvirt_packages.split(',') }}"
-  when: libvirt_packages is defined
+    - "{{ _libvirt_packages.split(',') }}"
+  when: _libvirt_packages is defined
 
 - name: create offline repo
-  command: createrepo {{ offline_yum_path }}
+  command: createrepo {{ _offline_yum_path }}
   changed_when: true
 
 - name: create yum repository file
   template:
     src: openness-offline.repo.j2
-    dest: "{{ offline_path }}/openness-offline-{{ inventory_hostname }}.repo"
+    dest: "{{ _offline_path }}/openness-offline-{{ inventory_hostname }}.repo"
     mode: '0644'
 
 - name: revert /etc/yum.conf changes

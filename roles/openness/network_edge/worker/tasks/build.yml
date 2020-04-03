@@ -10,11 +10,11 @@
   - name: build binaries and images
     shell: source /etc/profile && make networkedge
     args:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
   - name: build interface service image for kube-ovn
     shell: source /etc/profile && make interfaceservice
     args:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
     when: "'kubeovn' in kubernetes_cnis"
   always:
   - name: remove .openness_gitconfig

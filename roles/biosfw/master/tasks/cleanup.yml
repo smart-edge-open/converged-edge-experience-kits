@@ -5,5 +5,5 @@
 
 - name: remove biosfw plugin
   file:
-    path: "{{ biosfw_plugin_dest }}"
+    path: "{{ _biosfw_plugin_dest }}"
     state: absent

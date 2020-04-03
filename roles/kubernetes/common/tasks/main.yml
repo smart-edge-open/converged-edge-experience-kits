@@ -7,15 +7,15 @@
   yum_repository:
     name: kubernetes
     description: Kubernetes repository
-    baseurl: "{{ kubernetes_repository_url }}"
-    gpgkey: "{{ kubernetes_repository_key }}"
+    baseurl: "{{ _kubernetes_repository_url }}"
+    gpgkey: "{{ _kubernetes_repository_key }}"
     gpgcheck: yes
     enabled: true
     repo_gpgcheck: true
 
 - name: install packages
   yum:
-    name: "{{ kubernetes_packages }}"
+    name: "{{ _kubernetes_packages }}"
     state: present
     skip_broken: yes
     update_cache: yes

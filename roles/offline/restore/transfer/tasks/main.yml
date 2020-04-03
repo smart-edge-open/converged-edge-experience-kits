@@ -5,16 +5,16 @@
 
 - name: make sure dir exists
   file:
-    path: "{{ offline_path_common }}"
+    path: "{{ _offline_path_common }}"
     state: directory
 
 - name: copy archive to remote machine
   copy:
-    src: "{{ offline_path_common }}/{{ offline_archive }}"
-    dest: "{{ offline_path_common }}/{{ offline_archive }}"
+    src: "{{ _offline_path_common }}/{{ _offline_archive }}"
+    dest: "{{ _offline_path_common }}/{{ _offline_archive }}"
 
 - name: unarchive
   unarchive:
-    src: "{{ offline_path_common }}/{{ offline_archive }}"
-    dest: "{{ offline_path_common }}"
+    src: "{{ _offline_path_common }}/{{ _offline_archive }}"
+    dest: "{{ _offline_path_common }}"
     remote_src: yes

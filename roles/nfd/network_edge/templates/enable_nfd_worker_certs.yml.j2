@@ -36,16 +36,16 @@
   value:
     name: certs
     hostPath:
-      path: "{{ certs_dest }}/nfd"
+      path: "{{ _certs_dest }}/nfd"
 - op: add
   path: /spec/template/spec/initContainers
   value:
     - name: openssl
       image: emberstack/openssl:latest
       command: ["sh", "-c"]
-      args: ["mkdir /root/ca && 
-        cp /root/CA/* /root/ca/ && 
-        cp /root/CA/cert.pem /root/certs/root.pem && 
+      args: ["mkdir /root/ca &&
+        cp /root/CA/* /root/ca/ &&
+        cp /root/CA/cert.pem /root/certs/root.pem &&
         (sh /root/certgen/tls_pair.sh nfd-worker /root/certs /root/ca)"]
       imagePullPolicy: IfNotPresent
       volumeMounts:

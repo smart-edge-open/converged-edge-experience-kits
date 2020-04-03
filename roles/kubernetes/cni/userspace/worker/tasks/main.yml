@@ -5,7 +5,7 @@
 
 - name: setting OVS_SOCKDIR
   lineinfile:
-    path: "{{ kubernetes_env_file }}"
+    path: "{{ _kubernetes_env_file }}"
     regexp: "^OVS_SOCKDIR=.*"
     line: "OVS_SOCKDIR=/var/run/openvswitch/"
   notify:

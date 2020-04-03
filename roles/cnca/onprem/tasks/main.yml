@@ -2,19 +2,19 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-- name: offline | set gopath
+- name: offline | set _gopath
   set_fact:
-    gopath: "{{ offline_path }}/golang_modules/cnca"
-  when: offline_mode
+    _gopath: "{{ _offline_path }}/golang_modules/cnca"
+  when: _offline_mode
 
 - name: build CNCA plugin
-  shell: source /etc/profile && GOPATH="{{ gopath }}" go build -ldflags "-X cnca.HTTP2ClientTLSCAPath={{ certs_dest }}/ngc" -o "{{ cnca_plugin_name }}"
+  shell: source /etc/profile && GOPATH="{{ _gopath }}" go build -ldflags "-X cnca.HTTP2ClientTLSCAPath={{ _certs_dest }}/ngc" -o "{{ _cnca_plugin_name }}"
   args:
-    chdir: "{{ git_repo_dest }}/cnca/"
+    chdir: "{{ _git_repo_dest }}/cnca/"
   changed_when: true
 
 - name: install CNCA plugin
-  command: mv "{{ cnca_plugin_name }}" "{{ cnca_plugin_dest }}"
+  command: mv "{{ _cnca_plugin_name }}" "{{ _cnca_plugin_dest }}"
   args:
-    chdir: "{{ git_repo_dest }}/cnca/"
+    chdir: "{{ _git_repo_dest }}/cnca/"
   changed_when: true

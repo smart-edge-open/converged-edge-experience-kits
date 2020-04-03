@@ -3,7 +3,7 @@
 
 ---
 
-calico_version: v3.12
-calico_url: https://docs.projectcalico.org/{{ calico_version }}/manifests/calico.yaml
+_calico_version: v3.12
+_calico_url: https://docs.projectcalico.org/{{ _calico_version }}/manifests/calico.yaml
 
 calico_cidr: "10.243.0.0/16"

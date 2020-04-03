@@ -5,5 +5,5 @@
 
 - name: prepare for offline | create base directory with artifacts for offline mode
   file:
-    path: "{{ offline_path }}"
+    path: "{{ _offline_path }}"
     state: directory

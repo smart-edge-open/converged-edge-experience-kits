@@ -10,7 +10,7 @@
 - name: deploy CNI
   command: kubectl apply -f ./images/k8s-v1.16/sriov-cni-daemonset.yaml
   args:
-    chdir: "{{ sriov_cni.download_dir }}"
+    chdir: "{{ _sriov_cni.download_dir }}"
   changed_when: true
 
 # Create temporary directory for SR-IOV network CRD
@@ -52,30 +52,30 @@
   block:
   - name: Copy base config
     copy:
-      src: "{{ config_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ config_map_name }}"
+      src: "{{ _config_map_name }}"
+      dest: "{{ tmp_dir.path }}/{{ _config_map_name }}"
   - name: Copy FPGA config
     copy:
-      src: "{{ fpga_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ fpga_map_name }}"
+      src: "{{ _fpga_map_name }}"
+      dest: "{{ tmp_dir.path }}/{{ _fpga_map_name }}"
   - name: Copy VM config
     copy:
-      src: "{{ vm_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ vm_map_name }}"
+      src: "{{ _vm_map_name }}"
+      dest: "{{ tmp_dir.path }}/{{ _vm_map_name }}"
 
 # Add VM config to base config
 - name: Add VM config to base config
-  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ vm_map_name }}' {{ tmp_dir.path }}/{{ config_map_name }}
+  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ _vm_map_name }}' {{ tmp_dir.path }}/{{ _config_map_name }}
   when: kubevirt.enabled
 
 # Add FPGA config to base config
 - name: Add FPGA config to base config
-  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ fpga_map_name }}' {{ tmp_dir.path }}/{{ config_map_name }}
+  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ _fpga_map_name }}' {{ tmp_dir.path }}/{{ _config_map_name }}
   when: fpga_sriov_userspace.enabled
 
 # Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
 - name: deploy dev plugin configMap
-  command: kubectl apply -f {{ config_map_name }}
+  command: kubectl apply -f {{ _config_map_name }}
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: true
@@ -84,5 +84,5 @@
 - name: deploy dev plugin
   command: kubectl apply -f ./deployments/k8s-v1.16/sriovdp-daemonset.yaml
   args:
-    chdir: "{{ sriov_dev_plugin.download_dir }}"
+    chdir: "{{ _sriov_dev_plugin.download_dir }}"
   changed_when: true

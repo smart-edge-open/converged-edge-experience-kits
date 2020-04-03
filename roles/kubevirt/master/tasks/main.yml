@@ -6,34 +6,34 @@
 - name: Install KubeVirt
   block:
   - name: KV Operator Install
-    command: kubectl apply -f "{{ kubevirt_operator_url }}"
+    command: kubectl apply -f "{{ _kubevirt_operator_url }}"
   - name: KV Controller Install
-    command: kubectl apply -f "{{ kubevirt_cr_url }}"
+    command: kubectl apply -f "{{ _kubevirt_cr_url }}"
 
 - name: Download Krew plugin
   block:
   - name: Make Krew directory
     file:
-      path: "{{ krew_dir }}"
+      path: "{{ _krew_dir }}"
       state: directory
   - name: Check if already downloaded
     stat:
-      path: "{{ krew_dir }}/krew.tar.gz"
+      path: "{{ _krew_dir }}/krew.tar.gz"
     register: krew_download
   - name: Download Krew yaml
     get_url:
-      url: "{{ krew_tar_url }}"
-      dest: "{{ krew_dir }}"
+      url: "{{ _krew_tar_url }}"
+      dest: "{{ _krew_dir }}"
     when: not krew_download.stat.exists
   - name: Download Krew tar.gz
     get_url:
-      url: "{{ krew_yaml_url }}"
-      dest: "{{ krew_dir }}"
+      url: "{{ _krew_yaml_url }}"
+      dest: "{{ _krew_dir }}"
     when: not krew_download.stat.exists
   - name: Unpack Krew
     unarchive:
-      src: "{{ krew_dest }}"
-      dest: "{{ krew_dir }}"
+      src: "{{ _krew_dest }}"
+      dest: "{{ _krew_dir }}"
       remote_src: True
       extra_opts: "--strip-components=1"
 
@@ -42,11 +42,11 @@
   - name: Install Krew
     shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" install --manifest=krew.yaml --archive=krew.tar.gz
     args:
-      chdir: "{{ krew_dir }}"
+      chdir: "{{ _krew_dir }}"
   - name: Update Krew
     shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" update
     args:
-      chdir: "{{ krew_dir }}"
+      chdir: "{{ _krew_dir }}"
   - name: Add path to profile
     lineinfile:
       state: present
@@ -60,9 +60,9 @@
 - name: Install CDI
   block:
   - name: CDI Operator Install
-    command: kubectl apply -f "{{ cdi_operator_url }}"
+    command: kubectl apply -f "{{ _cdi_operator_url }}"
   - name: CDI Controller Install
-    command: kubectl apply -f "{{ cdi_cr_url }}"
+    command: kubectl apply -f "{{ _cdi_cr_url }}"
 
 - name: Label CDI namespace
   command: kubectl label namespace/cdi ns=cdi --overwrite=true
@@ -107,6 +107,4 @@
   command: kubectl create -f localStorageClass.yaml
   args:
     chdir: "{{ kv_dir.path }}"
-  when: storage_class == "local-volume" and lvsc_exist.rc != 0
-
-
+  when: _storage_class == "local-volume" and lvsc_exist.rc != 0

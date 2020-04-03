@@ -5,10 +5,10 @@
 
 - name: offline | copy Go archive for offline
   copy:
-    src: "{{ offline_archives_path }}/{{ golang_download_name }}"
-    dest: "{{ golang_download_dest }}"
+    src: "{{ _offline_archives_path }}/{{ _golang_download_name }}"
+    dest: "{{ _golang_download_dest }}"
     remote_src: yes
-  when: offline_mode
+  when: _offline_mode
 
 - name: check if already installed
   stat:
@@ -17,14 +17,14 @@
 
 - name: download
   get_url:
-    url: "{{ golang_download_url }}"
-    dest: "{{ golang_download_dest }}"
-    checksum: "sha256:{{ golang_download_checksum }}"
+    url: "{{ _golang_download_url }}"
+    dest: "{{ _golang_download_dest }}"
+    checksum: "sha256:{{ _golang_download_checksum }}"
   when: not go_exe_file.stat.exists
 
 - name: install
   unarchive:
-    src: "{{ golang_download_dest }}"
+    src: "{{ _golang_download_dest }}"
     dest: "/usr/local"
     remote_src: yes
     creates: /usr/local/go/bin/go

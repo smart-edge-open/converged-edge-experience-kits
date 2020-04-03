@@ -5,12 +5,12 @@
 
 - name: remove cnca golang cache folder
   file:
-    path: "{{ offline_path }}/golang_modules/cnca"
+    path: "{{ _offline_path }}/golang_modules/cnca"
     state: absent
 
 - name: create empty cnca golang cache folder
   file:
-    path: "{{ offline_path }}/golang_modules/cnca"
+    path: "{{ _offline_path }}/golang_modules/cnca"
     state: directory
 
 - name: download cnca golang modules
@@ -19,9 +19,9 @@
     - name: download modules
       command: "go mod download"
       args:
-        chdir: "{{ git_repo_dest }}/cnca"
+        chdir: "{{ _git_repo_dest }}/cnca"
       environment:
         PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
-        GOPATH: "{{ offline_path }}/golang_modules/cnca"
+        GOPATH: "{{ _offline_path }}/golang_modules/cnca"
   always:
     - include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml

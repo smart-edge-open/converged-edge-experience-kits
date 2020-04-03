@@ -3,7 +3,6 @@
 
 ---
 
-default_pv_dir: /var/vd/
-default_pv_vol_name: vol
-pv_vm_max_num:  64
-
+_default_pv_dir: /var/vd/
+_default_pv_vol_name: vol
+_pv_vm_max_num:  64

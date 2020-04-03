@@ -3,7 +3,7 @@
 
 ---
 
-apache_packages: "httpd,mod_ssl"
-certs_path: /etc/ssl/certs
+_apache_packages: "httpd,mod_ssl"
+_certs_path: /etc/ssl/certs
 
 ip_address: ""

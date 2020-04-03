@@ -5,13 +5,13 @@ FROM centos:7
 
 ENV PYTHONDONTWRITEBYTECODE yes
 
-ENV DPDK_VERSION={{ ovn_img_dpdk_version }}
+ENV DPDK_VERSION={{ _ovn_img_dpdk_version }}
 ENV DPDK_DIR=/usr/src/dpdk-$DPDK_VERSION
-ENV DPDK_TARGET={{ ovn_img_dpdk_target }}
+ENV DPDK_TARGET={{ _ovn_img_dpdk_target }}
 ENV DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
-ENV OVS_VERSION={{ ovs_img_version }}
-{% if host_ip != controller_ip %}
-ENV OVN_NB_DB=tcp:{{ controller_ip }}:6641
+ENV OVS_VERSION={{ _ovs_img_version }}
+{% if _host_ip != _controller_ip %}
+ENV OVN_NB_DB=tcp:{{ _controller_ip }}:6641
 {% endif %}
 
 RUN yum install -y \

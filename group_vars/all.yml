@@ -46,13 +46,13 @@ onprem_dataplane: "nts"
 # offline_mode setting:
 # - False - regular online mode,
 # - True - offline mode - RPMs, Python packages, etc. are installed from cache, Internet is not accessed
-offline_mode: False
+_offline_mode: False
 
-offline_path_common: "/opt/openness-offline"
-offline_archives_path: "{{ offline_path }}/archives"
-offline_pip_path: "{{ offline_path }}/pip"
-offline_yum_path: "{{ offline_path }}/yum"
-offline_docker_images_path: "{{ offline_path }}/docker_images"
-offline_experience_kits_path: "{{ offline_path_common }}/openness-experience-kits"
+_offline_path_common: "/opt/openness-offline"
+_offline_archives_path: "{{ _offline_path }}/archives"
+_offline_pip_path: "{{ _offline_path }}/pip"
+_offline_yum_path: "{{ _offline_path }}/yum"
+_offline_docker_images_path: "{{ _offline_path }}/docker_images"
+_offline_experience_kits_path: "{{ _offline_path_common }}/openness-experience-kits"
 
-offline_always_redownload_packages: false
+_offline_always_redownload_packages: false

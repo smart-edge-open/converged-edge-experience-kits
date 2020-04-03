@@ -11,7 +11,7 @@
 
 - name: download Multus daemonSet
   get_url:
-    url: "{{ multus_daemonset_url }}"
+    url: "{{ _multus_daemonset_url }}"
     dest: "{{ tmp_dir.path }}/multus-daemonset.yml"
 
 - name: create kustomization.yml

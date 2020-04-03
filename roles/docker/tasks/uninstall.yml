@@ -20,7 +20,7 @@
 
 - name: uninstall
   yum:
-    name: "{{ docker_packages_to_remove }}"
+    name: "{{ _docker_packages_to_remove }}"
     state: absent
 
 - name: remove docker-compose

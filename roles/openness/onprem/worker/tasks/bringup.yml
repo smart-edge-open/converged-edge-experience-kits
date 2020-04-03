@@ -8,68 +8,68 @@
 # Stop and stop selected containers
 - name: remove syslog container
   docker_container:
-    name: "{{ docker_syslog_container_name }}"
+    name: "{{ _docker_syslog_container_name }}"
     state: absent
 
 - name: remove appliance container
   docker_container:
-    name: "{{ docker_appliance_container_name }}"
+    name: "{{ _docker_appliance_container_name }}"
     state: absent
 
 - name: remove eaa container
   docker_container:
-    name: "{{ docker_eaa_container_name }}"
+    name: "{{ _docker_eaa_container_name }}"
     state: absent
 
 - name: remove edgednssvr container
   docker_container:
-    name: "{{ docker_edgednssvr_container_name }}"
+    name: "{{ _docker_edgednssvr_container_name }}"
     state: absent
 
 # Bring up containers
 - name: up syslog container
   command: "docker-compose up -d --no-build syslog-ng"
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   environment:
-    REMOTE_SYSLOG_IP: "{{ remote_syslog_ip }}"
-    VER: "{{ docker_containers_ver }}"
+    REMOTE_SYSLOG_IP: "{{ _remote_syslog_ip }}"
+    VER: "{{ _docker_containers_ver }}"
   changed_when: true
 
 - name: up edgednssvr container
   command: "docker-compose up --no-start --no-build edgednssvr"
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   environment:
     LOCAL_SYSLOG_IP: "192.168.122.1"
-    VER: "{{ docker_containers_ver }}"
+    VER: "{{ _docker_containers_ver }}"
   changed_when: true
   when: "onprem_dataplane == 'nts'"
 
 - name: start edgednssvr container
   command: "docker-compose up --no-build --detach edgednssvr"
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   environment:
     LOCAL_SYSLOG_IP: "192.168.122.1"
-    VER: "{{ docker_containers_ver }}"
+    VER: "{{ _docker_containers_ver }}"
   changed_when: true
   when: "onprem_dataplane == 'ovncni'"
 
 - name: up EAA container
   command: "docker-compose up -d --no-build eaa"
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   environment:
-    VER: "{{ docker_containers_ver }}"
+    VER: "{{ _docker_containers_ver }}"
   changed_when: true
 
 - name: up appliance container
   command: "docker-compose up -d --no-build appliance"
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   environment:
-    VER: "{{ docker_containers_ver }}"
+    VER: "{{ _docker_containers_ver }}"
     HOSTNAME: "{{ ansible_hostname }}"
   changed_when: true
 
@@ -96,13 +96,13 @@
 - name: store verification key in folder repository folder
   copy:
     content: "{{ verification_key }}"
-    dest: "{{ git_repo_dest }}/verification_key.txt"
+    dest: "{{ _git_repo_dest }}/verification_key.txt"
 
 - name: add the node to controller's db
   include_tasks: subtasks/add_node_to_controller_db.yml
 
 - name: restart syslog_ng container
   docker_container:
-    name: "{{ docker_syslog_container_name }}"
+    name: "{{ _docker_syslog_container_name }}"
     state: started
     restart: yes

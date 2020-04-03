@@ -11,9 +11,9 @@
 
 - name: download CMK yamls
   get_url:
-    url: "{{ cmk_base_url }}/{{ item }}"
+    url: "{{ _cmk_base_url }}/{{ item }}"
     dest: "{{ tmp_dir.path }}"
-  with_items: "{{ cmk_yamls }}"
+  with_items: "{{ _cmk_yamls }}"
 
 - name: create kustomization.yml
   copy:

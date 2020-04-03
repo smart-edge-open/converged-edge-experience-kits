@@ -3,6 +3,6 @@
 
 ---
 
-cnca_plugin_name: "kubectl-cnca"
-cnca_plugin_dest: "/usr/local/bin/kubectl-cnca"
-certs_dest: "/etc/openness/certs"
+_cnca_plugin_name: "kubectl-cnca"
+_cnca_plugin_dest: "/usr/local/bin/kubectl-cnca"
+_certs_dest: "/etc/openness/certs"

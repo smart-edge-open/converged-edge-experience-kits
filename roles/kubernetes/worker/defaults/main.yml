@@ -3,8 +3,8 @@
 
 ---
 
-kubernetes_env_file: "/etc/sysconfig/kubelet"
-kubernetes_config_file: "/usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
+_kubernetes_env_file: "/etc/sysconfig/kubelet"
+_kubernetes_config_file: "/usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
 
 cpu:
   policy: "static" # Options: none (disabled), static (default)

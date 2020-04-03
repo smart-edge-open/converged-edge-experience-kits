@@ -5,5 +5,5 @@
 
 - name: Remove RSU kubectl plugin
   file:
-    path: "{{ rsu_plugin_dest }}"
+    path: "{{ _rsu_plugin_dest }}"
     state: absent

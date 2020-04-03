@@ -5,5 +5,5 @@
 
 - name: Remove old repository folder
   file:
-    path: "{{ git_repo_dest }}"
+    path: "{{ _git_repo_dest }}"
     state: absent

@@ -5,7 +5,6 @@
 
 - name: Create directories for PV
   file:
-    path: "{{ default_pv_dir }}{{ default_pv_vol_name }}{{ item }}"
+    path: "{{ _default_pv_dir }}{{ _default_pv_vol_name }}{{ item }}"
     state: directory
-  with_sequence: start=0 end="{{ pv_vm_max_num }}"
-
+  with_sequence: start=0 end="{{ _pv_vm_max_num }}"

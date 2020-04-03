@@ -8,7 +8,7 @@
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: not offline_mode
+  when: not _offline_mode
 
 - name: offline | install tuned dependencies - URLs
   block:
@@ -20,7 +20,7 @@
       name: "{{ rpm_packages }}"
       state: present
       allow_downgrade: yes
-  when: offline_mode
+  when: _offline_mode
 
 - name: setup isolated cores
   block:

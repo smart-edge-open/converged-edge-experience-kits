@@ -3,10 +3,10 @@
 
 ---
 
-qemu_version: "4.0.0"
-qemu_targets: "x86_64-softmmu"
+_qemu_version: "4.0.0"
+_qemu_targets: "x86_64-softmmu"
 
-qemu_name: "qemu-{{ qemu_version }}"
-qemu_download_url: "http://download.qemu.org/{{ qemu_name }}.tar.xz"
-qemu_download_dest: "/tmp/{{ qemu_name }}.tar.xz"
-qemu_install_dir: "/opt/{{ qemu_name }}"
+_qemu_name: "qemu-{{ _qemu_version }}"
+_qemu_download_url: "http://download.qemu.org/{{ _qemu_name }}.tar.xz"
+_qemu_download_dest: "/tmp/{{ _qemu_name }}.tar.xz"
+_qemu_install_dir: "/opt/{{ _qemu_name }}"

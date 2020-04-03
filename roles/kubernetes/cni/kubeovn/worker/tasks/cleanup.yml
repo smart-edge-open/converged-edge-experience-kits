@@ -11,5 +11,5 @@
 
 - name: remove ovn packages
   yum:
-    name: "{{ ovs_packages_to_remove }}"
+    name: "{{ _ovs_packages_to_remove }}"
     state: absent

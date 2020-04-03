@@ -5,14 +5,14 @@
 
 - name: copy git repository
   copy:
-    src: "{{ git_repo_dest }}"
-    dest: "{{ offline_path }}"
+    src: "{{ _git_repo_dest }}"
+    dest: "{{ _offline_path }}"
     remote_src: yes
 
 - name: remove .git directory
   file:
     state: absent
-    path: "{{ offline_path }}/{{ item }}/.git"
+    path: "{{ _offline_path }}/{{ item }}/.git"
   with_items:
     - "edgecontroller"
     - "edgenode"
@@ -20,7 +20,7 @@
 - name: remove .gitignore
   file:
     state: absent
-    path: "{{ offline_path }}/{{ item }}/.gitignore"
+    path: "{{ _offline_path }}/{{ item }}/.gitignore"
   with_items:
     - "edgecontroller"
     - "edgenode"

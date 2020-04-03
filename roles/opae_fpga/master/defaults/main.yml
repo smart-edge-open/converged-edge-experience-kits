@@ -3,4 +3,4 @@
 
 ---
 
-rsu_plugin_dest: "/usr/bin/kubectl-rsu"
+_rsu_plugin_dest: "/usr/bin/kubectl-rsu"

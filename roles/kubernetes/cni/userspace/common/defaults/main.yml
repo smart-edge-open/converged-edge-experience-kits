@@ -3,7 +3,7 @@
 
 ---
 
-userspace:
+_userspace:
   repository: "github.com/intel/userspace-cni-network-plugin"
   bridgeName: "br-userspace"
   logFile: "/var/log/userspace-openness.log"

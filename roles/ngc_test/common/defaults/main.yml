@@ -3,17 +3,17 @@
 
 ---
 
-epcforedge_git_repo:
+_epcforedge_git_repo:
   dir: https://{{ git_repo_token }}@github.com/otcshare/epcforedge.git
   download_dir: /opt/epcforedge
   branch: master
 
-configs_dest: /etc/openness/configs
-certs_dest: /etc/openness/certs
+_configs_dest: /etc/openness/configs
+_certs_dest: /etc/openness/certs
 
-git_repo_ngc_dir: "{{ epcforedge_git_repo.download_dir }}/ngc"
-git_repo_ngc_dist_dir: "{{ git_repo_ngc_dir }}/dist"
-git_repo_ngc_build_dir: "{{ git_repo_ngc_dir }}/build"
+_git_repo_ngc_dir: "{{ _epcforedge_git_repo.download_dir }}/ngc"
+_git_repo_ngc_dist_dir: "{{ _git_repo_ngc_dir }}/dist"
+_git_repo_ngc_build_dir: "{{ _git_repo_ngc_dir }}/build"
 
-controller_name: "{{ groups['controller_group'][0] }}"
-controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+_controller_name: "{{ groups['controller_group'][0] }}"
+_controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"

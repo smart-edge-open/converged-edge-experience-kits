@@ -10,7 +10,7 @@
     name: "{{ item }}"
     state: absent
   with_items:
-  - "{{ hddldaemon_container.download_dir }}"
+  - "{{ _hddldaemon_container.download_dir }}"
   ignore_errors: yes
 
 - name: docker stop and rmi

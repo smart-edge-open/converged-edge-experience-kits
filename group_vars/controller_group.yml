@@ -7,9 +7,9 @@ os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-util
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
 git_repo_branch: master
-git_repo_dest: /opt/edgecontroller
+_git_repo_dest: /opt/edgecontroller
 
-offline_path: "{{ offline_path_common }}/controller"
-offline_archive: "offline-controller.tar.gz"
+_offline_path: "{{ _offline_path_common }}/controller"
+_offline_archive: "offline-controller.tar.gz"
 
-offline_download_kernel: false
+_offline_download_kernel: false

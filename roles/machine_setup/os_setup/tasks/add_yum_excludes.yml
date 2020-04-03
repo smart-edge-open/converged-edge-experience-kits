@@ -6,8 +6,8 @@
 - name: Add excludes (rpm packages) to yum.conf
   lineinfile:
     dest: /etc/yum.conf
-    line: "{{ os_yum_exclude_rpm_packages }}"
+    line: "{{ _os_yum_exclude_rpm_packages }}"
     insertafter: EOF
   when:
-    - os_yum_exclude_rpm_packages is defined
-    - os_yum_exclude_rpm_packages|length > 0
+    - _os_yum_exclude_rpm_packages is defined
+    - _os_yum_exclude_rpm_packages|length > 0

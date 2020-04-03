@@ -5,12 +5,12 @@
 
 - name: remove binaries
   file:
-    path: "{{ dpdk_install_dir }}"
+    path: "{{ _dpdk_install_dir }}"
     state: absent
 
 - name: remove download folder
   file:
-    path: "{{ dpdk_download_dest }}"
+    path: "{{ _dpdk_download_dest }}"
     state: absent
 
 - name: remove ansible fact file

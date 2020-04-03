@@ -21,4 +21,4 @@
 - name: fail if time difference exceeds threshold
   fail:
     msg: "The date difference between Edge Controller and Edge Node is too big. Please update time on both machines and retry the installation scripts."
-  when: (difference | int) > date_threshold_seconds
+  when: (difference | int) > _date_threshold_seconds

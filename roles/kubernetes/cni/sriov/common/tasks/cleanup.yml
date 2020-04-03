@@ -8,8 +8,8 @@
     name: "{{ item }}"
     state: absent
   with_items:
-  - "{{ sriov_cni.download_dir }}"
-  - "{{ sriov_dev_plugin.download_dir }}"
+  - "{{ _sriov_cni.download_dir }}"
+  - "{{ _sriov_dev_plugin.download_dir }}"
 
 - name: remove patch utility
   yum:

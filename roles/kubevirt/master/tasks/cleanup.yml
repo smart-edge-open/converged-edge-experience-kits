@@ -43,10 +43,10 @@
     command: kubectl delete validatingwebhookconfigurations cdi-api-datavolume-validate --wait=true
     ignore_errors: yes
   - name: Delete operator
-    command: kubectl delete -f {{ cdi_operator_url }} --timeout=60s
+    command: kubectl delete -f {{ _cdi_operator_url }} --timeout=60s
     ignore_errors: yes
   - name: Delete controller
-    command: kubectl delete -f {{ cdi_cr_url }} --timeout=60s
+    command: kubectl delete -f {{ _cdi_cr_url }} --timeout=60s
     ignore_errors: yes
 
 - name: delete vritctl
@@ -61,7 +61,7 @@
 
 - name: delete krew directory
   file:
-    path: "{{ krew_dir }}"
+    path: "{{ _krew_dir }}"
     state: absent
 
 - name: uninstall KuberVirt
@@ -79,8 +79,8 @@
     command: kubectl delete validatingwebhookconfigurations virt-api-validator --wait=true
     ignore_errors: yes
   - name: Delete operator
-    command: kubectl delete -f "{{ kubevirt_operator_url }}" --timeout=60s
+    command: kubectl delete -f "{{ _kubevirt_operator_url }}" --timeout=60s
     ignore_errors: yes
   - name: Delete controller
-    command: kubectl delete -f "{{ kubevirt_cr_url }}" --timeout=60s
+    command: kubectl delete -f "{{ _kubevirt_cr_url }}" --timeout=60s
     ignore_errors: yes

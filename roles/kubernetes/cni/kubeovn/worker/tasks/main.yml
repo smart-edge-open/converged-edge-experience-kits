@@ -4,7 +4,7 @@
 ---
 
 - name: check if packages installed in proper version
-  shell: rpm -q openvswitch | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l # noqa 306
+  shell: rpm -q openvswitch | grep {{ _ovn_version.main }}-{{ _ovn_version.subversion }} | wc -l # noqa 306
   args:
     warn: false
   register: rpm_grep
@@ -14,13 +14,13 @@
   block:
   - name: remove old packages
     yum:
-      name: "{{ ovs_packages_to_remove }}"
+      name: "{{ _ovs_packages_to_remove }}"
       state: absent
   - name: installing OVS tool dependencies
     yum:
-      name: "{{ ovs_dependencies_yum }}"
+      name: "{{ _ovs_dependencies_yum }}"
   - name: installing OVS tool
-    command: yum install -y {{ ovs_package_url }}
+    command: yum install -y {{ _ovs_package_url }}
     args:
       warn: false
   when: "'1' not in rpm_grep.stdout"

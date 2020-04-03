@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019 Intel Corporation
 
-mkdir -p {{ offline_path_common }}
-mv offline-controller.tar.gz {{ offline_path_common }}
+mkdir -p {{ _offline_path_common }}
+mv offline-controller.tar.gz {{ _offline_path_common }}
 if [ $? -eq 0 ]; then
   echo "offline-controller.tar.gz moved to desired location"
 else
@@ -12,7 +12,7 @@ else
   exit 1
 fi
 
-mv offline-node.tar.gz {{ offline_path_common }}
+mv offline-node.tar.gz {{ _offline_path_common }}
 if [ $? -eq 0 ]; then
   echo "offline-node.tar.gz moved to desired location"
 else
@@ -20,7 +20,7 @@ else
   exit 2
 fi
 
-mkdir {{ offline_path_common }}/ansible_offline_packages
+mkdir {{ _offline_path_common }}/ansible_offline_packages
 
 command -v ansible-playbook 1>/dev/null
 if [[ $? -ne 0 ]]; then

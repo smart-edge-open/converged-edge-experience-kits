@@ -6,5 +6,5 @@
 - name: deploy gpu-plugin kustomization
   command: kubectl apply -k deployments/gpu_plugin
   args:
-    chdir: "{{ device_plugins.download_dir }}"
+    chdir: "{{ _device_plugins.download_dir }}"
   changed_when: true

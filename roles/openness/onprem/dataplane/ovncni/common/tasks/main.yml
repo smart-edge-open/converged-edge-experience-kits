@@ -6,22 +6,22 @@
 - name: generate Dockerfile from template
   template:
     src: Dockerfile.j2
-    dest: "{{ dpdk_install_dir }}/Dockerfile"
+    dest: "{{ _dpdk_install_dir }}/Dockerfile"
 
 - name: copy .dockerignore
   copy:
     src: .dockerignore
-    dest: "{{ dpdk_install_dir }}/.dockerignore"
+    dest: "{{ _dpdk_install_dir }}/.dockerignore"
 
 - name: copy configure_ovn_net.sh
   copy:
     src: configure_ovn_net.sh
-    dest: "{{ dpdk_install_dir }}/configure_ovn_net.sh"
+    dest: "{{ _dpdk_install_dir }}/configure_ovn_net.sh"
 
 - name: generate start_ovs_ovn.sh from template
   template:
     src: start_ovs_ovn.sh.j2
-    dest: "{{ dpdk_install_dir }}/start_ovs_ovn.sh"
+    dest: "{{ _dpdk_install_dir }}/start_ovs_ovn.sh"
     mode: '0744'
 
 #TODO: Use variables(Currently defined in configure_ovn_net.sh)

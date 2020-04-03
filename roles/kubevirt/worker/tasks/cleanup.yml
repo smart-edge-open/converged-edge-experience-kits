@@ -5,5 +5,5 @@
 
 - name: Delete PV directories
   file:
-    path: "{{ default_pv_dir }}"
+    path: "{{ _default_pv_dir }}"
     state: absent

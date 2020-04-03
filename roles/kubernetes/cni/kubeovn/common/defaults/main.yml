@@ -3,35 +3,35 @@
 
 ---
 
-kubeovn_version: v0.10.2
-ovs_dpdk: true
+_kubeovn_version: v0.10.2
 
-ovn_version:
+
+_ovn_version:
   main: "2.12.0"
   subversion: "4"
 
-dpdk_version: "18.11.2"
+_dpdk_version: "18.11.2"
 
-kubeovn_repo: https://github.com/alauda/kube-ovn.git
-kubeovn_raw_file_repo: https://raw.githubusercontent.com/alauda/kube-ovn
-kubeovn_destdir: /tmp/kube-ovn
+_kubeovn_raw_file_repo: https://raw.githubusercontent.com/alauda/kube-ovn
+_kubeovn_destdir: /tmp/kube-ovn
 
-kubeovn_cleanup_paths:
+_kubeovn_cleanup_paths:
 - /var/run/openvswitch
 - /etc/origin/openvswitch/
 - /etc/openvswitch
 - /etc/cni/net.d/00-kube-ovn.conflist
 
-kubeovn_download_files:
-- "{{ kubeovn_raw_file_repo }}/{{ kubeovn_version }}/dist/images/Dockerfile.node"
-- "{{ kubeovn_raw_file_repo }}/{{ kubeovn_version }}/dist/images/start-ovs.sh"
-- "{{ kubeovn_raw_file_repo }}/{{ kubeovn_version }}/dist/images/ovs-healthcheck.sh"
+_kubeovn_download_files:
+- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/Dockerfile.node"
+- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/start-ovs.sh"
+- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/ovs-healthcheck.sh"
 
-kubeovn_dockerimage_files_to_cp:
+_kubeovn_dockerimage_files_to_cp:
 - Dockerfile.dpdk
 - start-ovs-dpdk.sh
 - ovs-healthcheck.sh
 
+ovs_dpdk: true
 ovs_dpdk_socket_mem: "1024,0"
 ovs_dpdk_pmd_cpu_mask: "0x4"
 ovs_dpdk_lcore_mask: "0x2"

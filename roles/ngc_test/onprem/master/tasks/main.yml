@@ -11,20 +11,20 @@
 
 - name: create directory for certs used by AF and NEF
   file:
-    name: "{{ certs_dest }}/ngc"
+    name: "{{ _certs_dest }}/ngc"
     state: directory
 
 - name: copy genCerts.json file
   copy:
-    src: "{{ git_repo_ngc_dir }}/scripts/genCerts.sh"
+    src: "{{ _git_repo_ngc_dir }}/scripts/genCerts.sh"
     remote_src: yes
-    dest: "{{ certs_dest }}/ngc"
+    dest: "{{ _certs_dest }}/ngc"
     mode: a+x
 
 - name: run script to generate cerificates
-  shell: './genCerts.sh -t IP -h {{ controller_ip }} -t DNS -h {{ controller_name }}' # noqa 305
+  shell: './genCerts.sh -t IP -h {{ _controller_ip }} -t DNS -h {{ _controller_name }}' # noqa 305
   args:
-    chdir: "{{ certs_dest }}/ngc"
+    chdir: "{{ _certs_dest }}/ngc"
   changed_when: true
 
 - include_tasks: subtasks/bringup_oam.yml
@@ -32,4 +32,3 @@
 - include_tasks: subtasks/bringup_nef.yml
 
 - include_tasks: subtasks/bringup_af.yml
-

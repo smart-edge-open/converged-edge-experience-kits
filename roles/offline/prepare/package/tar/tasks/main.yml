@@ -5,26 +5,26 @@
 
 - name: create tmp folder
   file:
-    path: "{{ offline_path_common }}/tmp"
+    path: "{{ _offline_path_common }}/tmp"
     state: directory
 
 - name: create extraction script
   template:
     src: extract.sh.j2
-    dest: "{{ offline_path_common }}/tmp/extract.sh"
+    dest: "{{ _offline_path_common }}/tmp/extract.sh"
     mode: '0744'
 
 - name: create offline archive
   archive:
     path:
-    - "{{ offline_path_common }}/tmp/*"
-    dest: "{{ offline_path_common }}/offline-openness.tar"
+    - "{{ _offline_path_common }}/tmp/*"
+    dest: "{{ _offline_path_common }}/offline-openness.tar"
     format: tar
 
 - name: remove tmp folder
   file:
-    path: "{{ offline_path_common }}/tmp"
+    path: "{{ _offline_path_common }}/tmp"
     state: absent
 
 - debug:
-    msg: Offline package was successfully created in {{ offline_path_common }}/offline-openness.tar
+    msg: Offline package was successfully created in {{ _offline_path_common }}/offline-openness.tar

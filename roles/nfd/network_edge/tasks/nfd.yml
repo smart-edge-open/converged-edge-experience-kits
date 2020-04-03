@@ -11,15 +11,15 @@
 
 - name: download NFD yamls
   get_url:
-    url: "{{ nfd_base_url }}/{{ item }}.template"
+    url: "{{ _nfd_base_url }}/{{ item }}.template"
     dest: "{{ tmp_dir.path }}/{{ item }}"
-  with_items: "{{ nfd_yamls }}"
+  with_items: "{{ _nfd_yamls }}"
 
 - name: copy files for kustomization
   copy:
     src: "{{ item }}"
     dest: "{{ tmp_dir.path }}"
-  with_items: "{{ kustomization_files_to_copy }}"
+  with_items: "{{ _kustomization_files_to_copy }}"
 
 - name: create NFD certificates configuration file
   template:
@@ -38,7 +38,7 @@
   changed_when: true
 
 - name: apply network policy
-  command: kubectl apply -f {{ nfd_netpol }}
+  command: kubectl apply -f {{ _nfd_netpol }}
   changed_when: true
 
 - name: remove temp directory

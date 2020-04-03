@@ -5,7 +5,7 @@
 
 - name: setting KUBELET_EXTRA_ARGS
   lineinfile:
-    path: "{{ kubernetes_env_file }}"
+    path: "{{ _kubernetes_env_file }}"
     regexp: "^KUBELET_EXTRA_ARGS="
     line: "KUBELET_EXTRA_ARGS=--config /usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
   notify:
@@ -13,7 +13,7 @@
 
 - name: creating kubelet config
   blockinfile:
-    path: "{{ kubernetes_config_file }}"
+    path: "{{ _kubernetes_config_file }}"
     marker: "# {mark} OpenNESS configuration - General"
     create: yes
     block: |
@@ -34,7 +34,7 @@
 
 - name: customize kubelet config - CPU Manager
   blockinfile:
-    path: "{{ kubernetes_config_file }}"
+    path: "{{ _kubernetes_config_file }}"
     marker: "# {mark} OpenNESS configuration - CPU Manager"
     block: |
       cpuManagerPolicy: {{ cpu.policy }}
@@ -46,7 +46,7 @@
 
 - name: customize kubelet config - Topology Manager
   blockinfile:
-    path: "{{ kubernetes_config_file }}"
+    path: "{{ _kubernetes_config_file }}"
     marker: "# {mark} OpenNESS configuration - Topology Manager"
     block: |
       topologyManagerPolicy: {{ topology_manager.policy }}

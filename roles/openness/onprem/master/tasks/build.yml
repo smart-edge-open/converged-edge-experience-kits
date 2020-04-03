@@ -5,25 +5,25 @@
 
 - name: check if a backup of original .env file already exists
   stat:
-    path: "{{ git_repo_dest }}/.env.ansible.backup"
+    path: "{{ _git_repo_dest }}/.env.ansible.backup"
   register: env_backup_file
 
 - name: make a backup of original .env file if backup is missing
   copy:
-    src: "{{ git_repo_dest }}/.env"
-    dest: "{{ git_repo_dest }}/.env.ansible.backup"
+    src: "{{ _git_repo_dest }}/.env"
+    dest: "{{ _git_repo_dest }}/.env.ansible.backup"
     remote_src: yes
   when: not env_backup_file.stat.exists
 
 - name: generate .env file
   template:
     src: .env.j2
-    dest: "{{ git_repo_dest }}/.env"
+    dest: "{{ _git_repo_dest }}/.env"
 
 - name: offline | build docker images
   block:
   - name: offline | import images
-    shell: docker load < {{ offline_docker_images_path }}/{{ item }}
+    shell: docker load < {{ _offline_docker_images_path }}/{{ item }}
     with_items:
     - mysql.tar
     - cce.tar
@@ -35,7 +35,7 @@
 
   - name: offline | customize docker-compose.yml - use cached images
     lineinfile:
-      path: "{{ git_repo_dest }}/docker-compose.yml"
+      path: "{{ _git_repo_dest }}/docker-compose.yml"
       insertafter: 'context: ./ui/{{ item.dir }}'
       line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
     with_items:
@@ -67,8 +67,8 @@
   - name: offline | finish building UI images
     command: docker-compose build ui cups-ui cnca-ui landing-ui
     args:
-      chdir: "{{ git_repo_dest }}"
-  when: offline_mode
+      chdir: "{{ _git_repo_dest }}"
+  when: _offline_mode
 
 - name: online build controller docker images
   block:
@@ -76,7 +76,7 @@
     include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: build controller docker images
     make:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
       target: build
     register: build_controller_output
   - debug:
@@ -84,11 +84,11 @@
   always:
   - name: remove temporary .openness_gitconfig
     include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
-  when: not offline_mode
+  when: not _offline_mode
 
 - name: start controller
   make:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
     target: all-up
   register: start_controller_output
 

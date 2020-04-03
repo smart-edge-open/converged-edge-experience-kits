@@ -7,31 +7,31 @@
   include_vars: ../../../../dpdk/defaults/main.yml
 
 - debug:
-    msg: "dpdk will be downloaded from: {{ dpdk_download_url }}"
+    msg: "dpdk will be downloaded from: {{ _dpdk_download_url }}"
 
 - name: download dpdk package
   get_url:
-    url: "{{ dpdk_download_url }}"
-    dest: "{{ offline_path }}/archives/"
+    url: "{{ _dpdk_download_url }}"
+    dest: "{{ _offline_path }}/archives/"
 
 - name: get qemu settings
   include_vars: ../../../../qemu/defaults/main.yml
 
 - debug:
-    msg: "qemu will be downloaded from: {{ qemu_download_url }}"
+    msg: "qemu will be downloaded from: {{ _qemu_download_url }}"
 
 - name: download qemu package
   get_url:
-    url: "{{ qemu_download_url }}"
-    dest: "{{ offline_path }}/archives/"
+    url: "{{ _qemu_download_url }}"
+    dest: "{{ _offline_path }}/archives/"
 
 - name: get ovs settings
   include_vars: ../../../../ovs/defaults/main.yml
 
 - debug:
-    msg: "ovs will be downloaded from: {{ ovs_url }}"
+    msg: "ovs will be downloaded from: {{ _ovs_url }}"
 
 - name: download ovs package
   get_url:
-    url: "{{ ovs_url }}"
-    dest: "{{ offline_path }}/archives/openvswitch-{{ ovs_version }}.tar.gz"
+    url: "{{ _ovs_url }}"
+    dest: "{{ _offline_path }}/archives/openvswitch-{{ _ovs_version }}.tar.gz"

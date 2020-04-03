@@ -11,7 +11,7 @@
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: not offline_mode
+  when: not _offline_mode
 
 - name: offline | install kernel dependencies - tuned
   block:
@@ -23,14 +23,14 @@
       name: "{{ tuned_rpm_packages }}"
       state: present
       allow_downgrade: yes
-  when: offline_mode
+  when: _offline_mode
 
 - name: install kernel dependencies - URLs
   yum:
     name: "{{ kernel_dependencies_urls | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: not offline_mode
+  when: not _offline_mode
 
 - name: offline | install kernel dependencies - URLs
   block:
@@ -42,7 +42,7 @@
       name: "{{ rpm_packages }}"
       state: present
       allow_downgrade: yes
-  when: offline_mode
+  when: _offline_mode
 
 - name: install kernel dependencies - packages
   yum:

@@ -9,5 +9,5 @@
     regexp: "^exclude=.*"
     state: absent
   when:
-    - os_yum_exclude_rpm_packages is defined
-    - os_yum_exclude_rpm_packages|length > 0
+    - _os_yum_exclude_rpm_packages is defined
+    - _os_yum_exclude_rpm_packages|length > 0

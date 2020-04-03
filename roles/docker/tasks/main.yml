@@ -7,11 +7,11 @@
   yum_repository:
     name: docker
     description: Docker CE repository
-    baseurl: "{{ docker_repository_url }}"
-    gpgkey: "{{ docker_repository_key }}"
+    baseurl: "{{ _docker_repository_url }}"
+    gpgkey: "{{ _docker_repository_key }}"
     gpgcheck: yes
   # Do not add remote repositories in offline mode
-  when: not offline_mode
+  when: not _offline_mode
 
 - name: clear yum cache
   command: yum clean all
@@ -21,23 +21,23 @@
 
 - name: install Docker CE
   yum:
-    name: "{{ docker_packages }}"
+    name: "{{ _docker_packages }}"
     state: present
   notify:
   - enable and start docker service
 
 - name: install docker-compose
   pip:
-    name: "{{ docker_compose_package }}"
+    name: "{{ _docker_compose_package }}"
     state: present
-  when: not offline_mode
+  when: not _offline_mode
 
 - name: offline | install docker-compose
   pip:
-    name: "{{ docker_compose_package }}"
+    name: "{{ _docker_compose_package }}"
     state: present
-    extra_args: "--no-index --find-links {{ offline_pip_path }}"
-  when: offline_mode
+    extra_args: "--no-index --find-links {{ _offline_pip_path }}"
+  when: _offline_mode
 
 - name: set up proxy
   include_tasks: proxy.yml
@@ -62,7 +62,7 @@
 - name:  Find docker audit files
   stat:
     path: "{{ item }}"
-  with_items: "{{ docker_audit_files }}"
+  with_items: "{{ _docker_audit_files }}"
   register: stats
 
 - name: Add audit rules for docker

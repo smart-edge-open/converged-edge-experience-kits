@@ -3,6 +3,6 @@
 
 ---
 
-multus_version: "v3.3"
+_multus_version: "v3.3"
 
-multus_daemonset_url: "https://raw.githubusercontent.com/intel/multus-cni/{{ multus_version }}/images/multus-daemonset.yml"
+_multus_daemonset_url: "https://raw.githubusercontent.com/intel/multus-cni/{{ _multus_version }}/images/multus-daemonset.yml"

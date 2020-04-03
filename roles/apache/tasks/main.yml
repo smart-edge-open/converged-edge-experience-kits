@@ -4,35 +4,35 @@
 ---
 
 - debug:
-    msg: "Installing the following packages: {{ apache_packages }}"
+    msg: "Installing the following packages: {{ _apache_packages }}"
 - name: install Apache
   yum:
-    name: "{{ apache_packages }}"
+    name: "{{ _apache_packages }}"
     state: present
     skip_broken: yes
 
 - name: acquire controller's root CA
   command: docker cp edgecontroller_cce_1:/artifacts/certificates/ca/cert.pem .
   args:
-    chdir: "{{ certs_path }}/"
+    chdir: "{{ _certs_path }}/"
   changed_when: true
 
 - name: acquire controller's key
   command: docker cp edgecontroller_cce_1:/artifacts/certificates/ca/key.pem .
   args:
-    chdir: "{{ certs_path }}/"
+    chdir: "{{ _certs_path }}/"
   changed_when: true
 
 - name: generate Apache key (2048 bits)
   command: openssl genrsa -out apache.key 2048
   args:
-    chdir: "{{ certs_path }}/"
+    chdir: "{{ _certs_path }}/"
   changed_when: true
 
 - name: create Apache CSR
   command: openssl req -new -key apache.key -out apache.csr -batch
   args:
-    chdir: "{{ certs_path }}/"
+    chdir: "{{ _certs_path }}/"
   changed_when: true
 
 - name: set IP address - inventory
@@ -61,7 +61,7 @@
     openssl x509 -req -in apache.csr -CA cert.pem -CAkey key.pem -CAcreateserial -out apache.crt -days 500
     -sha256 -extensions req_ext -extfile /etc/pki/tls/openssl.cnf
   args:
-    chdir: "{{ certs_path }}/"
+    chdir: "{{ _certs_path }}/"
   changed_when: true
 
 - name: set SSL certificate file

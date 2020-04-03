@@ -9,14 +9,14 @@
   block:
   - name: print kernel devel src path
     debug:
-      msg: " The kernel devel src path - /lib/modules/{{ hddl_kernel_devel }}"
+      msg: " The kernel devel src path - /lib/modules/{{ _hddl_kernel_devel }}"
   - name: check if already installed
     stat:
-      path: "/lib/modules/{{ hddl_kernel_devel }}"
+      path: "/lib/modules/{{ _hddl_kernel_devel }}"
     register: hddl_kernel_devel_src_dir
   - name: install kernel-devel package for hddl
     yum:
-      name: "{{ hddl_kernel_devel_url }}"
+      name: "{{ _hddl_kernel_devel_url }}"
       state: present
       disable_excludes: all
       allow_downgrade: yes

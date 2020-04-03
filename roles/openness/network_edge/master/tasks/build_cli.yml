@@ -13,7 +13,7 @@
     - name: build EdgeDNS cli
       shell: source /etc/profile && go build -o dist/edgednscli ./cmd/edgednscli
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
     - name: copy EdgeDNS cli
       copy:
         src: "{{ item }}"
@@ -21,8 +21,8 @@
         remote_src: yes
         mode: '0755'
       with_items:
-      - "{{ git_repo_dest }}/dist/edgednscli"
-      - "{{ git_repo_dest }}/network-edge/kubectl-edgedns"
+      - "{{ _git_repo_dest }}/dist/edgednscli"
+      - "{{ _git_repo_dest }}/network-edge/kubectl-edgedns"
 
   always:
   - name: remove .openness_gitconfig

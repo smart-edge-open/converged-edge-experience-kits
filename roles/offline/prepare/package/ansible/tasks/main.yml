@@ -5,10 +5,10 @@
 
 - name: create tmp folder
   file:
-    path: "{{ offline_path_common }}/tmp"
+    path: "{{ _offline_path_common }}/tmp"
     state: directory
 
 - name: create offline ansible archive
   copy:
     src: "/temp/ansible_offline_packages.tar"
-    dest: "{{ offline_path_common }}/tmp/ansible.tar"
+    dest: "{{ _offline_path_common }}/tmp/ansible.tar"

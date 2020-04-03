@@ -33,4 +33,4 @@
         state: absent
       delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
 
-  when: download_root_ca_from_controller|bool
+  when: _download_root_ca_from_controller|bool

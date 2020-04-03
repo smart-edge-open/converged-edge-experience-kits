@@ -9,5 +9,5 @@
     state: absent
 
 - name: delete go files
-  shell: "source /etc/profile && rm -rf $GOPATH/src/{{ userspace_repository }}"
+  shell: "source /etc/profile && rm -rf $GOPATH/src/{{ _userspace.repository }}"
   changed_when: true

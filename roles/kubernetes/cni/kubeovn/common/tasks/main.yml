@@ -8,23 +8,23 @@
     - name: checking if dpdk version fulfils requirements
       fail:
         msg: The ovs dpdk patches are created for version v0.10.2. Please rebase then in case of version change.
-      when: kubeovn_version != "v0.10.2"
+      when: _kubeovn_version != "v0.10.2"
 
     - name: Creates kubeovn tmp directory
       file:
-        path: "{{ kubeovn_destdir }}"
+        path: "{{ _kubeovn_destdir }}"
         state: directory
 
     - name: download kubeovn files
       get_url:
         url: "{{ item }}"
-        dest: "{{ kubeovn_destdir }}"
-      with_items: "{{ kubeovn_download_files }}"
+        dest: "{{ _kubeovn_destdir }}"
+      with_items: "{{ _kubeovn_download_files }}"
 
     - name: copy Dockerfile
       copy:
-        src: "{{ kubeovn_destdir }}/Dockerfile.node"
-        dest: "{{ kubeovn_destdir }}/Dockerfile.dpdk"
+        src: "{{ _kubeovn_destdir }}/Dockerfile.node"
+        dest: "{{ _kubeovn_destdir }}/Dockerfile.dpdk"
         mode: preserve
         remote_src: yes
 
@@ -36,36 +36,36 @@
     - name: apply patch for Dockerfile.dpdk
       patch:
         src: "dockerfile_dpdk_v0.10.2.patch"
-        dest: "{{ kubeovn_destdir }}/Dockerfile.dpdk"
-        basedir: "{{ kubeovn_destdir }}"
+        dest: "{{ _kubeovn_destdir }}/Dockerfile.dpdk"
+        basedir: "{{ _kubeovn_destdir }}"
 
     - name: copy start script
       copy:
-        src: "{{ kubeovn_destdir }}/start-ovs.sh"
-        dest: "{{ kubeovn_destdir }}/start-ovs-dpdk.sh"
+        src: "{{ _kubeovn_destdir }}/start-ovs.sh"
+        dest: "{{ _kubeovn_destdir }}/start-ovs-dpdk.sh"
         mode: preserve
         remote_src: yes
 
     - name: apply patch for start-ovs-dpdk.sh
       patch:
         src: "start_ovs_dpdk_v0.10.2.patch"
-        dest: "{{ kubeovn_destdir }}/start-ovs-dpdk.sh"
-        basedir: "{{ kubeovn_destdir }}"
+        dest: "{{ _kubeovn_destdir }}/start-ovs-dpdk.sh"
+        basedir: "{{ _kubeovn_destdir }}"
 
     - name: copy files needed to build an image to dpdk folder
       copy:
-        src: "{{ kubeovn_destdir }}/{{ item }}"
-        dest: "{{ dpdk_install_dir }}"
+        src: "{{ _kubeovn_destdir }}/{{ item }}"
+        dest: "{{ _dpdk_install_dir }}"
         mode: preserve
         remote_src: yes
-      with_items: "{{ kubeovn_dockerimage_files_to_cp }}"
+      with_items: "{{ _kubeovn_dockerimage_files_to_cp }}"
 
     - name: build OVS-DPDK image (this may take some time...)
       docker_image:
         name: ovs-dpdk
         source: build
         build:
-          path: "{{ dpdk_install_dir }}"
+          path: "{{ _dpdk_install_dir }}"
           dockerfile: Dockerfile.dpdk
           pull: yes
           use_config_proxy: yes
@@ -73,6 +73,6 @@
     - name: Clean ovs files
       file:
         state: absent
-        path: "{{ dpdk_install_dir }}/{{ item }}"
-      with_items: "{{ kubeovn_dockerimage_files_to_cp }}"
+        path: "{{ _dpdk_install_dir }}/{{ item }}"
+      with_items: "{{ _kubeovn_dockerimage_files_to_cp }}"
   when: ovs_dpdk

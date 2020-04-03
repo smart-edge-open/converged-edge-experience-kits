@@ -16,7 +16,7 @@
   - 6784/udp
 
 - name: apply WeaveNet via the addon
-  shell: "kubectl apply -f {{ weavenet_yaml }}"
+  shell: "kubectl apply -f {{ _weavenet_yaml }}"
   changed_when: true
 
 - name: wait for weavenet pods become running

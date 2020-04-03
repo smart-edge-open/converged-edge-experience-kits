@@ -7,11 +7,11 @@
   copy:
     content: |
       GITHUB_TOKEN={{ git_repo_token }}
-    dest: "{{ git_repo_dest }}/.env"
+    dest: "{{ _git_repo_dest }}/.env"
 
 - name: customize docker-compose.yml
   lineinfile:
-    path: "{{ git_repo_dest }}/docker-compose.yml"
+    path: "{{ _git_repo_dest }}/docker-compose.yml"
     insertafter: "context: ./ui/{{ item.dir }}"
     line: "      target: {{ item.image }}-deps-image"
   with_items:
@@ -22,7 +22,7 @@
 
 - name: change docker-compose.yml images names
   lineinfile:
-    path: "{{ git_repo_dest }}/docker-compose.yml"
+    path: "{{ _git_repo_dest }}/docker-compose.yml"
     regexp: "    image: {{ item.original }}"
     line: "    image: {{ item.new }}"
   with_items:
@@ -36,31 +36,31 @@
     - name: build ui image
       command: docker-compose build ui
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
       register: build_ui_output
 
     - name: build cups-ui image
       command: docker-compose build cups-ui
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
       register: build_cups_output
 
     - name: build cnca-ui image
       command: docker-compose build cnca-ui
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
       register: build_cnca_output
 
     - name: build landing-ui image
       command: docker-compose build landing-ui
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
       register: build_landing_output
 
     - name: build cce image
       command: docker-compose build cce
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
       register: build_controller_output
 
     - name: build NFD master image
@@ -70,27 +70,27 @@
       - name: build NFD master binary
         shell: source /etc/profile && go build -o dist/nfd-master ./cmd/nfd-master
         args:
-          chdir: "{{ git_repo_dest }}"
-          creates: "{{ git_repo_dest }}/dist/nfd-master"
+          chdir: "{{ _git_repo_dest }}"
+          creates: "{{ _git_repo_dest }}/dist/nfd-master"
       - name: build Docker image
         command: docker-compose build nfd-master
         args:
-          chdir: "{{ git_repo_dest }}"
+          chdir: "{{ _git_repo_dest }}"
       - name: remove temporary .openness_gitconfig
         include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
 
     - name: pull mysql image
       command: docker-compose pull --quiet mysql
       args:
-        chdir: "{{ git_repo_dest }}"
+        chdir: "{{ _git_repo_dest }}"
 
     - name: make sure dir for images exists
       file:
-        path: "{{ offline_docker_images_path }}"
+        path: "{{ _offline_docker_images_path }}"
         state: directory
 
     - name: save all images
-      shell: docker save "{{ item.image }}" > "{{ offline_docker_images_path }}/{{ item.filename }}"
+      shell: docker save "{{ item.image }}" > "{{ _offline_docker_images_path }}/{{ item.filename }}"
       with_items:
       - { image: "mysql", filename: "mysql.tar" }
       - { image: "cce", filename: "cce.tar" }
@@ -103,11 +103,11 @@
   always:
   - name: remove .env
     file:
-      path: "{{ git_repo_dest }}/.env"
+      path: "{{ _git_repo_dest }}/.env"
       state: absent
   - name: remove docker-compose.yml customization
     lineinfile:
-      path: "{{ git_repo_dest }}/docker-compose.yml"
+      path: "{{ _git_repo_dest }}/docker-compose.yml"
       line: '      target: {{ item }}-deps-image'
       state: absent
     with_items:
@@ -117,7 +117,7 @@
     - landing-ui
   - name: restore docker-compose.yml images names
     lineinfile:
-      path: "{{ git_repo_dest }}/docker-compose.yml"
+      path: "{{ _git_repo_dest }}/docker-compose.yml"
       regexp: "    image: {{ item.new }}"
       line: "    image: {{ item.original }}"
     with_items:

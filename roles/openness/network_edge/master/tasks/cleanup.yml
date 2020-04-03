@@ -15,7 +15,7 @@
 
 - name: remove openness definitions
   command: kubectl delete -f {{ item }}
-  with_items: "{{ openness_yamls }}"
+  with_items: "{{ _openness_yamls }}"
   ignore_errors: yes
   changed_when: true
 
@@ -37,10 +37,10 @@
     path: "{{ item }}"
     state: absent
   with_items:
-  - "{{ certs_dest }}/client/interfaceservice"
-  - "{{ certs_dest }}/client/edgeclient"
-  - "{{ certs_dest }}/CA"
-  - "{{ certs_dest }}"
+  - "{{ _certs_dest }}/client/interfaceservice"
+  - "{{ _certs_dest }}/client/edgeclient"
+  - "{{ _certs_dest }}/CA"
+  - "{{ _certs_dest }}"
   - "/etc/openness"
 
 - name: remove kubectl plugins

@@ -7,7 +7,7 @@
   block:
   - name: offline | add cache_from to docker-compose.yml
     lineinfile:
-      path: "{{ git_repo_dest }}/docker-compose.yml"
+      path: "{{ _git_repo_dest }}/docker-compose.yml"
       insertafter: 'context: {{ item.context }}'
       line: '      cache_from: ["{{ item.cache }}-deps-image"]'
     with_items:
@@ -17,7 +17,7 @@
     - { context: ./dist/edgednssvr, cache: edgedns }
 
   - name: offline | load images
-    shell: docker load < {{ offline_docker_images_path }}/{{ item }}
+    shell: docker load < {{ _offline_docker_images_path }}/{{ item }}
     with_items:
     - centos.tar
     - alpine.tar
@@ -46,19 +46,19 @@
       content: |
         { "proxies": { "default": { "noProxy": "" } } }
     when: docker_history.rc == 0
-  - name: offline | set gopath
+  - name: offline | set _gopath
     set_fact:
-      gopath: "{{ offline_path }}/golang_modules/main"
-  when: offline_mode
+      _gopath: "{{ _offline_path }}/golang_modules/main"
+  when: _offline_mode
 
 - name: build node docker images
   block:
   - name: create temporary custom .openness_gitconfig
     include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: binaries and images
-    shell: source /etc/profile && GOPATH={{ gopath }} make onprem-{{ onprem_dataplane }}
+    shell: source /etc/profile && GOPATH={{ _gopath }} make onprem-{{ onprem_dataplane }}
     args:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
   always:
   - name: remove temporary .openness_gitconfig
     include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml

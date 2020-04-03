@@ -5,10 +5,10 @@
 
 - name: offline | copy DPDK archive for offline
   copy:
-    src: "{{ offline_archives_path }}/{{ dpdk_name }}.tar.xz"
-    dest: "{{ dpdk_download_dest }}"
+    src: "{{ _offline_archives_path }}/{{ _dpdk_name }}.tar.xz"
+    dest: "{{ _dpdk_download_dest }}"
     remote_src: yes
-  when: offline_mode
+  when: _offline_mode
 
 - name: get current kernel
   command: uname -r
@@ -46,32 +46,32 @@
 
 - name: check if already installed
   stat:
-    path: "{{ dpdk_install_dir }}"
+    path: "{{ _dpdk_install_dir }}"
   register: dpdk_dest_dir
 
 - name: download
   get_url:
-    url: "{{ dpdk_download_url }}"
-    dest: "{{ dpdk_download_dest }}"
-    checksum: "md5:{{ dpdk_checksum }}"
+    url: "{{ _dpdk_download_url }}"
+    dest: "{{ _dpdk_download_dest }}"
+    checksum: "md5:{{ _dpdk_checksum }}"
   when: not dpdk_dest_dir.stat.exists
 
 - name: ensure install dir exists
   file:
-    path: "{{ dpdk_install_dir }}"
+    path: "{{ _dpdk_install_dir }}"
     state: directory
 
 - name: extract
   unarchive:
-    src: "{{ dpdk_download_dest }}"
-    dest: "{{ dpdk_install_dir }}"
+    src: "{{ _dpdk_download_dest }}"
+    dest: "{{ _dpdk_install_dir }}"
     extra_opts: "--strip-components=1"
     remote_src: yes
-    creates: "{{ dpdk_install_dir }}/README"
+    creates: "{{ _dpdk_install_dir }}/README"
 
 - name: check if already compiled
   stat:
-    path: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
+    path: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
   register: igb_uio_module
 
 - name: remove old dpdk path to compiled DPDK
@@ -93,7 +93,7 @@
 
 - name: compile
   make:
-    chdir: "{{ dpdk_install_dir }}"
+    chdir: "{{ _dpdk_install_dir }}"
     target: install
     params:
       T: x86_64-native-linuxapp-gcc
@@ -113,7 +113,7 @@
 
 - name: copy kernel modules
   copy:
-    src: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/{{ item }}"
+    src: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/{{ item }}"
     dest: "/lib/modules/{{ unamer.stdout }}/kernel/drivers/"
     remote_src: yes
   with_items:
