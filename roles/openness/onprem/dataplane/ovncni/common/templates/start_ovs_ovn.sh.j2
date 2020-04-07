@@ -11,10 +11,10 @@ export PATH=$PATH:/usr/local/share/ovn/scripts:/usr/share/openvswitch/scripts
 ovs-ctl restart --no-ovs-vswitchd --system-id=random
 
 # Start ovsdb
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="{{ ovs_dpdk_socket_mem }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="{{ ovncni_dpdk_socket_mem }}"
 ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true
-ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="{{ ovs_dpdk_pmd_cpu_mask }}"
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask="{{ ovs_dpdk_lcore_mask }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="{{ ovncni_dpdk_pmd_cpu_mask }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask="{{ ovncni_dpdk_lcore_mask }}"
 ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-hugepage-dir="{{ _huge_dir }}"
 
 ovs-ctl restart --no-ovsdb-server  --system-id=random

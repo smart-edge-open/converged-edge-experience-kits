@@ -6,91 +6,101 @@
 # Playbook for Network Edge deployment
 
 - hosts: controller_group
-  vars:
-    hugepage_amount: "1024"
 
   pre_tasks:
-  - name: fail if more than 1 controller
-    fail:
-      msg: "Only one controller is supported"
-    when:
-    - groups['controller_group'] is defined
-    - (groups['controller_group']|length>1)
-  - name: validate hostname
-    include_tasks: ./tasks/precheck_hostname.yml
-  - name: validate requested CNIs
-    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+  - name: check deployment settings
+    include_tasks: ./tasks/settings_check_ne.yml
+  - name: print deployment settings
+    include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
-    # - role: time/ntp
+    - role: time/ntp
+      when: ntp_enable | default(False)
+
+    - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(True))
     - role: machine_setup/grub
     - role: machine_setup/conditional_reboot
+
     - role: git_repo
     - role: golang
     - role: docker
+
     - role: kubernetes/master
     - role: kubernetes/cni
-    # - role: kubernetes/device_plugins
+    - role: kubernetes/device_plugins
+      when: k8s_device_plugins_enable | default(False)
+
     - role: openness/network_edge/master
     - role: cnca/master
     - role: kubevirt/master
-    # - role: ngc_test/master
-    # - role: opae_fpga/master
+
+    - role: ngc_test/master
+      when: ne_ngc_test_enable | default(False)
+    - role: opae_fpga/master
+      when: ne_opae_fpga_enable | default(False)
     - role: nfd/network_edge
-    # - role: biosfw/master
-    # - role: cmk/master
-    # - role: hddl/network_edge/master
+      when: ne_nfd_enable | default(True)
+    - role: biosfw/master
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/master
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/master
+      when: ne_hddl_enable | default(False)
 
 
 - hosts: edgenode_group
-  vars:
-    hugepage_amount: "1024"
 
   pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - name: validate hostname
-    include_tasks: ./tasks/precheck_hostname.yml
-  - name: validate requested CNIs
-    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+  - name: check deployment settings
+    include_tasks: ./tasks/settings_check_ne.yml
+  - name: print deployment settings
+    include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
-    # - role: time/ntp
+    - role: time/ntp
+      when: ntp_enable | default(False)
     - role: time/verify
 
     - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(False))
     - role: machine_setup/grub
     - role: machine_setup/configure_tuned
+      when: not (tuned_skip | default(False))
     - role: machine_setup/conditional_reboot
+
     - role: git_repo
     - role: golang
     - role: docker
-    # - role: opae_fpga/worker
+    - role: opae_fpga/worker
+      when: ne_opae_fpga_enable | default(False)
     - role: kubernetes/worker
     - role: kubernetes/cni
     - role: openness/network_edge/worker
     - role: kubevirt/worker
-    # - role: biosfw/worker
-    # - role: cmk/worker
-    # - role: hddl/network_edge/worker
+    - role: biosfw/worker
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/worker
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/worker
+      when: ne_hddl_enable | default(False)
 
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group
 
   pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - name: validate hostname
-    include_tasks: ./tasks/precheck_hostname.yml
-  - name: validate requested CNIs
-    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+  - name: check deployment settings
+    include_tasks: ./tasks/settings_check_ne.yml
+  - name: print deployment settings
+    include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
-    # - role: time/ntp
+    - role: time/ntp
+      when: ntp_enable | default(False)
     - role: time/verify
 
     - role: git_repo

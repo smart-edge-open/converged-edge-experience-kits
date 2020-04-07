@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: print group_vars
+  command: grep -v -E "^#|^$|^--|git_repo_token" ./group_vars/{{ item }}
+  delegate_to: localhost
+  with_items:
+  - all.yml
+  - edgenode_group.yml
+  - controller_group.yml
+  changed_when: false
+
+- name: print host_vars
+  command: grep -v -E "^#|^$|^--" "{{ item.src }}"
+  delegate_to: localhost
+  with_filetree: ./host_vars
+  changed_when: false
+  when:
+  - item.state == 'file'
+  - "'_example_variables.yml' not in item.src"
+
+- name: print vars about environment
+  debug:
+    msg: |
+      ansible ver: {{ ansible_version.string }}
+      distro: {{ ansible_distribution }} {{ ansible_distribution_version }}
+      hostname: {{ ansible_hostname }}
+      cmdline: {{ ansible_proc_cmdline }}
+      interfaces: {{ ansible_interfaces }}
+      memory: {{ ansible_memory_mb }}
+      cpu: {{ ansible_processor }}

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: fail if more than 1 controller
+  fail:
+    msg: "Only one controller is supported"
+  when:
+  - groups['controller_group'] is defined
+  - (groups['controller_group']|length>1)
+
+- name: validate hostname
+  include_tasks: precheck_hostname.yml

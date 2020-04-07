@@ -8,11 +8,11 @@
   - name: setup repository for kernel | get repository file
     get_url:
       url: "{{ kernel_repo_url }}"
-      dest: "{{ kernel_repo_dest }}"
+      dest: "{{ _kernel_repo_dest }}"
       mode: 0644
 
   - name: find out place for GPG key
-    command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ kernel_repo_dest }}
+    command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ _kernel_repo_dest }}
     register: gpg_key_filepath
 
   - name: set GPG key filepath
@@ -37,5 +37,5 @@
       key: "{{ repo_gpg_filepath }}"
 
   when:
-  - not _offline_mode # online mode only, for offline RPMs are cached
+  - not (_offline_mode | d(False)) # online mode only, for offline RPMs are cached
   - kernel_repo_url is defined and kernel_repo_url|length > 0 # url to repository file not be empty

@@ -5,17 +5,21 @@
 
 - hosts: controller_group
   tasks:
-  # - name: include ngc_test variables
-  #   include_vars: ./roles/ngc_test/common/defaults/main.yml
+  - name: NGC Test cleanup
+    block:
+    - name: include ngc_test variables
+      include_vars: ./roles/ngc_test/common/defaults/main.yml
+    - name: cleanup ngc_test
+      include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
+    when: onprem_ngc_test_enable | default(False)
 
-  # - name: cleanup ngc_test
-  #   include_tasks: ./roles/ngc_test/onprem/master/tasks/cleanup.yml
-
-  - name: load ovn variables
-    include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
-
-  - name: clean ovn
-    include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
+  - name: OVNCNI cleanup
+    block:
+    - name: load ovn variables
+      include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
+    - name: clean ovn
+      include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
+    when: "'ovncni' in onprem_dataplane"
 
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml
@@ -51,17 +55,21 @@
   - name: cleanup openness
     include_tasks: ./roles/openness/onprem/worker/tasks/cleanup.yml
 
-  - name: load ovn variables
-    include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
+  - name: OVNCNI cleanup
+    block:
+    - name: load ovn variables
+      include_vars: ./roles/openness/onprem/dataplane/ovncni/common/defaults/main.yml
+    - name: clean ovn
+      include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
+    when: "'ovncni' in onprem_dataplane"
 
-  - name: clean ovn
-    include_tasks: ./roles/openness/onprem/dataplane/ovncni/common/tasks/cleanup.yml
-
-  #- name: load onprem hddl variables
-  #  include_vars: ./roles/hddl/onprem/worker/defaults/main.yml
-
-  #- name: clean onprem hddl
-  #  include_tasks: ./roles/hddl/onprem/worker/tasks/cleanup.yml
+  - name: HDDL cleanup
+    block:
+    - name: load onprem hddl variables
+      include_vars: ./roles/hddl/onprem/worker/defaults/main.yml
+    - name: clean onprem hddl
+      include_tasks: ./roles/hddl/onprem/worker/tasks/cleanup.yml
+    when: onprem_hddl_enable | default(False)
 
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml
@@ -89,6 +97,10 @@
 
   - name: cleanup qemu
     include_tasks: ./roles/qemu/tasks/cleanup.yml
+
+  - name: load sriov defaults if not defined
+    include_vars: ./roles/sriov_device_init/onprem/defaults/main.yml
+    when: sriov is not defined
 
   - name: cleanup sriov
     include_tasks: ./roles/sriov_device_init/onprem/tasks/cleanup.yml

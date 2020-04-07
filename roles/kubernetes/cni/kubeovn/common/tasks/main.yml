@@ -75,4 +75,4 @@
         state: absent
         path: "{{ _dpdk_install_dir }}/{{ item }}"
       with_items: "{{ _kubeovn_dockerimage_files_to_cp }}"
-  when: ovs_dpdk
+  when: kubeovn_dpdk

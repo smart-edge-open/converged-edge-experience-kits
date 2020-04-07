@@ -3,6 +3,6 @@
 
 ---
 - name: delete WeaveNet via the addon
-  shell: "kubectl delete -f {{ _weavenet_yaml }}"
+  command: "kubectl delete -f {{ _weavenet_yaml }}"
   changed_when: true
   ignore_errors: yes

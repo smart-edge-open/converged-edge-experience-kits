@@ -8,7 +8,7 @@
     src: "{{ _offline_archives_path }}/{{ _dpdk_name }}.tar.xz"
     dest: "{{ _dpdk_download_dest }}"
     remote_src: yes
-  when: _offline_mode
+  when: _offline_mode | d(False)
 
 - name: get current kernel
   command: uname -r

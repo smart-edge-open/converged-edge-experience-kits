@@ -3,6 +3,6 @@
 
 ---
 
-_default_pv_dir: /var/vd/
-_default_pv_vol_name: vol
-_pv_vm_max_num:  64
+kubevirt_default_pv_dir: /var/vd/
+kubevirt_default_pv_vol_name: vol
+kubevirt_pv_vm_max_num:  64

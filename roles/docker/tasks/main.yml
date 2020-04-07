@@ -11,7 +11,7 @@
     gpgkey: "{{ _docker_repository_key }}"
     gpgcheck: yes
   # Do not add remote repositories in offline mode
-  when: not _offline_mode
+  when: not (_offline_mode | d(False))
 
 - name: clear yum cache
   command: yum clean all
@@ -30,18 +30,18 @@
   pip:
     name: "{{ _docker_compose_package }}"
     state: present
-  when: not _offline_mode
+  when: not (_offline_mode | d(False))
 
 - name: offline | install docker-compose
   pip:
     name: "{{ _docker_compose_package }}"
     state: present
     extra_args: "--no-index --find-links {{ _offline_pip_path }}"
-  when: _offline_mode
+  when: _offline_mode | d(False)
 
 - name: set up proxy
   include_tasks: proxy.yml
-  when: proxy_os_enable|bool
+  when: proxy_enable|bool
 
 - name: set cgroups driver to systemd
   block:

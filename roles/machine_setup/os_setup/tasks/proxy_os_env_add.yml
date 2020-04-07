@@ -9,54 +9,54 @@
       lineinfile:
         path: /etc/environment
         state: present
-        line: "http_proxy={{ proxy_os_http }}"
-      when: proxy_os_enable|bool and proxy_os_http
+        line: "http_proxy={{ proxy_http }}"
+      when: proxy_enable|bool and proxy_http
 
     - name: https -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "https_proxy={{ proxy_os_https }}"
-      when: proxy_os_enable|bool and proxy_os_https
+        line: "https_proxy={{ proxy_https }}"
+      when: proxy_enable|bool and proxy_https
 
     - name: HTTP -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "HTTP_PROXY={{ proxy_os_http }}"
-      when: proxy_os_enable|bool and proxy_os_http
+        line: "HTTP_PROXY={{ proxy_http }}"
+      when: proxy_enable|bool and proxy_http
 
     - name: HTTPS -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "HTTPS_PROXY={{ proxy_os_https }}"
-      when: proxy_os_enable|bool and proxy_os_https
+        line: "HTTPS_PROXY={{ proxy_https }}"
+      when: proxy_enable|bool and proxy_https
 
     - name: ftp -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "ftp_proxy={{ proxy_os_ftp }}"
-      when: proxy_os_enable|bool and proxy_os_ftp
+        line: "ftp_proxy={{ proxy_ftp }}"
+      when: proxy_enable|bool and proxy_ftp
 
     - name: FTP -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "FTP_PROXY={{ proxy_os_ftp }}"
-      when: proxy_os_enable|bool and proxy_os_ftp
+        line: "FTP_PROXY={{ proxy_ftp }}"
+      when: proxy_enable|bool and proxy_ftp
 
     - name: no proxy -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "no_proxy={{ proxy_os_noproxy }}"
-      when: proxy_os_enable|bool and proxy_os_noproxy
+        line: "no_proxy={{ proxy_noproxy }}"
+      when: proxy_enable|bool and proxy_noproxy
 
     - name: NO PROXY -> /etc/environment
       lineinfile:
         path: /etc/environment
         state: present
-        line: "NO_PROXY={{ proxy_os_noproxy }}"
-      when: proxy_os_enable|bool and proxy_os_noproxy
+        line: "NO_PROXY={{ proxy_noproxy }}"
+      when: proxy_enable|bool and proxy_noproxy

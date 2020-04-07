@@ -65,38 +65,38 @@
 - name: set proxy to false
   lineinfile:
     path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
-    regexp: 'proxy_os_enable:.*$'
-    line: 'proxy_os_enable: false'
+    regexp: 'proxy_enable:.*$'
+    line: 'proxy_enable: false'
 
 - name: set remove old proxy to true
   lineinfile:
     path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
-    regexp: 'proxy_os_remove_old:.*$'
-    line: 'proxy_os_remove_old: true'
+    regexp: 'proxy_remove_old:.*$'
+    line: 'proxy_remove_old: true'
 
 - name: clear yum proxy
   lineinfile:
     path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
-    regexp: 'proxy_yum_url:.*$'
-    line: 'proxy_yum_url: ""'
+    regexp: 'proxy_yum:.*$'
+    line: 'proxy_yum: ""'
 
 - name: clear http proxy
   lineinfile:
     path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
-    regexp: 'proxy_os_http:.*$'
-    line: 'proxy_os_http: "http://proxy.example.org:3128"'
+    regexp: 'proxy_http:.*$'
+    line: 'proxy_http: "http://proxy.example.org:3128"'
 
 - name: clear https proxy
   lineinfile:
     path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
-    regexp: 'proxy_os_https:.*$'
-    line: 'proxy_os_https: "http://proxy.example.org:3129"'
+    regexp: 'proxy_https:.*$'
+    line: 'proxy_https: "http://proxy.example.org:3129"'
 
 - name: clear ftp proxy
   lineinfile:
     path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
-    regexp: 'proxy_os_ftp:.*$'
-    line: 'proxy_os_ftp: "http://proxy.example.org:3128"'
+    regexp: 'proxy_ftp:.*$'
+    line: 'proxy_ftp: "http://proxy.example.org:3128"'
 
 - name: clear git token
   lineinfile:
@@ -105,10 +105,10 @@
     line: 'git_repo_token: ""'
 
 - name: disable ntp role
-  replace:
-    path: "{{ _offline_experience_kits_path }}/on_premises.yml"
-    regexp: '^( *)(\- role: time/ntp)'
-    replace: '\1# \2'
+  lineinfile:
+    path: "{{ _offline_experience_kits_path }}/group_vars/all.yml"
+    regexp: 'ntp_enable:.*$'
+    line: 'ntp_enable: false'
 
 - name: remove .git directory
   file:

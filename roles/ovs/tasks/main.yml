@@ -41,7 +41,7 @@
 - name: offline | select ovs archive
   set_fact:
     _ovs_download_dest: "{{ _offline_path }}/archives/openvswitch-{{ _ovs_version }}.tar.gz"
-  when: _offline_mode
+  when: _offline_mode | d(False)
 
 - name: extract ovs
   unarchive:

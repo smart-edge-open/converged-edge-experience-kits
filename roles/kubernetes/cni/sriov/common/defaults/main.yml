@@ -32,5 +32,4 @@ _fpga_map_name: "addFpgaConfigMap.yaml"
 _vm_map_name: "addVmConfigMap.yaml"
 
 # VM support
-kubevirt:
-  enabled: false
+sriov_kubevirt_enable: false

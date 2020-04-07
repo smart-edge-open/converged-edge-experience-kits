@@ -21,4 +21,4 @@ kernel_dependencies_packages: []
 
 # ---
 
-kernel_repo_dest: /etc/yum.repos.d/CentOS-RT.repo
+_kernel_repo_dest: /etc/yum.repos.d/CentOS-RT.repo

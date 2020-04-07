@@ -5,7 +5,6 @@
 
 _kubeovn_version: v0.10.2
 
-
 _ovn_version:
   main: "2.12.0"
   subversion: "4"
@@ -31,11 +30,11 @@ _kubeovn_dockerimage_files_to_cp:
 - start-ovs-dpdk.sh
 - ovs-healthcheck.sh
 
-ovs_dpdk: true
-ovs_dpdk_socket_mem: "1024,0"
-ovs_dpdk_pmd_cpu_mask: "0x4"
-ovs_dpdk_lcore_mask: "0x2"
-ovs_dpdk_hugepage_size: "2Mi"
-ovs_dpdk_hugepages: "1Gi"
-ovs_dpdk_resources_requests: "1Gi"
-ovs_dpdk_resources_limits: "1Gi"
+kubeovn_dpdk: true
+kubeovn_dpdk_socket_mem: "1024,0"
+kubeovn_dpdk_pmd_cpu_mask: "0x4"
+kubeovn_dpdk_lcore_mask: "0x2"
+kubeovn_dpdk_hugepage_size: "2Mi"
+kubeovn_dpdk_hugepages: "1Gi"
+kubeovn_dpdk_resources_requests: "1Gi"
+kubeovn_dpdk_resources_limits: "1Gi"

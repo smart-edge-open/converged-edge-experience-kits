@@ -91,7 +91,7 @@
         src: "{{ tmp_dir.path }}/ovn-dpdk.yaml"
         dest: "{{ tmp_dir.path }}/ovn.yaml"
         remote_src: yes
-  when: ovs_dpdk
+  when: kubeovn_dpdk
 
 - name: apply kube-ovn
   command: "kubectl apply -f {{ item.split('/')[-1] }}"

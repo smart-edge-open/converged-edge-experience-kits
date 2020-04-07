@@ -31,7 +31,7 @@
   copy:
     src: openness-sriov-vm-crd.yml
     dest: "{{ tmp_dir.path }}/openness-sriov-vm-crd.yml"
-  when: kubevirt.enabled
+  when: sriov_kubevirt_enable
 
 # Create SR-IOV network
 - name: deploy SR-IOV network CRD
@@ -45,7 +45,7 @@
   command: kubectl apply -f openness-sriov-vm-crd.yml
   args:
     chdir: "{{ tmp_dir.path }}"
-  when: kubevirt.enabled
+  when: sriov_kubevirt_enable
 
 # Copy ConfigMap variants
 - name: Copy ConfigMap variants for SRIOV
@@ -66,7 +66,7 @@
 # Add VM config to base config
 - name: Add VM config to base config
   shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ _vm_map_name }}' {{ tmp_dir.path }}/{{ _config_map_name }}
-  when: kubevirt.enabled
+  when: sriov_kubevirt_enable
 
 # Add FPGA config to base config
 - name: Add FPGA config to base config

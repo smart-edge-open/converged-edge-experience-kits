@@ -27,7 +27,6 @@
         state: absent
         path: "{{ _dpdk_install_dir }}/{{ item }}"
       with_items: "{{ _dockerimage_files_to_rm }}"
-  when: ovs_dpdk and not _offline_mode
 
 - name: open ovn firewall rules
   ignore_errors: yes
@@ -52,7 +51,7 @@
       - "{{ _ovs_dir }}:{{ _ovs_dir }}:rw"
       - /dev:/dev:rw
       - /lib/modules:/lib/modules:rw
-    memory: "{{ ovs_dpdk_resource_limits }}"
+    memory: "{{ ovncni_dpdk_resource_limits }}"
 
 - name: waiting for OVS DB on the node
   wait_for:

@@ -67,21 +67,21 @@
 
 - name: check local bbdev_config_service_directory
   stat:
-    path: "{{ _syscfg_local_path }}"
+    path: "{{ _fpga_config_local_path }}"
   connection: local
   register: syscfg_local_file
 
 - name: file not present
   debug:
-    msg: "{{ _syscfg_local_path }} does not exists, FPGA Config utility won't be set up on the node"
+    msg: "{{ _fpga_config_local_path }} does not exists, FPGA Config utility won't be set up on the node"
   when: not syscfg_local_file.stat.exists
 
 - name: set up FPGA Config utility on the node
   block:
   - name: copy local FPGA Config utility to remote
     copy:
-      src: "{{ _syscfg_local_path }}"
-      dest: "{{ _syscfg_remote_path }}"
+      src: "{{ _fpga_config_local_path }}"
+      dest: "{{ _fpga_config_remote_path }}"
   - name: build FPGA Config utility worker image
     command: make fpga-cfg
     args:

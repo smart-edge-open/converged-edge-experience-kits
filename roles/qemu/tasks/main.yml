@@ -8,7 +8,7 @@
     src: "{{ _offline_archives_path }}/{{ _qemu_name }}.tar.xz"
     dest: "{{ _qemu_download_dest }}"
     remote_src: yes
-  when: _offline_mode
+  when: _offline_mode | d(False)
 
 - name: remove qemu-img if installed
   command: rpm -e --nodeps qemu-img
@@ -28,7 +28,7 @@
     dest: "{{ _qemu_download_dest }}"
   when:
   - not qemu_dest_dir.stat.exists
-  - not _offline_mode
+  - not (_offline_mode | d(False))
 
 - name: ensure install dir exists
   file:

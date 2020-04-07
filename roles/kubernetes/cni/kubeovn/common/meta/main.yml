@@ -4,4 +4,4 @@
 ---
 
 dependencies:
-- { role: 'dpdk', when: ovs_dpdk }
+- { role: 'dpdk', when: kubeovn_dpdk }

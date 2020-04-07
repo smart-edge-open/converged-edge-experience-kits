@@ -10,20 +10,26 @@
   # - multus
   # - sriov/master
 
-  # - name: load ngc_test variables
-  #   include_vars: ./roles/ngc_test/common/defaults/main.yml
+  - name: NGC Test cleanup
+    block:
+    - name: load ngc_test variables
+      include_vars: ./roles/ngc_test/common/defaults/main.yml
 
-  # - name: cleanup ngc_test
-  #   include_tasks: ./roles/ngc_test/master/tasks/cleanup.yml
+    - name: cleanup ngc_test
+      include_tasks: ./roles/ngc_test/master/tasks/cleanup.yml
+    when: ne_ngc_test_enable | default(False)
 
-  - name: load fpga variables
-    include_vars: ./roles/opae_fpga/master/defaults/main.yml
+  - name: OPAE FPGA cleanup
+    block:
+    - name: load fpga variables
+      include_vars: ./roles/opae_fpga/master/defaults/main.yml
+    - name: cleanup fpga
+      include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
+    when: ne_opae_fpga_enable | default(False)
 
-  - name: cleanup fpga
-    include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
-
-  # - name: uninstall hddl 
-  #  include_tasks: ./roles/hddl/network_edge/master/tasks/cleanup.yml
+  - name: uninstall hddl
+    include_tasks: ./roles/hddl/network_edge/master/tasks/cleanup.yml
+    when: ne_hddl_enable | default(False)
 
   - name: load kubevirt variables
     include_vars: ./roles/kubevirt/master/defaults/main.yml
@@ -49,11 +55,13 @@
   - name: cleanup network edge
     include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
 
-  # - name: load device plugins variables
-  #   include_vars: ./roles/kubernetes/device_plugins/defaults/main.yml
-
-  # - name: uninstall device plugins
-  #   include_tasks: ./roles/kubernetes/device_plugins/tasks/cleanup.yml
+  - name: Kubernetes Device Plugins cleanup
+    block:
+    - name: load device plugins variables
+      include_vars: ./roles/kubernetes/device_plugins/defaults/main.yml
+    - name: uninstall device plugins
+      include_tasks: ./roles/kubernetes/device_plugins/tasks/cleanup.yml
+    when: k8s_device_plugins_enable | default(False)
 
   - name: run CNIs cleanup
     include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
@@ -106,8 +114,9 @@
   - name: cleanup cmk
     include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
 
-  # - name: uninstall hddl 
-  #   include_tasks: ./roles/hddl/network_edge/worker/tasks/cleanup.yml
+  - name: uninstall hddl
+    include_tasks: ./roles/hddl/network_edge/worker/tasks/cleanup.yml
+    when: ne_hddl_enable | default(False)
 
   - name: load network edge variables
     include_vars: ./roles/openness/network_edge/worker/defaults/main.yml

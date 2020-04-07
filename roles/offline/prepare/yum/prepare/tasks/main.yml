@@ -11,14 +11,11 @@
     state: absent
   when: _offline_always_redownload_packages
 
-- name: get custom_kernel settings
-  include_vars: ../../../../machine_setup/custom_kernel/defaults/main.yml
-
-- name: get tuned settings
-  include_vars: ../../../../machine_setup/configure_tuned/defaults/main.yml
-
 - name: add custom kernel repository
-  include_tasks: ../../../../../machine_setup/custom_kernel/tasks/setup_repository.yml
+  include_role:
+    name: machine_setup/custom_kernel
+    tasks_from: setup_repository
+    public: no
   when: _offline_download_kernel
 
 - name: create offline repo folder

@@ -6,61 +6,67 @@
 # Playbook for On-Premises deployment
 
 - hosts: controller_group
-  vars:
-    hugepage_amount: "1024" # only applicable for ovncni deployment
 
   pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - name: Check if only one controller is enabled
-    fail:
-      msg: "Only one controller is supported"
-    when:
-    - groups['controller_group'] is defined
-    - (groups['controller_group']|length>1)
-  - name: Hostname precheck
-    include_tasks: ./tasks/precheck_hostname.yml
+  - name: check deployment settings
+    include_tasks: ./tasks/settings_check_onprem.yml
+  - name: print deployment settings
+    include_tasks: ./tasks/print_vars.yml
 
   roles:
+    - role: offline/vars
     - role: offline/restore/transfer
       when: _offline_mode
     - role: offline/restore/yum/setup
       when: _offline_mode
+
     - role: machine_setup/os_setup
-    # - role: time/ntp
+    - role: time/ntp
+      when: ntp_enable | default(False)
     - role: docker
     - role: git_repo
     - role: golang
+
     - role: openness/onprem/master
     - role: cnca/onprem
     - role: nfd/onprem/master
+      when: onprem_nfd_enable | default(True)
     - role: offline/restore/ngc_test
       when: _offline_mode and _epcforedge_git_repo is defined
-    #- role: ngc_test/onprem/master
+    - role: ngc_test/onprem/master
+      when: onprem_ngc_test_enable | default(False)
     - role: apache
+
     - role: offline/restore/yum/clean
       when: _offline_mode
 
 
 - hosts: edgenode_group
+  vars:
+    hugepage_amount: "5000"
+
   pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - include_tasks: ./tasks/precheck_hostname.yml
-  # - include_tasks: ./roles/hddl/common/tasks/precheck.yml
+  - name: check deployment settings
+    include_tasks: ./tasks/settings_check_onprem.yml
+  - name: print deployment settings
+    include_tasks: ./tasks/print_vars.yml
 
   roles:
+    - role: offline/vars
     - role: offline/restore/transfer
       when: _offline_mode
     - role: offline/restore/yum/setup
       when: _offline_mode
     - role: machine_setup/os_setup
-    # - role: time/ntp
+    - role: time/ntp
+      when: ntp_enable | default(False)
     - role: time/verify
 
     - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(False))
     - role: machine_setup/grub
     - role: machine_setup/configure_tuned
+      when: not (tuned_skip | default(False))
     - role: machine_setup/conditional_reboot
 
     - role: dpdk
@@ -70,9 +76,13 @@
     - role: qemu
     - role: sriov_device_init/onprem
     - role: git_repo
-    # - role: ovs
+    - role: ovs
+      when: onprem_iac_enable | default(False)
     - role: openness/onprem/worker
-    # - role: hddl/onprem/worker
+    - role: hddl/onprem/worker
+      when: onprem_hddl_enable | default(False)
     - role: nfd/onprem/worker
+      when: onprem_nfd_enable | default(True)
+
     - role: offline/restore/yum/clean
       when: _offline_mode

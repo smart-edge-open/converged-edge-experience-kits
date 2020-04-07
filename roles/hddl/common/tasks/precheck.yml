@@ -3,7 +3,7 @@
 
 ---
 - name: get kernel value
-  shell: uname -r 
+  command: uname -r
   ignore_errors: yes
   register: grep_kernel_version
   changed_when: False
@@ -25,19 +25,16 @@
   when: grep_expected_kernel_flag.rc == 1
 
 - name: Check whether custom_kernel align with  HDDL recommended kernel
-  block: 
+  block:
   - name: include default variables of custom kernel
     include_vars: ../../../machine_setup/custom_kernel/defaults/main.yml
 
   - name: if custom_kernel - kernel_skip true
     fail:
       msg: "USER need to install no-rtkernl 3.10.0-957.el7.x86_64 OR custom_kernel as kernel_skip false and no-rt kernel: 3.10.0-957.el7.x86_64"
-    when: (kernel_skip == true) and (grep_expected_kernel_flag.rc == 1)
+    when: kernel_skip and (grep_expected_kernel_flag.rc == 1)
 
   - name: if custom_kernel -kernel_skip false
     fail:
       msg: "USER need to custom_kernel with no-rt kernel as 3.10.0-957.el7.x86_64"
-    when: (kernel_skip == false) and (kernel_version != "3.10.0-957.el7.x86_64")
-  
-
-
+    when: kernel_skip and (kernel_version != "3.10.0-957.el7.x86_64")

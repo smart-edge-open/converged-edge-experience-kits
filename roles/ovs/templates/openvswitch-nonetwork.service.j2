@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 [Unit]
 Description=Open vSwitch Internal Unit
@@ -14,8 +14,8 @@ RemainAfterExit=yes
 ExecStart=/usr/sbin/modprobe uio_pci_generic
 ExecStart=/usr/local/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd start
 ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true
-ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket_mem={{ ovs_socket_mem }}
-ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask={{ ovs_cores_hex }}
+ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket_mem={{ iac_ovs_socket_mem }}
+ExecStart=/usr/local/bin/ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask={{ iac_ovs_cores_hex }}
 {% for port in ovs_ports %}
 ExecStart={{ ansible_local["dpdk"]["_dpdk_install_dir"] }}/usertools/dpdk-devbind.py --bind=igb_uio {{ port }}
 {% endfor %}

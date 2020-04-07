@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: check common settings
+  include_tasks: settings_check_common.yml
+
+- name: validate requested CNIs
+  include_tasks: "{{ playbook_dir }}/roles/kubernetes/cni/tasks/precheck.yml"
+
+- name: biosfw role - verify precondition
+  block:
+  - name: load biosfw vars
+    include_vars:
+      file: roles/biosfw/worker/defaults/main.yml
+    when: _syscfg_local_path is not defined
+  - name: check syscfg_package.zip
+    stat:
+      path: "{{ _syscfg_local_path }}"
+    delegate_to: localhost
+    register: biosfw_syscfg_package_stat
+  - name: fail if file not present
+    fail:
+      msg: |
+        BIOSFW feature enabled, but the SYSCFG package is missing.
+        It is expected in: {{ playbook_dir }}/{{ _syscfg_local_path | replace('./', '') }}
+    when: not biosfw_syscfg_package_stat.stat.exists
+  when: ne_biosfw_enable | default(False)
+
+- name: sriov_device_init/network_edge - verify precondition
+  block:
+  - name: load sriov_device_init/network_edge vars
+    include_vars:
+      file: roles/sriov_device_init/network_edge/defaults/main.yml
+    when: fpga_config_local_path is not defined
+  - name: check if local bbdev config exists
+    stat:
+      path: "{{ _fpga_config_local_path }}"
+    delegate_to: localhost
+    register: sriov_fpga_config_package_stat
+  - name: log if file not present
+    debug:
+      msg: |
+        SR-IOV CNI enabled, but FPGA CONFIG is not present.
+        Expected path: {{ playbook_dir }}/{{ _fpga_config_local_path | replace('./', '') }}
+        This is non-fatal warning, continuing...
+    when: not sriov_fpga_config_package_stat.stat.exists
+  when: '"sriov" in kubernetes_cnis'

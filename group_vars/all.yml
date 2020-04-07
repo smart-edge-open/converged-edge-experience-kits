@@ -3,24 +3,67 @@
 
 ---
 
-proxy_yum_url: ""
+# This file contains variables intended to be configured by user.
+# It allows feature enabling and configuration.
+# Per-host variables should be places in `host_vars` directory.
+# Features should not be configured by changing roles' defaults (i.e. role/defaults/main.yml)
 
-proxy_os_enable: false
-proxy_os_remove_old: true
-proxy_os_http: "http://proxy.example.org:3128"
-proxy_os_https: "http://proxy.example.org:3129"
-proxy_os_ftp: "http://proxy.example.org:3128"
-# NOTE - VCA: 172.32.1.0/24 is used for VCA node.
-proxy_os_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,cdi.svc,127.0.0.1,10.244.0.0/16,10.96.0.0/16,10.16.0.0/16,10.32.0.0/12,172.32.1.0/24"
+##################################################
+##### User settings
 
-os_remove_yum_plugins: true
-
+### GitHub token
+# It must be provided when using private repositories.
+# Not required when using github.com/open-ness repositories.
+# How to create a GitHub token: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 git_repo_token: ""
 
-# Controller settings
-mysql_root_password: "pass"
-cce_admin_password: "pass"
+### Proxy settings
+# Setup proxy on the machine - required if the Internet is accessible via proxy
+proxy_enable: false
+# Clear previous proxy settings
+proxy_remove_old: true
+# Proxy URLs to be used for HTTP, HTTPS and FTP
+proxy_http: "http://proxy.example.org:3128"
+proxy_https: "http://proxy.example.org:3129"
+proxy_ftp: "http://proxy.example.org:3128"
+# Proxy to be used by YUM (/etc/yum.conf)
+proxy_yum: "{{ proxy_http }}"
+# No proxy setting contains addresses and networks that should not be accessed using proxy (e.g. local network, Kubernetes CNI networks)
+# NOTE - VCA: 172.32.1.0/24 is used for VCA node.
+proxy_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,cdi.svc,127.0.0.1,10.244.0.0/16,10.96.0.0/16,10.16.0.0/16,10.32.0.0/12,172.32.1.0/24"
 
+# Disable YUM plugins (e.g. Fastest Mirror)
+os_remove_yum_plugins: true
+
+##################################################
+##### Common settings for Network Edge & On Premises
+
+### OpenNESS Git Repositories
+# Following variables specify branch/SHA/tag to be checked out for Edge Controller and Edge Node repositories
+controller_repository_branch: master
+edgenode_repository_branch: master
+
+# If True, the repository will be deleted and cloned again
+# If False, repository will be left as it is and any changes won't be overwritten.
+always_clean_repository: True
+
+### Network Time Protocol (NTP)
+# Enable machine's time synchronization with NTP server
+ntp_enable: false
+# Servers to be used by NTP instead of the default ones (e.g. 0.centos.pool.ntp.org)
+ntp_servers: []
+
+### Kernel, grub & tuned configuration
+# Kernel, grub & tuned configurations are machine-type specific:
+# - Edge Nodes - edit `group_vars/edgenode_group.yml`
+# - Edge Controller - edit `group_vars/controller_group.yml`
+# To provide configuration for specific machine, place the settings in `host_vars/_inventory_host_name.yml`
+
+
+##################################################
+##### Network Edge
+
+### Network Edge's Kubernetes CNIs
 # List of requested CNIs to be used in Network Edge mode
 # CNIs are applied in order of definition
 # Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
@@ -35,24 +78,144 @@ cce_admin_password: "pass"
 kubernetes_cnis:
 - kubeovn
 
+# Calico's CIDR (any change must be included in proxy_noproxy var)
+calico_cidr: "10.243.0.0/16"
+
+# Flannel's CIDR (any change must be included in proxy_noproxy var)
+flannel_cidr: "10.244.0.0/16"
+
+## Kube-ovn with OVS-DPDK
+# Enable kube-ovn with OVS-DPDK
+kubeovn_dpdk: true
+# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
+kubeovn_dpdk_socket_mem: "1024,0"
+# Core bitmask for datapath packet processing. 0x4 selects core 2
+kubeovn_dpdk_pmd_cpu_mask: "0x4"
+# Core bitmask for DPDK initialization. 0x2 selects core 1
+kubeovn_dpdk_lcore_mask: "0x2"
+# Hugepage size to be used with DPDK: 2Mi or 1Gi
+kubeovn_dpdk_hugepage_size: "2Mi"
+# Overall amount of hugepages available to DPDK
+kubeovn_dpdk_hugepages: "1Gi"
+# OVS pods memory resource requests
+kubeovn_dpdk_resources_requests: "1Gi"
+# OVS pods memory resource limits
+kubeovn_dpdk_resources_limits: "1Gi"
+
+## SR-IOV CNI
+# FPGA SRIOV Userspace
+fpga_sriov_userspace:
+  enabled: false
+
+# FPGA Userspace VF configuration
+fpga_userspace_vf:
+  enabled: false
+  vendor_id: "8086"
+  vf_device_id: "0d90"
+  pf_device_id: "0d8f"
+  vf_number: "2"
+  vf_driver: "vfio-pci"
+
+# SR-IOV support for kube-virt based Virtual Machines
+sriov_kubevirt_enable: false
+
+# Kube-virt settings
+kubevirt_default_pv_dir: /var/vd/
+kubevirt_default_pv_vol_name: vol
+kubevirt_pv_vm_max_num:  64
+
+# Kubernetes device plugins
+k8s_device_plugins_enable: false
+
+### BIOSFW
+# Enable BIOSFW feature (requires SYSCFG package provided by user)
+ne_biosfw_enable: false
+
+### CPU Manager for Kubernetes
+# Enable CMK feature
+ne_cmk_enable: false
+# CMK - Number of cores in exclusive pool
+cmk_num_exclusive_cores: "4"
+# CMK - Number of cores in shared pool
+cmk_num_shared_cores: "1"
+# CMK - Comma separated list of nodes' hostnames
+cmk_host_list: "node01,node02"
+
+### Kubernetes Topology Manager configuration (for worker)
+# CPU settings
+cpu:
+  # CPU policy - possible values: none (disabled), static (default)
+  policy: "static"
+  # Reserved CPUs
+  reserved_cpus: 1
+
+# Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
+topology_manager:
+  policy: "best-effort"
+
+## Network Edge NGC Test role
+ne_ngc_test_enable: False
+
+## OPAE FPGA
+ne_opae_fpga_enable: False
+
+## Network Edge HDDL
+ne_hddl_enable: False
+
+## Network Edge Node Feature Discovery (NFD)
+ne_nfd_enable: True
+
+##################################################
+##### On Premises
+
+### Controller settings
+# Password for Controller's database
+mysql_root_password: "pass"
+# Password for Controller UI/REST API
+cce_admin_password: "pass"
+# Log level for Edge Controller
+cce_log_level: "debug"
+
+### On Premises dataplane
 # Dataplane to be used for On-Premises mode
 # Available dataplanes:
 # - nts
 # - ovncni
 onprem_dataplane: "nts"
 
-## Offline On Premise mode
+### NTS DPDK settings
+# Amount of hugepages to use on 1st NUMA node (in MB)
+docker_nts_mem_mb_s0: "2048"
+# Amount of hugepages to use on 2nd NUMA node (in MB)
+docker_nts_mem_mb_s1: "0"
 
-# offline_mode setting:
-# - False - regular online mode,
-# - True - offline mode - RPMs, Python packages, etc. are installed from cache, Internet is not accessed
-_offline_mode: False
+### OVNCNI DPDK settings
+# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
+ovncni_dpdk_socket_mem: "1024,0"
+# Core bitmask for datapath packet processing. 0x4 selects core 2
+ovncni_dpdk_pmd_cpu_mask: "0x4"
+# Core bitmask for DPDK initialization. 0x2 selects core 1
+ovncni_dpdk_lcore_mask: "0x2"
+# Memory limit for OVNCNI's OVS container
+ovncni_dpdk_resource_limits: 1G
 
-_offline_path_common: "/opt/openness-offline"
-_offline_archives_path: "{{ _offline_path }}/archives"
-_offline_pip_path: "{{ _offline_path }}/pip"
-_offline_yum_path: "{{ _offline_path }}/yum"
-_offline_docker_images_path: "{{ _offline_path }}/docker_images"
-_offline_experience_kits_path: "{{ _offline_path_common }}/openness-experience-kits"
+### On-Premises InterApp-Communication
+# WARNING: Only for deployment with NTS dataplane
+onprem_iac_enable: false
+# Core bitmask for DPDK initialization.
+iac_ovs_cores_hex: "0x10"
+# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
+iac_ovs_socket_mem: "1024,0"
 
-_offline_always_redownload_packages: false
+### HTTP server on the Edge Controller
+# IP address that should be used instead of Controller's IP from inventory
+ip_address: ""
+
+## On-Premises NGC Test
+onprem_ngc_test_enable: False
+
+## On-Premises HDDL
+onprem_hddl_enable: False
+
+## On-Premises Node Feature Discovery (NFD)
+onprem_nfd_enable: True

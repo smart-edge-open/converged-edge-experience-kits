@@ -5,6 +5,6 @@
 
 - name: Create directories for PV
   file:
-    path: "{{ _default_pv_dir }}{{ _default_pv_vol_name }}{{ item }}"
+    path: "{{ kubevirt_default_pv_dir }}{{ kubevirt_default_pv_vol_name }}{{ item }}"
     state: directory
-  with_sequence: start=0 end="{{ _pv_vm_max_num }}"
+  with_sequence: start=0 end="{{ kubevirt_pv_vm_max_num }}"

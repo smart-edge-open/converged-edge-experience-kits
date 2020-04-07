@@ -3,8 +3,8 @@
 
 ---
 
-_syscfg_local_path: "./fpga_config/bbdev_config_service"
-_syscfg_remote_path: "{{ _git_repo_dest }}/build/fpga_config/"
+_fpga_config_local_path: "./fpga_config/bbdev_config_service"
+_fpga_config_remote_path: "{{ _git_repo_dest }}/build/fpga_config/"
 sriov:
     network_interfaces: {}
     interface_subnets: []

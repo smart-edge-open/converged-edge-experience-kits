@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright © 2019 Intel Corporation
+# Copyright © 2019-2020 Intel Corporation
 
 ---
 
@@ -76,7 +76,7 @@
       - 8050:8050
       - 8051:8051
     env:
-      no_proxy: "{{ proxy_os_noproxy }},{{ _node_name }},{{ _controller_name }}"
+      no_proxy: "{{ proxy_noproxy }},{{ _node_name }},{{ _controller_name }}"
   when: docker_service_status.rc == 0
 
 - name: update container's /etc/hosts file

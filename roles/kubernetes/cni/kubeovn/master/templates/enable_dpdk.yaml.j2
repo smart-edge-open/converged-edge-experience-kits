@@ -29,15 +29,15 @@
 
 - op: replace
   path: /spec/template/spec/containers/0/resources/requests/memory
-  value: {{ ovs_dpdk_resources_requests }}
+  value: {{ kubeovn_dpdk_resources_requests }}
 
 - op: replace
   path: /spec/template/spec/containers/0/resources/limits/memory
-  value: {{ ovs_dpdk_resources_limits }}
+  value: {{ kubeovn_dpdk_resources_limits }}
 
 - op: add
-  path: /spec/template/spec/containers/0/resources/limits/hugepages-{{ ovs_dpdk_hugepage_size }}
-  value: {{ ovs_dpdk_hugepages }}
+  path: /spec/template/spec/containers/0/resources/limits/hugepages-{{ kubeovn_dpdk_hugepage_size }}
+  value: {{ kubeovn_dpdk_hugepages }}
 
 - op: add
   path: /spec/template/spec/volumes/-

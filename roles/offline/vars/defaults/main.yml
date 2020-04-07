@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+# Offline mode setting:
+# - False - regular online mode,
+# - True - offline mode - RPMs, Python packages, etc. are installed from cache, Internet is not accessed
+_offline_mode: False
+
+_offline_path_common: "/opt/openness-offline"
+_offline_archives_path: "{{ _offline_path }}/archives"
+_offline_pip_path: "{{ _offline_path }}/pip"
+_offline_yum_path: "{{ _offline_path }}/yum"
+_offline_docker_images_path: "{{ _offline_path }}/docker_images"
+_offline_experience_kits_path: "{{ _offline_path_common }}/openness-experience-kits"
+
+_offline_always_redownload_packages: false
