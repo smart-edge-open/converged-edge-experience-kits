@@ -76,7 +76,7 @@
     - role: qemu
     - role: sriov_device_init/onprem
     - role: git_repo
-    - role: ovs
+    - role: interapp_ovs
       when: onprem_iac_enable | default(False)
     - role: openness/onprem/worker
     - role: hddl/onprem/worker

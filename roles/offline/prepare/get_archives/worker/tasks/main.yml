@@ -26,7 +26,7 @@
     dest: "{{ _offline_path }}/archives/"
 
 - name: get ovs settings
-  include_vars: ../../../../ovs/defaults/main.yml
+  include_vars: ../../../../interapp_ovs/defaults/main.yml
 
 - debug:
     msg: "ovs will be downloaded from: {{ _ovs_url }}"
