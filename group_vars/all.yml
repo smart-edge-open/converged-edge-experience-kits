@@ -29,9 +29,7 @@ proxy_ftp: "http://proxy.example.org:3128"
 # Proxy to be used by YUM (/etc/yum.conf)
 proxy_yum: "{{ proxy_http }}"
 # No proxy setting contains addresses and networks that should not be accessed using proxy (e.g. local network, Kubernetes CNI networks)
-# NOTE - VCA: 172.32.1.0/24 is used for VCA node.
-proxy_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,\
-  cdi.svc,127.0.0.1,10.244.0.0/16,10.96.0.0/16,10.16.0.0/16,10.32.0.0/12,172.32.1.0/24"
+proxy_noproxy: ""
 
 # Disable YUM plugins (e.g. Fastest Mirror)
 os_remove_yum_plugins: true
@@ -79,11 +77,17 @@ ntp_servers: []
 kubernetes_cnis:
 - kubeovn
 
-# Calico's CIDR (any change must be included in proxy_noproxy var)
+# Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
 calico_cidr: "10.243.0.0/16"
 
-# Flannel's CIDR (any change must be included in proxy_noproxy var)
+# Flannel's CIDR (will be included automatically to noproxy when flannel is included in kubernetes_cnis)
 flannel_cidr: "10.244.0.0/16"
+
+# VCA's CIDR (will be included automatically to noproxy when weavenet is included in kubernetes_cnis)
+vca_cidr: "172.32.1.0/24"
+
+# Kubeovn's CIDR (will be included automatically to noproxy when kubeovn is included in kubernetes_cnis)
+kubeovn_cidr: "10.16.0.0/16,100.64.0.0/16,10.96.0.0/12"
 
 ## Kube-ovn with OVS-DPDK
 # Enable kube-ovn with OVS-DPDK
