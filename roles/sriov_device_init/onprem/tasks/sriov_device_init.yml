@@ -69,7 +69,7 @@
   changed_when: true
 
 - name: bind ports to PCI Stub
-  shell: "{{ _dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=pci-stub {{ interface_names.results[loop_index].stdout }}"
+  command: "{{ _dpdk_install_dir }}/usertools/dpdk-devbind.py --bind=pci-stub {{ interface_names.results[loop_index].stdout }}"
   with_sequence: start=0 count={{ sriov.vm_vf_ports }}
   loop_control:
     index_var: loop_index
@@ -108,6 +108,6 @@
     loop: "{{ sriov.network_name }}"
 
   - name: configure the docker network for each VF port
-    shell: docker network create -d macvlan --subnet={{ item.0 }} --gateway={{ item.1 }} -o parent={{ item.2.stdout }} {{ item.3 }}
+    command: docker network create -d macvlan --subnet={{ item.0 }} --gateway={{ item.1 }} -o parent={{ item.2.stdout }} {{ item.3 }}
     loop: "{{ query('together', sriov.interface_subnets, sriov.interface_ips, ifnames.results, sriov.network_name) }}"
   when: docker_status.rc == 0

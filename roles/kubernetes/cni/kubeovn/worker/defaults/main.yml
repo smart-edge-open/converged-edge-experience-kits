@@ -3,6 +3,7 @@
 
 ---
 
-_ovs_package_url: "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/openvswitch-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
+_ovs_package_url: "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
+  openvswitch-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
 _ovs_dependencies_yum: "unbound"
 _ovs_packages_to_remove: "openvswitch,unbound"

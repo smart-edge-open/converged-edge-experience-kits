@@ -47,31 +47,11 @@
     chdir: "{{ tmp_dir.path }}"
   when: sriov_kubevirt_enable
 
-# Copy ConfigMap variants
-- name: Copy ConfigMap variants for SRIOV
-  block:
-  - name: Copy base config
-    copy:
-      src: "{{ _config_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ _config_map_name }}"
-  - name: Copy FPGA config
-    copy:
-      src: "{{ _fpga_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ _fpga_map_name }}"
-  - name: Copy VM config
-    copy:
-      src: "{{ _vm_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ _vm_map_name }}"
-
-# Add VM config to base config
-- name: Add VM config to base config
-  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ _vm_map_name }}' {{ tmp_dir.path }}/{{ _config_map_name }}
-  when: sriov_kubevirt_enable
-
-# Add FPGA config to base config
-- name: Add FPGA config to base config
-  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ _fpga_map_name }}' {{ tmp_dir.path }}/{{ _config_map_name }}
-  when: fpga_sriov_userspace.enabled
+# Create ConfigMap
+- name: Create configMap from template
+  template:
+    src: "{{ _config_map_name }}.j2"
+    dest: "{{ tmp_dir.path }}/{{ _config_map_name }}"
 
 # Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
 - name: deploy dev plugin configMap

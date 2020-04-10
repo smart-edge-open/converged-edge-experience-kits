@@ -9,4 +9,4 @@ spec:
   template:
     spec:
       nodeSelector:
-        hddl-zone: "yes" 
+        hddl-zone: "yes"

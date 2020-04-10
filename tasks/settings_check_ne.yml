@@ -7,7 +7,7 @@
   include_tasks: settings_check_common.yml
 
 - name: validate requested CNIs
-  include_tasks: "{{ playbook_dir }}/roles/kubernetes/cni/tasks/precheck.yml"
+  include_tasks: "../roles/kubernetes/cni/tasks/precheck.yml"
 
 - name: biosfw role - verify precondition
   block:

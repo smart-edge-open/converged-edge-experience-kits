@@ -39,7 +39,7 @@
   - Dockerfile
 
 - name: build hddlaaemon container image
-  shell: ./build.sh
+  command: ./build.sh
   args:
     chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
   changed_when: true

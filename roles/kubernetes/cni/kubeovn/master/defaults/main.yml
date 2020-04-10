@@ -12,8 +12,10 @@ _kubeovn_yamls:
 - "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/yamls/kube-ovn.yaml"
 
 _ovn_packages_urls:
-- "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/openvswitch-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
-- "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/ovn-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
+- "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
+  openvswitch-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
+- "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
+  ovn-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
 
 _ovn_packages_yum:
 - "unbound"

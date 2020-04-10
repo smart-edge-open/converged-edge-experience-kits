@@ -29,5 +29,5 @@
   - onprem_iac_enable | default(False)
 
 - name: hddl precheck
-  include_tasks: "{{ playbook_dir }}/roles/hddl/common/tasks/precheck.yml"
+  include_tasks: "../roles/hddl/common/tasks/precheck.yml"
   when: onprem_hddl_enable | default(False)

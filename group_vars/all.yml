@@ -30,7 +30,8 @@ proxy_ftp: "http://proxy.example.org:3128"
 proxy_yum: "{{ proxy_http }}"
 # No proxy setting contains addresses and networks that should not be accessed using proxy (e.g. local network, Kubernetes CNI networks)
 # NOTE - VCA: 172.32.1.0/24 is used for VCA node.
-proxy_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,cdi.svc,127.0.0.1,10.244.0.0/16,10.96.0.0/16,10.16.0.0/16,10.32.0.0/12,172.32.1.0/24"
+proxy_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,\
+  cdi.svc,127.0.0.1,10.244.0.0/16,10.96.0.0/16,10.16.0.0/16,10.32.0.0/12,172.32.1.0/24"
 
 # Disable YUM plugins (e.g. Fastest Mirror)
 os_remove_yum_plugins: true

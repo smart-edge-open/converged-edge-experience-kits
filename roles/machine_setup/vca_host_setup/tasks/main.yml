@@ -70,7 +70,7 @@
   changed_when: false
 
 - name: install VCA kernel packages, driver and utility
-  command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}"
+  command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}" # noqa 303
   with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
 

@@ -11,7 +11,8 @@ _docker_packages: "docker-ce-{{ _docker_version }},docker-ce-cli-{{ _docker_vers
 _docker_repository_url: "https://download.docker.com/linux/centos/7/$basearch/stable"
 _docker_repository_key: "https://download.docker.com/linux/centos/gpg"
 
-_docker_packages_to_remove: "docker,docker-client,docker-client-latest,docker-common,docker-latest,docker-latest-logrotate,docker-logrotate,docker-engine,docker-ce,docker-ce-cli,containerd.io"
+_docker_packages_to_remove: "docker,docker-client,docker-client-latest,docker-common,docker-latest,docker-latest-logrotate,\
+  docker-logrotate,docker-engine,docker-ce,docker-ce-cli,containerd.io"
 
 _docker_audit_files:
 - "/usr/bin/docker"
