@@ -144,11 +144,11 @@
   - "uio_pci_generic"
   - "uio"
 
-  - name: unload vfio
-    modprobe:
-      name: vfio
-      state: absent
-    ignore_errors: yes
+- name: unload vfio
+  modprobe:
+    name: vfio
+    state: absent
+  ignore_errors: yes
 
 - name: load uio and igb_uio modules
   modprobe:
