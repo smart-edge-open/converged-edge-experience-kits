@@ -22,8 +22,13 @@
   - '"kubeovn" in kubernetes_cnis'
   - kubernetes_cnis[0] != "kubeovn"
 
+- name: load kubernetes/cni defaults
+  include_vars:
+    file: ./roles/kubernetes/cni/defaults/main.yml
+    name: defaults
+
 - name: fail if requested CNI is not available
   fail:
     msg: "Requested CNI is not available: {{ item }}"
   with_items: "{{ kubernetes_cnis }}"
-  when: "item not in _available_kubernetes_cnis"
+  when: "item not in defaults._available_kubernetes_cnis"

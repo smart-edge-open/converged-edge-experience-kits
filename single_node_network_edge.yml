@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# Playbook for single node Network Edge cluster deployment
+
+- hosts: controller_group
+  pre_tasks:
+  - name: create helper variable
+    set_fact:
+      single_node_deployment: true
+  - name: check deployment settings
+    include_tasks: ./tasks/settings_check_ne.yml
+  - name: print deployment settings
+    include_tasks: ./tasks/print_vars.yml
+
+  roles:
+    - role: machine_setup/os_setup
+
+    - role: time/ntp
+      when: ntp_enable | default(False)
+
+    - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(True))
+    - role: machine_setup/grub
+    - role: machine_setup/configure_tuned
+      when: not (tuned_skip | default(False))
+    - role: machine_setup/conditional_reboot
+
+    - role: git_repo
+    - role: golang
+    - role: docker
+
+
+- hosts: edgenode_group
+  roles:
+    - role: machine_setup/os_setup
+    - role: git_repo
+    - role: opae_fpga/worker
+      when: ne_opae_fpga_enable | default(False)
+
+
+- hosts: controller_group
+  roles:
+    - role: kubernetes/master
+    - role: kubernetes/cni
+    - role: kubernetes/device_plugins
+      when: k8s_device_plugins_enable | default(False)
+
+    - role: openness/network_edge/master
+
+    - role: cnca/master
+    - role: kubevirt/master
+    - role: kubevirt/worker
+    - role: ngc_test/master
+      when: ne_ngc_test_enable | default(False)
+    - role: opae_fpga/master
+      when: ne_opae_fpga_enable | default(False)
+    - role: nfd/network_edge
+      when: ne_nfd_enable | default(True)
+    - role: biosfw/master
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/master
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/master
+      when: ne_hddl_enable | default(False)
+
+
+- hosts: edgenode_group
+  roles:
+    - role: openness/network_edge/worker
+    - role: kubevirt/worker
+    - role: biosfw/worker
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/worker
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/worker
+      when: ne_hddl_enable | default(False)
