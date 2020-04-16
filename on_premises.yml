@@ -42,8 +42,6 @@
 
 
 - hosts: edgenode_group
-  vars:
-    hugepage_amount: "5000"
 
   pre_tasks:
   - name: check deployment settings
