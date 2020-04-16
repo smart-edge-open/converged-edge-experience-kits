@@ -13,10 +13,14 @@
       dest: "{{ _epcforedge_git_repo.download_dir }}"
       version: "{{ _epcforedge_git_repo.branch }}"
       force: yes
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   always:
   - name: remove .openness_gitconfig
     include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
-  when: not _offline_mode
+  when: not (_offline_mode | d(False))
 
 - name: create directory for ngc configs
   file:

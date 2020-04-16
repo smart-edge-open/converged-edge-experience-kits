@@ -10,3 +10,7 @@
     clone: yes
     update: no
     version: "{{ _hddldaemon_container.commit }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"

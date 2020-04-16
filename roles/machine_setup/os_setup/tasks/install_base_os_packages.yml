@@ -5,7 +5,7 @@
 
 - debug:
     msg: "Installing the following packages: {{ os_yum_base_packages }}"
-- name: Install base OS rpm packages
+- name: install base OS rpm packages
   yum:
     name: "{{ os_yum_base_packages }}"
     state: present

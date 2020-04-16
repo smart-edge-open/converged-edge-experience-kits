@@ -3,13 +3,23 @@
 
 ---
 
-- name: Build kube-cnca plugin
+- name: download modules for kube-cnca plugin
+  shell: source /etc/profile && go mod download
+  args:
+    chdir: "{{ _git_repo_dest }}/cnca/"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  changed_when: true
+
+- name: build kube-cnca plugin
   shell: source /etc/profile && go build -ldflags "-X cnca.HTTP2ClientTLSCAPath={{ _certs_dest }}/ngc" -o "{{ _cnca_plugin_name }}"
   args:
     chdir: "{{ _git_repo_dest }}/cnca/"
   changed_when: true
 
-- name: Install kube-cnca plugin
+- name: install kube-cnca plugin
   command: mv "{{ _cnca_plugin_name }}" "{{ _cnca_plugin_dest }}"
   args:
     chdir: "{{ _git_repo_dest }}/cnca/"

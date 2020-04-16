@@ -13,6 +13,10 @@
   get_url:
     url: "{{ _cmk_base_url }}/{{ item }}"
     dest: "{{ tmp_dir.path }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   with_items: "{{ _cmk_yamls }}"
 
 - name: create kustomization.yml

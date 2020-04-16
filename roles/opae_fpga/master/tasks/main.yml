@@ -3,13 +3,23 @@
 
 ---
 
-- name: Build RSU kubectl plugin
+- name: download modules for RSU kubectl plugin
+  shell: source /etc/profile && go mod download
+  args:
+    chdir: "{{ _git_repo_dest }}/fpga/kube-rsu/"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  changed_when: true
+
+- name: build RSU kubectl plugin
   shell: source /etc/profile && go build -o kubectl-rsu
   args:
     chdir: "{{ _git_repo_dest }}/fpga/kube-rsu/"
   changed_when: true
 
-- name: Install RSU kubectl plugin
+- name: install RSU kubectl plugin
   command: mv kubectl-rsu "{{ _rsu_plugin_dest }}"
   args:
     chdir: "{{ _git_repo_dest }}/fpga/kube-rsu/"

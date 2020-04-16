@@ -10,6 +10,14 @@
   block:
   - name: build and copy EdgeDNS CLI
     block:
+    - name: download modules for EdgeDNS cli
+      shell: source /etc/profile && go mod download
+      args:
+        chdir: "{{ _git_repo_dest }}/cmd/edgednscli"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
     - name: build EdgeDNS cli
       shell: source /etc/profile && go build -o dist/edgednscli ./cmd/edgednscli
       args:

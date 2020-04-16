@@ -10,6 +10,10 @@
     clone: yes
     update: no
     version: "{{ _device_plugins.commit }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: VPU device plugin
   import_tasks: vpu_plugin.yml

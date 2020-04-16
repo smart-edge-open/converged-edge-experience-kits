@@ -58,6 +58,11 @@ ntp_servers: []
 # - Edge Controller - edit `group_vars/controller_group.yml`
 # To provide configuration for specific machine, place the settings in `host_vars/_inventory_host_name.yml`
 
+### Retry settings for network-based tasks
+# - number_of_retries - configures how many times failed task should be retried
+# - retry_delay - configures delay between retries (in seconds)
+number_of_retries: 10
+retry_delay: 5
 
 ##################################################
 ##### Network Edge
@@ -224,3 +229,4 @@ onprem_hddl_enable: False
 
 ## On-Premises Node Feature Discovery (NFD)
 onprem_nfd_enable: True
+

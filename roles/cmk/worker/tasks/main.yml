@@ -9,12 +9,20 @@
     dest: "{{ _cmk_download_dir }}"
     version: "{{ _cmk_commit }}"
     update: no
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: build CPU Manager image
   shell: source /etc/profile && make
   args:
     chdir: "{{ _cmk_download_dir }}"
   changed_when: true
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: create CMK cluster-init pod, ns, svc and rbac rules
   command: "kubectl apply -f /tmp/cmk.yml"

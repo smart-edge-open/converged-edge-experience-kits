@@ -23,6 +23,14 @@
       update_cache: yes
       allow_downgrade: true
       validate_certs: no
+  - name: download OVN tools
+    command: "yum install --downloadonly -y {{ _ovn_packages_urls | join(' ') }}"
+    args:
+      warn: false
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   - name: install OVN tools
     command: "yum install -y {{ _ovn_packages_urls | join(' ') }}"
     args:
@@ -55,6 +63,10 @@
   get_url:
     url: "{{ item }}"
     dest: "{{ tmp_dir.path }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   with_items: "{{ _kubeovn_yamls }}"
 
 - name: remove kube-ovn-pinger from kube-ovn.yaml

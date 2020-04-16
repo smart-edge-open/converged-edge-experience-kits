@@ -13,6 +13,10 @@
   get_url:
     url: "{{ _multus_daemonset_url }}"
     dest: "{{ tmp_dir.path }}/multus-daemonset.yml"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: create kustomization.yml
   copy:

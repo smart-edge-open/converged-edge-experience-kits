@@ -13,6 +13,10 @@
   get_url:
     url: "{{ _nfd_base_url }}/{{ item }}.template"
     dest: "{{ tmp_dir.path }}/{{ item }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   with_items: "{{ _nfd_yamls }}"
 
 - name: copy files for kustomization

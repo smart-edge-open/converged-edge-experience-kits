@@ -65,7 +65,7 @@
 
 - debug: msg="{{ init_vca.stdout }}"
 
-- name: Delete VCAC-A node from ~/.ssh/known_hosts
+- name: delete VCAC-A node from ~/.ssh/known_hosts
   lineinfile:
     path: ~/.ssh/known_hosts
     regexp: '^{{ vca_node_ip }}'
@@ -96,6 +96,10 @@
     ssh "{{ vca_node_ip }}" apt install -y dbus tzdata
     ssh "{{ vca_node_ip }}" timedatectl set-timezone $(timedatectl | awk '/Time zone:/{print$3}')
   changed_when: true
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 # Start configuration on vca-node.
 # Because vca-node is behind NAT and not in the ansible inventory, need below mitigation for the configuration.
@@ -132,6 +136,10 @@
     dest: /tmp/hddl_daemonset.yaml
     force: yes
   delegate_to: "{{ groups['controller_group'][0] }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: update hddl-daemon yaml to use vcaca-ubuntu1804-analytics-hddldaemon:20.2
   replace:

@@ -3,7 +3,7 @@
 
 ---
 
-- name: Download and install EPEL package
+- name: install EPEL package
   yum:
     name: epel-release
     state: present

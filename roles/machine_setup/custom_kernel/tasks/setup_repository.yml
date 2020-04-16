@@ -10,6 +10,10 @@
       url: "{{ kernel_repo_url }}"
       dest: "{{ _kernel_repo_dest }}"
       mode: 0644
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
 
   - name: find out place for GPG key
     command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ _kernel_repo_dest }}
@@ -31,6 +35,10 @@
       url: "{{ kernel_repo_key }}"
       dest: "{{ repo_gpg_filepath }}"
       mode: 0644
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   - name: setup repository for kernel | import GPG key
     rpm_key:
       state: present

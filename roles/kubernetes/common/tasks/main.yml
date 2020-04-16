@@ -12,6 +12,10 @@
     gpgcheck: yes
     enabled: true
     repo_gpgcheck: true
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: install packages
   yum:

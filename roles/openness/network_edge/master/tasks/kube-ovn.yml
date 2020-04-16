@@ -26,6 +26,15 @@
   - name: create temporary custom .openness_gitconfig
     include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
 
+  - name: download modules for interface service cli
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/interfaceservicecli"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
   - name: build interface service cli
     shell: source /etc/profile && go build -o dist/interfaceservicecli ./cmd/interfaceservicecli
     args:

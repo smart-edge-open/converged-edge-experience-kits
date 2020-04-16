@@ -5,7 +5,7 @@
 
 - name: install tuned packages
   yum:
-    name: "{{ tuned_packages | join(',') }}"
+    name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
   when: not (_offline_mode | d(False))

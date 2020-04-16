@@ -23,6 +23,10 @@
     command: yum install -y {{ _ovs_package_url }}
     args:
       warn: false
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   when: "'1' not in rpm_grep.stdout"
 
 - name: open kube-ovn firewall rules

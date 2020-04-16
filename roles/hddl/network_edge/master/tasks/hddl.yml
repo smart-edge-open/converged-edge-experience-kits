@@ -29,7 +29,7 @@
       src: "{{ _offline_archives_path }}/{{ _openvino_name }}"
       dest: "{{ _openvino_download_dest }}"
       remote_src: yes
-    when: _offline_mode
+    when: _offline_mode | d(False)
   - name: check if already downloaded
     stat:
       path: "{{ _openvino_download_dir }}"
@@ -40,7 +40,7 @@
       dest: "{{ _openvino_download_dest }}"
     when:
     - not ov_dl_dir.stat.exists
-    - not _offline_mode
+    - not (_offline_mode | d(False))
   - name: ensure download dir exists
     file:
       path: "{{ _openvino_download_dir }}"
@@ -67,13 +67,13 @@
 
 - name: offline | build HDDL
   include_tasks: offline_build.yml
-  when: _offline_mode
+  when: _offline_mode | d(False)
 
 - name: build HDDL image
   shell: source /etc/profile && make hddllog
   args:
     chdir: "{{ _git_repo_dest }}"
-  when: not _offline_mode
+  when: not (_offline_mode | d(False))
 
 - name: bring up hddlservice container
   command: "docker-compose up -d --no-build hddlservice"

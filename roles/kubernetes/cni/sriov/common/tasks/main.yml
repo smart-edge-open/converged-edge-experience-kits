@@ -10,6 +10,10 @@
     clone: yes
     update: no
     version: "{{ _sriov_cni.commit }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: download device plugin
   git:
@@ -18,6 +22,10 @@
     clone: yes
     update: no
     version: "{{ _sriov_dev_plugin.commit }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: patch device plugin for FPGA SRIOV USERSPACE functionality
   block:
@@ -43,9 +51,17 @@
       path: "{{ _sriov_cni.download_dir }}"
       use_config_proxy: yes
       pull: yes
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: build device plugin image
   command: make image
   args:
     chdir: "{{ _sriov_dev_plugin.download_dir }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   changed_when: true

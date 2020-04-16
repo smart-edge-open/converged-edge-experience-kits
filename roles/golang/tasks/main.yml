@@ -20,7 +20,11 @@
     url: "{{ _golang_download_url }}"
     dest: "{{ _golang_download_dest }}"
     checksum: "sha256:{{ _golang_download_checksum }}"
-  when: not go_exe_file.stat.exists
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  when: not go_exe_file.stat.exists and not (_offline_mode | d(False))
 
 - name: install
   unarchive:
@@ -28,6 +32,7 @@
     dest: "/usr/local"
     remote_src: yes
     creates: /usr/local/go/bin/go
+  when: not go_exe_file.stat.exists
 
 - name: add exports to /etc/profile
   lineinfile:

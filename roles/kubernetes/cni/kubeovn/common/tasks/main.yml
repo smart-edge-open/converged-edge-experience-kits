@@ -19,6 +19,10 @@
       get_url:
         url: "{{ item }}"
         dest: "{{ _kubeovn_destdir }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
       with_items: "{{ _kubeovn_download_files }}"
 
     - name: copy Dockerfile

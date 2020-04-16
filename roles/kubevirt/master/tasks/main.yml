@@ -7,8 +7,16 @@
   block:
   - name: KV Operator Install
     command: kubectl apply -f "{{ _kubevirt_operator_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   - name: KV Controller Install
     command: kubectl apply -f "{{ _kubevirt_cr_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
 
 - name: Download Krew plugin
   block:
@@ -24,11 +32,19 @@
     get_url:
       url: "{{ _krew_tar_url }}"
       dest: "{{ _krew_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
     when: not krew_download.stat.exists
   - name: Download Krew tar.gz
     get_url:
       url: "{{ _krew_yaml_url }}"
       dest: "{{ _krew_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
     when: not krew_download.stat.exists
   - name: Unpack Krew
     unarchive:
@@ -61,8 +77,16 @@
   block:
   - name: CDI Operator Install
     command: kubectl apply -f "{{ _cdi_operator_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   - name: CDI Controller Install
     command: kubectl apply -f "{{ _cdi_cr_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
 
 - name: Label CDI namespace
   command: kubectl label namespace/cdi ns=cdi --overwrite=true
