@@ -59,7 +59,7 @@ tuned_vars: |
 # Size of a single hugepage (2M or 1G)
 hugepage_size: "2M"
 # Amount of hugepages
-hugepage_amount: "1024"
+hugepage_amount: "2048"
 # Default grub parameters
 default_grub_params: "hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
 # Additional grub parameters
