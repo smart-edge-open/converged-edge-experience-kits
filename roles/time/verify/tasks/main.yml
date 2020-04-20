@@ -3,6 +3,16 @@
 
 ---
 
+- name: wait for controller's time setup with NTP
+  stat:
+    path: "{{ _ntp_time_set }}"
+  register: result
+  delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+  until: result.stat.exists
+  retries: 60
+  delay: 10
+  when: ntp_enable
+
 - name: get controller's date
   command: date +%s
   register: controller_date

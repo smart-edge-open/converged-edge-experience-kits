@@ -59,3 +59,7 @@
         daemon_reload: yes
     - name: set hardware clock
       command: hwclock -w
+    - name: create ntp time set flag
+      file:
+        path: "{{ _ntp_time_set }}"
+        state: touch

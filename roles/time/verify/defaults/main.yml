@@ -4,3 +4,4 @@
 ---
 
 _date_threshold_seconds: 120
+_ntp_time_set: /tmp/ntp_time_set

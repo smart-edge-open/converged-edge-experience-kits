@@ -2,10 +2,9 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-# Playbook for Network Edge deployment
-
-- hosts: controller_group
+# Common platform setup playbook
+- hosts: controller_group:edgenode_group
+  strategy: free
 
   pre_tasks:
   - name: check deployment settings
@@ -17,16 +16,24 @@
     - role: machine_setup/os_setup
     - role: time/ntp
       when: ntp_enable | default(False)
-
+    - role: time/verify
+      when: "'edgenode_group' in group_names"
     - role: machine_setup/custom_kernel
       when: not (kernel_skip | default(True))
     - role: machine_setup/grub
+
+    - role: machine_setup/configure_tuned
+      when: not (tuned_skip | default(False)) and "'edgenode_group' in group_names"
     - role: machine_setup/conditional_reboot
 
     - role: git_repo
     - role: golang
     - role: docker
+    - role: dependency_build
 
+# Playbook for Network Edge deployment
+- hosts: controller_group
+  roles:
     - role: kubernetes/master
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
@@ -51,29 +58,7 @@
 
 
 - hosts: edgenode_group
-
-  pre_tasks:
-  - name: check deployment settings
-    include_tasks: ./tasks/settings_check_ne.yml
-  - name: print deployment settings
-    include_tasks: ./tasks/print_vars.yml
-
   roles:
-    - role: machine_setup/os_setup
-    - role: time/ntp
-      when: ntp_enable | default(False)
-    - role: time/verify
-
-    - role: machine_setup/custom_kernel
-      when: not (kernel_skip | default(False))
-    - role: machine_setup/grub
-    - role: machine_setup/configure_tuned
-      when: not (tuned_skip | default(False))
-    - role: machine_setup/conditional_reboot
-
-    - role: git_repo
-    - role: golang
-    - role: docker
     - role: opae_fpga/worker
       when: ne_opae_fpga_enable | default(False)
     - role: kubernetes/worker
