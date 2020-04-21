@@ -27,7 +27,7 @@
         defaultMode: 0777
     - name: certs
       hostPath:
-        path: "{{ _certs_dest }}/nfd"
+        path: "{{ _certs_dest }}/nfd-master"
 - op: add
   path: /spec/template/spec/initContainers
   value:

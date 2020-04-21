@@ -4,4 +4,6 @@
 ---
 
 dependencies:
+- role: sriov_device_init/network_edge
+  when: single_node_deployment | default(false)
 - role: kubernetes/cni/sriov/common

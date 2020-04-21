@@ -204,3 +204,14 @@
     ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
+
+- name: configure OVS
+  shell: |
+    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
+    ovs-vsctl --may-exist add-br br-local
+  register: result
+  until: not result.failed
+  retries: 5
+  delay: 60
+  changed_when: true
+  when: single_node_deployment | default(false)
