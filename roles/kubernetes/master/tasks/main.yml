@@ -37,4 +37,7 @@
         group: root
         mode: 0664
         remote_src: yes
+    - name: remove the taint to be able to schedule Pods on the control-plane node
+      command: kubectl taint nodes --all node-role.kubernetes.io/master-
+      when: single_node_deployment | default(false)
   when: cluster_info.rc == 1

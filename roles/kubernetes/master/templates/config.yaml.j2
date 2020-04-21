@@ -4,7 +4,18 @@
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
 cgroupDriver: "systemd"
-
+{% if single_node_deployment | d(false) %}
+featureGates:
+  TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
+{% if topology_manager is defined and topology_manager.policy is defined and topology_manager.policy != 'none' %}
+topologyManagerPolicy: {{ topology_manager.policy }}		
+{% endif %}
+{% if cpu is defined and cpu.policy is defined and cpu.policy == 'static' %}
+cpuManagerPolicy: {{ cpu.policy }}
+kubeReserved:
+  cpu: "{{ cpu.reserved_cpus }}"
+{% endif %}
+{% endif %} 
 ---
 
 apiVersion: kubeadm.k8s.io/v1beta2
