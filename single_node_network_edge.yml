@@ -12,6 +12,8 @@
       single_node_deployment: true
   - name: check deployment settings
     include_tasks: ./tasks/settings_check_ne.yml
+  - name: check deployment settings for single node deployment
+    include_tasks: ./tasks/settings_check_ne_single_node.yml
   - name: print deployment settings
     include_tasks: ./tasks/print_vars.yml
 
