@@ -35,12 +35,12 @@
       state: present
   - name: patch device plugin for FPGA SRIOV USERSPACE functionality
     patch:
-      src: "{{ fpga_sriov_userspace.patch_path }}"
+      src: "{{ _fpga_sriov_userspace_patch_path }}"
       basedir: "{{ _sriov_dev_plugin.download_dir }}"
       strip: 1
       binary: no
       remote_src: yes
-  when: fpga_sriov_userspace.enabled
+  when: fpga_sriov_userspace_enable
 
 
 - name: build CNI image

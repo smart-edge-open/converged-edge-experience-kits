@@ -27,7 +27,7 @@ data:
                 }
             },
             {% endif %}
-            {% if fpga_sriov_userspace.enabled is defined and fpga_sriov_userspace.enabled %}
+            {% if fpga_sriov_userspace_enable is defined and fpga_sriov_userspace_enable %}
             {
                 "resourceName": "intel_fec_lte",
                 "selectors": {

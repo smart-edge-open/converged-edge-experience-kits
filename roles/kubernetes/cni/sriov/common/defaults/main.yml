@@ -13,9 +13,8 @@ _sriov_dev_plugin:
   download_dir: "/temp/_sriov_dev_plugin"
   commit: "bf28fdc3e2d9dd2edcc4f0bceb58448ac9317696"
 
-fpga_sriov_userspace:
-  enabled: false
-  patch_path: "{{ _git_repo_dest }}/fpga/FPGA_SRIOV_USERSPACE_DEV_PLUGIN.patch"
+fpga_sriov_userspace_enable: false
+_fpga_sriov_userspace_patch_path: "{{ _git_repo_dest }}/fpga/FPGA_SRIOV_USERSPACE_DEV_PLUGIN.patch"
 
 # Config for nodes
 fpga_userspace_vf:

@@ -114,8 +114,7 @@ kubeovn_dpdk_resources_limits: "1Gi"
 
 ## SR-IOV CNI
 # FPGA SRIOV Userspace
-fpga_sriov_userspace:
-  enabled: false
+fpga_sriov_userspace_enable: false
 
 # FPGA Userspace VF configuration
 fpga_userspace_vf:
