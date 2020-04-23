@@ -5,7 +5,7 @@
 
 # Playbook for single node Network Edge cluster deployment
 
-- hosts: controller_group
+- hosts: edgenode_group
   pre_tasks:
   - name: create helper variable
     set_fact:
@@ -24,7 +24,7 @@
       when: ntp_enable | default(False)
 
     - role: machine_setup/custom_kernel
-      when: not (kernel_skip | default(True))
+      when: not (kernel_skip | default(False))
     - role: machine_setup/grub
     - role: machine_setup/configure_tuned
       when: not (tuned_skip | default(False))
@@ -33,18 +33,14 @@
     - role: git_repo
     - role: golang
     - role: docker
-
-
-- hosts: edgenode_group
-  roles:
-    - role: machine_setup/os_setup
-    - role: git_repo
     - role: opae_fpga/worker
       when: ne_opae_fpga_enable | default(False)
 
 
 - hosts: controller_group
   roles:
+    - role: machine_setup/os_setup
+    - role: git_repo
     - role: kubernetes/master
     - role: kubernetes/cni
     - role: kubernetes/device_plugins

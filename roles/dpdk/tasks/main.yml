@@ -15,6 +15,14 @@
   register: unamer
   changed_when: false
 
+- name: check if kernel-(rt-)devel is already installed
+  shell: >
+    set -o pipefail &&
+    yum list installed | grep -E "kernel-(rt-)?devel(.*){{ '.'.join(unamer.stdout.split('.')[:-1]) }}"
+  register: yum_list_kernel_devel
+  ignore_errors: true
+  changed_when: false
+
 - name: install kernel-devel package
   block:
   - name: use kernel-devel-uname-r
@@ -42,7 +50,9 @@
   # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
   # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
   # OnPrem Offline does not support kernel customization so `custom_kernel` is enabled and `kernel_skip` is defined and false
-  when: (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+  when:
+  - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+  - yum_list_kernel_devel.rc == 1   # kernel-(rt-)devel is missing
 
 - name: check if already installed
   stat:
