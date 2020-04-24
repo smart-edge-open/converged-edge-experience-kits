@@ -38,6 +38,11 @@
 
 
 - hosts: controller_group
+  pre_tasks:
+  - name: create helper variable
+    set_fact:
+      single_node_deployment: true
+
   roles:
     - role: machine_setup/os_setup
     - role: git_repo
@@ -50,7 +55,6 @@
 
     - role: cnca/master
     - role: kubevirt/master
-    - role: kubevirt/worker
     - role: ngc_test/master
       when: ne_ngc_test_enable | default(False)
     - role: opae_fpga/master
