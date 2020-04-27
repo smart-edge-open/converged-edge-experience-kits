@@ -17,6 +17,7 @@
     - role: offline/prepare/yum/prepare
     - role: offline/prepare/get_archives/common
     - role: offline/prepare/git
+    - role: offline/prepare/docker
     - role: offline/prepare/docker_images
     - role: offline/prepare/pip
     - role: offline/prepare/cnca
@@ -39,6 +40,7 @@
     - role: docker
     - role: git_repo
     - role: offline/prepare/git
+    - role: offline/prepare/docker
     - role: offline/prepare/docker_images
     - role: offline/prepare/get_golang_modules
     - role: offline/prepare/yum/prepare

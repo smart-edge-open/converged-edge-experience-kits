@@ -67,13 +67,13 @@
 - name: restart services if needed
   meta: flush_handlers
 
-- name:  Find docker audit files
+- name: find docker audit files
   stat:
     path: "{{ item }}"
   with_items: "{{ _docker_audit_files }}"
   register: stats
 
-- name: Add audit rules for docker
+- name: add audit rules for docker
   lineinfile:
     path: /etc/audit/rules.d/docker.rules
     line: "-w {{ item.item }} -k docker"
@@ -81,6 +81,32 @@
   when: item.stat.exists
   with_items: "{{ stats.results }}"
 
-- name: Restart auditd
+- name: restart auditd
   command: service auditd restart # noqa 303
   changed_when: true
+
+- name: setup docker bash completion
+  block:
+  - name: download Docker CLI bash completion
+    get_url:
+      url: "{{ _docker_completion_url }}"
+      dest: "/etc/bash_completion.d"
+  - name: download Docker Compose bash completion
+    get_url:
+      url: "{{ _docker_compose_completion_url }}"
+      dest: "/etc/bash_completion.d"
+  when: not (_offline_mode | d(False))
+
+- name: offline | setup docker bash completion
+  block:
+  - name: copy Docker CLI bash completion
+    copy:
+      src: "{{ _offline_path }}/docker/docker"
+      dest: "/etc/bash_completion.d/"
+      remote_src: yes
+  - name: copy Docker Compose bash completion
+    copy:
+      src: "{{ _offline_path }}/docker/docker-compose"
+      dest: "/etc/bash_completion.d/"
+      remote_src: yes
+  when: _offline_mode | d(False)

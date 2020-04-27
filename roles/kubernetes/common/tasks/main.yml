@@ -63,3 +63,9 @@
 
 - name: restart services if needed
   meta: flush_handlers
+
+- name: setup kubectl bash completion
+  shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+
+- name: setup kubeadm bash completion
+  shell: kubeadm completion bash > /etc/bash_completion.d/kubeadm

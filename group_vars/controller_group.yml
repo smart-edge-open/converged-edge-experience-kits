@@ -50,7 +50,7 @@ additional_grub_params: ""
 
 # Packages to be installed on the Edge Controller host
 os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,\
-  device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel,createrepo,psmisc"
+  device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion"
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
 _git_repo_dest: /opt/edgecontroller
