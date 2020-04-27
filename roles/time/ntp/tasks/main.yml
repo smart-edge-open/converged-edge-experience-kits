@@ -2,6 +2,8 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+- name: include time/verify/defaults vars
+  include_vars: ../../verify/defaults/main.yml
 
 - name: stop and disable chronyd service if available
   systemd:
