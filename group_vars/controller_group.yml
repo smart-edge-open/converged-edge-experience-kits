@@ -43,10 +43,13 @@ hugepage_size: "2M"
 # Amount of hugepages
 hugepage_amount: "1024"
 # Default grub parameters
-default_grub_params: "hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
+default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
 # Additional grub parameters
 additional_grub_params: ""
 
+## Kube-ovn with OVS-DPDK
+# Hugepage configuration for controller's NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
+kubeovn_dpdk_socket_mem: "1024,0"
 
 # Packages to be installed on the Edge Controller host
 os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,\

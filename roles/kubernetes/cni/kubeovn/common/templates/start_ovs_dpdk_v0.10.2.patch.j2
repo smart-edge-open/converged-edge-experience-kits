@@ -7,10 +7,10 @@ index 851961a..44fa64f 100755
  
  # Start ovsdb
 +
-+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="1024,0"
++ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="{{ kubeovn_dpdk_socket_mem }}"
 +ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true
-+ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask=0x4
-+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask=0x2
++ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask={{ kubeovn_dpdk_pmd_cpu_mask }}
++ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask={{ kubeovn_dpdk_lcore_mask }}
 +ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-hugepage-dir="/hugepages"
 +
  /usr/share/openvswitch/scripts/ovs-ctl restart --no-ovsdb-server  --system-id=random

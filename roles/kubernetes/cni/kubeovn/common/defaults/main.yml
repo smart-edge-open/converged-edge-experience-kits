@@ -38,3 +38,5 @@ kubeovn_dpdk_hugepage_size: "2Mi"
 kubeovn_dpdk_hugepages: "1Gi"
 kubeovn_dpdk_resources_requests: "1Gi"
 kubeovn_dpdk_resources_limits: "1Gi"
+
+_ovs_dpdk_patch_file: "start_ovs_dpdk_v0.10.2.patch"

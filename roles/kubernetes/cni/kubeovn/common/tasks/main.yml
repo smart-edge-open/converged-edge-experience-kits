@@ -50,11 +50,28 @@
         mode: preserve
         remote_src: yes
 
+    - name: create temp dir
+      tempfile:
+        state: directory
+        suffix: -ovs-dpdk
+      register: tmp_dir
+
+    - name: create patch file from template
+      template:
+        src: "{{ _ovs_dpdk_patch_file }}.j2"
+        dest: "{{ tmp_dir.path }}/{{ _ovs_dpdk_patch_file }}"
+
     - name: apply patch for start-ovs-dpdk.sh
       patch:
-        src: "start_ovs_dpdk_v0.10.2.patch"
+        src: "{{ tmp_dir.path }}/{{ _ovs_dpdk_patch_file }}"
         dest: "{{ _kubeovn_destdir }}/start-ovs-dpdk.sh"
         basedir: "{{ _kubeovn_destdir }}"
+        remote_src: yes
+
+    - name: remove temporary directory
+      file:
+        path: "{{ tmp_dir.path }}"
+        state: absent
 
     - name: copy files needed to build an image to dpdk folder
       copy:
