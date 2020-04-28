@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_helm_version: "v3.1.2"
+_helm_name: "helm-{{ _helm_version }}-linux-amd64"
+_helm_download_url: "https://get.helm.sh"
+_helm_download_item: "{{ _helm_name }}.tar.gz"
+_helm_binary_path: /usr/local/bin/helm

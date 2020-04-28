@@ -55,6 +55,13 @@
   - name: cleanup network edge
     include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
 
+  - name: helm cleanup
+    block:
+    - name: load helm variables
+      include_vars: ./roles/kubernetes/helm/defaults/main.yml
+    - name: cleanup helm
+      include_tasks: ./roles/kubernetes/helm/tasks/cleanup.yml
+
   - name: Kubernetes Device Plugins cleanup
     block:
     - name: load device plugins variables
