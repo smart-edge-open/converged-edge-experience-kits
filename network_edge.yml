@@ -35,8 +35,8 @@
 - hosts: controller_group
   roles:
     - role: kubernetes/master
-    - role: kubernetes/cni
     - role: kubernetes/helm
+    - role: kubernetes/cni
     - role: kubernetes/device_plugins
       when: k8s_device_plugins_enable | default(False)
 
