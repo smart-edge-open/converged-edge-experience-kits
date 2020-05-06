@@ -4,22 +4,23 @@
 ---
 
 - name: print group_vars
-  command: grep -v -E "^#|^$|^--|git_repo_token" ./group_vars/{{ item }}
+  shell: grep -v -E "^#|^$|^--|git_repo_token" "group_vars/{{ item.path }}" || true
   delegate_to: localhost
-  with_items:
-  - all.yml
-  - edgenode_group.yml
-  - controller_group.yml
+  with_filetree: ./group_vars
   changed_when: false
+  run_once: true
+  when:
+  - item.state == 'file' or item.state == 'link'
 
 - name: print host_vars
-  command: grep -v -E "^#|^$|^--" "{{ item.src }}"
+  shell: grep -v -E "^#|^$|^--" "host_vars/{{ item.path }}" || true
   delegate_to: localhost
   with_filetree: ./host_vars
   changed_when: false
+  run_once: true
   when:
-  - item.state == 'file'
-  - "'_example_variables.yml' not in item.src"
+  - item.state == 'file' or item.state == 'link'
+  - "'_example_variables' not in item.path"
 
 - name: print vars about environment
   debug:

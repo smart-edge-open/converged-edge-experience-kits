@@ -1,3 +1,3 @@
 /biosfw/
 /logs/
-/action_plugins/*.pyc
+*.pyc
