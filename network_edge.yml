@@ -35,6 +35,7 @@
 - hosts: controller_group
   roles:
     - role: kubernetes/master
+    - role: docker_registry/master
     - role: kubernetes/helm
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
@@ -63,6 +64,7 @@
     - role: opae_fpga/worker
       when: ne_opae_fpga_enable | default(False)
     - role: kubernetes/worker
+    - role: docker_registry/worker
     - role: kubernetes/cni
     - role: openness/network_edge/worker
     - role: kubevirt/worker

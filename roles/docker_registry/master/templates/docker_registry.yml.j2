@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-registry-deployment
+  namespace: openness
+  labels:
+    app: docker-registry
+
+spec:
+
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-registry
+  template:
+    metadata:
+      labels:
+        app: docker-registry
+
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      containers:
+      - name: docker-registry
+        image: registry:{{ _registry_version }}
+        volumeMounts:
+        - name: docker-registry-data
+          mountPath: /var/lib/registry
+        - name: registry-path
+          mountPath: /opt/docker-registry
+        env:
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: /opt/docker-registry/server-cert.pem
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: /opt/docker-registry/server-key.pem
+        - name: REGISTRY_STORAGE_DELETE_ENABLED
+          value: "true"
+        ports:
+         - containerPort: {{ _registry_port }}
+           protocol: TCP
+      hostNetwork: true
+      volumes:
+      - name: docker-registry-data
+        hostPath:
+          path: /var/lib/registry
+      - name: registry-path
+        hostPath:
+          path: /opt/docker-registry

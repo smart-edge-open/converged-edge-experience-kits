@@ -10,6 +10,12 @@
   # - multus
   # - sriov/master
 
+  - name: load docker_registry variables
+    include_vars: ./roles/docker_registry/master/defaults/main.yml
+
+  - name: cleanup docker_registry
+    include_tasks: ./roles/docker_registry/master/tasks/cleanup.yml
+
   - name: NGC Test cleanup
     block:
     - name: load ngc_test variables
@@ -173,6 +179,11 @@
   - name: cleanup git
     include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
+  - name: load docker_registry variables
+    include_vars: ./roles/docker_registry/master/defaults/main.yml
+
+  - name: cleanup docker_registry certificate
+    include_tasks: ./roles/docker_registry/worker/tasks/cleanup.yml
 
 - hosts: edgenode_vca_group
   serial: 1
