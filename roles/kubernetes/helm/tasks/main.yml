@@ -2,6 +2,11 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+- name: Create directories for helm charts
+  file:
+    path: "{{ ne_helm_charts_default_dir }}"
+    state: directory
+
 - name: check whether helm exist
   block:
   - name: check /usr/local/bin/helm exist
