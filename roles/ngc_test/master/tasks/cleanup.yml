@@ -45,6 +45,20 @@
       - oam_pod_removed_status.rc == 0
 
 - block:
+  - name: remove cntf service
+    command: kubectl delete service cntfservice --namespace=ngc
+    ignore_errors: yes
+  - name: remove cntf pod
+    command: kubectl delete pod cntf --namespace=ngc
+    register: cntf_pod_removed_status
+    ignore_errors: yes
+  - name: remove cntf image
+    command: docker image rm -f cntf-image:1.0
+    ignore_errors: yes
+    when:
+      - cntf_pod_removed_status.rc == 0
+
+- block:
   - name: output hostname
     command: hostname
     register: hostname_output

@@ -44,7 +44,7 @@
   shell: >
     set -o pipefail &&
     jq '.ServerConfig.Hostname="afservice" | .ServerConfig.UIEndpoint="http://{{ _controller_ip }}:3020" |
-    .CliConfig.NEFHostname="nefservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
+    .CliConfig.NEFHostname="nefservice" | .CliPAConfig.Hostname="cntfservice"' /etc/openness/configs/ngc/af.json | sponge /etc/openness/configs/ngc/af.json
   args:
   changed_when: true
 

@@ -19,7 +19,7 @@
   - name: set label on master node
     command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=true --overwrite
 
-- name: create directory for certs used by AF and NEF
+- name: create directory for certs used by AF,NEF and cntf
   file:
     name: "{{ _certs_dest }}/ngc"
     state: directory
@@ -32,7 +32,7 @@
     mode: a+x
 
 - name: run script to generate cerificates
-  command: './genCerts.sh -t DNS -h afservice nefservice localhost -t IP -h 127.0.0.1'
+  command: './genCerts.sh -t DNS -h afservice nefservice cntfservice localhost -t IP -h 127.0.0.1'
   args:
     chdir: "{{ _certs_dest }}/ngc"
   changed_when: true
@@ -52,3 +52,5 @@
 - include_tasks: subtasks/bringup_nef.yml
 
 - include_tasks: subtasks/bringup_af.yml
+
+- include_tasks: subtasks/bringup_cntf.yml

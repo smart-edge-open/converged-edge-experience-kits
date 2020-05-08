@@ -34,4 +34,5 @@
     - af-image
     - nef-image
     - oam-image
+    - cntf-image
   changed_when: true
