@@ -41,6 +41,12 @@
     chdir: "{{ tmp_dir.path }}"
   changed_when: true
 
+- name: templates nfd network policies
+  template:
+    src: "enable_nfd_netpol_weavenet_ipblock.yml.j2"
+    dest: "{{ _nfd_netpol }}"
+  when: '"weavenet" in kubernetes_cnis'
+
 - name: apply network policy
   command: kubectl apply -f {{ _nfd_netpol }}
   changed_when: true

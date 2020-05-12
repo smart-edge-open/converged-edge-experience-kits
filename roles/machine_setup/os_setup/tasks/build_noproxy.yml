@@ -14,7 +14,7 @@
 
 - name: Adding vca/weavenet CIDR to noproxy
   set_fact:
-    _base_noproxy: "{{ _base_noproxy + ',' + vca_cidr }}"
+    _base_noproxy: "{{ _base_noproxy + ',' + vca_cidr + ',' + weavenet_cidr }}"
   when: '"weavenet" in kubernetes_cnis'
 
 - name: Adding calico CIDR to noproxy
