@@ -7,6 +7,7 @@
   command: "{{ item }}"
   with_items:
     - kubectl -n openness delete  deployment docker-registry-deployment
+    - kubectl get pods -n openness --no-headers=true | awk '/docker-registry/{print $1}'| xargs  kubectl delete -n openness pod --grace-period=0 --force
     - docker rmi -f  registry:"{{ _registry_version }}"
   changed_when: true
   ignore_errors: yes
