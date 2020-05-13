@@ -67,6 +67,9 @@
   ignore_errors: yes
   changed_when: true
 
+- name: reload firewall rules
+  command: firewall-cmd --reload
+  changed_when: false
 
 - name: copy public key from master to local ansible host
   fetch:
