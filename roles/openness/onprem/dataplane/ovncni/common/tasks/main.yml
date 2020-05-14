@@ -28,12 +28,15 @@
 #TODO: Find a working solution for selective masquerade
 - name: Add firewall rules for OVN masquerade
   command: firewall-cmd --zone=public --add-masquerade --permanent
+  ignore_errors: yes
   changed_when: true
 
 - name: Add firewall rules to accept ovn-local interface
   command: firewall-cmd --permanent --zone=trusted --change-interface=ovn-local
+  ignore_errors: yes
   changed_when: true
 
 - name: Reload firewall rules
   command: firewall-cmd --reload
+  ignore_errors: yes
   changed_when: true

@@ -57,4 +57,5 @@
 
 - name: reload firewall rules
   command: firewall-cmd --reload
+  ignore_errors: yes
   changed_when: true

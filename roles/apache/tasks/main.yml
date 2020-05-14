@@ -78,14 +78,17 @@
 
 - name: add firewall rules for Apache (http)
   command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 80 -j ACCEPT
+  ignore_errors: yes
   changed_when: true
 
 - name: add firewall rules for for Apache (https)
   command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 443 -j ACCEPT
+  ingore_errors: yes
   changed_when: true
 
 - name: reload firewall rules
   command: firewall-cmd --reload
+  ignore_errors: yes
   changed_when: false
 
 - name: enable and start httpd service
