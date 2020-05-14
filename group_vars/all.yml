@@ -177,7 +177,7 @@ ne_hddl_enable: False
 ne_nfd_enable: True
 
 ## Network Edge Helm Charts Storage Default Directory
-ne_helm_charts_default_dir: /opt/openness-helm-charts/
+ne_helm_charts_default_dir: /opt/openness-helm-charts
 
 
 ##################################################
