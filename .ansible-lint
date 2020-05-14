@@ -4,3 +4,9 @@
 ---
 skip_list:
   - '701'
+
+exclude_paths:
+  - roles/telemetry/certs/files/
+  - roles/telemetry/collectd/files/
+  - roles/telemetry/node_exporter/files/
+  - roles/telemetry/prometheus/files/

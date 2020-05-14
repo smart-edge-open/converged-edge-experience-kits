@@ -45,6 +45,10 @@
     - role: cnca/master
     - role: kubevirt/master
 
+    - role: telemetry/certs
+    - role: telemetry/prometheus
+    - role: telemetry/node_exporter
+
     - role: ngc_test/master
       when: ne_ngc_test_enable | default(False)
     - role: opae_fpga/master
@@ -63,6 +67,7 @@
   roles:
     - role: opae_fpga/worker
       when: ne_opae_fpga_enable | default(False)
+    - role: telemetry/worker
     - role: kubernetes/worker
     - role: docker_registry/worker
     - role: kubernetes/cni
@@ -97,6 +102,7 @@
     - role: machine_setup/vca_host_setup
     - role: machine_setup/conditional_reboot
     - role: machine_setup/vca_node_setup
+    - role: telemetry/worker
     - role: kubernetes/worker
     - role: kubernetes/cni
     - role: openness/network_edge/worker

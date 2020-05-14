@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: collectd
+  namespace: telemetry
+spec:
+  selector:
+    matchLabels:
+      name: collectd
+  template:
+    metadata:
+      labels:
+        name: collectd
+    spec:
+      hostNetwork: true
+      containers:
+      - name: collectd
+        image: opnfv/barometer-collectd
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: varrun
+          mountPath: /var/run
+        - name: tmp
+          mountPath: /tmp
+        - name: resctrl
+          mountPath: /sys/fs/resctrl
+        - name: cfg
+          mountPath: /opt/collectd/etc/collectd.conf.d
+        ports:
+        - containerPort: 25826
+          hostPort: 25826
+          protocol: UDP
+      volumes:
+      - name: varrun 
+        hostPath:
+          path: /var/run
+      - name: tmp
+        hostPath:
+          path: /tmp
+      - name: resctrl
+        hostPath:
+          path: /sys/fs/resctrl
+      - name: cfg
+        hostPath:
+          path: /etc/openness/collectd/configs
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: collectd-exporter
+  namespace: telemetry
+spec:
+  selector:
+    matchLabels:
+      name: collectd-exporter
+  template:
+    metadata:
+      labels:
+        name: collectd-exporter
+    spec:
+      hostNetwork: true
+      containers:
+      - name: collectd-exporter
+        image: prom/collectd-exporter
+        imagePullPolicy: IfNotPresent
+        args: ["--collectd.listen-address=:25826", "--collectd.security-level=Encrypt", "--collectd.auth-file=/collectd/auth"]
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "1"
+            memory: "128Mi"
+        ports:
+        - containerPort: 9103
+          hostPort: 9103
+        volumeMounts:
+        - name: auth
+          mountPath: /collectd/auth
+      volumes:
+      - name: auth
+        hostPath:
+          path: /etc/openness/collectd/auth/auth_file

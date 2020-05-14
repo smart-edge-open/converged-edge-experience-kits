@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create temporary directory
+  tempfile:
+    state: directory
+    suffix: prometheus
+  register: tmp_dir
+  delegate_to: localhost
+
+- name: copy namespace.yml to tmp directory
+  copy:
+    src: "namespace.yml"
+    dest: "{{ tmp_dir.path }}/"
+
+- name: create telemetry namespace
+  command: kubectl apply -f "{{ tmp_dir.path }}"/namespace.yml
+  changed_when: true
+
+- name: remove temporary directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
+
+- name: create directory for CA certificate
+  file:
+    name: "{{ _telemetry_certs_dest }}/CA"
+    state: directory
+
+- name: create root CA certificate
+  command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh telemetry {{ _telemetry_certs_dest }}/CA"
+  changed_when: true
+
+- name: create root CA secret
+  block:
+  - name: check if root CA secret exists
+    command: kubectl get secret root-ca --namespace=telemetry
+    ignore_errors: yes
+    register: get_secret_rootca
+  - name: create secret with root CA
+    shell: >
+      kubectl create secret generic root-ca
+      --from-file={{ _telemetry_certs_dest }}/CA/key.pem
+      --from-file={{ _telemetry_certs_dest }}/CA/cert.pem
+      --namespace=telemetry
+    when: get_secret_rootca.rc == 1
+
+- name: create certificate generator secret
+  block:
+  - name: check if certificate generator secret exists
+    command: kubectl get secret certgen --namespace=telemetry
+    ignore_errors: yes
+    register: get_secret_certgen
+  - name: create secret with certificate generator
+    shell: >
+      kubectl create secret generic certgen
+      --from-file={{ _git_repo_dest }}/network-edge/tls_pair.sh
+      --from-file={{ _git_repo_dest }}/network-edge/entrypoint_tls.sh
+      --namespace=telemetry
+    when: get_secret_certgen.rc == 1

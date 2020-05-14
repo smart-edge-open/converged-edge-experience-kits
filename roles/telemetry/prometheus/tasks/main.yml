@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../certs/defaults/main.yml
+
+- name: certificates for prometheus
+  block:
+  - name: create directory for server certificates
+    file:
+      name: "{{ _telemetry_certs_dest }}/prometheus"
+      state: directory
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _telemetry_certs_dest }}/CA/cert.pem"
+      dest: "{{ _telemetry_certs_dest }}/prometheus/root.pem"
+      state: link
+  - name: create server certificate signed by root CA certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh prometheus {{ _telemetry_certs_dest }}/prometheus {{ _telemetry_certs_dest }}/CA"
+  - name: delete symbolic link to root's cert
+    file:
+      path: "{{ _telemetry_certs_dest }}/prometheus/root.pem"
+      state: absent
+
+- name: open port for prometheus
+  ignore_errors: yes
+  firewalld:
+    port: 30000/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: create temporary directory
+  tempfile:
+    state: directory
+    suffix: prometheus
+  register: tmp_dir
+  delegate_to: localhost
+
+- name: copy cluster_role.yml to tmp directory
+  copy:
+    src: "cluster_role.yml"
+    dest: "{{ tmp_dir.path }}/"
+
+- name: apply cluster role
+  command: kubectl apply -f "{{ tmp_dir.path }}"/cluster_role.yml
+  changed_when: true
+
+- name: copy config_map.yml to tmp directory
+  copy:
+    src: "config_map.yml"
+    dest: "{{ tmp_dir.path }}/"
+
+- name: apply config map
+  command: kubectl apply -f "{{ tmp_dir.path }}"/config_map.yml
+  changed_when: true
+
+- name: copy deployment.yml to tmp directory
+  copy:
+    src: "deployment.yml"
+    dest: "{{ tmp_dir.path }}/"
+
+- name: deploy Prometheus
+  command: kubectl apply -f "{{ tmp_dir.path }}"/deployment.yml
+  changed_when: true
+
+- name: remove temporary directory
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
