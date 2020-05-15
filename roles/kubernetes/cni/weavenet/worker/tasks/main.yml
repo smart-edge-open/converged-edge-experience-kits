@@ -14,6 +14,10 @@
   - 6783/udp
   - 6784/udp
 
+- name: reload firewall rules
+  command: firewall-cmd --reload
+  changed_when: false
+
 - name: patch node's Pod CIDR
   command: kubectl patch node "{{ ansible_hostname }}" -p '{ "spec":{ "podCIDR":"{{ weavenet_cidr }}" }}'
   delegate_to: "{{ groups['controller_group'][0] }}"
