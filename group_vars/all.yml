@@ -114,6 +114,9 @@ kubeovn_dpdk_resources_requests: "1Gi"
 # OVS pods memory resource limits
 kubeovn_dpdk_resources_limits: "1Gi"
 
+## calico_ebpf can be enabled only when calico is Primary CNI
+calico_ebpf_enabled: false
+
 ## SR-IOV CNI
 # FPGA SRIOV Userspace
 fpga_sriov_userspace_enable: false

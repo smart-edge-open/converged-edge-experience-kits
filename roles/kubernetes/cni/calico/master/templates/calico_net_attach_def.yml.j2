@@ -16,7 +16,7 @@ spec:
     "datastore_type": "kubernetes",
     "mtu": 1440,
     "ipam": {
-      "type": "host-local",
+      "type": "{{ calico_ipam_type }}",
       "subnet": "{{ calico_cidr }}",
       "routes": [{"dst": "{{ calico_cidr }}"}]
     },

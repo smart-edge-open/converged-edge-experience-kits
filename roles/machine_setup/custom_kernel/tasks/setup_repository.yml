@@ -14,6 +14,15 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
+    when: not ( calico_ebpf_enabled )
+
+  - name: setup ebpf custom kernel repo and GPG key
+    command: rpm -Uvh "{{ ebpf_kernel_package }}"
+    args:
+      warn: false
+    register: temp_result
+    ignore_errors: yes
+    when: calico_ebpf_enabled
 
   - name: find out place for GPG key
     command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ _kernel_repo_dest }}
@@ -39,6 +48,8 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
+    when: not ( calico_ebpf_enabled )
+
   - name: setup repository for kernel | import GPG key
     rpm_key:
       state: present

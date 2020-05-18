@@ -37,6 +37,13 @@ kernel_dependencies_packages: []
 # Default value is valid for Centos 7.6-1810. Variable must be updated accordingly if using other version.
 dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm"
 
+## ebpf
+# URL or package name providing `kernel-ml and kernel-ml-devel` package when role `custom_kernel` is:
+# - disabled (commented), or
+# - skipped for specific host (`customize_kernel_skip` variable)
+# Default value is valid for Centos 7.6-1810. Variable must be updated accordingly if using other version.
+ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm"
+
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
 hugepage_size: "2M"

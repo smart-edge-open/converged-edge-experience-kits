@@ -83,6 +83,12 @@
     remote_src: yes
     creates: "{{ _dpdk_install_dir }}/README"
 
+- name: WA Fix for compilation error for rte_kni ko
+  command: sed -i 's/ -Werror//g'  "{{ _dpdk_install_dir }}/kernel/linux/kni/Makefile"
+  args:
+    warn: false
+  when: calico_ebpf_enabled
+
 - name: check if already compiled
   stat:
     path: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
