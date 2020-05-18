@@ -7,13 +7,13 @@
   block:
     - name: extract controller rootCA
       command: docker cp edgecontroller_cce_1:/artifacts/certificates/ca/cert.pem /tmp/controller-root-ca.pem
-      delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+      delegate_to: "{{ groups['controller_group'][0] }}"
 
     - name: get rootCA content
       slurp:
         src: /tmp/controller-root-ca.pem
       register: controller_rootca
-      delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+      delegate_to: "{{ groups['controller_group'][0] }}"
 
     - debug:
         msg: "{{ controller_rootca['content'] | b64decode }}"
@@ -31,6 +31,6 @@
       file:
         path: /tmp/controller-root-ca.pem
         state: absent
-      delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+      delegate_to: "{{ groups['controller_group'][0] }}"
 
   when: _download_root_ca_from_controller|bool

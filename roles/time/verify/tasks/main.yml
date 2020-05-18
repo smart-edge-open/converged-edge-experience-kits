@@ -7,7 +7,7 @@
   stat:
     path: "{{ _ntp_time_set }}"
   register: result
-  delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+  delegate_to: "{{ groups['controller_group'][0] }}"
   until: result.stat.exists
   retries: 60
   delay: 10
@@ -16,7 +16,7 @@
 - name: get controller's date
   command: date +%s
   register: controller_date
-  delegate_to: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+  delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: false
 
 - name: get node's date

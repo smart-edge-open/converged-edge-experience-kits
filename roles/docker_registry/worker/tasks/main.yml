@@ -24,7 +24,7 @@
   file:
     path: "{{ _registry_location }}/{{ ansible_host }}/"
     state: directory
-  delegate_to: "{{ _registry_ip_address }}"
+  delegate_to: "{{ _registry_host }}"
 
 - name: get client.csr certificate content
   slurp:
@@ -37,7 +37,7 @@
   copy:
     content: "{{ docker_registry_client_csr['content'] | b64decode }}"
     dest: "{{ _registry_location }}/{{ ansible_host }}/client.csr"
-  delegate_to: "{{ _registry_ip_address }}"
+  delegate_to: "{{ _registry_host }}"
 
 - name: generate client.cert from client.csr , root CA and key file
   command: "{{ item }}"
@@ -45,14 +45,14 @@
     - openssl x509 -req -in client.csr -CA ../ca.crt -CAkey ../root-ca-key.pem -days 90 -out client.cert -CAcreateserial
   args:
     chdir: "{{ _registry_location }}/{{ ansible_host }}/"
-  delegate_to: "{{ _registry_ip_address }}"
+  delegate_to: "{{ _registry_host }}"
   changed_when: true
 
 - name: get public self signed certificate content
   slurp:
     src: "{{ _registry_location }}/ca.crt"
   register: docker_registry_ca
-  delegate_to: "{{ _registry_ip_address }}"
+  delegate_to: "{{ _registry_host }}"
 - debug:
     msg: "{{ docker_registry_ca['content'] | b64decode }}"
 
@@ -65,7 +65,7 @@
   slurp:
     src: "{{ _registry_location }}/{{ ansible_host }}/client.cert"
   register: docker_registry_client
-  delegate_to: "{{ _registry_ip_address }}"
+  delegate_to: "{{ _registry_host }}"
 - debug:
     msg: "{{ docker_registry_client['content'] | b64decode }}"
 
