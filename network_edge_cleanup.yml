@@ -40,6 +40,9 @@
   - name: load kubevirt variables
     include_vars: ./roles/kubevirt/master/defaults/main.yml
 
+  - name: cleanup multus-cni
+    include_tasks: ./roles/kubernetes/cni/multus/master/tasks/cleanup.yml
+
   - name: cleanup kubevirt
     include_tasks: ./roles/kubevirt/master/tasks/cleanup.yml
 

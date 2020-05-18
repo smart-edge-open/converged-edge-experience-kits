@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 
----
-
-_multus_version: "v3.3"
-
-_multus_daemonset_url: "https://raw.githubusercontent.com/intel/multus-cni/{{ _multus_version }}/images/multus-daemonset.yml"
+# Tested on v3.3 and v3.4.1 versions. With newer versions some changes in chart might be required
+_multus_image_tag: v3.4.1
+_multus_image_name: nfvpe/multus

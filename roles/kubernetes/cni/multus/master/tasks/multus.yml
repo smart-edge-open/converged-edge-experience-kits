@@ -3,37 +3,35 @@
 
 ---
 
-- name: create temp dir
-  tempfile:
-    state: directory
-    suffix: -multus
-  register: tmp_dir
+- name: pull multus image
+  docker_image:
+    name: "{{ _multus_image_name }}"
+    tag: "{{ _multus_image_tag }}"
+    source: pull
 
-- name: download Multus daemonSet
-  get_url:
-    url: "{{ _multus_daemonset_url }}"
-    dest: "{{ tmp_dir.path }}/multus-daemonset.yml"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
+- name: tag multus image and push to docker registry
+  docker_image:
+    name: "{{ _multus_image_name }}"
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/multus"
+    tag: "{{ _multus_image_tag }}"
+    push: yes
+    source: local
 
-- name: create kustomization.yml
+- name: remove local image
+  docker_image:
+    state: absent
+    name: "{{ _multus_image_name }}"
+    tag: "{{ _multus_image_tag }}"
+
+- name: copy multus-cni chart
   copy:
-    src: kustomization.yml
-    dest: "{{ tmp_dir.path }}/kustomization.yml"
+    src: "multus-cni"
+    dest: "{{ ne_helm_charts_default_dir }}"
 
-- name: create rename_default_net.yml
-  copy:
-    src: rename_default_net.yml
-    dest: "{{ tmp_dir.path }}/rename_default_net.yml"
-
-- name: setup Multus
-  shell: >
-    set -o pipefail &&
-    kubectl kustomize . | kubectl apply -f -
-  args:
-    chdir: "{{ tmp_dir.path }}"
+- name: install multus-cni chart
+  command: >
+    "helm install multus-release {{ ne_helm_charts_default_dir }}/multus-cni
+    --set registry_ip={{ _registry_ip_address }} --set registry_port={{ _registry_port }} --set image_tag={{ _multus_image_tag }}"
   changed_when: true
 
 - name: wait for Multus to start
@@ -45,9 +43,3 @@
   delay: 10
   until: multus_started.rc == 0
   changed_when: false
-
-- name: remove temp directory
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
