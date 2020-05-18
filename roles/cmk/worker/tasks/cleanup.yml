@@ -3,11 +3,6 @@
 
 ---
 
-- name: remove CPU Manager download dir
-  file:
-    path: "{{ _cmk_download_dir }}"
-    state: absent
-
 - name: remove CPU Manager config dir
   file:
     path: /etc/cmk

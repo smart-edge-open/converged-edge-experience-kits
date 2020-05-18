@@ -2,30 +2,14 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+- name: include docker registry vars
+  include_vars: ../../../docker_registry/master/defaults/main.yml
 
-- name: download CPU Manager plugin
-  git:
-    repo: "{{ _cmk_url }}"
-    dest: "{{ _cmk_download_dir }}"
-    version: "{{ _cmk_commit }}"
-    update: no
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-
-- name: build CPU Manager image
-  shell: source /etc/profile && make
-  args:
-    chdir: "{{ _cmk_download_dir }}"
-  changed_when: true
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-
-- name: create CMK cluster-init pod, ns, svc and rbac rules
-  command: "kubectl apply -f /tmp/cmk.yml"
+# CMK deployment is called on Controller after node is ready
+- name: deploy CMK with Helm chart
+  command:  >
+    helm install cmk-release -f {{ ne_helm_charts_default_dir }}/cmk-values.yml {{ _cmk_chart_dir }}
+    --namespace=cmk-namespace
   delegate_to: "{{ groups['controller_group'][0] }}"
   run_once: true
   changed_when: true

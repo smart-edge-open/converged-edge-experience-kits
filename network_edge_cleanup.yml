@@ -43,6 +43,14 @@
   - name: cleanup kubevirt
     include_tasks: ./roles/kubevirt/master/tasks/cleanup.yml
 
+  - name: CPU Manager for Kubernetes cleanup
+    block:
+    - name: load cmk variables
+      include_vars: ./roles/cmk/master/defaults/main.yml
+    - name: cleanup cmk
+      include_tasks: ./roles/cmk/master/tasks/cleanup.yml
+    when: ne_cmk_enable | default(False)
+
   - name: load cnca variables
     include_vars: ./roles/cnca/master/defaults/main.yml
 

@@ -3,14 +3,30 @@
 
 ---
 
-_cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
-_cmk_base_url: "https://raw.githubusercontent.com/intel/CPU-Manager-for-Kubernetes/{{ _cmk_commit }}/resources"
+_cmk_main_dir: "/tmp/cmk"
 
-_cmk_yamls:
-- "authorization/cmk-namespace.yaml"
-- "authorization/cmk-serviceaccount.yaml"
-- "authorization/cmk-rbac-rules.yaml"
-- "pods/cmk-cluster-init-pod.yaml"
+_cmk_source_dir: "{{ _cmk_main_dir }}/source"
+_cmk_tag: "v1.4.1"
+_cmk_base_url: "https://github.com/intel/CPU-Manager-for-Kubernetes"
+
+_cmk_chart_dir: "{{ ne_helm_charts_default_dir }}/cpu-manager-for-kubernetes"
+
+_cmk_cek_commit: "v1.4.1"
+_cmk_cek_url: "https://raw.githubusercontent.com/intel/container-experience-kits/\
+  {{ _cmk_cek_commit }}/roles/cmk-install/charts/cpu-manager-for-kubernetes"
+
+_cmk_chart:
+- ".helmignore"
+- "Chart.yaml"
+- "values.yaml"
+
+_cmk_chart_templates:
+- "templates/NOTES.txt"
+- "templates/_helpers.tpl"
+- "templates/daemonset.yml"
+- "templates/rbac.yml"
+- "templates/serviceaccount.yml"
+- "templates/webhook.yml"
 
 cmk_num_exclusive_cores: "4"
 cmk_num_shared_cores: "1"
