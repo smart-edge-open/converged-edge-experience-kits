@@ -6,4 +6,4 @@
 - name: Early OVS-DPDK image build
   include_role:
     name: kubernetes/cni/kubeovn/common
-  when: kubeovn_dpdk and '"kubeovn" in kubernetes_cnis'
+  when: 'kubeovn_dpdk and "kubeovn" in kubernetes_cnis'
