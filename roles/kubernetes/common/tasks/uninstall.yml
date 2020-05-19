@@ -51,3 +51,8 @@
   args:
     warn: false
   changed_when: true
+
+- name: remove CNI directory
+  file:
+    name: /etc/cni/net.d
+    state: absent
