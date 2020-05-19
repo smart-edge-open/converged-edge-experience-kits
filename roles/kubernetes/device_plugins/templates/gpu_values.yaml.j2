@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# image specifies gpu plugin image repository address and related tag.
+# default repository is openness local docker registry.
+image:
+  repository: {{ _registry_ip_address }}:{{ _registry_port }}/intel/intel-gpu-plugin
+  tag: {{ _gpu_plugin.tag }}
+
+# pullPolicy secifies the pulling policy.
+pullPolicy: IfNotPresent
+
+# nodeSelector specifies the nodeSelector for gpu plugin: default is vcac-zone. 
+nodeSelector: {{ _gpu_plugin.nodeSelector }}

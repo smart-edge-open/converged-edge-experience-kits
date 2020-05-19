@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: "{{ .Release.Name }}"
+  labels:
+    app: "{{ .Release.Name }}"
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: "{{ .Release.Name }}"
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.pullPolicy }}"
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: devion
+          mountPath: /dev/ion
+          readOnly: true
+        - name: devfs
+          mountPath: /dev/bus/usb
+          readOnly: true
+        - name: sysfs1
+          mountPath: /sys/bus/usb
+          readOnly: true
+        - name: sysfs2
+          mountPath: /sys/devices
+          readOnly: true
+        - name: tmpfs
+          mountPath: /var/tmp
+        - name: kubeletsockets
+          mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+      - name: devion
+        hostPath:
+           path: /dev/ion
+           type: CharDevice
+      - name: devfs
+        hostPath:
+          path: /dev/bus/usb
+      - name: sysfs1
+        hostPath:
+          path: /sys/bus/usb
+      - name: sysfs2
+        hostPath:
+          path: /sys/devices
+      - name: tmpfs
+        hostPath:
+          path: /var/tmp
+      - name: kubeletsockets
+        hostPath:
+          path: /var/lib/kubelet/device-plugins
+      nodeSelector:
+        "{{ .Values.nodeSelector }}": "yes"

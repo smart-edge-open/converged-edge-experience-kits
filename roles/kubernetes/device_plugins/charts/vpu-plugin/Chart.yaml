@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: v2
+name: "intel-vpu-plugin"
+description: "vpu plugin for openness network edge"
+type: application
+version: 0.1.0
+appVersion: 0.17.0
