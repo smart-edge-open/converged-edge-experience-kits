@@ -4,7 +4,6 @@
 ---
 # Common platform setup playbook
 - hosts: controller_group:edgenode_group
-  strategy: free
 
   pre_tasks:
   - name: check deployment settings
