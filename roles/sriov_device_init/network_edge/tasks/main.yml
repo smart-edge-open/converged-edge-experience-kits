@@ -3,9 +3,6 @@
 
 ---
 
-- name: include sriov/common default vars
-  include_vars: ../../kubernetes/cni/sriov/common/defaults/main.yml
-
 - name: Check if VFIO-PCI loaded
   shell: lsmod | grep vfio_pci
   register: vfio_loaded
