@@ -2,72 +2,84 @@
 # Copyright © 2019 Intel Corporation
 
 ---
-- block:
-  - name: remove AF service
-    command: kubectl delete service afservice --namespace=ngc
-    ignore_errors: yes
-  - name: remove AF pod
-    command: kubectl delete pod af --namespace=ngc
-    register: af_pod_removed_status
-    ignore_errors: yes
-  - name: remove AF image
-    command: docker image rm -f af-image:1.0
-    ignore_errors: yes
-    when:
-      - af_pod_removed_status.rc == 0
+- name: include docker registry vars
+  include_vars: ../../../docker_registry/master/defaults/main.yml
 
 - block:
-  - name: remove NEF service
-    command: kubectl delete service nefservice --namespace=ngc
-    ignore_errors: yes
-  - name: remove NEF pod
-    command: kubectl delete pod nef --namespace=ngc
-    register: nef_pod_removed_status
-    ignore_errors: yes
-  - name: remove NEF image
-    command: docker image rm -f nef-image:1.0
-    ignore_errors: yes
-    when:
-      - nef_pod_removed_status.rc == 0
+    - name: uninstall the AF Helm Chart
+      command: helm uninstall af
+      ignore_errors: yes
+
+    - name: remove the AF Helm Chart
+      file:
+        path: "{{ ne_helm_charts_default_dir }}/af"
+        state: absent
+      ignore_errors: yes
+
+    - name: remove AF docker image
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/af-image:1.0"
+      ignore_errors: yes
 
 - block:
-  - name: remove OAM service
-    command: kubectl delete service oamservice --namespace=ngc
-    ignore_errors: yes
-  - name: remove OAM pod
-    command: kubectl delete pod oam --namespace=ngc
-    register: oam_pod_removed_status
-    ignore_errors: yes
-  - name: remove OAM image
-    command: docker image rm -f oam-image:1.0
-    ignore_errors: yes
-    when:
-      - oam_pod_removed_status.rc == 0
+    - name: uninstall the NEF Helm Chart
+      command: helm uninstall nef
+      ignore_errors: yes
+
+    - name: remove the NEF Helm Chart
+      file:
+        path: "{{ ne_helm_charts_default_dir }}/nef"
+        state: absent
+      ignore_errors: yes
+
+    - name: remove NEF docker image
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/nef-image:1.0"
+      ignore_errors: yes
 
 - block:
-  - name: remove cntf service
-    command: kubectl delete service cntfservice --namespace=ngc
-    ignore_errors: yes
-  - name: remove cntf pod
-    command: kubectl delete pod cntf --namespace=ngc
-    register: cntf_pod_removed_status
-    ignore_errors: yes
-  - name: remove cntf image
-    command: docker image rm -f cntf-image:1.0
-    ignore_errors: yes
-    when:
-      - cntf_pod_removed_status.rc == 0
+    - name: uninstall the OAM Helm Chart
+      command: helm uninstall oam
+      ignore_errors: yes
+
+    - name: remove the OAM Helm Chart
+      file:
+        path: "{{ ne_helm_charts_default_dir }}/oam"
+        state: absent
+      ignore_errors: yes
+
+    - name: remove OAM docker image
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/oam-image:1.0"
+      ignore_errors: yes
 
 - block:
-  - name: output hostname
-    command: hostname
-    register: hostname_output
-  - name: register k8s master node name
-    set_fact:
-      k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
-  - name: remove label on master node
-    command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=false --overwrite
+    - name: uninstall the CNTF Helm Chart
+      command: helm uninstall cntf
+      ignore_errors: yes
+
+    - name: remove the CNTF Helm Chart
+      file:
+        path: "{{ ne_helm_charts_default_dir }}/cntf"
+        state: absent
+      ignore_errors: yes
+
+    - name: remove CNTF docker image
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/cntf-image:1.0"
+      ignore_errors: yes
+
+- block:
+    - name: Forcefull cleanup any pods in terminating state
+      shell: for p in $(kubectl get pods -n ngc | grep Terminating | awk '{print $1}'); do kubectl delete pod $p -n ngc --grace-period=0 --force;done
+      ignore_errors: yes
+
+
+- block:
+    - name: output hostname
+      command: hostname
+      register: hostname_output
+    - name: register k8s master node name
+      set_fact:
+        k8s_master_node_name: "{{ hostname_output.stdout | lower }}"
+    - name: remove label on master node
+      command: kubectl label nodes {{ k8s_master_node_name }} 5g-openness=false --overwrite
 
 - name: remove firewall rules
   include_tasks: rm_firewall_rules.yml
-

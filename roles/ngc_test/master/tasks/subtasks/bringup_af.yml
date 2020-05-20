@@ -2,7 +2,6 @@
 # Copyright © 2019-2020 Intel Corporation
 
 ---
-
 - block:
   - name: create temporary custom .openness_gitconfig
     include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
@@ -61,6 +60,34 @@
   until: result is succeeded
   delay: "{{ retry_delay }}"
 
-- name: deploy AF
-  command: kubectl create -f {{ _git_repo_ngc_dir }}/scripts/networkedge/ngctest/podAF.yaml
+# Additions for Helm chart
+- name: tag AF docker image and push to docker registry
+  docker_image:
+    name: af-image
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/af-image"
+    tag: "1.0"
+    push: yes
+    source: local
+
+- name: remove the locally built AF docker image
+  docker_image:
+    state: absent
+    name: af-image
+    tag: "1.0"
+
+- name: Copy AF helm chart
+  copy:
+    src: ../charts/af
+    dest: "{{ ne_helm_charts_default_dir }}"
+
+- name: install the AF helm chart
+  command: >
+    helm install af {{ ne_helm_charts_default_dir }}/af
+    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/af-image
   changed_when: true
+
+
+
+
+
+

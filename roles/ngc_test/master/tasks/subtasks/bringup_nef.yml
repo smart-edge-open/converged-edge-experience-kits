@@ -2,22 +2,21 @@
 # Copyright © 2019-2020 Intel Corporation
 
 ---
-
 - block:
-  - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
-  - name: download modules for NEF component
-    shell: source /etc/profile && go mod download
-    args:
-      chdir: "{{ _git_repo_ngc_dir }}/cmd/nef"
-    register: result
-    retries: "{{ number_of_retries }}"
-    until: result is succeeded
-    delay: "{{ retry_delay }}"
-  - name: build NEF component
-    shell: source /etc/profile && make nef
-    args:
-      chdir: "{{ _git_repo_ngc_dir }}"
+    - name: create temporary custom .openness_gitconfig
+      include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
+    - name: download modules for NEF component
+      shell: source /etc/profile && go mod download
+      args:
+        chdir: "{{ _git_repo_ngc_dir }}/cmd/nef"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+    - name: build NEF component
+      shell: source /etc/profile && make nef
+      args:
+        chdir: "{{ _git_repo_ngc_dir }}"
   always:
     - name: remove .openness_gitconfig
       include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
@@ -53,6 +52,28 @@
   until: result is succeeded
   delay: "{{ retry_delay }}"
 
-- name: deploy NEF
-  command: kubectl create -f {{ _git_repo_ngc_dir }}/scripts/networkedge/ngctest/podNEF.yaml
+# Additions for Helm chart
+- name: tag NEF docker image and push to docker registry
+  docker_image:
+    name: nef-image
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/nef-image"
+    tag: "1.0"
+    push: yes
+    source: local
+
+- name: remove the locally built NEF docker image
+  docker_image:
+    state: absent
+    name: nef-image
+    tag: "1.0"
+
+- name: Copy NEF helm chart
+  copy:
+    src: ../charts/nef
+    dest: "{{ ne_helm_charts_default_dir }}"
+
+- name: install the NEF helm chart
+  command: >
+    helm install nef {{ ne_helm_charts_default_dir }}/nef
+    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/nef-image
   changed_when: true

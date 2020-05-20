@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: "{{ .Values.service.name }}"
+  name: af
+  namespace: "{{ .Values.namespace }}"
+spec:
+  volumes:
+  - name: shared-configs
+    hostPath:
+      path: /etc/openness/configs/ngc
+  - name: shared-certs
+    hostPath:
+      path: /etc/openness/certs/ngc
+  containers:
+  - securityContext:
+      privileged: false
+    name: af-container
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "./entrypoint.sh" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+    ports:
+    - containerPort: 8050
+      name: cnca
+    - containerPort: 8051
+      name: nef
+    volumeMounts:
+    - name: shared-configs
+      mountPath: /root/configs
+    - name: shared-certs
+      mountPath: /etc/certs
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: "Exists"
+    effect: "NoSchedule"
+  nodeSelector:
+    5g-openness: "true"
+  restartPolicy: Always

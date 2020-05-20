@@ -2,14 +2,13 @@
 # Copyright © 2019-2020 Intel Corporation
 
 ---
-
 - block:
-  - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
-  - name: build cntf component
-    shell: source /etc/profile && make cntf
-    args:
-      chdir: "{{ _git_repo_ngc_dir }}"
+    - name: create temporary custom .openness_gitconfig
+      include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
+    - name: build cntf component
+      shell: source /etc/profile && make cntf
+      args:
+        chdir: "{{ _git_repo_ngc_dir }}"
   always:
     - name: remove .openness_gitconfig
       include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
@@ -41,6 +40,28 @@
       pull: yes
       use_config_proxy: yes
 
-- name: deploy cntf
-  command: kubectl create -f {{ _git_repo_ngc_dir }}/scripts/networkedge/ngctest/podCNTF.yaml
+# Additions for Helm chart
+- name: tag CNTF docker image and push to docker registry
+  docker_image:
+    name: cntf-image
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/cntf-image"
+    tag: "1.0"
+    push: yes
+    source: local
+
+- name: remove the locally built CNTF docker image
+  docker_image:
+    state: absent
+    name: cntf-image
+    tag: "1.0"
+
+- name: Copy CNTF helm chart
+  copy:
+    src: ../charts/cntf
+    dest: "{{ ne_helm_charts_default_dir }}"
+
+- name: install the CNTF helm chart
+  command: >
+    helm install cntf {{ ne_helm_charts_default_dir }}/cntf
+    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/cntf-image
   changed_when: true

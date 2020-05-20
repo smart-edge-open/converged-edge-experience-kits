@@ -6,6 +6,9 @@
 - name: include common vars
   include_vars: ../common/defaults/main.yml
 
+- name: include docker registry vars
+  include_vars: ../../../docker_registry/master/defaults/main.yml
+
 - name: prepare firewall
   include_tasks: add_firewall_rules.yml
 
