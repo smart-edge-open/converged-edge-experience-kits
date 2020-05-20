@@ -3,6 +3,13 @@
 
 ---
 
-- name: remove multus-cni release
-  command: helm uninstall multus-release
-  changed_when: true
+- name: remove multus-cni release if exist
+  block:
+  - name: check if multus-cni release exists
+    command: helm status multus-release
+    ignore_errors: yes
+    register: get_release_multus
+  - name: remove multus-cni release
+    command: helm uninstall multus-release
+    when: get_release_multus.rc == 0
+    changed_when: true
