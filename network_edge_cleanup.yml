@@ -66,6 +66,14 @@
   - name: cleanup biosfw
     include_tasks: ./roles/biosfw/master/tasks/cleanup.yml
 
+  - name: Node Feature Discovery cleanup
+    block:
+    - name: load nfd variables
+      include_vars: ./roles/nfd/network_edge/defaults/main.yml
+    - name: cleanup nfd
+      include_tasks: ./roles/nfd/network_edge/tasks/cleanup.yml
+    when: ne_nfd_enable | default(False)
+
   - name: load network edge variables
     include_vars: ./roles/openness/network_edge/master/defaults/main.yml
 

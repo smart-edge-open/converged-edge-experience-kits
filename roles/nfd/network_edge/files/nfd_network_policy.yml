@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: {{ template "node-feature-discovery.fullname" . }}-network-policy
+{{ include "node-feature-discovery.labels" . | indent 4 }}
+  name: {{ template "node-feature-discovery.fullname" . }}-network-policy
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "node-feature-discovery.fullname" . }}-master
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ template "node-feature-discovery.fullname" . }}-worker
+    {{- if .Values.weavenet_cidr_enabled }}
+    - ipBlock:
+        cidr: {{ .Values.weavenet_cidr }}
+    {{- end }}
+    ports:
+    - protocol: TCP
+      port: 8080

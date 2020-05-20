@@ -3,56 +3,79 @@
 
 ---
 
-- name: create temp directory
-  tempfile:
-    state: directory
-    suffix: .nfd
-  register: tmp_dir
+- name: pull NFD image
+  docker_image:
+    name: "{{ _nfd_image_name }}"
+    tag: "{{ _nfd_tag }}"
+    source: pull
 
-- name: download NFD yamls
+- name: tag NFD image and push to docker registry
+  docker_image:
+    name: "{{ _nfd_image_name }}"
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery"
+    tag: "{{ _nfd_tag }}"
+    push: yes
+    source: local
+
+- name: remove local NFD image
+  docker_image:
+    state: absent
+    name: "{{ _nfd_image_name }}"
+    tag: "{{ _nfd_tag }}"
+
+- name: create NFD chart template directory
+  file:
+    name: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ _nfd_chart_dir }}"
+    - "{{ _nfd_chart_dir }}/templates"
+  changed_when: true
+
+- name: download NFD chart
   get_url:
-    url: "{{ _nfd_base_url }}/{{ item }}.template"
-    dest: "{{ tmp_dir.path }}/{{ item }}"
+    url: "{{ _nfd_cek_url }}/{{ item }}"
+    dest: "{{ _nfd_chart_dir }}"
   register: result
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
-  with_items: "{{ _nfd_yamls }}"
+  with_items: "{{ _nfd_chart }}"
 
-- name: copy files for kustomization
+- name: download NFD chart templates
+  get_url:
+    url: "{{ _nfd_cek_url }}/{{ item }}"
+    dest: "{{ _nfd_chart_dir }}/templates"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  with_items: "{{ _nfd_chart_templates }}"
+
+- name: copy nfd network policy to chart templates
   copy:
-    src: "{{ item }}"
-    dest: "{{ tmp_dir.path }}"
-  with_items: "{{ _kustomization_files_to_copy }}"
+    src: "nfd_network_policy.yml"
+    dest: "{{ _nfd_chart_dir }}/templates"
 
-- name: create NFD certificates configuration file
-  template:
-    src: "{{ item }}.j2"
-    dest: "{{ tmp_dir.path }}/{{ item }}"
-  with_items:
-  - enable_nfd_master_certs.yml
-  - enable_nfd_worker_certs.yml
+- name: set _nfd_weavenet_cidr_enabled
+  set_fact:
+    _nfd_weavenet_cidr_enabled: true
+  when: "'weavenet' in kubernetes_cnis"
 
-- name: apply NFD plugin
-  shell: >
-    set -o pipefail &&
-    kubectl kustomize . | kubectl apply -f -
-  args:
-    chdir: "{{ tmp_dir.path }}"
+# openness namespace should already exist
+- name: create openness namespace if needed
+  block:
+  - name: check if openness namespace exists
+    command: kubectl get ns openness
+    ignore_errors: yes
+    register: get_ns_openness
+  - name: create openness namespace
+    command: kubectl create namespace openness
+    when: get_ns_openness.rc == 1
+
+- name: deploy NFD with Helm chart
+  command:  >
+    helm install {{ _nfd_release_name }} {{ _nfd_chart_dir }} --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery
+    --set image.tag={{ _nfd_tag }} --set serviceAccount.name=nfd-master --set weavenet_cidr_enabled={{ _nfd_weavenet_cidr_enabled }}
+    --set weavenet_cidr={{ weavenet_cidr }} --namespace=openness
   changed_when: true
-
-- name: templates nfd network policies
-  template:
-    src: "enable_nfd_netpol_weavenet_ipblock.yml.j2"
-    dest: "{{ _nfd_netpol }}"
-  when: '"weavenet" in kubernetes_cnis'
-
-- name: apply network policy
-  command: kubectl apply -f {{ _nfd_netpol }}
-  changed_when: true
-
-- name: remove temp directory
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined

@@ -10,3 +10,4 @@ exclude_paths:
   - roles/telemetry/collectd/files/
   - roles/telemetry/node_exporter/files/
   - roles/telemetry/prometheus/files/
+  - roles/nfd/network_edge/files/
