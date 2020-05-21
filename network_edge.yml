@@ -4,6 +4,7 @@
 ---
 # Common platform setup playbook
 - hosts: controller_group:edgenode_group
+  any_errors_fatal: true
 
   pre_tasks:
   - name: check deployment settings
