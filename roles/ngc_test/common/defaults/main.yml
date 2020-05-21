@@ -2,12 +2,6 @@
 # Copyright © 2019-2020 Intel Corporation
 
 ---
-
-_epcforedge_git_repo:
-  dir: https://{{ git_repo_token }}@github.com/otcshare/epcforedge.git
-  download_dir: /opt/epcforedge
-  branch: master
-
 _configs_dest: /etc/openness/configs
 _certs_dest: /etc/openness/certs
 

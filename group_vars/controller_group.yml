@@ -65,7 +65,15 @@ os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-util
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
 _git_repo_dest: /opt/edgecontroller
 
+_epcforedge_git_repo:
+  dir: https://{{ git_repo_token }}@github.com/otcshare/epcforedge.git
+  download_dir: /opt/epcforedge
+  branch: master
+
 _offline_path: "{{ _offline_path_common }}/controller"
 _offline_archive: "offline-controller.tar.gz"
 
 _offline_download_kernel: false
+
+## Network Edge Helm Charts Storage Default Directory
+ne_helm_charts_default_dir: /opt/openness-helm-charts/

@@ -19,7 +19,7 @@
     - name: download modules
       command: "go mod download"
       args:
-        chdir: "{{ _git_repo_dest }}/cnca"
+        chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca"
       environment:
         PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
         GOPATH: "{{ _offline_path }}/golang_modules/cnca"

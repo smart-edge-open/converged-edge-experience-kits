@@ -17,6 +17,12 @@
   register: repo_folder_result
   changed_when: false
 
+- name: check if epcforedge repository folder exists
+  command: "stat {{ _epcforedge_git_repo.download_dir }}"
+  ignore_errors: true
+  register: epcforedge_repo_folder_result
+  changed_when: false
+
 - name: remove all Docker containers
   command: docker-compose rm --stop -f
   args:
@@ -24,3 +30,11 @@
   when:
     - docker_service_status.rc == 0
     - repo_folder_result.rc == 0
+
+- name: remove all Docker containers from epcforedge repository
+  command: docker-compose rm --stop -f
+  args:
+    chdir: "{{ _epcforedge_git_repo.download_dir }}"
+  when:
+    - docker_service_status.rc == 0
+    - epcforedge_repo_folder_result.rc == 0

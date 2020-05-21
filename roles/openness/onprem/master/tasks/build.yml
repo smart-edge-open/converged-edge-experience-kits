@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: check if a backup of original .env file already exists
   stat:
     path: "{{ _git_repo_dest }}/.env.ansible.backup"
@@ -20,70 +19,98 @@
     src: .env.j2
     dest: "{{ _git_repo_dest }}/.env"
 
+- name: copy generated .env file to epcforedge repo
+  template:
+    src: .env.j2
+    dest: "{{ _epcforedge_git_repo.download_dir }}/.env"
+
 - name: offline | build docker images
   block:
-  - name: offline | import images
-    shell: docker load < {{ _offline_docker_images_path }}/{{ item }}
-    with_items:
-    - mysql.tar
-    - cce.tar
-    - ui-deps-image.tar
-    - cups-deps-image.tar
-    - cnca-deps-image.tar
-    - landing-deps-image.tar
-    - node.tar
+    - name: offline | import images
+      shell: docker load < {{ _offline_docker_images_path }}/{{ item }}
+      with_items:
+        - mysql.tar
+        - cce.tar
+        - ui-deps-image.tar
+        - cups-deps-image.tar
+        - cnca-deps-image.tar
+        - landing-deps-image.tar
+        - node.tar
 
-  - name: offline | customize docker-compose.yml - use cached images
-    lineinfile:
-      path: "{{ _git_repo_dest }}/docker-compose.yml"
-      insertafter: 'context: ./ui/{{ item.dir }}'
-      line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
-    with_items:
-    - { image: "cce-ui", dir: "controller" }
-    - { image: "cups-ui", dir: "cups" }
-    - { image: "cnca-ui", dir: "cnca" }
-    - { image: "landing-ui", dir: "landing" }
+    - name: offline | customize docker-compose.yml - use cached images
+      lineinfile:
+        path: "{{ _git_repo_dest }}/docker-compose.yml"
+        insertafter: "context: ./ui/{{ item.dir }}"
+        line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
+      with_items:
+        - { image: "cce-ui", dir: "controller" }
+        - { image: "landing-ui", dir: "landing" }
 
-  # This is workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
-  # Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
-  # - not counting toward the |# resulting in |0 prepended to commands.
-  # So on proxy-less offline machine docker will not prepend it resulting in being two different RUN commands for docker
-  - name: offline | check if image was built with proxy
-    shell: docker history cce-ui-deps-image | grep -q "|0"
-    ignore_errors: yes
-    register: docker_history_ui
-  - name: create .docker dir
-    file:
-      path: /root/.docker
-      state: directory
-    when: docker_history_ui.rc == 0
-  - name: offline | add dummy noProxy
-    copy:
-      dest: /root/.docker/config.json
-      content: |
-        { "proxies": { "default": { "noProxy": "" } } }
-    when: docker_history_ui.rc == 0
+    - name: offline | customize docker-compose.yml from epcforedge repo - use cached images
+      lineinfile:
+        path: "{{ _epcforedge_git_repo.download_dir }}/docker-compose.yml"
+        insertafter: "context: ./ui/{{ item.dir }}"
+        line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
+      with_items:
+        - { image: "cups-ui", dir: "cups" }
+        - { image: "cnca-ui", dir: "cnca" }
 
-  - name: offline | finish building UI images
-    command: docker-compose build ui cups-ui cnca-ui landing-ui
-    args:
-      chdir: "{{ _git_repo_dest }}"
+    # This is workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
+    # Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
+    # - not counting toward the |# resulting in |0 prepended to commands.
+    # So on proxy-less offline machine docker will not prepend it resulting in being two different RUN commands for docker
+    - name: offline | check if image was built with proxy
+      shell: docker history cce-ui-deps-image | grep -q "|0"
+      ignore_errors: yes
+      register: docker_history_ui
+    - name: create .docker dir
+      file:
+        path: /root/.docker
+        state: directory
+      when: docker_history_ui.rc == 0
+    - name: offline | add dummy noProxy
+      copy:
+        dest: /root/.docker/config.json
+        content: |
+          { "proxies": { "default": { "noProxy": "" } } }
+      when: docker_history_ui.rc == 0
+
+    - name: offline | finish building UI images
+      command: docker-compose build ui cups-ui cnca-ui landing-ui
+      args:
+        chdir: "{{ _git_repo_dest }}"
   when: _offline_mode
 
 - name: online build controller docker images
   block:
-  - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
-  - name: build controller docker images
-    make:
-      chdir: "{{ _git_repo_dest }}"
-      target: build
-    register: build_controller_output
-  - debug:
-      msg: "{{ build_controller_output.stdout }}"
+    - name: create temporary custom .openness_gitconfig
+      include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
+    - name: build controller docker images
+      make:
+        chdir: "{{ _git_repo_dest }}"
+        target: build
+      register: build_controller_output
+    - debug:
+        msg: "{{ build_controller_output.stdout }}"
   always:
-  - name: remove temporary .openness_gitconfig
-    include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
+    - name: remove temporary .openness_gitconfig
+      include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
+  when: not _offline_mode
+
+- name: online build core network UI docker images from epcforedge repository
+  block:
+    - name: create temporary custom .openness_gitconfig
+      include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
+    - name: build controller docker images from epcforedge repository
+      make:
+        chdir: "{{ _epcforedge_git_repo.download_dir }}"
+        target: build
+      register: build_core_network_ui_images_output
+    - debug:
+        msg: "{{ build_core_network_ui_images_output.stdout }}"
+  always:
+    - name: remove temporary .openness_gitconfig
+      include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
   when: not _offline_mode
 
 - name: start controller
@@ -92,6 +119,16 @@
     target: all-up
   register: start_controller_output
 
+- name: start controller core network UI docker images from epcforedge repository
+  make:
+    chdir: "{{ _epcforedge_git_repo.download_dir }}"
+    target: ui-up
+  register: start_controller_images_epcforedge_output
+
 - name: controller start output
   debug:
     msg: "{{ start_controller_output.stdout }}"
+
+- name: controller images from epcforedge start output
+  debug:
+    msg: "{{ start_controller_images_epcforedge_output.stdout }}"

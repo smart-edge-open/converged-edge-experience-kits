@@ -2,8 +2,13 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Remove old repository folder
   file:
     path: "{{ _git_repo_dest }}"
     state: absent
+
+- name: Remove old epcforedge repository folder
+  file:
+    path: "{{ _epcforedge_git_repo.download_dir }}"
+    state: absent
+  when: "'controller_group' in group_names"
