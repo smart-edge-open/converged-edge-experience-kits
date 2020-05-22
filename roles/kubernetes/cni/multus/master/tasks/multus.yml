@@ -2,6 +2,15 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+- name: wait for docker registry to start
+  shell: >
+    set -o pipefail &&
+    kubectl get pods --field-selector status.phase=Running -n openness | grep -q docker-registry-deployment
+  register: docker_registry_started
+  retries: 60
+  delay: 15
+  until: docker_registry_started.rc == 0
+  changed_when: false
 
 - name: pull multus image
   docker_image:
