@@ -14,8 +14,7 @@
 - name: generate client key and csr file
   command: "{{ item }}"
   with_items:
-    - openssl ecparam -genkey -name secp384r1 -out "client.key"
-    - openssl req -new -key client.key -out client.csr -subj "/CN={{ ansible_host }}"
+    - openssl req -new -sha256 -nodes -out client.csr -newkey rsa:2048 -keyout client.key -subj "/CN={{ ansible_host }}"
   args:
     chdir: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
   changed_when: true
@@ -42,7 +41,7 @@
 - name: generate client.cert from client.csr , root CA and key file
   command: "{{ item }}"
   with_items:
-    - openssl x509 -req -in client.csr -CA ../ca.crt -CAkey ../root-ca-key.pem -days 90 -out client.cert -CAcreateserial
+    - openssl x509 -req -in client.csr -CA ../ca.crt -CAkey ../ca.key -days 1000 -out client.cert -CAcreateserial
   args:
     chdir: "{{ _registry_location }}/{{ ansible_host }}/"
   delegate_to: "{{ _registry_host }}"
@@ -73,3 +72,9 @@
   copy:
     content: "{{ docker_registry_client['content'] | b64decode }}"
     dest: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/client.cert
+
+- name: remove client.csr from worker node after certificate generation
+  file:
+    path: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/client.csr"
+    state: absent
+  ignore_errors: yes

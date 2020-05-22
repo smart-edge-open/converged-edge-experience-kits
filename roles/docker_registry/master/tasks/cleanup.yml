@@ -8,6 +8,7 @@
   with_items:
     - kubectl -n openness delete  deployment docker-registry-deployment
     - kubectl get pods -n openness --no-headers=true | awk '/docker-registry/{print $1}'| xargs  kubectl delete -n openness pod --grace-period=0 --force
+    - kubectl -n openness delete secret  docker-registry-rootca docker-registry-server-cert
     - docker rmi -f  registry:"{{ _registry_version }}"
   changed_when: true
   ignore_errors: yes
@@ -21,5 +22,11 @@
 - name: delete docker-registry file
   file:
     path: "{{ _registry_location }}"
+    state: absent
+  ignore_errors: yes
+
+- name: remove file registry_curl_cmd.sh
+  file:
+    path: "{{ ansible_env.HOME }}/registry_curl_cmd.sh"
     state: absent
   ignore_errors: yes

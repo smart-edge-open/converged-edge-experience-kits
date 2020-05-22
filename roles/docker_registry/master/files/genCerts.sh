@@ -2,176 +2,39 @@
 
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
+set -eo pipefail
 
-helpPrint()
-{
+if [[ $# -eq 0 ]] ; then
    echo ""
-   echo "Usage: $0 [-t sanType -h {sanValue | *}] | *"
-   echo -e "\t-t SAN type: could be IP or DNS"
-   echo -e "\t-h subject alternative names list: could be one or more IP addressess or domain names separated by space"
-   echo -e "\t"
-   echo -e "Ex: $0 -t DNS -h afservice nefservice localhost"
-   echo -e "    $0 -t IP -h 172.168.10.12 172.168.10.56"
-   echo -e "    $0 -t DNS -h controller -t IP -h 172.168.10.12 172.168.10.56"
-   echo -e "    $0 -t IP -h 172.168.10.12 -t DNS -h afservice nefservice localhost"
-   echo -e ""
+   echo "Usage: $0 <cn_name> : give cn name as server ip address" 
+   echo -e "Example:"
+   echo -e "    $0 192.168.1.1" 
    exit 1 # Exit with help
-}
-
-Hostname_count=0
-Hostname_flag=0
-IP_count=0
-IP_flag=0
-subjstr=""
-subj1=""
-tupleStarted=0
-
-while [ "$1" != "" ]; 
-do
-   case $1 in
-      -t )
-         if [ $tupleStarted == 1 ]
-         then
-            echo "Missing -h option"
-            helpPrint
-         else
-            tupleStarted=1
-         fi
-         if [ $Hostname_flag == 1 ]
-         then
-            Hostname_flag=0
-         fi
-         if [ $IP_flag == 1 ]
-         then
-            IP_flag=0
-         fi
-         shift 
-         if [ "$1" == IP ] || [ "$1" == DNS ] 
-         then
-            sanType="$1"
-         else
-            echo "Missing/Wrong sanType"
-            helpPrint
-         fi
-         ;;
-      -h )
-         if [ "$sanType" == "" ] || [ $Hostname_flag != 0 ] || [ $IP_flag != 0 ]
-         then
-            echo "Missing -t option"
-            helpPrint
-         fi
-         shift
-         if [ "$1" != "" ] && [ "$1" != "-t" ] && [ "$1" != "-h" ]
-         then
-            tupleStarted=0
-            if [ "$subj1" == "" ]
-            then
-               subj1="$1"
-            fi
-            if [ "$sanType" == DNS ]
-            then
-               Hostname_flag=$((Hostname_flag+1))
-               Hostname_count=$((Hostname_count+1))
-               if [ "$subjstr" == "" ]
-               then
-                  subjstr=$sanType"."$Hostname_count":""$1"
-               else
-                  subjstr+=","$sanType"."$Hostname_count":""$1"
-               fi
-            fi
-            if [ "$sanType" == IP ]
-            then
-               IP_flag=$((IP_flag+1))
-               IP_count=$((IP_count+1))
-               if [ "$subjstr" == "" ]
-               then 
-                  subjstr=$sanType"."$IP_count":""$1"
-               else
-                  subjstr+=","$sanType"."$IP_count":""$1"
-               fi
-            fi
-         else
-            echo "Missing argument for -h option"
-            helpPrint
-         fi
-         ;;
-      ? ) helpPrint # Print help
-         ;;
-      * )
-         if [ $Hostname_flag == 1 ]
-         then
-            Hostname_count=$((Hostname_count+1))
-            subjstr+=","$sanType"."$Hostname_count":""$1"
-         elif [ $IP_flag == 1 ]
-         then
-            IP_count=$((IP_count+1))
-            subjstr+=","$sanType"."$IP_count":""$1"
-         else
-            echo "Incorrect Input"
-            helpPrint
-         fi
-         ;;
-  esac
-  shift
-done
-
-if [ $tupleStarted != 0 ]
-then
-   echo "Missing -h option "
-   helpPrint
 fi
+echo "Generate Docker registry certificate"
 
-if [ -z "$subj1" ] || [ -z "$subjstr" ] || [ -z "$sanType" ]
-then
-   echo "One of the input parameters missing"
-   helpPrint
-fi
-
-echo "Running with input parameters:"
-echo "$subjstr"
-
-ROOT_CA_NAME=DOCKER-REGISTRY
+root_cn_name="docker-registry"
+server_cn_name=$1
 
 echo "Generating RootCA Key and Cert:"
-openssl ecparam -genkey -name secp384r1 -out "root-ca-key.pem"
-if (($?))
-then 
-   echo "RootCA key generation failed"
-   exit 1
-fi
+openssl ecparam -genkey -name secp384r1 -out "ca.key"
 
-openssl req -key "root-ca-key.pem" -new -x509 -days 90 -subj "/CN=$ROOT_CA_NAME" -out "root-ca-cert.pem" 
-if (($?))
-then 
-   echo "RootCA cert generation failed"
-   exit 1
-fi
+openssl req -key "ca.key" -new -x509 -days 1000 -subj "/CN=$root_cn_name" -out "ca.crt" 
 
 echo "Generating Server Key and Cert:"
-openssl ecparam -genkey -name secp384r1 -out "server-key.pem"
-if (($?))
-then 
-   echo "Server key generation failed"
-   exit 1
-fi
+openssl ecparam -genkey -name secp384r1 -out "server.key"
 
-openssl req -new -key "server-key.pem" -out "server-request.csr" -subj "/CN=$subj1"
-if (($?))
-then 
-   echo "Server CSR generation failed"
-   exit 1
-fi
+openssl req -new -key "server.key"  -out "server.csr" -subj "/CN=$server_cn_name"
 rm -f extfile.cnf
-echo "subjectAltName = $subjstr" >> extfile.cnf
-openssl x509 -req -extfile extfile.cnf -in "server-request.csr" -CA "root-ca-cert.pem" -CAkey "root-ca-key.pem" -days 90 -out "server-cert.pem" -CAcreateserial
-if (($?))
-then 
-   echo "Server cert generation failed"
-   exit 1
-fi
+echo "subjectAltName = IP.1:$server_cn_name" >> extfile.cnf
 
-echo "Print CA Cert Pem:"
-openssl x509 -in root-ca-cert.pem -text -noout
-echo "Print Server Cert Pem:"
-openssl x509 -in server-cert.pem -text -noout
-echo "Successfully completed"
+echo "Generate server.cert for  registry server  from root ca.key and ca.crt"
+openssl x509 -req -extfile extfile.cnf -in "server.csr" -CA "ca.crt" -CAkey "ca.key" -days 1000 -out "server.cert" -CAcreateserial
+
+echo "Generate Master Node  registry access client.key and client.csr"
+openssl req -new -sha256 -nodes -out client.csr -newkey rsa:2048 -keyout client.key -subj "/CN=$server_cn_name"
+
+echo "Generate client.cert for  Master Node  from root ca.key and ca.crt"
+
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.cert -days 1000
+

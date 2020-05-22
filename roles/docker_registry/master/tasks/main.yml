@@ -30,10 +30,10 @@
 - name: docker-registry create self signed certificate
   command : "{{ item }}"
   with_items:
-    - rm -rf *.pem extfile.cnf root-ca-cert.srl server-request.csr ca.crt
-    - ./genCerts.sh -t IP -h  {{ _registry_ip_address }}
-    - mv  root-ca-cert.pem ca.crt
-    - cp -rf  ca.crt /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/
+    - rm -rf extfile.cnf *.key *.crt *.csr *.cert
+    - ./genCerts.sh  {{ _registry_ip_address }}
+    - cp -rf  ca.crt client.cert client.key /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/
+    - rm -rf  client.csr client.cert client.key
   args:
     chdir: "{{ _registry_location }}"
   changed_when: true
@@ -43,6 +43,7 @@
   with_items:
     - kubectl -n openness delete deployment docker-registry-deployment
     - kubectl get pods -n openness --no-headers=true | awk '/docker-registry/{print $1}'| xargs  kubectl delete -n openness pod --grace-period=0 --force
+    - kubectl -n openness delete secret  docker-registry-rootca docker-registry-server-cert
   ignore_errors: yes
   changed_when: true
 
@@ -55,6 +56,9 @@
 - name: deploy docker-registry pod on master node
   command: "{{ item }}"
   with_items:
+    - kubectl -n openness create secret generic docker-registry-rootca  --from-file=./ca.key --from-file=./ca.crt
+    - kubectl -n openness create secret generic docker-registry-server-cert --from-file=./server.key --from-file=./server.cert
+    - rm -rf server.key server.csr server.cert
     - kubectl apply -f docker_registry.yml
   args:
     chdir: "{{ _registry_location }}"
@@ -64,15 +68,12 @@
   command: "{{ item }}"
   with_items:
     - firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 5000 -j ACCEPT
+    - firewall-cmd --reload
   ignore_errors: yes
   changed_when: true
 
-- name: reload firewall rules
-  command: firewall-cmd --reload
-  changed_when: false
-
-- name: copy public key from master to local ansible host
-  fetch:
-    src: "{{ _registry_location }}/ca.crt"
-    dest: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/ca.crt
-    flat: yes
+- name: copy docker registry curl command script file registry_curl_cmd.sh.j2
+  template:
+    src: registry_curl_cmd.sh.j2
+    dest:  "{{ ansible_env.HOME }}/registry_curl_cmd.sh"
+    mode: '0744'

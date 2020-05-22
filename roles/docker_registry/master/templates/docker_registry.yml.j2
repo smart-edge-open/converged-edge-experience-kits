@@ -33,13 +33,15 @@ spec:
         volumeMounts:
         - name: docker-registry-data
           mountPath: /var/lib/registry
-        - name: registry-path
-          mountPath: /opt/docker-registry
+        - name: docker-registry-certificate
+          mountPath: /opt/registry-certificate
         env:
         - name: REGISTRY_HTTP_TLS_CERTIFICATE
-          value: /opt/docker-registry/server-cert.pem
+          value: /opt/registry-certificate/server.cert
         - name: REGISTRY_HTTP_TLS_KEY
-          value: /opt/docker-registry/server-key.pem
+          value: /opt/registry-certificate/server.key
+        - name: REGISTRY_HTTP_TLS_CLIENTCAS
+          value: "[ '/opt/registry-certificate/ca.crt' ]"
         - name: REGISTRY_STORAGE_DELETE_ENABLED
           value: "true"
         ports:
@@ -50,6 +52,10 @@ spec:
       - name: docker-registry-data
         hostPath:
           path: /var/lib/registry
-      - name: registry-path
-        hostPath:
-          path: /opt/docker-registry
+      - name: docker-registry-certificate
+        projected:
+          sources:
+          - secret:
+              name: docker-registry-rootca
+          - secret:
+              name: docker-registry-server-cert
