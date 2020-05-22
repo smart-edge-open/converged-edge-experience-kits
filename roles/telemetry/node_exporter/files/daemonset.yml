@@ -22,6 +22,10 @@ spec:
     spec:
       hostNetwork: true
       hostPID: true
+      tolerations:
+      - effect: NoSchedule
+        key: cmk
+        operator: Exists
       containers:
       - name:  node-exporter
         image: prom/node-exporter:v1.0.0-rc.0

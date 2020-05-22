@@ -73,6 +73,31 @@
     command: kubectl create namespace openness
     when: get_ns_openness.rc == 1
 
+- name: apply CMK worker patch
+  block:
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
+  - name: apply CMK worker patch
+    patch:
+      src: worker.yml.patch
+      dest: "{{ _nfd_chart_dir }}/templates/worker.yml"
+      strip: 1
+      binary: no
+      backup: no
+  - name: find backup files
+    find:
+      paths: "{{ _nfd_chart_dir }}/templates"
+      patterns: "*.orig"
+    register: backup_files
+  - name: remove backup files
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ backup_files.files }}"
+    changed_when: true
+
 - name: deploy NFD with Helm chart
   command:  >
     helm install {{ _nfd_release_name }} {{ _nfd_chart_dir }} --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery
