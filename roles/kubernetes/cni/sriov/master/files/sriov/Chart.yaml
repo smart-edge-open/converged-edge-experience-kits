@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: v2
+name: sriov-cni
+description: A Helm chart for sriov-cni and sriov-dp
+type: application
+version: 0.1.0

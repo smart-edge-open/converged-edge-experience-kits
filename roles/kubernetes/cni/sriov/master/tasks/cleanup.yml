@@ -3,8 +3,23 @@
 
 ---
 
-- name: load common variables for SR-IOV
-  include_vars: ../../common/defaults/main.yml
+- name: remove SR-IOV CNI and device plugin release if exist
+  block:
+  - name: check if SR-IOV CNI and device plugin release exists
+    command: helm status sriov-release
+    ignore_errors: yes
+    register: get_release_sriov
+  - name: remove SR-IOV CNI and device plugin release
+    command: helm uninstall sriov-release
+    when: get_release_sriov.rc == 0
+    changed_when: true
 
-- name: run common cleanup for SR-IOV
-  include_tasks: ../../common/tasks/cleanup.yml
+- name: remove downloaded artifacts
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ _sriov_cni.download_dir }}"
+  - "{{ _sriov_dev_plugin.download_dir }}"
+
+# Docker images are removed during Docker's cleanup

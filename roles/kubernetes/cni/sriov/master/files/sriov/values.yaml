@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+registry_ip: ""
+registry_port: ""
+
+sriov_kubevirt_enable: false
+fpga_sriov_userspace_enable: false
+
+#sriov dev plugin values:
+namespace: kube-system
+image:
+  repository: nfvpe/sriov-device-plugin
+  tag: latest
+  pullPolicy: IfNotPresent
+log:
+  level: 10
