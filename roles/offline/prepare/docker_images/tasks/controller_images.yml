@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: create .env file with github token
   copy:
     content: |
@@ -13,7 +12,7 @@
   copy:
     content: |
       GITHUB_TOKEN={{ git_repo_token }}
-    dest: "{{ _epcforedge_git_repo.download_dir }}/.env"
+    dest: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/.env"
 
 - name: customize docker-compose.yml
   lineinfile:
@@ -26,7 +25,7 @@
 
 - name: customize docker-compose.yml from epcforedge repo
   lineinfile:
-    path: "{{ _epcforedge_git_repo.download_dir }}/docker-compose.yml"
+    path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
     insertafter: "context: ./ui/{{ item.dir }}"
     line: "      target: {{ item.image }}-deps-image"
   with_items:
@@ -44,13 +43,12 @@
 
 - name: change docker-compose.yml images from epcforedge repo names
   lineinfile:
-    path: "{{ _epcforedge_git_repo.download_dir }}/docker-compose.yml"
+    path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
     regexp: "    image: {{ item.original }}"
     line: "    image: {{ item.new }}"
   with_items:
     - { original: "cups", new: "cups-ui-deps-image" }
     - { original: "cnca", new: "cnca-ui-deps-image" }
-
 
 - name: pull, build & save controller images
   block:
@@ -63,13 +61,13 @@
     - name: build cups-ui image
       command: docker-compose build cups-ui
       args:
-        chdir: "{{ _epcforedge_git_repo.download_dir }}"
+        chdir: "{{ _epcforedge_git_repo.download_dir }}cnca/ui/"
       register: build_cups_output
 
     - name: build cnca-ui image
       command: docker-compose build cnca-ui
       args:
-        chdir: "{{ _epcforedge_git_repo.download_dir }}"
+        chdir: "{{ _epcforedge_git_repo.download_dir }}cnca/ui/"
       register: build_cnca_output
 
     - name: build landing-ui image
@@ -86,19 +84,19 @@
 
     - name: build NFD master image
       block:
-      - name: create temporary custom .openness_gitconfig
-        include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
-      - name: build NFD master binary
-        shell: source /etc/profile && go build -o dist/nfd-master ./cmd/nfd-master
-        args:
-          chdir: "{{ _git_repo_dest }}"
-          creates: "{{ _git_repo_dest }}/dist/nfd-master"
-      - name: build Docker image
-        command: docker-compose build nfd-master
-        args:
-          chdir: "{{ _git_repo_dest }}"
-      - name: remove temporary .openness_gitconfig
-        include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
+        - name: create temporary custom .openness_gitconfig
+          include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
+        - name: build NFD master binary
+          shell: source /etc/profile && go build -o dist/nfd-master ./cmd/nfd-master
+          args:
+            chdir: "{{ _git_repo_dest }}"
+            creates: "{{ _git_repo_dest }}/dist/nfd-master"
+        - name: build Docker image
+          command: docker-compose build nfd-master
+          args:
+            chdir: "{{ _git_repo_dest }}"
+        - name: remove temporary .openness_gitconfig
+          include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
 
     - name: pull mysql image
       command: docker-compose pull --quiet mysql
@@ -113,48 +111,48 @@
     - name: save all images
       shell: docker save "{{ item.image }}" > "{{ _offline_docker_images_path }}/{{ item.filename }}"
       with_items:
-      - { image: "mysql", filename: "mysql.tar" }
-      - { image: "cce", filename: "cce.tar" }
-      - { image: "cce-ui-deps-image", filename: "ui-deps-image.tar" }
-      - { image: "cups-ui-deps-image", filename: "cups-deps-image.tar" }
-      - { image: "cnca-ui-deps-image", filename: "cnca-deps-image.tar" }
-      - { image: "landing-ui-deps-image", filename: "landing-deps-image.tar" }
-      - { image: "node:lts-alpine", filename: "node.tar" }
-      - { image: "nfd-master", filename: "nfd-master.tar" }
+        - { image: "mysql", filename: "mysql.tar" }
+        - { image: "cce", filename: "cce.tar" }
+        - { image: "cce-ui-deps-image", filename: "ui-deps-image.tar" }
+        - { image: "cups-ui-deps-image", filename: "cups-deps-image.tar" }
+        - { image: "cnca-ui-deps-image", filename: "cnca-deps-image.tar" }
+        - { image: "landing-ui-deps-image", filename: "landing-deps-image.tar" }
+        - { image: "node:lts-alpine", filename: "node.tar" }
+        - { image: "nfd-master", filename: "nfd-master.tar" }
   always:
-  - name: remove .env
-    file:
-      path: "{{ _git_repo_dest }}/.env"
-      state: absent
-  - name: remove docker-compose.yml customization
-    lineinfile:
-      path: "{{ _git_repo_dest }}/docker-compose.yml"
-      line: '      target: {{ item }}-deps-image'
-      state: absent
-    with_items:
-    - cce-ui
-    - landing-ui
-  - name: remove docker-compose.yml from epcforedge repo customization
-    lineinfile:
-      path: "{{ _epcforedge_git_repo.download_dir }}/docker-compose.yml"
-      line: '      target: {{ item }}-deps-image'
-      state: absent
-    with_items:
-    - cups-ui
-    - cnca-ui
-  - name: restore docker-compose.yml images names
-    lineinfile:
-      path: "{{ _git_repo_dest }}/docker-compose.yml"
-      regexp: "    image: {{ item.new }}"
-      line: "    image: {{ item.original }}"
-    with_items:
-      - { original: "ui", new: "cce-ui-deps-image" }
-      - { original: "landing", new: "landing-ui-deps-image" }
-  - name: restore docker-compose.yml images from epcforedge repo names
-    lineinfile:
-      path: "{{ _epcforedge_git_repo.download_dir }}/docker-compose.yml"
-      regexp: "    image: {{ item.new }}"
-      line: "    image: {{ item.original }}"
-    with_items:
-      - { original: "cups", new: "cups-ui-deps-image" }
-      - { original: "cnca", new: "cnca-ui-deps-image" }
+    - name: remove .env
+      file:
+        path: "{{ _git_repo_dest }}/.env"
+        state: absent
+    - name: remove docker-compose.yml customization
+      lineinfile:
+        path: "{{ _git_repo_dest }}/docker-compose.yml"
+        line: "      target: {{ item }}-deps-image"
+        state: absent
+      with_items:
+        - cce-ui
+        - landing-ui
+    - name: remove docker-compose.yml from epcforedge repo customization
+      lineinfile:
+        path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
+        line: "      target: {{ item }}-deps-image"
+        state: absent
+      with_items:
+        - cups-ui
+        - cnca-ui
+    - name: restore docker-compose.yml images names
+      lineinfile:
+        path: "{{ _git_repo_dest }}/docker-compose.yml"
+        regexp: "    image: {{ item.new }}"
+        line: "    image: {{ item.original }}"
+      with_items:
+        - { original: "ui", new: "cce-ui-deps-image" }
+        - { original: "landing", new: "landing-ui-deps-image" }
+    - name: restore docker-compose.yml images from epcforedge repo names
+      lineinfile:
+        path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
+        regexp: "    image: {{ item.new }}"
+        line: "    image: {{ item.original }}"
+      with_items:
+        - { original: "cups", new: "cups-ui-deps-image" }
+        - { original: "cnca", new: "cnca-ui-deps-image" }

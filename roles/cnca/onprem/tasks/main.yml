@@ -10,11 +10,11 @@
 - name: build CNCA plugin
   shell: source /etc/profile && GOPATH="{{ _gopath }}" go build -ldflags "-X cnca.HTTP2ClientTLSCAPath={{ _certs_dest }}/ngc" -o "{{ _cnca_plugin_name }}"
   args:
-    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/"
+    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/cli/"
   changed_when: true
 
 - name: install CNCA plugin
   command: mv "{{ _cnca_plugin_name }}" "{{ _cnca_plugin_dest }}"
   args:
-    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/"
+    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/cli/"
   changed_when: true

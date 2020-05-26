@@ -2,11 +2,10 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: download modules for kube-cnca plugin
   shell: source /etc/profile && go mod download
   args:
-    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/"
+    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/cli"
   register: result
   retries: "{{ number_of_retries }}"
   until: result is succeeded
@@ -16,11 +15,11 @@
 - name: build kube-cnca plugin
   shell: source /etc/profile && go build -ldflags "-X cnca.HTTP2ClientTLSCAPath={{ _certs_dest }}/ngc" -o "{{ _cnca_plugin_name }}"
   args:
-    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/"
+    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/cli"
   changed_when: true
 
 - name: install kube-cnca plugin
   command: mv "{{ _cnca_plugin_name }}" "{{ _cnca_plugin_dest }}"
   args:
-    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/"
+    chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/cli"
   changed_when: true
