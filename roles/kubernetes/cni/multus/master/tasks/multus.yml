@@ -37,11 +37,18 @@
     src: "multus-cni"
     dest: "{{ ne_helm_charts_default_dir }}"
 
-- name: install multus-cni chart
-  command: >
-    helm install multus-release {{ ne_helm_charts_default_dir }}/multus-cni
-    --set registry_ip={{ _registry_ip_address }} --set registry_port={{ _registry_port }} --set image_tag={{ _multus_image_tag }}
-  changed_when: true
+- name: install multus chart
+  block:
+  - name: check if multus release already exists
+    command: helm status multus-release
+    ignore_errors: yes
+    register: get_release_multus
+  - name: install multus-cni chart
+    command: >
+      helm install multus-release {{ ne_helm_charts_default_dir }}/multus-cni
+      --set registry_ip={{ _registry_ip_address }} --set registry_port={{ _registry_port }} --set image_tag={{ _multus_image_tag }}
+    when: get_release_multus.rc != 0
+    changed_when: true
 
 - name: wait for Multus to start
   shell: >
