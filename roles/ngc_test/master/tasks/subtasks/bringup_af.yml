@@ -49,7 +49,8 @@
 
 - name: build AF docker image
   docker_image:
-    name: af-image:1.0
+    name: "{{ _image_name.af }}"
+    tag: "{{ _image_tag.af }}"
     source: build
     build:
       path: "{{ _git_repo_ngc_build_dir }}/networkedge/af"
@@ -61,30 +62,48 @@
   delay: "{{ retry_delay }}"
 
 # Additions for Helm chart
+- name: remove af release if exist
+  block:
+    - name: check if af release exists
+      command: helm status "{{ _helm_release_name.af }}"
+      ignore_errors: yes
+      register: get_release_af
+    - name: remove af release
+      command: helm uninstall "{{ _helm_release_name.af }}"
+      when: get_release_af.rc == 0
+      changed_when: true
+
 - name: tag AF docker image and push to docker registry
   docker_image:
-    name: af-image
-    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/af-image"
-    tag: "1.0"
+    name: "{{ _image_name.af }}"
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _image_name.af }}"
+    tag: "{{ _image_tag.oam }}"
     push: yes
     source: local
 
 - name: remove the locally built AF docker image
   docker_image:
     state: absent
-    name: af-image
-    tag: "1.0"
+    name: "{{ _image_name.af }}"
+    tag: "{{ _image_tag.af }}"
 
 - name: Copy AF helm chart
   copy:
     src: ../charts/af
     dest: "{{ ne_helm_charts_default_dir }}"
 
+# retry required since as part of  the previous uninstallation if the
+# pods are still not completely deleted as it might take some time
 - name: install the AF helm chart
   command: >
-    helm install af {{ ne_helm_charts_default_dir }}/af
-    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/af-image
+    helm install {{ _helm_release_name.af }} {{ ne_helm_charts_default_dir }}/{{ _helm_release_name.af }}
+    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/{{ _image_name.af }}
   changed_when: true
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+
 
 
 

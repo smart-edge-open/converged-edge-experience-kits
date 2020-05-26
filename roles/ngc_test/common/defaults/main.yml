@@ -11,3 +11,22 @@ _git_repo_ngc_build_dir: "{{ _git_repo_ngc_dir }}/build"
 
 _controller_name: "{{ groups['controller_group'][0] }}"
 _controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+
+_image_name:
+  af: af-image
+  nef: nef-image
+  oam: oam-image
+  cntf: cntf-image
+
+_image_tag:
+  af: 1.0
+  nef: 1.0
+  oam: 1.0
+  cntf: 1.0
+
+_helm_release_name:
+  af: af
+  nef: nef
+  oam: oam
+  cntf: cntf
+

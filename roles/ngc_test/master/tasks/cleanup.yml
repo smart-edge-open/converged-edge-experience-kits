@@ -6,64 +6,65 @@
   include_vars: ../../../docker_registry/master/defaults/main.yml
 
 - block:
-    - name: uninstall the AF Helm Chart
-      command: helm uninstall af
-      ignore_errors: yes
-
-    - name: remove the AF Helm Chart
-      file:
-        path: "{{ ne_helm_charts_default_dir }}/af"
-        state: absent
-      ignore_errors: yes
-
-    - name: remove AF docker image
-      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/af-image:1.0"
-      ignore_errors: yes
-
-- block:
-    - name: uninstall the NEF Helm Chart
-      command: helm uninstall nef
-      ignore_errors: yes
-
-    - name: remove the NEF Helm Chart
-      file:
-        path: "{{ ne_helm_charts_default_dir }}/nef"
-        state: absent
-      ignore_errors: yes
-
-    - name: remove NEF docker image
-      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/nef-image:1.0"
-      ignore_errors: yes
-
-- block:
-    - name: uninstall the OAM Helm Chart
-      command: helm uninstall oam
-      ignore_errors: yes
-
-    - name: remove the OAM Helm Chart
-      file:
-        path: "{{ ne_helm_charts_default_dir }}/oam"
-        state: absent
-      ignore_errors: yes
-
-    - name: remove OAM docker image
-      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/oam-image:1.0"
-      ignore_errors: yes
-
-- block:
     - name: uninstall the CNTF Helm Chart
-      command: helm uninstall cntf
+      command: helm uninstall "{{ _helm_release_name.cntf }}"
       ignore_errors: yes
 
     - name: remove the CNTF Helm Chart
       file:
-        path: "{{ ne_helm_charts_default_dir }}/cntf"
+        path: "{{ ne_helm_charts_default_dir }}/{{ _helm_release_name.cntf }}"
         state: absent
       ignore_errors: yes
 
     - name: remove CNTF docker image
-      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/cntf-image:1.0"
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/{{  _image_name.cntf }}:{{ _image_tag.cntf }}"
       ignore_errors: yes
+
+- block:
+    - name: uninstall the AF Helm Chart
+      command: helm uninstall "{{ _helm_release_name.af }}"
+      ignore_errors: yes
+
+    - name: remove the AF Helm Chart
+      file:
+        path: "{{ ne_helm_charts_default_dir }}/{{ _helm_release_name.af }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: remove AF docker image
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/{{  _image_name.af }}:{{ _image_tag.af }}"
+      ignore_errors: yes
+
+- block:
+    - name: uninstall the NEF Helm Chart
+      command: helm uninstall "{{ _helm_release_name.nef }}"
+      ignore_errors: yes
+
+    - name: remove the NEF Helm Chart
+      file:
+        path: "{{ ne_helm_charts_default_dir }}/{{ _helm_release_name.nef }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: remove NEF docker image
+      command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/{{  _image_name.af }}:{{ _image_tag.nef }}"
+      ignore_errors: yes
+
+
+- block:
+  - name: uninstall the OAM Helm Chart
+    command: helm uninstall "{{ _helm_release_name.oam }}"
+    ignore_errors: yes
+
+  - name: remove the OAM Helm Chart
+    file:
+      path: "{{ ne_helm_charts_default_dir }}/{{ _helm_release_name.oam }}"
+      state: absent
+    ignore_errors: yes
+
+  - name: remove OAM docker image
+    command: docker image rm -f "{{ _registry_ip_address }}:{{ _registry_port }}/{{  _image_name.oam }}:{{ _image_name.oam }}"
+    ignore_errors: yes
 
 - block:
     - name: Forcefull cleanup any pods in terminating state

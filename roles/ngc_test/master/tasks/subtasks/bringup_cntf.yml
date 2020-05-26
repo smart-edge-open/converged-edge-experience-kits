@@ -33,7 +33,8 @@
 
 - name: build cntf docker image
   docker_image:
-    name: cntf-image:1.0
+    name: "{{ _image_name.cntf }}"
+    tag: "{{ _image_tag.cntf }}"
     source: build
     build:
       path: "{{ _git_repo_ngc_build_dir }}/networkedge/cntf"
@@ -41,27 +42,44 @@
       use_config_proxy: yes
 
 # Additions for Helm chart
+- name: remove CNTF release if exist
+  block:
+    - name: check if cntf release exists
+      command: helm status "{{ _helm_release_name.cntf }}"
+      ignore_errors: yes
+      register: get_release
+    - name: remove cntf release
+      command: helm uninstall "{{ _helm_release_name.cntf }}"
+      when: get_release.rc == 0
+      changed_when: true
+
 - name: tag CNTF docker image and push to docker registry
   docker_image:
-    name: cntf-image
-    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/cntf-image"
-    tag: "1.0"
+    name: "{{ _image_name.cntf }}"
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _image_name.cntf }}"
+    tag: "{{ _image_tag.cntf }}"
     push: yes
     source: local
 
 - name: remove the locally built CNTF docker image
   docker_image:
     state: absent
-    name: cntf-image
-    tag: "1.0"
+    name: "{{ _image_name.cntf }}"
+    tag: "{{ _image_tag.cntf }}"
 
 - name: Copy CNTF helm chart
   copy:
     src: ../charts/cntf
     dest: "{{ ne_helm_charts_default_dir }}"
 
+# retry required since as part of  the previous uninstallation if the
+# pods are still not completely deleted as it might take some time
 - name: install the CNTF helm chart
   command: >
-    helm install cntf {{ ne_helm_charts_default_dir }}/cntf
-    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/cntf-image
+    helm install {{ _helm_release_name.cntf }} {{ ne_helm_charts_default_dir }}/{{ _helm_release_name.cntf }}
+    --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/{{ _image_name.cntf }}
   changed_when: true
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
