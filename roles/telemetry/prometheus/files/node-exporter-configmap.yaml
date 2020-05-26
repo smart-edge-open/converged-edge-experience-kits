@@ -13,7 +13,6 @@ metadata:
   name: node-exporter-cm
   labels:
     name: node-exporter-cm
-  namespace: telemetry
 data:
   web-config.yml: |-
     tlsConfig:

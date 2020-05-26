@@ -3,19 +3,40 @@
 
 ---
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-cm
-  labels:
-    name: prometheus-cm
-  namespace: telemetry
-data:
-  prometheus.yml: |-
-    global:
-      scrape_interval: 5s
-      evaluation_interval: 5s
+server:
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  extraInitContainers:
+    - name: setup-permissions
+      image: busybox
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        runAsNonRoot: false
+      volumeMounts:
+        - name: storage-volume
+          mountPath: /data
+      command: ["/bin/chmod","-R","777", "/data"]
+  extraVolumes:
+    - name: cert-vol
+      hostPath:
+        path: "{{ _telemetry_certs_dest }}"
+        type: Directory
+  extraVolumeMounts:
+    - name: cert-vol
+      mountPath: /opt/prometheus/certs/
+  global:
+    scrape_interval: 5s
+    scrape_timeout: 4s
+  service:
+    nodePort: 30000
+    type: NodePort
 
+serverFiles:
+  prometheus.yml:
     scrape_configs:
       - job_name: 'prometheus'
         static_configs:
@@ -54,7 +75,7 @@ data:
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
         - source_labels: [__meta_kubernetes_pod_name]
-          regex: 'node-exporter.*'
+          regex: '.*node-exporter.*'
           action: keep
         - source_labels: [__address__]
           regex: '.*:9100'
@@ -65,3 +86,35 @@ data:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: kubernetes_pod_name
+
+nodeExporter:
+  image:
+    tag: v1.0.0-rc.0
+  extraArgs:
+    web.config: /opt/config/web-config.yml
+    collector.textfile.directory: /opt/vpumetrics
+  extraConfigmapMounts:
+    - name: config-vol
+      mountPath: /opt/config/
+      configMap: node-exporter-cm
+  extraHostPathMounts:
+    - name: cert-vol
+      hostPath: "{{ _telemetry_certs_dest }}"
+      mountPath: /opt/certs/
+      type: DirectoryOrCreate
+    - name: vpumetrics
+      hostPath: /tmp/node-exporter
+      mountPath: /opt/vpumetrics
+      type: DirectoryOrCreate
+  extraSecretMounts:
+    - name: ca
+      secretName: root-ca
+      mountPath: /opt/CA
+  hostNetwork: false
+  tolerations:
+    - effect: NoSchedule
+      key: cmk
+      operator: Exists
+
+kubeStateMetrics:
+  enabled: false

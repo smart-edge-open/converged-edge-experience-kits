@@ -1,0 +1,32 @@
+--- node-exporter-daemonset.yaml	2020-05-12 15:50:01.704000000 +0200
++++ node-exporter-daemonset.yaml.new	2020-05-13 16:21:37.306000000 +0200
+@@ -77,6 +77,10 @@
+               mountPath: {{ .mountPath }}
+               readOnly: {{ .readOnly }}
+           {{- end }}
++          {{- range .Values.nodeExporter.extraSecretMounts }}
++            - name: {{ .name }}
++              mountPath: {{ .mountPath }}
++          {{- end }}
+     {{- if .Values.imagePullSecrets }}
+       imagePullSecrets:
+       {{ toYaml .Values.imagePullSecrets | indent 2 }}
+@@ -110,11 +114,18 @@
+         - name: {{ .name }}
+           hostPath:
+             path: {{ .hostPath }}
++            type: {{ .type }}
+       {{- end }}
+       {{- range .Values.nodeExporter.extraConfigmapMounts }}
+         - name: {{ .name }}
+           configMap:
+             name: {{ .configMap }}
+       {{- end }}
++      {{- range .Values.nodeExporter.extraSecretMounts }}
++        - name: {{ .name }}
++          secret:
++            secretName: {{ .secretName }}
++            defaultMode: 0744
++      {{- end }}
+ 
+ {{- end -}}

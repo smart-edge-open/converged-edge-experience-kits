@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../defaults/main.yml
+
+- name: delete telemetry namespace
+  command: kubectl delete namespace telemetry
+  changed_when: true
+  ignore_errors: yes
+
+- name: delete telemetry certificate directory
+  file:
+    name: "{{ _telemetry_certs_dest }}"
+    state: absent

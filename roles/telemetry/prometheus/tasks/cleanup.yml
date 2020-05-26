@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../certs/defaults/main.yml
+
+- name: include prometheus variables
+  include_vars: ../defaults/main.yml
+
+- name: remove Prometheus certificates
+  file:
+    path: "{{ _telemetry_certs_dest }}/prometheus"
+    state: absent
+
+- name: remove Prometheus chart template directory
+  file:
+    path: "{{ _prometheus_chart_dir }}"
+    state: absent
+
+- name: close Prometheus port
+  ignore_errors: yes
+  firewalld:
+    port: 30000/tcp
+    permanent: yes
+    state: disabled
+    immediate: yes
+
+- name: uninstall prometheus using Helm
+  command: "helm uninstall prometheus --namespace telemetry"
+  changed_when: true
+  ignore_errors: yes
+
+- name: delete definitions of persistent volumes
+  command: "kubectl delete pv {{ item }} -n telemetry"
+  with_items: "{{ _pv_names }}"
+  changed_when: true
+  ignore_errors: yes
+
+- name: delete directory for persistent volumes
+  file:
+    path: "{{ _pv_dir }}"
+    state: absent

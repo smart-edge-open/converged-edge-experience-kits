@@ -24,7 +24,7 @@
       path: "{{ _telemetry_certs_dest }}/prometheus/root.pem"
       state: absent
 
-- name: open port for prometheus
+- name: open port for Prometheus
   ignore_errors: yes
   firewalld:
     port: 30000/tcp
@@ -39,31 +39,105 @@
   register: tmp_dir
   delegate_to: localhost
 
-- name: copy cluster_role.yml to tmp directory
-  copy:
-    src: "cluster_role.yml"
+- name: template values.yml to tmp directory
+  template:
+    src: values.yml
     dest: "{{ tmp_dir.path }}/"
 
-- name: apply cluster role
-  command: kubectl apply -f "{{ tmp_dir.path }}"/cluster_role.yml
+- name: add default Helm repository
+  command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
   changed_when: true
 
-- name: copy config_map.yml to tmp directory
-  copy:
-    src: "config_map.yml"
-    dest: "{{ tmp_dir.path }}/"
-
-- name: apply config map
-  command: kubectl apply -f "{{ tmp_dir.path }}"/config_map.yml
+- name: create Prometheus chart template directory
+  file:
+    name: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ _prometheus_chart_dir }}"
+    - "{{ _prometheus_chart_dir }}/templates"
   changed_when: true
 
-- name: copy deployment.yml to tmp directory
-  copy:
-    src: "deployment.yml"
-    dest: "{{ tmp_dir.path }}/"
+- name: download Prometheus chart
+  get_url:
+    url: "{{ _prometheus_chart_url }}/{{ item }}"
+    dest: "{{ _prometheus_chart_dir }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  with_items: "{{ _prometheus_chart }}"
 
-- name: deploy Prometheus
-  command: kubectl apply -f "{{ tmp_dir.path }}"/deployment.yml
+- name: download Prometheus chart templates
+  get_url:
+    url: "{{ _prometheus_chart_url }}/{{ item }}"
+    dest: "{{ _prometheus_chart_dir }}/templates"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  with_items: "{{ _prometheus_chart_templates }}"
+
+- name: create directory for persistent volumes
+  file:
+    path: "{{ _pv_dir }}"
+    state: directory
+
+- name: create directories for persistent volumes
+  file:
+    path: "{{ _pv_dir }}/{{ item }}"
+    state: directory
+  with_items: "{{ _pv_names }}"
+
+- name: template definitions of persistent volumes
+  template:
+    src: "volume.yml"
+    dest: "{{ tmp_dir.path }}/{{ item }}.yml"
+  with_items: "{{ _pv_names }}"
+  changed_when: true
+
+- name: apply definitions of persistent volumes
+  command: kubectl apply -n telemetry -f "{{ tmp_dir.path }}/{{ item }}.yml"
+  with_items: "{{ _pv_names }}"
+  changed_when: true
+
+- name: copy template file
+  copy:
+    src: node-exporter-configmap.yaml
+    dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-configmap.yaml"
+
+- name: template telemetry-certs-daemonset
+  template:
+    src: telemetry-certs-daemonset.yml.j2
+    dest: "{{ _prometheus_chart_dir }}/templates/telemetry-certs-daemonset.yaml"
+
+- name: install patch utility
+  yum:
+    name: patch
+    state: present
+
+- name: apply node-exporter-daemonset patch
+  patch:
+    src: node-exporter-daemonset.patch
+    dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-daemonset.yaml"
+    strip: 1
+    binary: no
+    backup: no
+
+- name: find backup files
+  find:
+    paths: "{{ _prometheus_chart_dir }}/templates"
+    patterns: "*.orig"
+  register: backup_files
+
+- name: remove backup files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ backup_files.files }}"
+  changed_when: true
+
+- name: install prometheus using Helm
+  command: "helm install prometheus --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _prometheus_chart_dir }}"
   changed_when: true
 
 - name: remove temporary directory
