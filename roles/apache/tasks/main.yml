@@ -83,7 +83,7 @@
 
 - name: add firewall rules for for Apache (https)
   command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 443 -j ACCEPT
-  ingore_errors: yes
+  ignore_errors: yes
   changed_when: true
 
 - name: reload firewall rules
