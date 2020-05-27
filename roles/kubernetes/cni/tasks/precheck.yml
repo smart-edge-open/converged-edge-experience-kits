@@ -34,7 +34,7 @@
 
 - name: load kubernetes/cni defaults
   include_vars:
-    file: ./roles/kubernetes/cni/defaults/main.yml
+    file: ../defaults/main.ym
     name: defaults
 
 - name: fail if requested CNI is not available
