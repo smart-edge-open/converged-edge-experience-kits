@@ -32,116 +32,125 @@
     state: enabled
     immediate: yes
 
-- name: create temporary directory
-  tempfile:
-    state: directory
-    suffix: prometheus
-  register: tmp_dir
-  delegate_to: localhost
+- name: check if Prometheus release already exists
+  command: helm status prometheus
+  ignore_errors: yes
+  register: get_release_prometheus
+  changed_when: false
 
-- name: template values.yml to tmp directory
-  template:
-    src: values.yml
-    dest: "{{ tmp_dir.path }}/"
+- name: install Prometheus chart
+  block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: prometheus
+    register: tmp_dir
+    delegate_to: localhost
 
-- name: add default Helm repository
-  command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-  changed_when: true
+  - name: template values.yml to tmp directory
+    template:
+      src: values.yml
+      dest: "{{ tmp_dir.path }}/"
 
-- name: create Prometheus chart template directory
-  file:
-    name: "{{ item }}"
-    state: directory
-  with_items:
-    - "{{ _prometheus_chart_dir }}"
-    - "{{ _prometheus_chart_dir }}/templates"
-  changed_when: true
+  - name: add default Helm repository
+    command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    changed_when: true
 
-- name: download Prometheus chart
-  get_url:
-    url: "{{ _prometheus_chart_url }}/{{ item }}"
-    dest: "{{ _prometheus_chart_dir }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  with_items: "{{ _prometheus_chart }}"
+  - name: create Prometheus chart template directory
+    file:
+      name: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ _prometheus_chart_dir }}"
+      - "{{ _prometheus_chart_dir }}/templates"
+    changed_when: true
 
-- name: download Prometheus chart templates
-  get_url:
-    url: "{{ _prometheus_chart_url }}/{{ item }}"
-    dest: "{{ _prometheus_chart_dir }}/templates"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  with_items: "{{ _prometheus_chart_templates }}"
+  - name: download Prometheus chart
+    get_url:
+      url: "{{ _prometheus_chart_url }}/{{ item }}"
+      dest: "{{ _prometheus_chart_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _prometheus_chart }}"
 
-- name: create directory for persistent volumes
-  file:
-    path: "{{ _pv_dir }}"
-    state: directory
+  - name: download Prometheus chart templates
+    get_url:
+      url: "{{ _prometheus_chart_url }}/{{ item }}"
+      dest: "{{ _prometheus_chart_dir }}/templates"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _prometheus_chart_templates }}"
 
-- name: create directories for persistent volumes
-  file:
-    path: "{{ _pv_dir }}/{{ item }}"
-    state: directory
-  with_items: "{{ _pv_names }}"
+  - name: create directory for persistent volumes
+    file:
+      path: "{{ _pv_dir }}"
+      state: directory
 
-- name: template definitions of persistent volumes
-  template:
-    src: "volume.yml"
-    dest: "{{ tmp_dir.path }}/{{ item }}.yml"
-  with_items: "{{ _pv_names }}"
-  changed_when: true
+  - name: create directories for persistent volumes
+    file:
+      path: "{{ _pv_dir }}/{{ item }}"
+      state: directory
+    with_items: "{{ _pv_names }}"
 
-- name: apply definitions of persistent volumes
-  command: kubectl apply -n telemetry -f "{{ tmp_dir.path }}/{{ item }}.yml"
-  with_items: "{{ _pv_names }}"
-  changed_when: true
+  - name: template definitions of persistent volumes
+    template:
+      src: "volume.yml"
+      dest: "{{ tmp_dir.path }}/{{ item }}.yml"
+    with_items: "{{ _pv_names }}"
+    changed_when: true
 
-- name: copy template file
-  copy:
-    src: node-exporter-configmap.yaml
-    dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-configmap.yaml"
+  - name: apply definitions of persistent volumes
+    command: kubectl apply -n telemetry -f "{{ tmp_dir.path }}/{{ item }}.yml"
+    with_items: "{{ _pv_names }}"
+    changed_when: true
 
-- name: template telemetry-certs-daemonset
-  template:
-    src: telemetry-certs-daemonset.yml.j2
-    dest: "{{ _prometheus_chart_dir }}/templates/telemetry-certs-daemonset.yaml"
+  - name: copy template file
+    copy:
+      src: node-exporter-configmap.yaml
+      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-configmap.yaml"
 
-- name: install patch utility
-  yum:
-    name: patch
-    state: present
+  - name: template telemetry-certs-daemonset
+    template:
+      src: telemetry-certs-daemonset.yml.j2
+      dest: "{{ _prometheus_chart_dir }}/templates/telemetry-certs-daemonset.yaml"
 
-- name: apply node-exporter-daemonset patch
-  patch:
-    src: node-exporter-daemonset.patch
-    dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-daemonset.yaml"
-    strip: 1
-    binary: no
-    backup: no
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
 
-- name: find backup files
-  find:
-    paths: "{{ _prometheus_chart_dir }}/templates"
-    patterns: "*.orig"
-  register: backup_files
+  - name: apply node-exporter-daemonset patch
+    patch:
+      src: node-exporter-daemonset.patch
+      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-daemonset.yaml"
+      strip: 1
+      binary: no
+      backup: no
 
-- name: remove backup files
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ backup_files.files }}"
-  changed_when: true
+  - name: find backup files
+    find:
+      paths: "{{ _prometheus_chart_dir }}/templates"
+      patterns: "*.orig"
+    register: backup_files
 
-- name: install prometheus using Helm
-  command: "helm install prometheus --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _prometheus_chart_dir }}"
-  changed_when: true
+  - name: remove backup files
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ backup_files.files }}"
+    changed_when: true
 
-- name: remove temporary directory
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
+  - name: install Prometheus release
+    command: "helm install prometheus --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _prometheus_chart_dir }}"
+    changed_when: true
+
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+  when: get_release_prometheus.rc != 0
