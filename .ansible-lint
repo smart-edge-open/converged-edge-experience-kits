@@ -11,3 +11,4 @@ exclude_paths:
   - roles/telemetry/prometheus/files/
   - roles/nfd/network_edge/files/
   - roles/kubernetes/cni/sriov/master/files
+  - cnab
