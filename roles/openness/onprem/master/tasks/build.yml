@@ -19,7 +19,7 @@
     src: .env.j2
     dest: "{{ _git_repo_dest }}/.env"
 
-- name: copy generated .env file to epcforedge repo
+- name: copy generated .env file to x-epcforedge repo
   template:
     src: .env.j2
     dest: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/.env"
@@ -46,7 +46,7 @@
         - { image: "cce-ui", dir: "controller" }
         - { image: "landing-ui", dir: "landing" }
 
-    - name: offline | customize docker-compose.yml from epcforedge repo - use cached images
+    - name: offline | customize docker-compose.yml from x-epcforedge repo - use cached images
       lineinfile:
         path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
         insertafter: "context: ./ui/{{ item.dir }}"
@@ -97,11 +97,11 @@
       include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
   when: not _offline_mode
 
-- name: online build core network UI docker images from epcforedge repository
+- name: online build core network UI docker images from x-epcforedge repository
   block:
     - name: create temporary custom .openness_gitconfig
       include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
-    - name: build controller docker images from epcforedge repository
+    - name: build controller docker images from x-epcforedge repository
       make:
         chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui"
         target: build
@@ -119,7 +119,7 @@
     target: all-up
   register: start_controller_output
 
-- name: start controller core network UI docker images from epcforedge repository
+- name: start controller core network UI docker images from x-epcforedge repository
   make:
     chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui"
     target: ui-up
@@ -129,6 +129,6 @@
   debug:
     msg: "{{ start_controller_output.stdout }}"
 
-- name: controller images from epcforedge start output
+- name: controller images from x-epcforedge start output
   debug:
     msg: "{{ start_controller_images_epcforedge_output.stdout }}"

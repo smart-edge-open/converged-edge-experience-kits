@@ -8,7 +8,7 @@
       GITHUB_TOKEN={{ git_repo_token }}
     dest: "{{ _git_repo_dest }}/.env"
 
-- name: create .env file from epcforedge repo with github token
+- name: create .env file from x-epcforedge repo with github token
   copy:
     content: |
       GITHUB_TOKEN={{ git_repo_token }}
@@ -23,7 +23,7 @@
     - { image: "cce-ui", dir: "controller" }
     - { image: "landing-ui", dir: "landing" }
 
-- name: customize docker-compose.yml from epcforedge repo
+- name: customize docker-compose.yml from x-epcforedge repo
   lineinfile:
     path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
     insertafter: "context: ./ui/{{ item.dir }}"
@@ -41,7 +41,7 @@
     - { original: "ui", new: "cce-ui-deps-image" }
     - { original: "landing", new: "landing-ui-deps-image" }
 
-- name: change docker-compose.yml images from epcforedge repo names
+- name: change docker-compose.yml images from x-epcforedge repo names
   lineinfile:
     path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
     regexp: "    image: {{ item.original }}"
@@ -132,7 +132,7 @@
       with_items:
         - cce-ui
         - landing-ui
-    - name: remove docker-compose.yml from epcforedge repo customization
+    - name: remove docker-compose.yml from x-epcforedge repo customization
       lineinfile:
         path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
         line: "      target: {{ item }}-deps-image"
@@ -148,7 +148,7 @@
       with_items:
         - { original: "ui", new: "cce-ui-deps-image" }
         - { original: "landing", new: "landing-ui-deps-image" }
-    - name: restore docker-compose.yml images from epcforedge repo names
+    - name: restore docker-compose.yml images from x-epcforedge repo names
       lineinfile:
         path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
         regexp: "    image: {{ item.new }}"

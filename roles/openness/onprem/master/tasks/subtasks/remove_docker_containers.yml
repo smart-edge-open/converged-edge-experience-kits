@@ -16,7 +16,7 @@
   register: repo_folder_result
   changed_when: false
 
-- name: check if epcforedge repository folder exists
+- name: check if x-epcforedge repository folder exists
   command: "stat {{ _epcforedge_git_repo.download_dir }}"
   ignore_errors: true
   register: epcforedge_repo_folder_result
@@ -30,7 +30,7 @@
     - docker_service_status.rc == 0
     - repo_folder_result.rc == 0
 
-- name: remove all Docker containers from epcforedge repository
+- name: remove all Docker containers from x-epcforedge repository
   command: docker-compose rm --stop -f
   args:
     chdir: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui"

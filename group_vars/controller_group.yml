@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 ### Kernel, grub & tuned configuration
 # Following settings control behavior of custom_kernel, grub and tuned roles
 # NOTE: If specific settings should be different for particular host, it should be configured using `host_vars/machine.yml`
@@ -59,15 +58,16 @@ additional_grub_params: ""
 kubeovn_dpdk_socket_mem: "1024,0"
 
 # Packages to be installed on the Edge Controller host
-os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,\
+os_yum_base_packages:
+  "jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,\
   device-mapper-persistent-data,lvm2,git,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion"
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
 _git_repo_dest: /opt/edgecontroller
 
 _epcforedge_git_repo:
-  dir: https://{{ git_repo_token }}@github.com/otcshare/epcforedge.git
-  download_dir: /opt/epcforedge
+  dir: https://{{ git_repo_token }}@github.com/otcshare/x-epcforedge.git
+  download_dir: /opt/x-epcforedge
   branch: master
 
 _offline_path: "{{ _offline_path_common }}/controller"

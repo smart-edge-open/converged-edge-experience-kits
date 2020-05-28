@@ -34,7 +34,7 @@
         update: no
       when: not always_clean_repository
 
-    - name: checkout clean epcforedge repository
+    - name: checkout clean x-epcforedge repository
       git:
         repo: "{{ _epcforedge_git_repo.dir }}"
         dest: "{{ _epcforedge_git_repo.download_dir }}"
