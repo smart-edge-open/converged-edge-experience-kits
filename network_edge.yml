@@ -63,6 +63,8 @@
 
     - role: telemetry/grafana/master
       when: telemetry_grafana_enable | default(True)
+    - role: telemetry/pcm
+      when: telemetry_pcm_enable | default(True)
 
 - hosts: edgenode_group
   roles:

@@ -1,0 +1,93 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: load pcm dir paths
+  include_vars: ../defaults/main.yml
+
+- name: create telemetry namespace if needed
+  block:
+  - name: check if telemetry namespace exists
+    command: kubectl get ns telemetry
+    ignore_errors: yes
+    register: get_ns_telemetry
+  - name: create telemetry namespace
+    command: kubectl create namespace telemetry
+    when: get_ns_telemetry.rc == 1
+
+- name: create temp directory
+  tempfile:
+    state: directory
+    suffix: .pcm
+  register: tmp_dir
+
+- name: copy pcm deployment file to edge controller
+  synchronize:
+    src: "{{ role_path }}/files/deployment.yaml"
+    dest: "{{ tmp_dir.path }}"
+
+- name: copy pcm service file to edge controller
+  synchronize:
+    src: "{{ role_path }}/files/service.yaml"
+    dest: "{{ tmp_dir.path }}"
+
+- name: deploy pcm
+  command: kubectl apply -f "{{ tmp_dir.path }}/deployment.yaml"
+  changed_when: true
+
+- name: create pcm service
+  command: kubectl apply -f "{{ tmp_dir.path }}/service.yaml"
+  changed_when: true
+
+- name: create pcm dashboards provisioning directory
+  file:
+    path: "{{ _grafana_dashboards_prov }}"
+    state: directory
+    mode: '0755'
+
+- name: create pcm dashboards directory for json files
+  file:
+    path: "{{ _grafana_dashboards_conf }}"
+    state: directory
+    mode: '0755'
+
+- name: copy pcm dashboards provisioning file
+  synchronize:
+    src: "{{ role_path }}/files/local.yml"
+    dest: "{{ _grafana_dashboards_prov }}"
+
+- name: wait for pods to come up
+  command: kubectl get pods -n telemetry -o json
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  changed_when: false
+
+- name: get pcm dashboards from controller and nodes
+  get_url:
+    url: "http://{{ hostvars[item]['ansible_host'] }}:32100/dashboard"
+    dest: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    use_proxy: false
+    force: yes
+  with_inventory_hostnames:
+  - controller_group
+  - edgenode_group
+
+# This is for ensuring, that we don't get two same titles or UIDs
+- name: add prefix to title in dashboard json files
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '  "title": "Processor Counter Monitor'
+    replace: '  "title": "{{ hostvars[item]["ansible_hostname"] }} - Processor Counter Monitor'
+  with_inventory_hostnames:
+  - controller_group
+  - edgenode_group
+
+- name: add prefix to UID in dashboard json files
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '  "uid": "'
+    replace: '  "uid": "{{ hostvars[item]["ansible_hostname"] }}-'
+  with_inventory_hostnames:
+  - controller_group
+  - edgenode_group
