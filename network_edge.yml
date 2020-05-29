@@ -61,6 +61,8 @@
     - role: hddl/network_edge/master
       when: ne_hddl_enable | default(False)
 
+    - role: telemetry/grafana/master
+      when: telemetry_grafana_enable | default(True)
 
 - hosts: edgenode_group
   roles:

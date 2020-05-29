@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create telemetry namespace if needed
+  block:
+  - name: check if telemetry namespace exists
+    command: kubectl get ns telemetry
+    ignore_errors: yes
+    register: get_ns_telemetry
+  - name: create telemetry namespace
+    command: kubectl create namespace telemetry
+    when: get_ns_telemetry.rc == 1
+
+- name: create temp directory
+  tempfile:
+    state: directory
+    suffix: .grafana
+  register: tmp_dir
+
+- name: copy grafana deployment files to edge controller
+  synchronize:
+    src: "{{ role_path }}/files/"
+    dest: "{{ tmp_dir.path }}"
+
+- name: configure grafana datasource
+  command: kubectl apply -f "{{ tmp_dir.path }}/datasource-config.yaml"
+  changed_when: true
+
+- name: deploy grafana
+  command: kubectl apply -f "{{ tmp_dir.path }}/deployment.yaml"
+  changed_when: true
+
+- name: create grafana service
+  command: kubectl apply -f "{{ tmp_dir.path }}/service.yaml"
+  changed_when: true
