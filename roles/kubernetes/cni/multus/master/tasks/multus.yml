@@ -2,60 +2,62 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-- name: wait for docker registry to start
-  shell: >
-    set -o pipefail &&
-    kubectl get pods --field-selector status.phase=Running -n openness | grep -q docker-registry-deployment
-  register: docker_registry_started
-  retries: 60
-  delay: 15
-  until: docker_registry_started.rc == 0
-  changed_when: false
 
-- name: pull multus image
-  docker_image:
-    name: "{{ _multus_image_name }}"
-    tag: "{{ _multus_image_tag }}"
-    source: pull
+- name: check if multus release already exists
+  command: helm status multus-release
+  ignore_errors: yes
+  register: get_release_multus
 
-- name: tag multus image and push to docker registry
-  docker_image:
-    name: "{{ _multus_image_name }}"
-    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/multus"
-    tag: "{{ _multus_image_tag }}"
-    push: yes
-    source: local
-
-- name: remove local image
-  docker_image:
-    state: absent
-    name: "{{ _multus_image_name }}"
-    tag: "{{ _multus_image_tag }}"
-
-- name: copy multus-cni chart
-  copy:
-    src: "multus-cni"
-    dest: "{{ ne_helm_charts_default_dir }}"
-
-- name: install multus chart
+- name: install Multus-cni chart
   block:
-  - name: check if multus release already exists
-    command: helm status multus-release
-    ignore_errors: yes
-    register: get_release_multus
+  - name: wait for docker registry to start
+    shell: >
+      set -o pipefail &&
+      kubectl get pods --field-selector status.phase=Running -n openness | grep -q docker-registry-deployment
+    register: docker_registry_started
+    retries: 60
+    delay: 15
+    until: docker_registry_started.rc == 0
+    changed_when: false
+
+  - name: pull multus image
+    docker_image:
+      name: "{{ _multus_image_name }}"
+      tag: "{{ _multus_image_tag }}"
+      source: pull
+
+  - name: tag multus image and push to docker registry
+    docker_image:
+      name: "{{ _multus_image_name }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/multus"
+      tag: "{{ _multus_image_tag }}"
+      push: yes
+      source: local
+
+  - name: remove local image
+    docker_image:
+      state: absent
+      name: "{{ _multus_image_name }}"
+      tag: "{{ _multus_image_tag }}"
+
+  - name: copy multus-cni chart
+    copy:
+      src: "multus-cni"
+      dest: "{{ ne_helm_charts_default_dir }}"
+
   - name: install multus-cni chart
     command: >
       helm install multus-release {{ ne_helm_charts_default_dir }}/multus-cni
       --set registry_ip={{ _registry_ip_address }} --set registry_port={{ _registry_port }} --set image_tag={{ _multus_image_tag }}
-    when: get_release_multus.rc != 0
     changed_when: true
 
-- name: wait for Multus to start
-  shell: >
-    set -o pipefail &&
-    kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
-  register: multus_started
-  retries: 30
-  delay: 10
-  until: multus_started.rc == 0
-  changed_when: false
+  - name: wait for Multus to start
+    shell: >
+      set -o pipefail &&
+      kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
+    register: multus_started
+    retries: 30
+    delay: 10
+    until: multus_started.rc == 0
+    changed_when: false
+  when: get_release_multus.rc != 0

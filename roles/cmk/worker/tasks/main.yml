@@ -2,6 +2,14 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+
+- name: check if CMK release already exists
+  command: helm status cmk-release -n cmk-namespace
+  ignore_errors: yes
+  register: get_release_cmk
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: false
+
 - name: include docker registry vars
   include_vars: ../../../docker_registry/master/defaults/main.yml
 
@@ -13,3 +21,4 @@
   delegate_to: "{{ groups['controller_group'][0] }}"
   run_once: true
   changed_when: true
+  when: get_release_cmk.rc != 0

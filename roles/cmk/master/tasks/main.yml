@@ -3,83 +3,92 @@
 
 ---
 
-- name: create CPU Manager directories
-  file:
-    name: "{{ item }}"
-    state: directory
-  with_items:
-    - "{{ _cmk_source_dir }}"
-    - "{{ _cmk_chart_dir }}"
-    - "{{ _cmk_chart_dir }}/templates"
-  changed_when: true
+- name: check if CMK release already exists
+  command: helm status cmk-release -n cmk-namespace
+  ignore_errors: yes
+  register: get_release_cmk
+  changed_when: false
 
-- name: download CPU Manager plugin repository
-  git:
-    repo: "{{ _cmk_base_url }}"
-    dest: "{{ _cmk_source_dir }}"
-    version: "{{ _cmk_tag }}"
-    update: no
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-
-- name: build CPU Manager image
-  shell: source /etc/profile && make
-  args:
-    chdir: "{{ _cmk_source_dir }}"
-  changed_when: true
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-
-- name: tag the CMK image and push to local registry
-  docker_image:
-    name: cmk
-    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/cmk"
-    tag: "{{ _cmk_tag }}"
-    push: yes
-    source: local
-
-- name: remove CMK source directory
-  file:
-    path: "{{ _cmk_source_dir }}"
-    state: absent
-  when: _cmk_source_dir is defined
-
-- name: download CMK chart
-  get_url:
-    url: "{{ _cmk_cek_url }}/{{ item }}"
-    dest: "{{ _cmk_chart_dir }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  with_items: "{{ _cmk_chart }}"
-
-- name: download CMK chart templates
-  get_url:
-    url: "{{ _cmk_cek_url }}/{{ item }}"
-    dest: "{{ _cmk_chart_dir }}/templates"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  with_items: "{{ _cmk_chart_templates }}"
-
-- name: templates CMK Helm chart values
-  template:
-    src: "helm_values.yml.j2"
-    dest: "{{ ne_helm_charts_default_dir }}/cmk-values.yml"
-
-# cmk-namespace created using kubectl command (Helm 3 is not creating namespace)
-- name: create cmk-namespace if needed
+- name: prepare for CMK install
   block:
-  - name: check if cmk-namespace exists
-    command: kubectl get ns cmk-namespace
-    ignore_errors: yes
-    register: get_ns_cmk_namespace
-  - name: create cmk-namespace
-    command: kubectl create namespace cmk-namespace
-    when: get_ns_cmk_namespace.rc == 1
+  - name: create CPU Manager directories
+    file:
+      name: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ _cmk_source_dir }}"
+      - "{{ _cmk_chart_dir }}"
+      - "{{ _cmk_chart_dir }}/templates"
+    changed_when: true
+
+  - name: download CPU Manager plugin repository
+    git:
+      repo: "{{ _cmk_base_url }}"
+      dest: "{{ _cmk_source_dir }}"
+      version: "{{ _cmk_tag }}"
+      update: no
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
+  - name: build CPU Manager image
+    shell: source /etc/profile && make
+    args:
+      chdir: "{{ _cmk_source_dir }}"
+    changed_when: true
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
+  - name: tag the CMK image and push to local registry
+    docker_image:
+      name: cmk
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/cmk"
+      tag: "{{ _cmk_tag }}"
+      push: yes
+      source: local
+
+  - name: remove CMK source directory
+    file:
+      path: "{{ _cmk_source_dir }}"
+      state: absent
+    when: _cmk_source_dir is defined
+
+  - name: download CMK chart
+    get_url:
+      url: "{{ _cmk_cek_url }}/{{ item }}"
+      dest: "{{ _cmk_chart_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _cmk_chart }}"
+
+  - name: download CMK chart templates
+    get_url:
+      url: "{{ _cmk_cek_url }}/{{ item }}"
+      dest: "{{ _cmk_chart_dir }}/templates"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _cmk_chart_templates }}"
+
+  - name: templates CMK Helm chart values
+    template:
+      src: "helm_values.yml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/cmk-values.yml"
+
+  # cmk-namespace created using kubectl command (Helm 3 is not creating namespace)
+  - name: create cmk-namespace if needed
+    block:
+    - name: check if cmk-namespace exists
+      command: kubectl get ns cmk-namespace
+      ignore_errors: yes
+      register: get_ns_cmk_namespace
+    - name: create cmk-namespace
+      command: kubectl create namespace cmk-namespace
+      when: get_ns_cmk_namespace.rc == 1
+  when: get_release_cmk.rc != 0
