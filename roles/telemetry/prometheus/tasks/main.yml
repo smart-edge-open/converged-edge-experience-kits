@@ -33,7 +33,7 @@
     immediate: yes
 
 - name: check if Prometheus release already exists
-  command: helm status prometheus
+  command: helm status prometheus -n telemetry
   ignore_errors: yes
   register: get_release_prometheus
   changed_when: false
