@@ -33,15 +33,21 @@ spec:
             memory: "1Gi"
             cpu: "500m"
         volumeMounts:
-          - mountPath: /var/lib/grafana
-            name: grafana-storage
+          - mountPath: /var/lib/grafana/dashboards
+            name: grafana-dashboards
+          - mountPath: /etc/grafana/provisioning/dashboards
+            name: grafana-provisioning-dashboards
           - mountPath: /etc/grafana/provisioning/datasources
-            name: grafana-datasources
+            name: grafana-provisioning-datasources
             readOnly: false
       volumes:
-        - name: grafana-storage
-          emptyDir: {}
-        - name: grafana-datasources
+        - name: grafana-dashboards
+          hostPath:
+            path: /var/lib/grafana/dashboards
+        - name: grafana-provisioning-dashboards
+          hostPath:
+            path: /etc/grafana/provisioning/dashboards
+        - name: grafana-provisioning-datasources
           configMap:
               defaultMode: 420
               name: grafana-datasources
