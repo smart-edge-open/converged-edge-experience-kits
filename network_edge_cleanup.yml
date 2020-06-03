@@ -10,12 +10,6 @@
   # - multus
   # - sriov/master
 
-  - name: load docker_registry variables
-    include_vars: ./roles/docker_registry/master/defaults/main.yml
-
-  - name: cleanup docker_registry
-    include_tasks: ./roles/docker_registry/master/tasks/cleanup.yml
-
   - name: NGC Test cleanup
     block:
     - name: load ngc_test variables
@@ -73,6 +67,12 @@
     - name: cleanup nfd
       include_tasks: ./roles/nfd/network_edge/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
+
+  - name: load docker_registry variables
+    include_vars: ./roles/docker_registry/master/defaults/main.yml
+
+  - name: cleanup docker_registry
+    include_tasks: ./roles/docker_registry/master/tasks/cleanup.yml
 
   - name: load network edge variables
     include_vars: ./roles/openness/network_edge/master/defaults/main.yml
