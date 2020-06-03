@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 # This file contains variables intended to be configured by user.
 # It allows feature enabling and configuration.
 # Per-host variables should be places in `host_vars` directory.
@@ -54,8 +53,8 @@ ntp_servers: []
 
 ### Kernel, grub & tuned configuration
 # Kernel, grub & tuned configurations are machine-type specific:
-# - Edge Nodes - edit `group_vars/edgenode_group.yml`
-# - Edge Controller - edit `group_vars/controller_group.yml`
+# - Edge Nodes - edit `group_vars/edgenode_group/10-default.yml`
+# - Edge Controller - edit `group_vars/controller_group/10-default.yml`
 # To provide configuration for specific machine, place the settings in `host_vars/_inventory_host_name.yml`
 
 ### Retry settings for network-based tasks
@@ -80,7 +79,7 @@ retry_delay: 5
 # - userspace (note: cannot be main or standalone)
 # NOTE - For VCAC-A setup, use `weavenet` CNI
 kubernetes_cnis:
-- kubeovn
+  - kubeovn
 
 # Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
 calico_cidr: "10.243.0.0/16"
@@ -136,7 +135,7 @@ sriov_kubevirt_enable: false
 # Kube-virt settings
 kubevirt_default_pv_dir: /var/vd/
 kubevirt_default_pv_vol_name: vol
-kubevirt_pv_vm_max_num:  64
+kubevirt_pv_vm_max_num: 64
 
 # Kubernetes device plugins
 k8s_device_plugins_enable: false
@@ -187,7 +186,6 @@ telemetry_grafana_enable: True
 
 ## Network Edge Processor Counter Monitor (PCM)
 telemetry_pcm_enable: False
-
 
 ##################################################
 ##### On Premises
@@ -243,4 +241,3 @@ onprem_hddl_enable: False
 
 ## On-Premises Node Feature Discovery (NFD)
 onprem_nfd_enable: True
-

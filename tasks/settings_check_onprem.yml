@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: check common settings
   include_tasks: settings_check_common.yml
 
@@ -14,19 +13,19 @@
       - "nts"
       - "ovncni"
   when:
-  - onprem_dataplane != "nts"
-  - onprem_dataplane != "ovncni"
+    - onprem_dataplane != "nts"
+    - onprem_dataplane != "ovncni"
 
 - name: Inter-App Communication is conflicting with OVNCNI
   fail:
     msg: |
       Inter-App Communication (IAC) feature is not supported together with OVNCNI dataplane.
-      Conflicting variables from `group_vars/all.yml`:
+      Conflicting variables from `group_vars/all/10-default.yml`:
         onprem_dataplane: "ovncni"
         onprem_iac_enable: True
   when:
-  - onprem_dataplane == "ovncni"
-  - onprem_iac_enable | default(False)
+    - onprem_dataplane == "ovncni"
+    - onprem_iac_enable | default(False)
 
 - name: hddl precheck
   include_tasks: "../roles/hddl/common/tasks/precheck.yml"
