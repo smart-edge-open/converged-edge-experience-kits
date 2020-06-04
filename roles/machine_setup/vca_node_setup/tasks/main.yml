@@ -8,9 +8,10 @@
   changed_when: true
 
 - name: build system image of VCA node
-  command: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/scripts/vcad_build.sh -c -o BASIC"
+  command: "./vcad_build.sh -c -o FULL --silent silent.cfg"
   args:
     creates: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
+    chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/scripts"
   ignore_errors: yes
   register: ret
   failed_when: >
@@ -130,25 +131,7 @@
     - install_kubernetes.sh
   changed_when: true
 
-- name: download hddl-daemon yaml
-  get_url:
-    url: "{{ _vca_hddl_yaml }}"
-    dest: /tmp/hddl_daemonset.yaml
-    force: yes
-  delegate_to: "{{ groups['controller_group'][0] }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-
-- name: update hddl-daemon yaml to use vcaca-ubuntu1804-analytics-hddldaemon:20.2
-  replace:
-    path: /tmp/hddl_daemonset.yaml
-    regexp: 'vcaca-ubuntu1804-analytics-hddldaemon'
-    replace: 'vcaca-ubuntu1804-analytics-hddldaemon:20.2'
-  delegate_to: "{{ groups['controller_group'][0] }}"
-
-- name: deploy hddl-daemon for VCA node
-  command: kubectl apply -f /tmp/hddl_daemonset.yaml
-  delegate_to: "{{ groups['controller_group'][0] }}"
+- name: run vpu metrics on VCA node. It will automatically start hddl daemon
+  command: "ssh {{ vca_node_ip }}  cd /opt/intel/vcaa/vpu_metric && ./run.sh start"
   changed_when: true
+

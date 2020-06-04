@@ -4,12 +4,12 @@
 ---
 
 _vca_dest: "/home/vca"
-_vca_image_url: "https://github.com/OpenVisualCloud/VCAC-SW/archive/VCAC-A-R4-ED1.tar.gz"
+_vca_image_url: "https://github.com/OpenVisualCloud/VCAC-SW-Analytics/archive/VCAC-A_R5.tar.gz"
 
 _vca_download_files:
     - https://github.com/OpenVisualCloud/VCAC-SW/archive/VCAC-A_R2.tar.gz
     - http://vault.centos.org/7.4.1708/updates/Source/SPackages/kernel-3.10.0-693.17.1.el7.src.rpm
-    - https://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/linux-4.19.87.tar.gz
+    - https://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/linux-4.19.97.tar.xz
     - https://cgit.freedesktop.org/drm/drm-firmware/tree/i915/kbl_dmc_ver1_04.bin
     - https://files.pythonhosted.org/packages/62/20/4d43e141b5bc426ba38274933ef8e76e85c7adea2c321ecf9ebf7421cedf/numpy-1.18.1-cp36-cp36m-manylinux1_x86_64.whl
     - https://files.pythonhosted.org/packages/c0/a9/9828dfaf93f40e190ebfb292141df6b7ea1a2d57b46263e757f52be8589f/opencv_python-4.1.2.30-cp36-cp36m-manylinux1_x86_64.whl # noqa 204
@@ -18,4 +18,4 @@ _vca_rpm_files:
     - kernel-3.10.0_1.*.VCA+-1.x86_64.rpm
     - kernel-devel-3.10.0_1.*.VCA+-1.x86_64.rpm
     - vcass-modules-3.10.0_1.*.rpm
-    - daemon-vca-2.7.3-x86_64.rpm
+    - daemon-vca-2.7.3-centos7-x86_64.rpm

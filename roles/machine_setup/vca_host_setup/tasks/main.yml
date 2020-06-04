@@ -55,7 +55,7 @@
   delay: "{{ retry_delay }}"
 
 - name: build Host Kernel and VCA Driver
-  command: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/scripts/build.sh -c"
+  command: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/scripts/build.sh -c -o centos7"
   args:
     creates: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/"
   ignore_errors: yes
