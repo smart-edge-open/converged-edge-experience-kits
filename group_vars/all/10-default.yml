@@ -185,7 +185,7 @@ ne_helm_charts_default_dir: /opt/openness-helm-charts
 telemetry_grafana_enable: True
 
 ## Network Edge Processor Counter Monitor (PCM)
-telemetry_pcm_enable: False
+telemetry_pcm_enable: True
 
 ##################################################
 ##### On Premises

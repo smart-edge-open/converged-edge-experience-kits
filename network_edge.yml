@@ -63,7 +63,7 @@
 
     - role: telemetry/grafana/master
       when: telemetry_grafana_enable | default(True)
-    - role: telemetry/pcm
+    - role: telemetry/pcm/master
       when: telemetry_pcm_enable | default(True)
 
 - hosts: edgenode_group
@@ -82,6 +82,8 @@
     - role: hddl/network_edge/worker
       when: ne_hddl_enable | default(False)
 
+    - role: telemetry/pcm/worker
+      when: telemetry_pcm_enable | default(True)
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group

@@ -144,9 +144,9 @@
   - name: pcm cleanup
     block:
     - name: load pcm variables
-      include_vars: ./roles/telemetry/pcm/defaults/main.yml
+      include_vars: ./roles/telemetry/pcm/master/defaults/main.yml
     - name: cleanup pcm
-      include_tasks: ./roles/telemetry/pcm/tasks/cleanup.yml
+      include_tasks: ./roles/telemetry/pcm/master/tasks/cleanup.yml
     when: telemetry_pcm_enable | default(True)
 
 
