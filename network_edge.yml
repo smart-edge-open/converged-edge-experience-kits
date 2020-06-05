@@ -7,10 +7,10 @@
   any_errors_fatal: true
 
   pre_tasks:
-  - name: check deployment settings
-    include_tasks: ./tasks/settings_check_ne.yml
-  - name: print deployment settings
-    include_tasks: ./tasks/print_vars.yml
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
@@ -44,6 +44,7 @@
     - role: openness/network_edge/master
     - role: cnca/master
     - role: kubevirt/master
+      when: kubevirt_enable | default(True)
 
     - role: telemetry/certs
     - role: telemetry/prometheus
@@ -75,6 +76,7 @@
     - role: kubernetes/cni
     - role: openness/network_edge/worker
     - role: kubevirt/worker
+      when: kubevirt_enable | default(True)
     - role: biosfw/worker
       when: ne_biosfw_enable | default(False)
     - role: cmk/worker
@@ -89,10 +91,10 @@
 - hosts: edgenode_vca_group
 
   pre_tasks:
-  - name: check deployment settings
-    include_tasks: ./tasks/settings_check_ne.yml
-  - name: print deployment settings
-    include_tasks: ./tasks/print_vars.yml
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
@@ -110,3 +112,4 @@
     - role: kubernetes/cni
     - role: openness/network_edge/worker
     - role: kubevirt/worker
+      when: kubevirt_enable | default(True)

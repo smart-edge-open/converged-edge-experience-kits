@@ -133,6 +133,7 @@ fpga_userspace_vf:
 sriov_kubevirt_enable: false
 
 # Kube-virt settings
+kubevirt_enable: true
 kubevirt_default_pv_dir: /var/vd/
 kubevirt_default_pv_vol_name: vol
 kubevirt_pv_vm_max_num: 64

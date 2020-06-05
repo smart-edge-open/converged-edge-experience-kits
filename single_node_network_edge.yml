@@ -2,20 +2,19 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 # Playbook for single node Network Edge cluster deployment
 
 - hosts: edgenode_group
   pre_tasks:
-  - name: create helper variable
-    set_fact:
-      single_node_deployment: true
-  - name: check deployment settings
-    include_tasks: ./tasks/settings_check_ne.yml
-  - name: check deployment settings for single node deployment
-    include_tasks: ./tasks/settings_check_ne_single_node.yml
-  - name: print deployment settings
-    include_tasks: ./tasks/print_vars.yml
+    - name: create helper variable
+      set_fact:
+        single_node_deployment: true
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: check deployment settings for single node deployment
+      include_tasks: ./tasks/settings_check_ne_single_node.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
@@ -36,12 +35,11 @@
     - role: opae_fpga/worker
       when: ne_opae_fpga_enable | default(False)
 
-
 - hosts: controller_group
   pre_tasks:
-  - name: create helper variable
-    set_fact:
-      single_node_deployment: true
+    - name: create helper variable
+      set_fact:
+        single_node_deployment: true
 
   roles:
     - role: machine_setup/os_setup
@@ -57,6 +55,7 @@
 
     - role: cnca/master
     - role: kubevirt/master
+      when: kubevirt_enable | default(True)
     - role: ngc_test/master
       when: ne_ngc_test_enable | default(False)
     - role: opae_fpga/master
@@ -70,11 +69,11 @@
     - role: hddl/network_edge/master
       when: ne_hddl_enable | default(False)
 
-
 - hosts: edgenode_group
   roles:
     - role: openness/network_edge/worker
     - role: kubevirt/worker
+      when: kubevirt_enable | default(True)
     - role: biosfw/worker
       when: ne_biosfw_enable | default(False)
     - role: cmk/worker
