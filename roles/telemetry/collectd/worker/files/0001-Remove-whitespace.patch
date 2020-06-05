@@ -1,0 +1,25 @@
+From cfcbd5403569c227661456a3e537462c781cda9a Mon Sep 17 00:00:00 2001
+From: kamilpoleszczuk <kamilx.poleszczuk@intel.com>
+Date: Tue, 26 May 2020 16:19:30 +0200
+Subject: [PATCH] Remove whitespace
+
+---
+ 3rd_party/ovs_pmd_stats/ovs_pmd_stats.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/3rd_party/ovs_pmd_stats/ovs_pmd_stats.py b/3rd_party/ovs_pmd_stats/ovs_pmd_stats.py
+index fc6045b..d38d689 100755
+--- a/3rd_party/ovs_pmd_stats/ovs_pmd_stats.py
++++ b/3rd_party/ovs_pmd_stats/ovs_pmd_stats.py
+@@ -101,7 +101,7 @@ for el in array:
+         plugin_instance = el[:-1].replace(' ', '_')
+     else:
+         type_instance = el.split(':')[0].replace(' ', "_")
+-        value = el.split(':')[1].split(' ')[0]
++        value = el.split(':')[1].strip().split(' ')[0]
+         print('PUTVAL %s/%s-%s/%s-%s N:%s' % (HOSTNAME, PROG_NAME, plugin_instance, TYPE, type_instance, value))
+ 
+ # close socket
+-- 
+2.22.0
+

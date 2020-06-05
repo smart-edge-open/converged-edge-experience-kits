@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+#Common values
+namespace: telemetry
+pullPolicy: IfNotPresent
+component: collectd
+
+#Collectd Values
+collectd:
+  image: opnfv/barometer-collectd
+  replicas: 1
+  name: collectd
+  resources:
+    requests:
+      cpu: "0.1"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+#Proxy Values
+proxy:
+    metricsCollectdPort: 9103
+    internalCollectdPort: 9104
+    serverName: collectd
+    name: collectd-proxy
+    certsDest: /root/certs/collectd
+    image: nginx:alpine
+    pathToNginxCfg: /etc/nginx/nginx.conf
+    configMap: collectd-proxy-config
+
+#Certs Values
+certs:
+  image: emberstack/openssl:latest
+  name: openssl
+

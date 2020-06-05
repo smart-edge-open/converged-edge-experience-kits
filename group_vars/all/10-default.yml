@@ -192,6 +192,9 @@ telemetry_grafana_enable: True
 ## Network Edge Processor Counter Monitor (PCM)
 telemetry_pcm_enable: False
 
+## Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
+telemetry_flavor: common
+
 ##################################################
 ##### On Premises
 

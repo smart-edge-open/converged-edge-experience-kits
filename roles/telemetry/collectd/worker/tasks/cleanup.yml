@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove collectd certificates
+  file:
+    path: "/etc/openness/certs/telemetry/collectd"
+    state: absent
+
+- name: remove collectd config files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /etc/openness/collectd
+  - /etc/openness/collectd/configs
+  - /etc/openness/collectd/pmd
+
+- name: close collectd port
+  ignore_errors: yes
+  firewalld:
+    port: 9103/tcp
+    permanent: yes
+    state: disabled
+    immediate: yes

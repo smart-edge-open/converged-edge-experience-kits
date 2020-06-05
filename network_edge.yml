@@ -48,6 +48,7 @@
 
     - role: telemetry/certs
     - role: telemetry/prometheus
+    - role: telemetry/collectd/master
     - role: telemetry/cadvisor/master
 
     - role: ngc_test/master
@@ -76,6 +77,7 @@
     - role: kubernetes/worker
     - role: docker_registry/worker
     - role: kubernetes/cni
+    - role: telemetry/collectd/worker
     - role: telemetry/cadvisor/worker
     - role: openness/network_edge/worker
     - role: kubevirt/worker
