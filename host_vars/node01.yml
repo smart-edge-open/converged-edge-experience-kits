@@ -11,3 +11,9 @@ sriov:
   vm_vf_ports: 0
 
 ovs_ports: []
+
+# ptp_port is the name of the hosts interface that connects the host to a PTP Master node
+# example usage:
+# ptp_port: enp134s0f1
+ptp_port:
+

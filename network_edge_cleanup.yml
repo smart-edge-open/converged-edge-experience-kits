@@ -10,6 +10,14 @@
   # - multus
   # - sriov/master
 
+  - name: ptp sychronization cleanup
+    block:
+    - name: load ptp sync variables
+      include_vars: ./roles/ptp/common/defaults/main.yml
+    - name: ptp synchronization cleanup
+      include_tasks: ./roles/ptp/common/tasks/cleanup.yml
+    when: ptp_sync_enable | default(False)
+
   - name: NGC Test cleanup
     block:
     - name: load ngc_test variables
@@ -157,6 +165,14 @@
   serial: 1
   tasks:
   # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
+
+  - name: ptp sychronization cleanup
+    block:
+    - name: load ptp sync variables
+      include_vars: ./roles/ptp/common/defaults/main.yml
+    - name: ptp synchronization cleanup
+      include_tasks: ./roles/ptp/common/tasks/cleanup.yml
+    when: ptp_sync_enable | default(False)
 
   - name: load kubevirt variables
     include_vars: ./roles/kubevirt/worker/defaults/main.yml

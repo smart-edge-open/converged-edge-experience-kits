@@ -63,6 +63,10 @@ ntp_servers: []
 number_of_retries: 10
 retry_delay: 5
 
+## PTP synchronization between nodes
+ptp_sync_enable: False
+
+
 ##################################################
 ##### Network Edge
 
