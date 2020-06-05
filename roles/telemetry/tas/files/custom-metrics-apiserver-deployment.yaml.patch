@@ -1,0 +1,11 @@
+--- custom-metrics-apiserver-deployment.yaml	2020-05-18 15:04:41.922000000 +0200
++++ custom-metrics-apiserver-deployment.yaml.new	2020-05-18 18:42:26.404000000 +0200
+@@ -25,7 +25,7 @@
+         - --tls-cert-file=/var/run/serving-cert/tls.crt
+         - --tls-private-key-file=/var/run/serving-cert/tls.key
+         - --logtostderr=true
+-        - --prometheus-url=http://prom-service.monitoring.svc:9090/
++        - --prometheus-url={{ .Values.prometheusServiceUrl }}
+         - --metrics-relist-interval=1m
+         - --v=10
+         - --config=/etc/adapter/config.yaml

@@ -49,6 +49,7 @@
     - role: telemetry/certs
     - role: telemetry/prometheus
     - role: telemetry/collectd/master
+    - role: telemetry/tas
     - role: telemetry/cadvisor/master
 
     - role: ngc_test/master

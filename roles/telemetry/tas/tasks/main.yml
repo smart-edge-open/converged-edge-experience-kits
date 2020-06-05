@@ -1,0 +1,134 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include vars telemetry certs role
+  include_vars:
+    file: ../../certs/defaults/main.yml
+
+
+- name: create temporary directory
+  tempfile:
+    state: directory
+    suffix: tas
+  register: tmp_dir
+
+
+- name: download TAS repo
+  git:
+    repo: "{{ _tas_repo.url }}"
+    dest: "{{ tmp_dir.path }}/tas-repo"
+    clone: yes
+    update: no
+    version: "{{ _tas_repo.commit }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+
+
+- name: Prometheus Adapter
+  block:
+  - name: create directory for server certificates
+    file:
+      name: "{{ _telemetry_certs_dest }}/tas"
+      state: directory
+
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _telemetry_certs_dest }}/CA/cert.pem"
+      dest: "{{ _telemetry_certs_dest }}/tas/root.pem"
+      state: link
+
+  - name: create server certificate signed by root CA certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh prometheus-adapter {{ _telemetry_certs_dest }}/tas {{ _telemetry_certs_dest }}/CA"
+
+  - name: delete symbolic link to root's cert
+    file:
+      path: "{{ _telemetry_certs_dest }}/tas/root.pem"
+      state: absent
+
+  - name: create custom-metrics kubernetes namespace
+    command: kubectl create namespace custom-metrics
+    register: create_namespace_result
+    failed_when: "create_namespace_result.rc != 0 and 'AlreadyExists' not in create_namespace_result.stderr"
+    changed_when: true
+
+  - name: create cm-adapter-serving-certs kubernetes secret
+    command: >
+      kubectl -n custom-metrics create secret tls cm-adapter-serving-certs
+      --cert={{ _telemetry_certs_dest }}/tas/cert.pem
+      --key={{ _telemetry_certs_dest }}/tas/key.pem
+    register: create_secret_result
+    failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
+    changed_when: true
+
+  - name: apply deployment patch
+    patch:
+      src: "custom-metrics-apiserver-deployment.yaml.patch"
+      dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-apiserver-deployment.yaml"
+
+  - name: copy Adapter config
+    copy:
+      src: "custom-metrics-config-map.yaml"
+      dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-config-map.yaml"
+
+  - name: add variable to Helm Chart Values
+    lineinfile:
+      path: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/values.yaml"
+      line: "prometheusServiceUrl: {{ _prometheus_svc_url }}"
+
+  - name: install Prometheus Adapter using Helm
+    command: "helm install prometheus-adapter {{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/"
+    register: deploy_adapter_result
+    failed_when: "deploy_adapter_result.rc != 0 and 'Error: cannot re-use a name that is still in use' not in deploy_adapter_result.stderr"
+    changed_when: true
+
+
+- name: Kubernetes Scheduler Extender
+  block:
+  - name: configure Kubernetes Scheduler Extender
+    command: "bash configure-scheduler.sh"
+    register: configure_scheduler_result
+    failed_when: "configure_scheduler_result.rc != 0 or 'error:' in configure_scheduler_result.stderr"
+    changed_when: true
+    args:
+      chdir: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration"
+
+  - name: create Scheduler Extender secret
+    command: kubectl create secret tls extender-secret --cert /etc/kubernetes/pki/ca.crt --key /etc/kubernetes/pki/ca.key
+    register: create_secret_result
+    failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
+    changed_when: true
+
+
+- name: Telemetry Aware Scheduling
+  block:
+  - name: build TAS
+    shell: source /etc/profile && make build
+    args:
+      chdir: "{{ tmp_dir.path }}/tas-repo"
+
+  - name: build TAS docker image
+    shell: source /etc/profile && make image
+    args:
+      chdir: "{{ tmp_dir.path }}/tas-repo"
+
+  - name: create Scheduler Extender secret
+    command: "kubectl apply -f {{ tmp_dir.path }}/tas-repo/deploy/"
+    changed_when: true
+
+
+- name: Descheduler
+  block:
+  - name: copy Descheduler deployment files
+    copy:
+      src: "{{ item }}"
+      dest: "{{ tmp_dir.path }}/"
+    with_items: "{{ _descheduler_deployment_files }}"
+
+  - name: deploy Descheduler
+    command: kubectl apply -f "{{ tmp_dir.path }}/{{ item }}"
+    changed_when: true
+    with_items: "{{ _descheduler_deployment_files }}"
