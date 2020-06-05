@@ -48,6 +48,7 @@
 
     - role: telemetry/certs
     - role: telemetry/prometheus
+    - role: telemetry/cadvisor/master
 
     - role: ngc_test/master
       when: ne_ngc_test_enable | default(False)
@@ -74,6 +75,7 @@
     - role: kubernetes/worker
     - role: docker_registry/worker
     - role: kubernetes/cni
+    - role: telemetry/cadvisor/worker
     - role: openness/network_edge/worker
     - role: kubevirt/worker
       when: kubevirt_enable | default(True)

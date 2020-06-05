@@ -86,6 +86,9 @@
   - name: cleanup telemetry certificates
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
 
+  - name: cleanup cAdvisor
+    include_tasks: ./roles/telemetry/cadvisor/master/tasks/cleanup.yml
+
   - name: helm cleanup
     block:
     - name: load helm variables
@@ -197,6 +200,9 @@
 
   - name: cleanup fpga
     include_tasks: ./roles/opae_fpga/worker/tasks/cleanup.yml
+
+  - name: cleanup cAdvisor certificates
+    include_tasks: ./roles/telemetry/cadvisor/worker/tasks/cleanup.yml
 
   - name: load docker variables
     include_vars: ./roles/docker/defaults/main.yml

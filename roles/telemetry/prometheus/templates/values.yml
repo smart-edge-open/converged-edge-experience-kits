@@ -87,6 +87,31 @@ serverFiles:
           action: replace
           target_label: kubernetes_pod_name
 
+      - job_name: 'cadvisor'
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: cadvisor
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          regex: 'cadvisor.*'
+          action: keep
+        - source_labels: [__address__]
+          regex: '.*:9105'
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: instance
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+
 nodeExporter:
   image:
     tag: v1.0.0-rc.0

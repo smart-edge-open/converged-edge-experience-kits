@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove cAdvisor certificates
+  file:
+    path: /etc/openness/certs/telemetry/cadvisor
+    state: absent

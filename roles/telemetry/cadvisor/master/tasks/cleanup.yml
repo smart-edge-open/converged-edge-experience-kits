@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include cAdvisor variables
+  include_vars: ../defaults/main.yml
+
+- name: remove cAdvisor chart template directory
+  file:
+    path: "{{ _cadvisor_chart_dir }}"
+    state: absent
+
+- name: uninstall cAdvisor using Helm
+  command: "helm uninstall cadvisor --namespace telemetry"
+  changed_when: true
+  ignore_errors: yes
