@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+---
+
+- name: remove fpga config release if exist
+  block:
+  - name: check if release exists
+    command: helm status intel-fpga-cfg
+    ignore_errors: yes
+    register: get_release_fpga_cfg
+  - name: remove fpga config release
+    command: helm uninstall intel-fpga-cfg
+    when: get_release_fpga_cfg.rc == 0
+    changed_when: true
+
+- name: remove fpga config helm charts
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ ne_helm_charts_default_dir }}/fpga_config"

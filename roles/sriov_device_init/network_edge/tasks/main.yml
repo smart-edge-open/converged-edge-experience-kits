@@ -3,9 +3,6 @@
 
 ---
 
-- name: include sriov/worker default vars
-  include_vars: ../../kubernetes/cni/sriov/worker/defaults/main.yml
-
 - name: Check if VFIO-PCI loaded
   shell: lsmod | grep vfio_pci
   register: vfio_loaded
@@ -64,29 +61,6 @@
         "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" |
         sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id"
   when: fpga_userspace_vf.enabled
-
-- name: check local bbdev_config_service_directory
-  stat:
-    path: "{{ _fpga_config_local_path }}"
-  connection: local
-  register: syscfg_local_file
-
-- name: file not present
-  debug:
-    msg: "{{ _fpga_config_local_path }} does not exists, FPGA Config utility won't be set up on the node"
-  when: not syscfg_local_file.stat.exists
-
-- name: set up FPGA Config utility on the node
-  block:
-  - name: copy local FPGA Config utility to remote
-    copy:
-      src: "{{ _fpga_config_local_path }}"
-      dest: "{{ _fpga_config_remote_path }}"
-  - name: build FPGA Config utility worker image
-    command: make fpga-cfg
-    args:
-      chdir: "{{ _git_repo_dest }}"
-  when: syscfg_local_file.stat.exists
 
 - name: get SR-IOV ethernet interfaces from /etc/rc.d/rc.local
   # ignore missing pipefail - we don't want to fail when grep does not find a line - we can continue with no lines

@@ -13,4 +13,5 @@ exclude_paths:
   - roles/telemetry/tas/files/
   - roles/nfd/network_edge/files/
   - roles/kubernetes/cni/sriov/master/files
+  - roles/fpga_cfg/charts
   - cnab

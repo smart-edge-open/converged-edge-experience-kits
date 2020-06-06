@@ -28,11 +28,11 @@
     when: not biosfw_syscfg_package_stat.stat.exists
   when: ne_biosfw_enable | default(False)
 
-- name: sriov_device_init/network_edge - verify precondition
+- name: fpga_cfg - verify precondition
   block:
-  - name: load sriov_device_init/network_edge vars
+  - name: load fpga_cfg vars
     include_vars:
-      file: roles/sriov_device_init/network_edge/defaults/main.yml
+      file: roles/fpga_cfg/defaults/main.yml
       name: defaults
   - name: check if local bbdev config exists
     stat:
@@ -42,8 +42,8 @@
   - name: log if file not present
     debug:
       msg: |
-        SR-IOV CNI enabled, but FPGA CONFIG is not present.
+        FPGA SRIOV enabled, but FPGA CONFIG is not present.
         Expected path: {{ playbook_dir }}/{{ defaults._fpga_config_local_path | replace('./', '') }}
         This is non-fatal warning, continuing...
     when: not sriov_fpga_config_package_stat.stat.exists
-  when: '"sriov" in kubernetes_cnis'
+  when: fpga_sriov_userspace_enable | default(False)

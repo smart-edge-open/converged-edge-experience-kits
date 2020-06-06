@@ -3,8 +3,14 @@
 
 ---
 
-_fpga_config_local_path: "./fpga_config/bbdev_config_service"
-_fpga_config_remote_path: "{{ _git_repo_dest }}/build/fpga_config/"
+fpga_userspace_vf:
+    enabled: false
+    vendor_id: "8086"
+    vf_device_id: "0d90"
+    pf_device_id: "0d8f"
+    vf_number: "2"
+    vf_driver: "vfio-pci"
+
 sriov:
     network_interfaces: {}
     interface_subnets: []

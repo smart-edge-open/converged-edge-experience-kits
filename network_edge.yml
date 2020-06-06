@@ -54,6 +54,8 @@
 
     - role: ngc_test/master
       when: ne_ngc_test_enable | default(False)
+    - role: fpga_cfg
+      when: fpga_sriov_userspace_enable | default(False)
     - role: opae_fpga/master
       when: ne_opae_fpga_enable | default(False)
     - role: nfd/network_edge

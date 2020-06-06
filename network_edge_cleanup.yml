@@ -97,6 +97,10 @@
   - name: cleanup cAdvisor
     include_tasks: ./roles/telemetry/cadvisor/master/tasks/cleanup.yml
 
+  - name: FPGA config cleanup
+    include_tasks: ./roles/fpga_cfg/tasks/cleanup.yml
+    when: fpga_sriov_userspace_enable | default(False)
+
   - name: helm cleanup
     block:
     - name: load helm variables

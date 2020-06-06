@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}"
+data:
+  "{{ .Values.configFileName }}": |
+    [MODE]
+    pf_mode_en = {{ .Values.pf_mode_en }}
+
+    [UL]
+    bandwidth = {{ .Values.dbandwidth }}
+    load_balance = {{ .Values.dload_balance }}
+    vfqmap = {{ .Values.dvfQueues.vf0 }},{{ .Values.dvfQueues.vf1 }},{{ .Values.dvfQueues.vf2 }},{{ .Values.dvfQueues.vf3 }},{{ .Values.dvfQueues.vf4 }},{{ .Values.dvfQueues.vf5 }},{{ .Values.dvfQueues.vf6 }},{{ .Values.dvfQueues.vf7 }}
+
+    [DL]
+    bandwidth = {{ .Values.ubandwidth }}
+    load_balance = {{ .Values.uload_balance }}
+    vfqmap = {{ .Values.uvfQueues.vf0 }},{{ .Values.uvfQueues.vf1 }},{{ .Values.uvfQueues.vf2 }},{{ .Values.uvfQueues.vf3 }},{{ .Values.uvfQueues.vf4 }},{{ .Values.uvfQueues.vf5 }},{{ .Values.uvfQueues.vf6 }},{{ .Values.uvfQueues.vf7 }}
+
+    [FLR]
+    flr_time_out = {{ .Values.flr_time_out }}
+

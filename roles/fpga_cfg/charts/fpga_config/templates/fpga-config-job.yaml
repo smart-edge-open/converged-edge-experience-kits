@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-{{ .Values.nodeName }}"
+spec:
+  template:
+    metadata:
+    spec:
+      containers:
+      - securityContext:
+          privileged: true
+        name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        command: [ "sudo", "/bin/bash", "-c", "--" ]
+        args: [ "./config_bbdev {{ .Values.networkType }} -c /home/fpga-config/fpga/fpga_bbdev.cfg" ]
+        volumeMounts:
+        - name: class
+          mountPath: /sys/devices
+          readOnly: false
+        - name: config-volume
+          mountPath: /home/fpga-config/fpga
+          readOnly: true
+      volumes:
+      - hostPath:
+          path: "/sys/devices"
+        name: class
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}
+          items:
+          - key: {{.Values.configFileName }}
+            path: {{.Values.configFileName }}
+      restartPolicy: "{{ .Values.restartPolicy }}"
+      nodeSelector:
+        kubernetes.io/hostname: "{{ .Values.nodeName }}"
