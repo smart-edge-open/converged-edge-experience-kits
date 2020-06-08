@@ -2,8 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-
 ### Kernel, grub & tuned configuration
 # Following settings control behavior of custom_kernel, grub and tuned roles
 # NOTE: If specific settings should be different for particular host, it should be configured using `host_vars/machine.yml`
@@ -17,8 +15,9 @@ kernel_skip: false
 # URL to the rpm repository with the kernel
 kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7/rt/CentOS-RT.repo
 # GPG Key to be used with the repository
-kernel_repo_key: "{{ 'https://www.elrepo.org/RPM-GPG-KEY-elrepo.org' if calico_ebpf_enabled
-                     else 'http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern' }}"
+kernel_repo_key:
+  "{{ 'https://www.elrepo.org/RPM-GPG-KEY-elrepo.org' if calico_ebpf_enabled
+  else 'http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern' }}"
 # Name of the package with kernel to be installed
 kernel_package: kernel-rt-kvm
 # Name of the kernel's development package
@@ -53,8 +52,8 @@ ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noa
 tuned_skip: false
 # Packages to install
 tuned_packages:
-- http://linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages/tuned-2.11.0-8.el7.noarch.rpm
-- http://linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+  - http://linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages/tuned-2.11.0-8.el7.noarch.rpm
+  - http://linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
 # Profile to be applied
 tuned_profile: realtime
 # Variables applied with the profile
@@ -74,10 +73,11 @@ default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugep
 additional_grub_params: ""
 
 # Packages to be installed on the Edge Node host
-os_yum_base_packages: "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python2-pip,wget,bridge-utils,\
+os_yum_base_packages:
+  "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python2-pip,wget,bridge-utils,\
   boost-devel,openssl-devel,pcre-devel,zlib-devel,glib2-devel,autoconf,automake,libtool,flex,bison,git,cmake,pciutils,\
   python-websocket-client,jsoncpp-devel,fcgi-devel,hiredis-devel,numactl-devel,gcc-c++,psmisc,python-httplib2,pixman-devel,\
-  moreutils,jq,python-devel,createrepo,psmisc,bash-completion,rsync"
+  moreutils,jq,python-devel,createrepo,psmisc,bash-completion,rsync,openssl11"
 _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git

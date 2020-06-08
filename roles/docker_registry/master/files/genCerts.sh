@@ -16,6 +16,14 @@ echo "Generate Docker registry certificate"
 root_cn_name="docker-registry"
 server_cn_name=$1
 
+shopt -s expand_aliases
+alias openssl=openssl11
+
+if ! openssl version | awk '$2 ~ /(^0\.)|(^1\.(0\.|1\.0))/ { exit 1 }'; then
+   echo "Not supported openssl:"
+   openssl version
+fi
+
 echo "Generating RootCA Key and Cert:"
 openssl ecparam -genkey -name secp384r1 -out "ca.key"
 

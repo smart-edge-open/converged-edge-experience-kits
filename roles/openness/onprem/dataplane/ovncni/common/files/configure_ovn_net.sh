@@ -32,7 +32,7 @@ function AddOVNNetwork {
     # Add a router port to the cluster router if it does not yet exist
     # --may-exist is not enough as the MAC is random
     if ! ovn-nbctl lrp-get-enabled "${rp}"; then
-        MAC="0e:00:$(openssl rand -hex 4 | sed 's/\(..\)/\1:/g; s/:$//')"
+        MAC="0e:00:$(openssl11 rand -hex 4 | sed 's/\(..\)/\1:/g; s/:$//')"
         ovn-nbctl "${ME}" lrp-add "${Cluster_Router}" "${rp}" "${MAC}" "${gw}/${mask}"
     fi
     # Create logical switch

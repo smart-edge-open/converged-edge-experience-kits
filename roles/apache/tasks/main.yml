@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - debug:
     msg: "Installing the following packages: {{ _apache_packages }}"
 - name: install Apache
@@ -24,13 +23,13 @@
   changed_when: true
 
 - name: generate Apache key (2048 bits)
-  command: openssl genrsa -out apache.key 2048
+  command: openssl11 genrsa -out apache.key 2048
   args:
     chdir: "{{ _certs_path }}/"
   changed_when: true
 
 - name: create Apache CSR
-  command: openssl req -new -key apache.key -out apache.csr -batch
+  command: openssl11 req -new -key apache.key -out apache.csr -batch
   args:
     chdir: "{{ _certs_path }}/"
   changed_when: true
@@ -39,15 +38,15 @@
   set_fact:
     ip_address: "{{ ansible_host }}"
   when:
-  - ansible_host != "127.0.0.1"
-  - not ip_address
+    - ansible_host != "127.0.0.1"
+    - not ip_address
 
 - name: set IP address - localhost installation
   set_fact:
     ip_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
   when:
-  - ansible_host == "127.0.0.1"
-  - not ip_address
+    - ansible_host == "127.0.0.1"
+    - not ip_address
 
 - name: add extension to /etc/pki/tls/openssl.cnf
   blockinfile:
@@ -58,7 +57,7 @@
 
 - name: generate self-signed Apache certificate
   command: >
-    openssl x509 -req -in apache.csr -CA cert.pem -CAkey key.pem -CAcreateserial -out apache.crt -days 500
+    openssl11 x509 -req -in apache.csr -CA cert.pem -CAkey key.pem -CAcreateserial -out apache.crt -days 500
     -sha256 -extensions req_ext -extfile /etc/pki/tls/openssl.cnf
   args:
     chdir: "{{ _certs_path }}/"
@@ -67,14 +66,14 @@
 - name: set SSL certificate file
   lineinfile:
     path: /etc/httpd/conf.d/ssl.conf
-    regexp: '^SSLCertificateFile.*$'
-    line: 'SSLCertificateFile /etc/ssl/certs/apache.crt'
+    regexp: "^SSLCertificateFile.*$"
+    line: "SSLCertificateFile /etc/ssl/certs/apache.crt"
 
 - name: set SSL key file
   lineinfile:
     path: /etc/httpd/conf.d/ssl.conf
-    regexp: '^SSLCertificateKeyFile.*$'
-    line: 'SSLCertificateKeyFile /etc/ssl/certs/apache.key'
+    regexp: "^SSLCertificateKeyFile.*$"
+    line: "SSLCertificateKeyFile /etc/ssl/certs/apache.key"
 
 - name: add firewall rules for Apache (http)
   command: firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -p tcp --dport 80 -j ACCEPT
