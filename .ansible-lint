@@ -10,6 +10,7 @@ exclude_paths:
   - roles/telemetry/collectd/master/files/
   - roles/telemetry/collectd/worker/files/
   - roles/telemetry/prometheus/files/
+  - roles/telemetry/pcm/master/charts/
   - roles/telemetry/tas/files/
   - roles/nfd/network_edge/files/
   - roles/kubernetes/cni/sriov/master/files

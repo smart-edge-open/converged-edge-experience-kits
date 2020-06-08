@@ -2,6 +2,7 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+_pcm_chart_dir: "{{ ne_helm_charts_default_dir }}/pcm"
 
 _grafana_dashboards_conf: /var/lib/grafana/dashboards
 _grafana_dashboards_prov: /etc/grafana/provisioning/dashboards

@@ -12,3 +12,7 @@
   file:
     path: "{{ _grafana_dashboards_prov }}"
     state: absent
+
+- name: unistall pcm
+  command: helm uninstall pcm --namespace telemetry
+  changed_when: true
