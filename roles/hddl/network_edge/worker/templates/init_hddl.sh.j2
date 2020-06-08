@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+modprobe -a i2c-dev i2c-i801 i2c-hid myd_vsc
+cd /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/drivers
+bash setup.sh install
