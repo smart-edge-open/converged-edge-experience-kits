@@ -13,7 +13,7 @@
 
 - name: patch node's Pod CIDR
   # flannel's CIDR is read from node's PodCIDR
-  command: kubectl patch node "{{ ansible_hostname }}" -p '{"spec":{"podCIDR":"{{ flannel_cidr }}" } }'
+  command: kubectl patch node "{{ node_name }}" -p '{"spec":{"podCIDR":"{{ flannel_cidr }}" } }'
   changed_when: true
 
 - name: create temp dir

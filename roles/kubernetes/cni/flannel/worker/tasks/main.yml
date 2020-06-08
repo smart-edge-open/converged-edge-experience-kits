@@ -12,6 +12,6 @@
     immediate: yes
 
 - name: patch node's Pod CIDR
-  command: kubectl patch node "{{ ansible_hostname }}" -p '{ "spec":{ "podCIDR":"10.244.0.0/16" }}'
+  command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"10.244.0.0/16" }}'
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true

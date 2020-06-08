@@ -50,7 +50,7 @@
   - 6081/udp
 
 - name: apply kube-ovn/role=master label to master node
-  command: "kubectl label node {{ ansible_hostname | lower }} kube-ovn/role=master --overwrite"
+  command: "kubectl label node {{ node_name }} kube-ovn/role=master --overwrite"
   changed_when: true
 
 - name: create temp dir
@@ -121,7 +121,7 @@
 - name: Wait till k8s master starts
   shell: >
     set -o pipefail &&
-    kubectl get nodes {{ ansible_hostname }} | awk '$2=="Ready"'
+    kubectl get nodes {{ node_name }} | awk '$2=="Ready"'
   args:
   register: k8s_master_init_start
   retries: 30
@@ -150,7 +150,7 @@
       set -o pipefail &&
       kubectl get pods -n kube-ovn
       -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
-      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep -E "ovs-ovn|ovn-central"
+      --field-selector spec.nodeName={{ node_name }} | grep -E "ovs-ovn|ovn-central"
     register: kubeovn_pods
     retries: 30
     delay: 30

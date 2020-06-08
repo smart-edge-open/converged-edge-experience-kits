@@ -5,6 +5,7 @@
 
 - hosts: controller_group
   serial: 1
+
   roles:
     - role: offline/vars
     - role: offline/prepare/before

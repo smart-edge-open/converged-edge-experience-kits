@@ -7,7 +7,7 @@
 - name: recreate SR-IOV device plugin pod if already exists
   shell: >
     kubectl delete -n kube-system $(kubectl get pods -n kube-system
-    --field-selector spec.nodeName={{ ansible_hostname | lower }} -o=NAME
+    --field-selector spec.nodeName={{ node_name }} -o=NAME
     | grep device-plugin )
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes

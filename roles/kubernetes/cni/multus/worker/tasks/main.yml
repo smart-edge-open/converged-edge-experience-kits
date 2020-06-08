@@ -15,7 +15,7 @@
   shell: >
     set -o pipefail &&
     kubectl get pods --field-selector status.phase=Running -n kube-system
-    --field-selector spec.nodeName={{ ansible_hostname }} | awk '/kube-multus-ds-amd64/ {print $1;}'
+    --field-selector spec.nodeName={{ node_name }} | awk '/kube-multus-ds-amd64/ {print $1;}'
   register: nodes_multus_pod
   retries: 30
   delay: 10
