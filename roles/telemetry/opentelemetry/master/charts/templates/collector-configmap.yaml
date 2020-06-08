@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.collector.configMap }}
+  namespace: {{ .Values.namespace }} 
+  labels:
+    component: {{ .Values.collector.configMap }}
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      opencensus:
+        endpoint: {{ .Values.collector.opencensus.endpoint }}
+    exporters:
+      prometheus:
+        endpoint: {{ .Values.collector.prometheus.endpoint }}
+        namespace: {{.Values.collector.prometheus.namespace  }}
+        const_labels:
+          label1: {{.Values.collector.prometheus.const_labels.label1  }}
+
+    extensions:
+      health_check: {}
+
+    service:
+      extensions: [health_check]
+      pipelines:
+        metrics:
+          receivers: [{{ .Values.collector.receivers }}]
+          exporters: [{{ .Values.collector.exporters }}]
+

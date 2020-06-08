@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../../certs/defaults/main.yml
+
+- name: remove otel collector certificates
+  file:
+    path: "{{ _telemetry_certs_dest }}/{{ item }}"
+    state: absent
+  with_items:
+  - otel_collector
+  - otel-collector.telemetry.svc

@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.proxy.configMap }}
+  labels:
+    name: {{ .Values.proxy.configMap }}
+  namespace: {{ .Values.namespace }}
+data:
+  nginx.conf: |-
+    worker_processes  1;
+    events {
+        worker_connections  1024; 
+    }
+    
+    http {
+        include       mime.types;
+        default_type  application/octet-stream;
+        sendfile        on;
+        keepalive_timeout  65;
+        server {
+            listen                {{ .Values.proxy.metricPrometheusPort }} ssl;
+            server_name           {{ .Values.proxy.serverNamePrometheus }};
+            ssl_certificate       /root/certs/{{ .Values.proxy.serverNamePrometheus }}/cert.pem;
+            ssl_certificate_key   /root/certs/{{ .Values.proxy.serverNamePrometheus }}/key.pem;
+            ssl_client_certificate /root/certs/{{ .Values.proxy.serverNamePrometheus }}/root.pem;
+            ssl_verify_client     on;
+            location / {
+                proxy_pass http://localhost:{{ .Values.collector.metricPrometheusPort }}/;
+                } 
+            }
+        server {
+            listen                {{ .Values.proxy.internalPrometheusPort }} ssl;
+            server_name           {{ .Values.proxy.serverNamePrometheus }};
+            ssl_certificate       /root/certs/{{ .Values.proxy.serverNamePrometheus }}/cert.pem;
+            ssl_certificate_key   /root/certs/{{ .Values.proxy.serverNamePrometheus }}/key.pem;
+            ssl_client_certificate /root/certs/{{ .Values.proxy.serverNamePrometheus }}/root.pem;
+            ssl_verify_client     on;
+            location / {
+                proxy_pass http://localhost:{{ .Values.collector.internalPrometheusPort }}/;
+                }
+            }
+         server {
+            listen                {{ .Values.proxy.opencensusport }} ssl http2;
+            server_name           {{ .Values.proxy.serverNameAgent }};
+            ssl_certificate       /root/certs/{{ .Values.proxy.serverNameAgent }}/cert.pem;
+            ssl_certificate_key   /root/certs/{{ .Values.proxy.serverNameAgent }}/key.pem;
+            location / {
+                grpc_pass grpc://0.0.0.0:{{ .Values.collector.opencensusport }};
+                }
+            }
+    }
+

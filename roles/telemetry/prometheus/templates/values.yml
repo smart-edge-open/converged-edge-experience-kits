@@ -87,6 +87,18 @@ serverFiles:
           action: replace
           target_label: kubernetes_pod_name
 
+      - job_name: 'otel-collector'
+        scrape_interval: 10s
+        static_configs:
+          - targets: ['otel-collector.telemetry.svc:9107']
+          - targets: ['otel-collector.telemetry.svc:9105']
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: otel_collector
+
       - job_name: 'collectd'
         scheme: https
         tls_config:

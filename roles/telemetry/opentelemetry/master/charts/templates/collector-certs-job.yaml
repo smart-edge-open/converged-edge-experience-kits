@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.certs.name }}
+  namespace: {{ .Values.namespace }}
+
+spec:
+  template:
+    metadata:
+      name:  {{ .Values.certs.name }}
+      labels:
+        name: {{ .Values.certs.name }}
+    spec:
+      hostPID: true
+      restartPolicy: Never
+      containers:
+      - name: openssl
+        image: {{ .Values.certs.image }}
+        command: ["/bin/sh","-c"]
+        args: ["rm -Rf /root/certs/{{ .Values.proxy.serverNamePrometheus }} && \
+              mkdir /root/certs/{{ .Values.proxy.serverNamePrometheus }} && \
+              /root/certgen/entrypoint_tls.sh {{ .Values.proxy.serverNamePrometheus }} /root/certs/{{ .Values.proxy.serverNamePrometheus }} /root/CA && \
+              chmod 644 /root/certs/{{ .Values.proxy.serverNamePrometheus }}/cert.pem /root/certs/{{ .Values.proxy.serverNamePrometheus }}/key.pem && \
+              rm -Rf /root/certs/{{ .Values.proxy.serverNameAgent }} && rm -rf /root/ca && \
+              mkdir /root/certs/{{ .Values.proxy.serverNameAgent }} && \
+              /root/certgen/entrypoint_tls.sh {{ .Values.proxy.serverNameAgent }} /root/certs/{{ .Values.proxy.serverNameAgent }} /root/CA && \
+              chmod 644 /root/certs/{{ .Values.proxy.serverNameAgent }}/cert.pem /root/certs/{{ .Values.proxy.serverNameAgent }}/key.pem"]
+        imagePullPolicy: {{ .Values.pullPolicy}}
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "0.1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        - name: certgen
+          mountPath: /root/certgen
+      volumes:
+      - name: cert-vol
+        hostPath:
+          path: {{ .Values.certs.certsHostPath }}
+          type: DirectoryOrCreate
+      - name: ca
+        secret:
+          secretName: {{ .Values.rootSecretName }}
+      - name: certgen
+        secret:
+          secretName: certgen
+          defaultMode: 0744
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: component
+                operator: In
+                values:
+                - "{{ .Values.component }}"
+            topologyKey: kubernetes.io/hostname

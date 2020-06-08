@@ -48,6 +48,7 @@
 
     - role: telemetry/certs
     - role: telemetry/prometheus
+    - role: telemetry/opentelemetry/master
     - role: telemetry/collectd/master
     - role: telemetry/tas
     - role: telemetry/cadvisor/master

@@ -91,6 +91,9 @@
   - name: cleanup prometheus
     include_tasks: ./roles/telemetry/prometheus/tasks/cleanup.yml
 
+  - name: cleanup otel collector
+    include_tasks: ./roles/telemetry/opentelemetry/master/tasks/cleanup.yml
+
   - name: cleanup telemetry certificates
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
 
@@ -220,6 +223,9 @@
 
   - name: cleanup fpga
     include_tasks: ./roles/opae_fpga/worker/tasks/cleanup.yml
+
+  - name: cleanup otel collector
+    include_tasks: ./roles/telemetry/opentelemetry/worker/tasks/cleanup.yml
 
   - name: cleanup cAdvisor certificates
     include_tasks: ./roles/telemetry/cadvisor/worker/tasks/cleanup.yml

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_otel_collector_chart_dir: "{{ ne_helm_charts_default_dir }}/otel_collector"
+
