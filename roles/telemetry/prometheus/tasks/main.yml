@@ -113,6 +113,16 @@
       src: node-exporter-configmap.yaml
       dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-configmap.yaml"
 
+  - name: copy server-service-tls template file
+    copy:
+      src: server-service-tls.yaml
+      dest: "{{ _prometheus_chart_dir }}/templates/server-service-tls.yaml"
+
+  - name: copy server proxy template file
+    copy:
+      src: server-proxy-configmap.yaml
+      dest: "{{ _prometheus_chart_dir }}/templates/server-proxy-configmap.yaml"
+
   - name: template telemetry-certs-daemonset
     template:
       src: telemetry-certs-daemonset.yml.j2

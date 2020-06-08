@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.proxy.service.name }}
+  namespace: telemetry
+spec:
+  clusterIP: {{ .Values.server.service.clusterIP }}
+  selector: {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+  ports:
+    - name: https
+      protocol: TCP
+      port: {{ .Values.proxy.apiPort }}
+      targetPort: {{ .Values.proxy.apiPort }}

@@ -25,6 +25,12 @@ server:
       hostPath:
         path: "{{ _telemetry_certs_dest }}"
         type: Directory
+    - name: ca
+      secret:
+        secretName: root-ca
+    - name: proxy-config
+      configMap:
+        name: prometheus-proxy-config 
   extraVolumeMounts:
     - name: cert-vol
       mountPath: /opt/prometheus/certs/
@@ -34,6 +40,22 @@ server:
   service:
     nodePort: 30000
     type: NodePort
+  sidecarContainers:
+  - name: server-proxy
+    image: nginx:alpine
+    securityContext:
+      runAsUser: 0 
+      runAsNonRoot: false
+    volumeMounts:
+    - name: proxy-config
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+    - name: ca
+      mountPath: /root/CA
+    - name: cert-vol
+      mountPath: /opt/prometheus/certs/
+    ports:
+    - containerPort: 9099
 
 serverFiles:
   prometheus.yml:
@@ -180,3 +202,14 @@ nodeExporter:
 
 kubeStateMetrics:
   enabled: false
+
+proxy:
+  apiPort: 9099
+  internalPort: 9090
+  serverName: prometheus
+  certsDest:  /opt/prometheus/certs
+  image: nginx:alpine
+  configMap: prometheus-proxy-config
+  service:
+    name: prometheus
+
