@@ -21,7 +21,7 @@ for host in "${hosts_array[@]}"
 do
     :
     echo "Waiting for ${host}"
-    until ssh -o StrictHostKeyChecking=no "${AZ_VM_USERNAME}@${host}" "echo $(hostname) is up"
+    until ssh -o StrictHostKeyChecking=no "${AZ_VM_USERNAME}@${host}" 'echo $(hostname) is up'
     do
         sleep 2
     done
