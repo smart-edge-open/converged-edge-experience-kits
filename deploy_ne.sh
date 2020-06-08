@@ -32,6 +32,9 @@ while getopts ":f:" o; do
 done
 shift $((OPTIND-1))
 
+# Remove all previous flavors
+find "${PWD}/group_vars/" -type l -name "30_*_flavor.yml" -delete
+
 if [[ -z "${flavor}" ]]; then
     echo "No flavor provided"
     echo -e "   $0 [-f <flavor>] <filter>. Available flavors: $(ls -m flavors)"
