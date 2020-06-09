@@ -47,7 +47,7 @@
   - name: wait for running ovs-ovn pod
     shell: >
       set -o pipefail &&
-      kubectl get pods -n kube-ovn
+      kubectl get pods -n kube-system
       -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
       --field-selector spec.nodeName={{ node_name }} | grep -E "ovs-ovn"
     register: kubeovn_pods
@@ -65,8 +65,8 @@
   - name: events of ovs-ovn pod
     shell: >
       set -o pipefail &&
-      kubectl describe pod -n kube-ovn
-      $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name
+      kubectl describe pod -n kube-system
+      $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name
       --field-selector spec.nodeName={{ node_name }} | grep ovs-ovn) |
       sed -n '/^Events:/,//p'
     changed_when: false
@@ -75,8 +75,8 @@
   - name: try to get ovs-ovn execution logs
     shell: >
       set -o pipefail &&
-      kubectl logs -n kube-ovn
-      $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name
+      kubectl logs -n kube-system
+      $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name
       --field-selector spec.nodeName={{ node_name }} | grep ovs-ovn)
     changed_when: false
     delegate_to: "{{ groups['controller_group'][0] }}"

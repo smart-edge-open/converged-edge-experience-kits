@@ -3,8 +3,8 @@
 
 ---
 
-_dpdk_version: "18.11.2"
-_dpdk_checksum: "0ad396d18be01db57b6de8270ebdf651"
+_dpdk_version: "18.11.6"
+_dpdk_checksum: "0d4ad7f0794ca40754cf9ca96de7fe64"
 
 _dpdk_name: "dpdk-{{ _dpdk_version }}"
 _dpdk_install_dir: "/opt/{{ _dpdk_name }}"

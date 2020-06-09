@@ -28,11 +28,11 @@ index 40e7337..c8c66f5 100644
 +        dpdk-devel
  
  ENV OVS_VERSION=2.12.0
- ENV OVS_SUBVERSION=4
+ ENV OVS_SUBVERSION=5
  
 -RUN rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/openvswitch-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
 -    rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/openvswitch-devel-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
-+ENV DPDK_VERSION=18.11.2
++ENV DPDK_VERSION=18.11.6
 +ENV DPDK_DIR=/opt/dpdk-$DPDK_VERSION
 +ENV DPDK_TARGET=x86_64-native-linuxapp-gcc
 +ENV DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
