@@ -54,6 +54,7 @@ RUN yum install -y nasm \
 COPY --from=builder /usr/lib64/libusb-1.0.so.0 /usr/lib64/libusb-1.0.so.0
 COPY --from=builder /home/opt/intel/openvino /opt/intel/openvino
 RUN sed -i '/"abort_if_hw_reset_failed"/ s/true/false/' /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/config/hddl_autoboot.config
+RUN sed -i '/"device_snapshot_mode"/ s/none/full/' /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/config/hddl_service.config
 COPY *_hddl.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/init_hddl.sh
 RUN chmod +x /usr/local/bin/run_hddl.sh
