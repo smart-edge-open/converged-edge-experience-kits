@@ -171,6 +171,7 @@ serverFiles:
           action: replace
           target_label: kubernetes_pod_name
 
+{% if telemetry_pcm_enable  | d(false) %}
       - job_name: 'pcm'
         scheme: https
         tls_config:
@@ -200,6 +201,7 @@ serverFiles:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: kubernetes_pod_name
+{% endif %}
 
 nodeExporter:
   image:

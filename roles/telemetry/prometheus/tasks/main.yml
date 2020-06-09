@@ -45,12 +45,11 @@
       state: directory
       suffix: prometheus
     register: tmp_dir
-    delegate_to: localhost
 
   - name: template values.yml to tmp directory
     template:
-      src: values.yml
-      dest: "{{ tmp_dir.path }}/"
+      src: values.yml.j2
+      dest: "{{ tmp_dir.path }}/values.yml"
 
   - name: add default Helm repository
     command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
