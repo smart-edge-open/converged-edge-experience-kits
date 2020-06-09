@@ -9,6 +9,7 @@ args=()
 if [ -n "${GIT_TOKEN}" ]; then args+=("-t"  "${GIT_TOKEN}"); fi
 if [ -n "${GIT_REPO}" ]; then args+=("-r"  "${GIT_REPO}"); fi
 if [ -n "${ANSIBLE_USER}" ]; then args+=("-u"  "${ANSIBLE_USER}"); fi
+if [ -n "${OEK_FLAVOR}" ]; then args+=("-f"  "${OEK_FLAVOR}"); fi
 if [ -n "${OEK_VARS}" ]; then args+=("-o"  "${OEK_VARS}"); fi
 if [ -n "${ANSIBLE_LIMITS}" ]; then args+=("-l"  "${ANSIBLE_LIMITS}"); fi
 

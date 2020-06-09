@@ -12,7 +12,9 @@ import configparser
 import signal
 import sys
 from urllib.parse import urlparse, urlunparse
+from pathlib import Path
 import shutil
+import glob
 
 _LOG = None
 OEK_PATH = "oek"
@@ -49,6 +51,9 @@ def make_parser():
     parser.add_argument(
         "-o", "--oek-vars", action="store", metavar="OEK_VARS", dest="oek_vars",
         help="Extra OpenNESS experience kit variables to override the defaults")
+    parser.add_argument(
+        "-f", "--flavor", action="store", metavar="OEK_FLAVOR", dest="oek_flavor",
+        help="OpenNESS experience kit flavor")
     parser.add_argument(
         "-l", "--limits", action="store", metavar="ANSIBLE_LIMITS", dest="ansible_limits",
         help="OpenNESS experience kit ansible limits")
@@ -123,6 +128,25 @@ def create_inventory(options, oek_path):
 def main(options):
     clone_repository(options.git_repo, options.git_token, OEK_PATH)
     create_inventory(options, OEK_PATH)
+
+    # Clean previous flavor links
+    for f in glob.glob(os.path.join(OEK_PATH, "group_vars", "*", "30_*_flavor.yml")):
+        if os.path.islink(f):
+            os.unlink(f)
+
+    if options.oek_flavor:
+        flavor_path = os.path.join(OEK_PATH, "flavors", options.oek_flavor)
+        if not (os.path.exists(flavor_path) and os.path.isdir(flavor_path)):
+            _LOG.fatal("Failed to find flavor directory {}".format(flavor_path))
+        for f in Path(flavor_path).iterdir():
+            group_name = f.stem
+            dst_dir = os.path.join(OEK_PATH, "group_vars", group_name)
+            if not (os.path.exists(dst_dir) and os.path.isdir(dst_dir)):
+                _LOG.fatal(
+                    "Failed to find group_vars directory {}".format(dst_dir))
+            dst = Path(os.path.join(
+                dst_dir, "30_{}_flavor.yml".format(options.oek_flavor)))
+            dst.symlink_to(f.resolve())
 
     command = ["ansible-playbook", "-vv"]
     playbook = os.path.join(OEK_PATH, "network_edge.yml")

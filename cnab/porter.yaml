@@ -39,7 +39,14 @@ parameters:
   - name: oek_vars
     type: string
     description: "Extra OpenNESS experience kit variables to override the defaults"
-    default: "kernel_skip=true dpdk_kernel_devel=https://linuxsoft.cern.ch/cern/centos/7/updates/x86_64/Packages/kernel-devel-3.10.0-957.21.3.el7.x86_64.rpm"
+    default: ""
+    applyTo:
+      - install
+
+  - name: oek_flavor
+    type: string
+    description: "OpenNESS experience kit flavor"
+    default: "minimal"
     applyTo:
       - install
 
@@ -81,7 +88,7 @@ parameters:
   - name: az_vm_flavor
     type: string
     description: "VM size"
-    default: "Standard_B4ms"
+    default: "Standard_B2s"
     applyTo:
       - install
 
