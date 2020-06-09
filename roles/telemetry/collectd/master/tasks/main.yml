@@ -4,7 +4,7 @@
 ---
 
 - name: check if collectd already exists
-  command: helm status collectd
+  command: helm status collectd -n telemetry
   ignore_errors: yes
   changed_when: False
   register: get_collectd

@@ -27,6 +27,11 @@
   until: result is succeeded
   delay: "{{ retry_delay }}"
 
+- name: check if Prometheus adapter release already exists
+  command: helm status prometheus-adapter
+  ignore_errors: yes
+  register: get_release_prometheus_adapter
+  changed_when: false
 
 - name: Prometheus Adapter
   block:
@@ -84,7 +89,7 @@
     register: deploy_adapter_result
     failed_when: "deploy_adapter_result.rc != 0 and 'Error: cannot re-use a name that is still in use' not in deploy_adapter_result.stderr"
     changed_when: true
-
+  when: get_release_prometheus_adapter.rc != 0
 
 - name: Kubernetes Scheduler Extender
   block:
