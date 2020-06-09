@@ -41,7 +41,7 @@ if [[ -z "${flavor}" ]]; then
 else
     flavor_path="${PWD}/flavors/${flavor}"
     if [[ ! -d "${flavor_path}" ]]; then
-        echo "Flavor ${1} does not exist[${flavor_path}]"
+        echo "Flavor ${flavor} does not exist[${flavor_path}]"
         exit 1
     fi
 
