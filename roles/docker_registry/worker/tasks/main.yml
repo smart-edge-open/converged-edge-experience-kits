@@ -2,78 +2,18 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-- name: load docker-registry variables
-  include_vars: ../../master/defaults/main.yml
 
-- name: create directory for copying certificate
-  file:
-    path: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}
-    state: directory
+- name: create docker registry certs for VCA node(s)
+  include_tasks: node_cert.yml
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+    cert_cn: "{{ ansible_hostname }}-vca{{ vca_idx }}"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']
 
-- name: generate client key and csr file
-  command: "{{ item }}"
-  with_items:
-    - openssl11 req -new -sha256 -nodes -out client.csr -newkey rsa:2048 -keyout client.key -subj "/CN={{ ansible_host }}"
-  args:
-    chdir: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
-  changed_when: true
-
-- name: create a directory for copying client.csr file
-  file:
-    path: "{{ _registry_location }}/{{ ansible_host }}/"
-    state: directory
-  delegate_to: "{{ _registry_host }}"
-
-- name: get client.csr certificate content
-  slurp:
-    src: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/client.csr"
-  register: docker_registry_client_csr
-- debug:
-    msg: "{{ docker_registry_client_csr['content'] | b64decode }}"
-
-- name: copy client.csr certificate content on master node
-  copy:
-    content: "{{ docker_registry_client_csr['content'] | b64decode }}"
-    dest: "{{ _registry_location }}/{{ ansible_host }}/client.csr"
-  delegate_to: "{{ _registry_host }}"
-
-- name: generate client.cert from client.csr , root CA and key file
-  command: "{{ item }}"
-  with_items:
-    - openssl11 x509 -req -in client.csr -CA ../ca.crt -CAkey ../ca.key -days 1000 -out client.cert -CAcreateserial
-  args:
-    chdir: "{{ _registry_location }}/{{ ansible_host }}/"
-  delegate_to: "{{ _registry_host }}"
-  changed_when: true
-
-- name: get public self signed certificate content
-  slurp:
-    src: "{{ _registry_location }}/ca.crt"
-  register: docker_registry_ca
-  delegate_to: "{{ _registry_host }}"
-- debug:
-    msg: "{{ docker_registry_ca['content'] | b64decode }}"
-
-- name: save self signed certificate node
-  copy:
-    content: "{{ docker_registry_ca['content'] | b64decode }}"
-    dest: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/ca.crt
-
-- name: get client.cert certificate content
-  slurp:
-    src: "{{ _registry_location }}/{{ ansible_host }}/client.cert"
-  register: docker_registry_client
-  delegate_to: "{{ _registry_host }}"
-- debug:
-    msg: "{{ docker_registry_client['content'] | b64decode }}"
-
-- name: save client.cert certificate on node
-  copy:
-    content: "{{ docker_registry_client['content'] | b64decode }}"
-    dest: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/client.cert
-
-- name: remove client.csr from worker node after certificate generation
-  file:
-    path: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/client.csr"
-    state: absent
-  ignore_errors: yes
+- name: create docker registry certs for edge node
+  include_tasks: node_cert.yml
+  vars:
+    cert_cn: "{{ ansible_hostname }}"

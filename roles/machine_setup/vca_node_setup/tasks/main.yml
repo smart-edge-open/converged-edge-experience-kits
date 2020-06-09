@@ -3,9 +3,12 @@
 
 ---
 
-- name: run vca_load_modules
-  command: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/vcaa_kernel/download/VCAC-SW-VCAC-A_R2/apps/scripts/vca_load_modules.sh"
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
   changed_when: true
+  register: num_vca
+
+- debug: msg="Detected {{ num_vca.stdout | int }} VCAC-A cards"
 
 - name: build system image of VCA node
   command: "./vcad_build.sh -c -o FULL --silent silent.cfg"
@@ -25,7 +28,17 @@
     chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
     creates: "{{ _vca_vcad_image }}"
 
-- name: copy vca init & shutdown script
+- name: copy vcad image for multiple VCA cards
+  copy:
+    src: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/{{ _vca_vcad_image }}"
+    dest: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/{{ vca_idx | int - 1 }}{{ _vca_vcad_image }}"
+    remote_src: yes
+    mode: preserve
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+
+- name: copy vca init scripts
   copy:
     src: "{{ item }}"
     dest: "{{ _vca_dest }}"
@@ -33,18 +46,32 @@
   with_items:
     - init_vca.sh
     - shutdown_vca.sh
+    - setup_firewall.sh
 
 - name: unload VCAC-A vcad image
   shell: |
-    "{{ _vca_dest }}"/shutdown_vca.sh
-    vcactl blockio close vcablk0
+    "{{ _vca_dest }}/shutdown_vca.sh"
+    vcactl blockio close {{ vca_idx | int - 1 }} 0 vcablk0
   changed_when: true
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
 
 - name: load VCAC-A vcad image
-  command: "vcactl blockio open vcablk0 RW {{ _vca_vcad_image }}"
+  command: "vcactl blockio open {{ vca_idx | int - 1 }} 0 vcablk0 RW {{ vca_idx | int - 1 }}{{ _vca_vcad_image }}"
   args:
     chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
   changed_when: true
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+
+- name: configure VCAC-A node hostname
+  command: "vcactl config {{ vca_idx | int - 1 }} 0 node-name {{ inventory_hostname }}-vca{{ vca_idx }}"
+  changed_when: true
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
 
 - name: set VCAC-A init script at system boot
   lineinfile:
@@ -60,80 +87,32 @@
   failed_when: init_vca.rc != 0
   changed_when: init_vca.rc == 0
 
-- name: get VCA node IP address
-  set_fact:
-    vca_node_ip: "{{ init_vca.stdout_lines[3] }}"
+- name: update firewall settings for VCAC-A
+  command: "{{ _vca_dest }}/setup_firewall.sh"
+  register: setup_firewall
+  failed_when: setup_firewall.rc != 0
+  changed_when: setup_firewall.rc == 0
 
 - debug: msg="{{ init_vca.stdout }}"
 
-- name: delete VCAC-A node from ~/.ssh/known_hosts
-  lineinfile:
-    path: ~/.ssh/known_hosts
-    regexp: '^{{ vca_node_ip }}'
-    state: absent
-  ignore_errors: yes
+- name: configure all VCA nodes
+  include_tasks: configure_vca_nodes.yml
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
 
-- name: establish password-less access from host to VCAC-A node
-  shell: |
-    ssh-keygen -q -N '' -C "$HOSTNAME" -f ~/.ssh/id_rsa <<< y > /dev/null
-    sshpass -p "{{ _vca_img_pswd }}" ssh-copy-id -o StrictHostKeyChecking=no root@"{{ vca_node_ip }}"
-  changed_when: true
-
-- name: remove resolv.conf soft link file (../run/systemd/resolve/stub-resolv.conf) on VCA node
-  command: "ssh {{ vca_node_ip }} rm -f /etc/resolv.conf"
-  changed_when: true
-
-- name: copy resolv & env files to VCAC-A node
-  command: "scp /etc/{{ item }} {{ vca_node_ip }}:/etc/"
-  with_items:
-    - resolv.conf
-    - environment
-  changed_when: true
-
-- name: install timezone on VCA node
-  shell: |
-    set -o pipefail
-    ssh "{{ vca_node_ip }}" apt update
-    ssh "{{ vca_node_ip }}" apt install -y dbus tzdata
-    ssh "{{ vca_node_ip }}" timedatectl set-timezone $(timedatectl | awk '/Time zone:/{print$3}')
-  changed_when: true
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-
-# Start configuration on vca-node.
-# Because vca-node is behind NAT and not in the ansible inventory, need below mitigation for the configuration.
-- name: copy install scripts to VCA node
-  block:
-    - name: copy install scripts to host
-      copy:
-        src: "{{ item }}"
-        dest: "{{ _vca_dest }}"
-        mode: a+x
-      with_items:
-        - install_docker.sh
-        - install_kubernetes.sh
-    - name: scp install scripts to VCA node
-      command: "scp {{ _vca_dest }}/{{ item }} {{ vca_node_ip }}:/root/"
-      with_items:
-        - install_docker.sh
-        - install_kubernetes.sh
-    - name: scp proxy to node
-      command: "scp /etc/systemd/system/docker.service.d/http-proxy.conf {{ vca_node_ip }}:/root/"
-    - name: scp config to node
-      command: "scp /root/.docker/config.json {{ vca_node_ip }}:/root/"
-
-- name: install docker & kubernetes on VCA node
-  command: "ssh {{ vca_node_ip }} ./{{ item }}"
-  with_items:
-    - install_docker.sh
-    - install_kubernetes.sh
-  changed_when: true
-
-- name: run vpu metrics on VCA node. It will automatically start hddl daemon
-  command: "ssh {{ vca_node_ip }}  cd /opt/intel/vcaa/vpu_metric && ./run.sh start"
-  changed_when: true
+- name: run vpu metrics on all VCA nodes -- this automatically starts hddl daemon
+  command: "ssh {{ vca_node_ip }} /opt/intel/vcaa/vpu_metric/run.sh start"
+  register: run_vpu_metrics
+  failed_when: run_vpu_metrics.rc != 0
+  changed_when: run_vpu_metrics.rc == 0
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
 
 - name: deploy vca policy that uses this vpu metrics
   block:

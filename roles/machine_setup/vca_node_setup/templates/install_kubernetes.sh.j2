@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-vca_k8s_kubelet_ver="kubelet=1.16.2-00"
-vca_k8s_kubeadm_ver="kubeadm=1.16.2-00"
-vca_k8s_kubectl_ver="kubectl=1.16.2-00"
+vca_k8s_kubelet_ver="kubelet={{ _kubernetes_version }}-00"
+vca_k8s_kubeadm_ver="kubeadm={{ _kubernetes_version }}-00"
+vca_k8s_kubectl_ver="kubectl={{ _kubernetes_version }}-00"
 
 rm -f /var/lib/apt/lists/lock
 apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update

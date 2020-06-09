@@ -46,5 +46,11 @@
   changed_when: true
 
 - name: join VCA node
-  include_tasks: vca_node.yml
+  include_tasks: vca_node_join.yml
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+    vca_node_name: "{{ inventory_hostname }}-vca{{ vca_idx }}"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']

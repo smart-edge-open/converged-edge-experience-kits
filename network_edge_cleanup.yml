@@ -308,3 +308,9 @@
 
   - name: cleanup git
     include_tasks: ./roles/git_repo/tasks/cleanup.yml
+
+  - name: load docker_registry variables
+    include_vars: ./roles/docker_registry/master/defaults/main.yml
+
+  - name: cleanup docker_registry certificate
+    include_tasks: ./roles/docker_registry/worker/tasks/cleanup.yml

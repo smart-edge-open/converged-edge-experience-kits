@@ -77,10 +77,14 @@
   register: installed_kernel
   changed_when: false
 
-- name: install VCA kernel packages, driver and utility
-  command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}" # noqa 303
+- name: remove old VCA RPMs
+  command: "rpm -qa | grep -e {{ item }} | xargs yum -y erase" # noqa 303
   with_items: "{{ _vca_rpm_files }}"
-  ignore_errors: yes
+  when: "'VCA' not in installed_kernel.stdout"
+
+- name: install VCA kernel packages, driver and utility
+  command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}.rpm" # noqa 303
+  with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
 
 - name: configure VCA kernel to be the default at boot
