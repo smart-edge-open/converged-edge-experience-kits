@@ -187,6 +187,9 @@ ne_helm_charts_default_dir: /opt/openness-helm-charts
 ## Network Edge Grafana
 telemetry_grafana_enable: True
 
+## Network Edge Grafana UI Password
+telemetry_grafana_pass: grafana
+
 ## Network Edge Processor Counter Monitor (PCM)
 telemetry_pcm_enable: False
 

@@ -71,7 +71,8 @@
       when: ne_hddl_enable | default(False)
     - role: ptp/master
       when: ptp_sync_enable | default(False)
-    - role: telemetry/grafana/master
+
+    - role: telemetry/grafana
       when: telemetry_grafana_enable | default(True)
     - role: telemetry/pcm/master
       when: telemetry_pcm_enable | default(False)

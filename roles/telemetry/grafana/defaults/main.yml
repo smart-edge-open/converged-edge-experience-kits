@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_pv_dir: /opt/grafana
+_pv_names:
+  - grafana-volume-1
+  - grafana-volume-2
+
+_grafana_chart_dir: "{{ ne_helm_charts_default_dir }}/grafana"
+_grafana_chart_commit: "d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a"
+_grafana_chart_url: "https://raw.githubusercontent.com/helm/charts/{{ _grafana_chart_commit }}/stable/grafana/"
+
+_grafana_chart:
+  - ".helmignore"
+  - "Chart.yaml"
+  - "values.yaml"
+
+_grafana_chart_templates:
+  - "templates/NOTES.txt"
+  - "templates/_helpers.tpl"
+  - "templates/_pod.tpl"
+  - "templates/clusterrole.yaml"
+  - "templates/clusterrolebinding.yaml"
+  - "templates/configmap-dashboard-provider.yaml"
+  - "templates/configmap.yaml"
+  - "templates/dashboards-json-configmap.yaml"
+  - "templates/deployment.yaml"
+  - "templates/headless-service.yaml"
+  - "templates/ingress.yaml"
+  - "templates/poddisruptionbudget.yaml"
+  - "templates/podsecuritypolicy.yaml"
+  - "templates/pvc.yaml"
+  - "templates/role.yaml"
+  - "templates/rolebinding.yaml"
+  - "templates/secret-env.yaml"
+  - "templates/secret.yaml"
+  - "templates/service.yaml"
+  - "templates/serviceaccount.yaml"
+  - "templates/statefulset.yaml"
+
+_grafana_chart_test_templates:
+  - "templates/tests/test-configmap.yaml"
+  - "templates/tests/test-podsecuritypolicy.yaml"
+  - "templates/tests/test-role.yaml"
+  - "templates/tests/test-rolebinding.yaml"
+  - "templates/tests/test-serviceaccount.yaml"
+  - "templates/tests/test.yaml"
