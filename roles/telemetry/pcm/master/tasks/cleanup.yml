@@ -15,4 +15,5 @@
 
 - name: unistall pcm
   command: helm uninstall pcm --namespace telemetry
+  ignore_errors: yes
   changed_when: true
