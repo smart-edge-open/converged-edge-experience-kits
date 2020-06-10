@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Kube-ovn with OVS-DPDK
+kubeovn_dpdk: false
+
+# Kube-virt settings
+kubevirt_enable: false
+
+# Network Edge Processor Counter Monitor (PCM)
+telemetry_pcm_enable: false
+
+# Kubernetes device plugins
+k8s_device_plugins_enable: true
+
+## Network Edge Node Feature Discovery (NFD)
+ne_nfd_enable: true
+
+# Deploy Video Analytics serving 
+video_analytics_serving_enable: true

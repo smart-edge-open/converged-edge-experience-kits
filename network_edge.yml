@@ -104,6 +104,8 @@
 - hosts: edgenode_vca_group
 
   pre_tasks:
+    - name: set node name
+      set_fact: node_name={{ ansible_hostname | lower }}
     - name: check deployment settings
       include_tasks: ./tasks/settings_check_ne.yml
     - name: print deployment settings

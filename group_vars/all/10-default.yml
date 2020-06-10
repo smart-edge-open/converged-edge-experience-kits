@@ -91,8 +91,6 @@ calico_cidr: "10.243.0.0/16"
 # Flannel's CIDR (will be included automatically to noproxy when flannel is included in kubernetes_cnis)
 flannel_cidr: "10.244.0.0/16"
 
-# VCA's CIDR (will be included automatically to noproxy when weavenet is included in kubernetes_cnis)
-vca_cidr: "172.32.1.0/24"
 # weavenet's CIDR that is used by VCA deployment
 weavenet_cidr: "10.32.0.0/12"
 

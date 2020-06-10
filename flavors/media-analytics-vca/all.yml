@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Kube-ovn with OVS-DPDK
+kubeovn_dpdk: false
+
+# Kube-virt settings
+kubevirt_enable: false
+
+# Network Edge Processor Counter Monitor (PCM)
+telemetry_pcm_enable: false
+
+# Network Edge's Kubernetes CNIs
+# WeaveNet CNI for VCAC-A
+kubernetes_cnis:
+  - weavenet
+
+# VCA's CIDR (will be included automatically to noproxy when weavenet is included in kubernetes_cnis)
+vca_cidr: "172.32.1.0/24"
+
+# Kubernetes device plugins
+k8s_device_plugins_enable: true
+
+## Network Edge Node Feature Discovery (NFD)
+ne_nfd_enable: true
+
+# Deploy Video Analytics serving 
+video_analytics_serving_enable: true
