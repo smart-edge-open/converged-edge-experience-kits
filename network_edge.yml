@@ -44,7 +44,6 @@
       when: k8s_device_plugins_enable | default(False)
 
     - role: openness/network_edge/master
-    - role: cnca/master
     - role: kubevirt/master
       when: kubevirt_enable | default(True)
 
@@ -55,8 +54,6 @@
     - role: telemetry/tas
     - role: telemetry/cadvisor/master
 
-    - role: ngc_test/master
-      when: ne_ngc_test_enable | default(False)
     - role: fpga_cfg
       when: fpga_sriov_userspace_enable | default(False)
     - role: opae_fpga/master

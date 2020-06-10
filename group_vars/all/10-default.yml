@@ -169,9 +169,6 @@ cpu:
 topology_manager:
   policy: "best-effort"
 
-## Network Edge NGC Test role
-ne_ngc_test_enable: False
-
 ## OPAE FPGA
 ne_opae_fpga_enable: False
 
@@ -241,9 +238,6 @@ iac_ovs_socket_mem: "1024,0"
 ### HTTP server on the Edge Controller
 # IP address that should be used instead of Controller's IP from inventory
 ip_address: ""
-
-## On-Premises NGC Test
-onprem_ngc_test_enable: False
 
 ## On-Premises HDDL
 onprem_hddl_enable: False

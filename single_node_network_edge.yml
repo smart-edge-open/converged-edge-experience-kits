@@ -57,11 +57,8 @@
 
     - role: openness/network_edge/master
 
-    - role: cnca/master
     - role: kubevirt/master
       when: kubevirt_enable | default(True)
-    - role: ngc_test/master
-      when: ne_ngc_test_enable | default(False)
     - role: opae_fpga/master
       when: ne_opae_fpga_enable | default(False)
     - role: nfd/network_edge

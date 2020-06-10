@@ -1,9 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
-
----
-
-_cnca_plugin_name: "cnca"
-_cnca_plugin_dest: "/usr/local/bin/cnca"
-_gopath: "$GOPATH"
-_certs_dest: "/etc/openness/certs"

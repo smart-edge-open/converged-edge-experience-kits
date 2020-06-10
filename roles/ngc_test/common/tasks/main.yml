@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright © 2019-2020 Intel Corporation
-
----
-- name: create directory for ngc configs
-  file:
-    name: "{{ _configs_dest }}/ngc"
-    state: directory

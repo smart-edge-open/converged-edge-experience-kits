@@ -65,11 +65,6 @@ os_yum_base_packages:
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
 _git_repo_dest: /opt/edgecontroller
 
-_epcforedge_git_repo:
-  dir: https://{{ git_repo_token }}@github.com/otcshare/x-epcforedge.git
-  download_dir: /opt/x-epcforedge
-  branch: master
-
 _offline_path: "{{ _offline_path_common }}/controller"
 _offline_archive: "offline-controller.tar.gz"
 

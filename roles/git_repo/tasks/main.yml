@@ -34,19 +34,6 @@
         update: no
       when: not always_clean_repository
 
-    - name: checkout clean x-epcforedge repository
-      git:
-        repo: "{{ _epcforedge_git_repo.dir }}"
-        dest: "{{ _epcforedge_git_repo.download_dir }}"
-        version: "{{ _epcforedge_git_repo.branch }}"
-        force: yes
-      register: result
-      retries: "{{ number_of_retries }}"
-      until: result is succeeded
-      delay: "{{ retry_delay }}"
-      when: "'controller_group' in group_names"
-  when: not (_offline_mode | d(False))
-
 - name: offline mode
   block:
     - name: copy repository to proper path

@@ -1,9 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
-
----
-
-- name: Remove kube-cnca plugin
-  file:
-    path: "{{ _cnca_plugin_dest }}"
-    state: absent

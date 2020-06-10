@@ -2,16 +2,15 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 # Playbook for On-Premises deployment
 
 - hosts: controller_group
 
   pre_tasks:
-  - name: check deployment settings
-    include_tasks: ./tasks/settings_check_onprem.yml
-  - name: print deployment settings
-    include_tasks: ./tasks/print_vars.yml
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_onprem.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: offline/vars
@@ -28,26 +27,22 @@
     - role: golang
 
     - role: openness/onprem/master
-    - role: cnca/onprem
     - role: nfd/onprem/master
       when: onprem_nfd_enable | default(True)
     - role: offline/restore/ngc_test
       when: _offline_mode and _epcforedge_git_repo is defined
-    - role: ngc_test/onprem/master
-      when: onprem_ngc_test_enable | default(False)
     - role: apache
 
     - role: offline/restore/yum/clean
       when: _offline_mode
 
-
 - hosts: edgenode_group
 
   pre_tasks:
-  - name: check deployment settings
-    include_tasks: ./tasks/settings_check_onprem.yml
-  - name: print deployment settings
-    include_tasks: ./tasks/print_vars.yml
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_onprem.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: offline/vars
