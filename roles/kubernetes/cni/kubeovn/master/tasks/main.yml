@@ -137,6 +137,7 @@
 - name: apply CRD defining local subnet
   command: "kubectl apply -f {{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
   changed_when: true
+  when: "{{ groups['edgenode_group'] | length > 0 }}"
 
 - name: remove temp crd_local.yml
   file:
@@ -196,6 +197,7 @@
   delay: 30
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
+  when: "{{ groups['edgenode_group'] | length > 0 }}"
 
 - name: configure local-ovs-phy port
   shell: |
@@ -204,6 +206,7 @@
     ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
+  when: "{{ groups['edgenode_group'] | length > 0 }}"
 
 - name: configure OVS
   shell: |
