@@ -55,8 +55,13 @@
     chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/script"
 
 - name: set hddl worker node name
-  set_fact:
-    hddl_worker_node_name: "{{ hostname_output.stdout |lower }}"
+  block:
+  - name: get hostname
+    command: hostname
+    register: hddlhostname_output
+  - name: set hddlhostname
+    set_fact:
+      hddl_worker_node_name: "{{ hddlhostname_output.stdout |lower }}"
 
 - name: label hddl worker node with hddl-zone=yes
   command: kubectl label node {{ hddl_worker_node_name }} hddl-zone=yes --overwrite
@@ -64,10 +69,10 @@
   changed_when: true
 
 - name: wait for running ov_hddl container
-  shell: set -o pipefail && (docker ps -a | grep ov_hddl)
-  register: hddldaemon_container_running
-  delegate_to: "{{ groups['controller_group'][0] }}"
+  docker_container_info:
+    name: ov_hddl
+  register: hddldaemon_container_result
   retries: 30
   delay: 5
-  until: hddldaemon_container_running
+  until: hddldaemon_container_result.exists
   changed_when: false
