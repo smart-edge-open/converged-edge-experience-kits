@@ -17,7 +17,7 @@
     _base_noproxy: "{{ _base_noproxy + ',' + weavenet_cidr }}"
   when: '"weavenet" in kubernetes_cnis'
 
-- name: Adding vca CIDR to noproxy
+- name: Adding VCA CIDR to noproxy
   set_fact:
     _base_noproxy: "{{ _base_noproxy + ',' + vca_cidr }}"
   when: inventory_hostname in groups['edgenode_vca_group']

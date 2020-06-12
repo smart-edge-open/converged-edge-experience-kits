@@ -16,7 +16,7 @@ kubernetes_cnis:
   - weavenet
 
 # VCA's CIDR (will be included automatically to noproxy when weavenet is included in kubernetes_cnis)
-vca_cidr: "172.32.1.0/24"
+vca_cidr: "172.32.1.0/12"
 
 # Kubernetes device plugins
 k8s_device_plugins_enable: true
