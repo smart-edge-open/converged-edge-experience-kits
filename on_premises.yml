@@ -40,6 +40,8 @@
     - role: apache
     - role: offline/restore/yum/clean
       when: offline_mode
+    - role: controller_ip
+    
 
 
 - hosts: edgenode_group
