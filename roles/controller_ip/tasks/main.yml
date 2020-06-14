@@ -33,6 +33,7 @@
     dest: /opt/controller_ip/
     mode: '1777'
 
+
 - name: Run the cron_task script
   shell: /opt/controller_ip/cron_task.sh 
 
