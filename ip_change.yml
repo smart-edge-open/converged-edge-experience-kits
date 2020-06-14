@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+---
+
+- hosts: edgenode_group
+  
+  tasks:
+  - name: Go to the config folder of each edgenode and change the controller IP
+    command: chdir=/var/lib/appliance/configs/ find ./ -type f -exec sed -i -e 's/{{old_ip}}/{{new_ip}}/g' {} \;
+  - name: Rebuild onprem-appliance
+    command: chdir=/opt/edgenode make run-onprem-appliance
+  
+
+  
+
+
+
+
+    
