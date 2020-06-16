@@ -7,7 +7,7 @@
   include_tasks: common.yml
 
 - name: load vars for CNIs
-  include_vars: "./roles/kubernetes/cni/{{ cni }}/{{ role_postfix }}/defaults/main.yml"
+  include_vars: "../{{ cni }}/{{ role_postfix }}/defaults/main.yml"
   with_items: "{{ kubernetes_cnis }}"
   when: "cni + '/' + role_postfix in available_cni_roles"
   loop_control:
@@ -16,7 +16,7 @@
   failed_when: False
 
 - name: run cleanup tasks for CNIs
-  include_tasks: "./roles/kubernetes/cni/{{ cni }}/{{ role_postfix }}/tasks/cleanup.yml"
+  include_tasks: "../{{ cni }}/{{ role_postfix }}/tasks/cleanup.yml"
   with_items: "{{ kubernetes_cnis }}"
   when: "cni + '/' + role_postfix in available_cni_roles"
   loop_control:

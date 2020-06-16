@@ -4,7 +4,7 @@
 ---
 
 - name: load kubeovn common variables
-  include_vars: ./roles/kubernetes/cni/kubeovn/common/defaults/main.yml
+  include_vars: ../../common/defaults/main.yml
 
 - name: kube-ovn cleanup
   block:

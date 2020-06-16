@@ -3,12 +3,25 @@
 
 ---
 
+- block:
+  - name: find cni dir
+    find:
+      paths: .
+      patterns: "cni"
+      recurse: yes
+      file_type: directory
+    delegate_to: localhost
+    register: cni_dir_matches
+  - name: set cni_dir variable (path to roles/kubernetes/cni dir)
+    set_fact:
+      cni_dir: "{{ cni_dir_matches.files[0].path }}"
+
 - name: create list of available CNIs roles
   # it creates an array with CNI roles, e.g.: [ 'kubeovn/master', 'kubeovn/worker', 'calico' ]
   # it is used later to call only roles that exists (skip worker role if it doesn't exist)
   set_fact:
     available_cni_roles: "{{ available_cni_roles|default([]) + [item.path] }}"
-  with_filetree: roles/kubernetes/cni/
+  with_filetree: "{{ cni_dir }}"
   when:
   - item.state == 'directory'
   - (item.path.endswith('master')) or (item.path.endswith('worker'))
