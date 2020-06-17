@@ -25,6 +25,9 @@ spec:
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: cmk
+        operator: Exists
       nodeSelector:
         node-role.kubernetes.io/master: ""
       containers:
