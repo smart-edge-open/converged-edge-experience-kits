@@ -18,6 +18,18 @@ collectd:
       cpu: "1"
       memory: "2Gi"
 
+#Collectd FPGA Values
+collectd_fpga:
+  image: {{ _registry_ip_address }}:{{ _registry_port }}/intel/collectd_fpga_plugin:0.1.0
+  replicas: 1
+  name: collectd
+  resources:
+    requests:
+      cpu: "0.1"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
 #Proxy Values
 proxy:
     metricsCollectdPort: 9103
@@ -33,4 +45,3 @@ proxy:
 certs:
   image: emberstack/openssl:latest
   name: openssl
-
