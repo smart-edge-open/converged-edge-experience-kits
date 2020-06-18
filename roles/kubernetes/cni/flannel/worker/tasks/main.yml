@@ -2,16 +2,15 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: open flannel firewall rules
   ignore_errors: yes
   firewalld:
-    port: 8285/udp
+    port: 8472/udp
     permanent: yes
     state: enabled
     immediate: yes
 
 - name: patch node's Pod CIDR
-  command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"10.244.0.0/16" }}'
+  command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"{{ flannel_cidr | ipsubnet(24, groups['all'].index(inventory_hostname)) }}" }}'
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true

@@ -24,8 +24,8 @@ if [[ $? -ne 0 ]]; then
       exit 1
     fi
   fi
-  echo "Installing ansible..."
-  yum -y install ansible
+  echo "Installing ansible and pip modules..."
+  yum -y install ansible pip && pip install netaddr
   if [[ $? -ne 0 ]]; then
     echo "ERROR: Could not install Ansible package from EPEL repository"
     exit 1
