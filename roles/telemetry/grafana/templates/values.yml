@@ -26,23 +26,11 @@ adminUser: admin
 adminPassword: {{ telemetry_grafana_pass }}
 
 sidecar:
-  image: kiwigrid/k8s-sidecar:0.1.151
-  imagePullPolicy: IfNotPresent
-  resources: {}
   dashboards:
     enabled: true
-    SCProvider: true
     label: grafana_dashboard
-    folder: /tmp/dashboards
-    defaultFolderName: null
-    searchNamespace: null
-    provider:
-      name: sidecarProvider
-      orgid: 1
-      folder: ''
-      type: file
-      disableDelete: false
-      allowUiUpdates: false
+    searchNamespace: true
+
   datasources:
     enabled: true
     label: grafana_datasource
