@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: check if NFD release already exists
   command: helm status nfd-release -n openness
   ignore_errors: yes
@@ -11,105 +10,94 @@
 
 - name: install NFD chart
   block:
-  - name: pull NFD image
-    docker_image:
-      name: "{{ _nfd_image_name }}"
-      tag: "{{ _nfd_tag }}"
-      source: pull
+    - name: pull NFD image
+      docker_image:
+        name: "{{ _nfd_image_name }}"
+        tag: "{{ _nfd_tag }}"
+        source: pull
 
-  - name: tag NFD image and push to docker registry
-    docker_image:
-      name: "{{ _nfd_image_name }}"
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery"
-      tag: "{{ _nfd_tag }}"
-      push: yes
-      source: local
+    - name: tag NFD image and push to docker registry
+      docker_image:
+        name: "{{ _nfd_image_name }}"
+        repository: "{{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery"
+        tag: "{{ _nfd_tag }}"
+        push: yes
+        source: local
 
-  - name: remove local NFD image
-    docker_image:
-      state: absent
-      name: "{{ _nfd_image_name }}"
-      tag: "{{ _nfd_tag }}"
-
-  - name: create NFD chart template directory
-    file:
-      name: "{{ item }}"
-      state: directory
-    with_items:
-      - "{{ _nfd_chart_dir }}"
-      - "{{ _nfd_chart_dir }}/templates"
-    changed_when: true
-
-  - name: download NFD chart
-    get_url:
-      url: "{{ _nfd_cek_url }}/{{ item }}"
-      dest: "{{ _nfd_chart_dir }}"
-    register: result
-    retries: "{{ number_of_retries }}"
-    until: result is succeeded
-    delay: "{{ retry_delay }}"
-    with_items: "{{ _nfd_chart }}"
-
-  - name: download NFD chart templates
-    get_url:
-      url: "{{ _nfd_cek_url }}/{{ item }}"
-      dest: "{{ _nfd_chart_dir }}/templates"
-    register: result
-    retries: "{{ number_of_retries }}"
-    until: result is succeeded
-    delay: "{{ retry_delay }}"
-    with_items: "{{ _nfd_chart_templates }}"
-
-  - name: copy nfd network policy to chart templates
-    copy:
-      src: "nfd_network_policy.yml"
-      dest: "{{ _nfd_chart_dir }}/templates"
-
-  - name: set _nfd_weavenet_cidr_enabled
-    set_fact:
-      _nfd_weavenet_cidr_enabled: true
-    when: "'weavenet' in kubernetes_cnis"
-
-  # openness namespace should already exist
-  - name: create openness namespace if needed
-    block:
-    - name: check if openness namespace exists
-      command: kubectl get ns openness
-      ignore_errors: yes
-      register: get_ns_openness
-    - name: create openness namespace
-      command: kubectl create namespace openness
-      when: get_ns_openness.rc == 1
-
-  - name: apply CMK worker patch
-    block:
-    - name: install patch utility
-      yum:
-        name: patch
-        state: present
-    - name: apply CMK worker patch
-      patch:
-        src: worker.yml.patch
-        dest: "{{ _nfd_chart_dir }}/templates/worker.yml"
-        strip: 1
-        binary: no
-        backup: no
-    - name: find backup files
-      find:
-        paths: "{{ _nfd_chart_dir }}/templates"
-        patterns: "*.orig"
-      register: backup_files
-    - name: remove backup files
-      file:
-        path: "{{ item.path }}"
+    - name: remove local NFD image
+      docker_image:
         state: absent
-      with_items: "{{ backup_files.files }}"
+        name: "{{ _nfd_image_name }}"
+        tag: "{{ _nfd_tag }}"
+
+    - name: create NFD chart template directory
+      file:
+        name: "{{ item }}"
+        state: directory
+      with_items:
+        - "{{ _nfd_chart_dir }}"
+        - "{{ _nfd_chart_dir }}/templates"
       changed_when: true
 
-  - name: deploy NFD with Helm chart
-    command:  >
-      helm install {{ _nfd_release_name }} {{ _nfd_chart_dir }} --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery
-      --set image.tag={{ _nfd_tag }} --set serviceAccount.name=nfd-master --set weavenet_cidr_enabled={{ _nfd_weavenet_cidr_enabled }}
-      --set weavenet_cidr={{ weavenet_cidr }} --namespace=openness
-    changed_when: true
+    - name: download NFD chart
+      get_url:
+        url: "{{ _nfd_cek_url }}/{{ item }}"
+        dest: "{{ _nfd_chart_dir }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      with_items: "{{ _nfd_chart }}"
+
+    - name: download NFD chart templates
+      get_url:
+        url: "{{ _nfd_cek_url }}/{{ item }}"
+        dest: "{{ _nfd_chart_dir }}/templates"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      with_items: "{{ _nfd_chart_templates }}"
+
+    # openness namespace should already exist
+    - name: create openness namespace if needed
+      block:
+        - name: check if openness namespace exists
+          command: kubectl get ns openness
+          ignore_errors: yes
+          register: get_ns_openness
+        - name: create openness namespace
+          command: kubectl create namespace openness
+          when: get_ns_openness.rc == 1
+
+    - name: apply CMK worker patch
+      block:
+        - name: install patch utility
+          yum:
+            name: patch
+            state: present
+        - name: apply CMK worker patch
+          patch:
+            src: worker.yml.patch
+            dest: "{{ _nfd_chart_dir }}/templates/worker.yml"
+            strip: 1
+            binary: no
+            backup: no
+        - name: find backup files
+          find:
+            paths: "{{ _nfd_chart_dir }}/templates"
+            patterns: "*.orig"
+          register: backup_files
+        - name: remove backup files
+          file:
+            path: "{{ item.path }}"
+            state: absent
+          with_items: "{{ backup_files.files }}"
+          changed_when: true
+
+    - name: deploy NFD with Helm chart
+      command: >
+        helm install {{ _nfd_release_name }} {{ _nfd_chart_dir }} --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery
+        --set image.tag={{ _nfd_tag }} --set serviceAccount.name=nfd-master --namespace=openness
+      changed_when: true
   when: get_release_nfd.rc != 0
