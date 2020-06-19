@@ -148,6 +148,14 @@
     command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }}"
     changed_when: true
 
+  - name: wait for grafana pod to be ready
+    command: >
+      kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
+      --for=condition=Ready pods --timeout=600s
+    changed_when: false
+    with_inventory_hostnames:
+    - controller_group
+
   - name: remove temporary directory
     file:
       path: "{{ tmp_dir.path }}"

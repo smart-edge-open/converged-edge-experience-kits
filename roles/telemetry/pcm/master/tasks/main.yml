@@ -58,7 +58,7 @@
     src: "default-dashboards-providers.yml"
     dest: "{{ _grafana_dashboards_prov }}"
 
-- name: wait for pcm pod to be ready
+- name: wait for pcm pods to be ready
   command: >
     kubectl wait --field-selector=spec.nodeName={{ hostvars[item]['ansible_hostname'] }}
     --namespace=telemetry --for=condition=Ready pods --selector=app=pcm --timeout=600s
@@ -98,15 +98,14 @@
 - name: get grafana pod name
   shell: >
     set -o pipefail && \
-      kubectl get pod -l app.kubernetes.io/instance=grafana -n telemetry -o name | awk -F '/' '{print $2}'
+      kubectl get pod --selector=app.kubernetes.io/instance=grafana -n telemetry -o name | awk -F '/' '{print $2}'
   register: grafana_pod_name
   changed_when: False
 
-- name: copy pcm dashboards to provisioning folder
+- name: copy pcm controller dashboard to provisioning folder
   command: >
     kubectl cp /var/lib/grafana/dashboards/{{ hostvars[item]['ansible_hostname'] }}.json
     telemetry/{{ grafana_pod_name.stdout }}:/tmp/dashboards/{{ hostvars[item]['ansible_hostname'] }}.json
   changed_when: False
   with_inventory_hostnames:
   - controller_group
-  - edgenode_group

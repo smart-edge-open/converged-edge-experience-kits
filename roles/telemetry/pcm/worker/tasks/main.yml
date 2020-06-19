@@ -65,3 +65,20 @@
   with_inventory_hostnames:
   - edgenode_group
   delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: get grafana pod name
+  shell: >
+    set -o pipefail && \
+      kubectl get pod --selector=app.kubernetes.io/instance=grafana -n telemetry -o name | awk -F '/' '{print $2}'
+  register: grafana_pod_name
+  changed_when: False
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: copy pcm worker dashboards to provisioning folder
+  command: >
+    kubectl cp /var/lib/grafana/dashboards/{{ hostvars[item]['ansible_hostname'] }}.json
+    telemetry/{{ grafana_pod_name.stdout }}:/tmp/dashboards/{{ hostvars[item]['ansible_hostname'] }}.json
+  changed_when: False
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"
