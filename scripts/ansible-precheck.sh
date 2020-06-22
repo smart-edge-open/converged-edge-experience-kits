@@ -24,11 +24,21 @@ if [[ $? -ne 0 ]]; then
       exit 1
     fi
   fi
-  echo "Installing ansible and pip modules..."
-  yum -y install ansible pip && pip install netaddr
+  echo "Installing ansible..."
+  yum -y install ansible
   if [[ $? -ne 0 ]]; then
     echo "ERROR: Could not install Ansible package from EPEL repository"
     exit 1
   fi
   echo "Ansible successfully instaled"
+fi
+pip show netaddr 1>/dev/null
+if [[ $? -ne 0 ]]; then
+  echo "netaddr not installed. Installing.."
+  yum -y install python-pip && pip install netaddr
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: Could not install pip and netaddr"
+    exit 1
+  fi
+  echo "netaddr successfully installed"
 fi
