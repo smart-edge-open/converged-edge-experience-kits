@@ -32,12 +32,23 @@ if [[ $? -ne 0 ]]; then
   fi
   echo "Ansible successfully instaled"
 fi
+
+command -v pip 1>/dev/null
+if [[ $? -ne 0 ]]; then
+  yum -y install python-pip
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: Could not install pip"
+    exit 1
+  fi
+  echo "pip successfully installed"
+fi
+
 pip show netaddr 1>/dev/null
 if [[ $? -ne 0 ]]; then
   echo "netaddr not installed. Installing.."
-  yum -y install python-pip && pip install netaddr
+  pip install netaddr
   if [[ $? -ne 0 ]]; then
-    echo "ERROR: Could not install pip and netaddr"
+    echo "ERROR: Could not install netaddr"
     exit 1
   fi
   echo "netaddr successfully installed"
