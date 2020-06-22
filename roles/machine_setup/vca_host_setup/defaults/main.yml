@@ -18,4 +18,4 @@ _vca_rpm_files:
     - kernel-3.10.0_1.*.VCA+-1.x86_64
     - kernel-devel-3.10.0_1.*.VCA+-1.x86_64
     - vcass-modules-3.10.0_1.*
-    - daemon-vca-2.7.3-centos7-x86_64
+    - daemon-vca-2.7.3*

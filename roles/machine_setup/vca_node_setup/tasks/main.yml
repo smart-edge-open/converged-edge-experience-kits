@@ -126,6 +126,14 @@
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true
 
+- name: wait for hddldaemon pod to come up
+  shell: set -o pipefail && kubectl get pods -n kube-system -l app=intel-vpu-hddl | awk '$3=="Running"'
+  register: hddldaemon_pod_running
+  retries: 30
+  delay: 10
+  until: hddldaemon_pod_running.rc == 0
+  changed_when: false
+
 - name: run vpu metrics on all VCA nodes -- this automatically starts hddl daemon
   command: "ssh {{ vca_node_ip }} /opt/intel/vcaa/vpu_metric/run.sh start"
   register: run_vpu_metrics

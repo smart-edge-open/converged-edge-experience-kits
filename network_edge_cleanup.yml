@@ -271,6 +271,12 @@
     - name: uninstall kubernetes
       include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
 
+    - name: cleanup otel collector
+      include_tasks: ./roles/telemetry/opentelemetry/worker/tasks/cleanup.yml
+
+    - name: cleanup cAdvisor certificates
+      include_tasks: ./roles/telemetry/cadvisor/worker/tasks/cleanup.yml
+
     - name: load docker variables
       include_vars: ./roles/docker/defaults/main.yml
 

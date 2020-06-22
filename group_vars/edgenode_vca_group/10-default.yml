@@ -7,7 +7,7 @@
 os_yum_base_packages: "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python2-pip,wget,bridge-utils,\
   boost-devel,openssl-devel,pcre-devel,zlib-devel,glib2-devel,autoconf,automake,libtool,flex,bison,git,cmake,pciutils,\
   python-websocket-client,jsoncpp-devel,fcgi-devel,hiredis-devel,numactl-devel,gcc-c++,psmisc,python-httplib2,pixman-devel,\
-  moreutils,jq,python-devel,createrepo,psmisc,sshpass,bash-completion,rsync"
+  moreutils,jq,python-devel,createrepo,psmisc,sshpass,bash-completion,rsync,openssl11"
 _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
 os_remove_yum_plugins: true
 

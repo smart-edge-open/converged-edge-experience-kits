@@ -100,6 +100,7 @@
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group
+  any_errors_fatal: true
 
   pre_tasks:
     - name: set node name
@@ -114,7 +115,6 @@
     - role: time/ntp
       when: ntp_enable | default(False)
     - role: time/verify
-
     - role: git_repo
     - role: golang
     - role: docker
@@ -124,6 +124,8 @@
     - role: kubernetes/worker
     - role: docker_registry/worker
     - role: kubernetes/cni
+    - role: telemetry/collectd/worker
+    - role: telemetry/cadvisor/worker
     - role: openness/network_edge/worker
-    - role: kubevirt/worker
-      when: kubevirt_enable | default(True)
+    - role: telemetry/pcm/worker
+      when: telemetry_pcm_enable | default(False)

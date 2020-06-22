@@ -78,7 +78,8 @@
   changed_when: false
 
 - name: remove old VCA RPMs
-  command: "rpm -qa | grep -e {{ item }} | xargs yum -y erase" # noqa 303
+  shell: "set -o pipefail && rpm -qa | grep -e {{ item }} | xargs yum -y erase"
+  ignore_errors: yes
   with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
 
@@ -88,7 +89,8 @@
   when: "'VCA' not in installed_kernel.stdout"
 
 - name: configure VCA kernel to be the default at boot
-  command: grub2-set-default 0
+  shell: grubby --set-default /boot/vmlinuz-3.10.0-*.VCA+
+  changed_when: true
   when: "'VCA' not in installed_kernel.stdout"
 
 - name: request reboot if VCA kernel is newly installed
