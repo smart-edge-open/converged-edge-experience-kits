@@ -67,8 +67,6 @@ spec:
           mountPath: /var/run
         - name: tmp
           mountPath: /tmp
-        - name: resctrl
-          mountPath: /sys/fs/resctrl
         - name: cfg
           mountPath: /opt/collectd/etc/collectd.conf.d
         - name: pmd
@@ -84,9 +82,6 @@ spec:
       - name: tmp
         hostPath:
           path: /tmp
-      - name: resctrl
-        hostPath:
-          path: /sys/fs/resctrl
       - name: cfg
         hostPath:
           path: /etc/openness/collectd/configs
