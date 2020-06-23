@@ -30,17 +30,9 @@ if ! command -v ansible-playbook 1>/dev/null; then
   echo "Ansible successfully instaled"
 fi
 
-if ! command -v pip 1>/dev/null; then
-  if ! yum -y install python-pip; then
-    echo "ERROR: Could not install pip"
-    exit 1
-  fi
-  echo "pip successfully installed"
-fi
-
-if ! pip show netaddr 1>/dev/null; then
+if ! python -c 'import netaddr' 2>/dev/null; then
   echo "netaddr not installed. Installing.."
-  if ! pip install netaddr; then
+  if ! yum install -y python-netaddr; then
     echo "ERROR: Could not install netaddr"
     exit 1
   fi
