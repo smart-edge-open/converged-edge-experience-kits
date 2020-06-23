@@ -65,10 +65,5 @@ os_yum_base_packages:
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
 _git_repo_dest: /opt/edgecontroller
 
-_offline_path: "{{ _offline_path_common }}/controller"
-_offline_archive: "offline-controller.tar.gz"
-
-_offline_download_kernel: false
-
 ## Network Edge Helm Charts Storage Default Directory
 ne_helm_charts_default_dir: /opt/openness-helm-charts/

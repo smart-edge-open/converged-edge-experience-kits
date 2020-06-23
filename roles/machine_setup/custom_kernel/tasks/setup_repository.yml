@@ -56,5 +56,4 @@
       key: "{{ repo_gpg_filepath }}"
 
   when:
-  - not (_offline_mode | d(False)) # online mode only, for offline RPMs are cached
   - kernel_repo_url is defined and kernel_repo_url|length > 0 # url to repository file not be empty

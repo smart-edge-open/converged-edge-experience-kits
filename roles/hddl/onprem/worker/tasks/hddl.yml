@@ -24,12 +24,6 @@
     file:
       path: "/temp"
       state: directory
-  - name: offline | copy openvino archive for offline
-    copy:
-      src: "{{ _offline_archives_path }}/{{ _openvino_name }}"
-      dest: "{{ _openvino_download_dest }}"
-      remote_src: yes
-    when: _offline_mode
   - name: check if already downloaded
     stat:
       path: "{{ _openvino_download_dir }}"
@@ -40,7 +34,6 @@
       dest: "{{ _openvino_download_dest }}"
     when:
     - not ov_dl_dir.stat.exists
-    - not _offline_mode
   - name: ensure download dir exists
     file:
       path: "{{ _openvino_download_dir }}"
@@ -65,10 +58,6 @@
     shell: "{{ _openvino_hddl_dependency_install }}" # noqa 305
   when: not udev.stat.exists or not vsc.stat.exists or not ion.stat.exists
 
-- name: offline | build HDDL
-  include_tasks: offline_build.yml
-  when: _offline_mode
-
 - name: build HDDL image
   block:
   - name: create temporary custom .openness_gitconfig
@@ -80,7 +69,6 @@
   always:
   - name: remove temporary .openness_gitconfig
     include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
-  when: not _offline_mode
 
 - name: bring up hddlservice container
   command: "docker-compose up -d --no-build hddlservice"

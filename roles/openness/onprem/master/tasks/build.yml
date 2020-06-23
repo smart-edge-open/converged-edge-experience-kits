@@ -19,63 +19,6 @@
     src: .env.j2
     dest: "{{ _git_repo_dest }}/.env"
 
-- name: offline | build docker images
-  block:
-    - name: offline | import images
-      shell: docker load < {{ _offline_docker_images_path }}/{{ item }}
-      with_items:
-        - mysql.tar
-        - cce.tar
-        - ui-deps-image.tar
-        - cups-deps-image.tar
-        - cnca-deps-image.tar
-        - landing-deps-image.tar
-        - node.tar
-
-    - name: offline | customize docker-compose.yml - use cached images
-      lineinfile:
-        path: "{{ _git_repo_dest }}/docker-compose.yml"
-        insertafter: "context: ./ui/{{ item.dir }}"
-        line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
-      with_items:
-        - { image: "cce-ui", dir: "controller" }
-        - { image: "landing-ui", dir: "landing" }
-
-    - name: offline | customize docker-compose.yml from x-epcforedge repo - use cached images
-      lineinfile:
-        path: "{{ _epcforedge_git_repo.download_dir }}/cnca/ui/docker-compose.yml"
-        insertafter: "context: ./ui/{{ item.dir }}"
-        line: '      cache_from: ["{{ item.image }}-deps-image", "node:lts-alpine"]'
-      with_items:
-        - { image: "cups-ui", dir: "cups" }
-        - { image: "cnca-ui", dir: "cnca" }
-
-    # This is workaround for how docker builder stores RUN commands in layers - it prepends |# where # is number of build args.
-    # Proxy vars in ~/.docker/config.json are treated as build args, but also specially treated
-    # - not counting toward the |# resulting in |0 prepended to commands.
-    # So on proxy-less offline machine docker will not prepend it resulting in being two different RUN commands for docker
-    - name: offline | check if image was built with proxy
-      shell: docker history cce-ui-deps-image | grep -q "|0"
-      ignore_errors: yes
-      register: docker_history_ui
-    - name: create .docker dir
-      file:
-        path: /root/.docker
-        state: directory
-      when: docker_history_ui.rc == 0
-    - name: offline | add dummy noProxy
-      copy:
-        dest: /root/.docker/config.json
-        content: |
-          { "proxies": { "default": { "noProxy": "" } } }
-      when: docker_history_ui.rc == 0
-
-    - name: offline | finish building UI images
-      command: docker-compose build ui cups-ui cnca-ui landing-ui
-      args:
-        chdir: "{{ _git_repo_dest }}"
-  when: _offline_mode
-
 - name: online build controller docker images
   block:
     - name: create temporary custom .openness_gitconfig
@@ -90,7 +33,6 @@
   always:
     - name: remove temporary .openness_gitconfig
       include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
-  when: not _offline_mode
 
 - name: start controller
   make:

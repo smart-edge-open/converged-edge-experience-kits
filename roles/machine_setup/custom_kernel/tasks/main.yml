@@ -11,38 +11,12 @@
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: not (_offline_mode | d(False))
-
-- name: offline | install kernel dependencies - tuned
-  block:
-  - name: offline | cut tuned packages to get package names
-    set_fact:
-      tuned_rpm_packages: "{{ tuned_packages | map('regex_replace','^.*/(.*).rpm', '\\1') | list }}"
-  - name: offline | install packages from local repository
-    yum:
-      name: "{{ tuned_rpm_packages }}"
-      state: present
-      allow_downgrade: yes
-  when: _offline_mode | d(False)
 
 - name: install kernel dependencies - URLs
   yum:
     name: "{{ kernel_dependencies_urls | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: not (_offline_mode | d(False))
-
-- name: offline | install kernel dependencies - URLs
-  block:
-  - name: offline | cut URLs to get package names
-    set_fact:
-      rpm_packages: "{{ kernel_dependencies_urls | map('regex_replace','^.*/(.*).rpm', '\\1') | list }}"
-  - name: offline | install packages from local repository
-    yum:
-      name: "{{ rpm_packages }}"
-      state: present
-      allow_downgrade: yes
-  when: _offline_mode | d(False)
 
 - name: install kernel dependencies - packages
   yum:

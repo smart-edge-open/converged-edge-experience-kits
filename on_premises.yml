@@ -13,12 +13,6 @@
       include_tasks: ./tasks/print_vars.yml
 
   roles:
-    - role: offline/vars
-    - role: offline/restore/transfer
-      when: _offline_mode
-    - role: offline/restore/yum/setup
-      when: _offline_mode
-
     - role: machine_setup/os_setup
     - role: time/ntp
       when: ntp_enable | default(False)
@@ -29,12 +23,7 @@
     - role: openness/onprem/master
     - role: nfd/onprem/master
       when: onprem_nfd_enable | default(True)
-    - role: offline/restore/ngc_test
-      when: _offline_mode and _epcforedge_git_repo is defined
     - role: apache
-
-    - role: offline/restore/yum/clean
-      when: _offline_mode
 
 - hosts: edgenode_group
 
@@ -45,11 +34,6 @@
       include_tasks: ./tasks/print_vars.yml
 
   roles:
-    - role: offline/vars
-    - role: offline/restore/transfer
-      when: _offline_mode
-    - role: offline/restore/yum/setup
-      when: _offline_mode
     - role: machine_setup/os_setup
     - role: time/ntp
       when: ntp_enable | default(False)
@@ -76,6 +60,3 @@
       when: onprem_hddl_enable | default(False)
     - role: nfd/onprem/worker
       when: onprem_nfd_enable | default(True)
-
-    - role: offline/restore/yum/clean
-      when: _offline_mode

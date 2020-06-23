@@ -33,12 +33,3 @@
         version: "{{ git_repo_branch }}"
         update: no
       when: not always_clean_repository
-
-- name: offline mode
-  block:
-    - name: copy repository to proper path
-      copy:
-        src: "{{ _offline_path }}/{{ _git_repo_dest.split('/')[-1] }}"
-        dest: "/opt"
-        remote_src: yes
-  when: _offline_mode | d(False)

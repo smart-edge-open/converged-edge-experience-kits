@@ -3,13 +3,6 @@
 
 ---
 
-- name: offline | copy Go archive for offline
-  copy:
-    src: "{{ _offline_archives_path }}/{{ _golang_download_name }}"
-    dest: "{{ _golang_download_dest }}"
-    remote_src: yes
-  when: _offline_mode | d(False)
-
 - name: check if already installed
   stat:
     path: /usr/local/go/bin/go
@@ -24,7 +17,7 @@
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
-  when: not go_exe_file.stat.exists and not (_offline_mode | d(False))
+  when: not go_exe_file.stat.exists
 
 - name: install
   unarchive:

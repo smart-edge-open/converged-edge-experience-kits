@@ -82,8 +82,3 @@ _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kerne
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git
 _git_repo_dest: /opt/edgenode
-
-_offline_path: "{{ _offline_path_common }}/node"
-_offline_archive: "offline-node.tar.gz"
-
-_offline_download_kernel: true

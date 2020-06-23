@@ -3,13 +3,6 @@
 
 ---
 
-- name: offline | copy QEMU archive for offline
-  copy:
-    src: "{{ _offline_archives_path }}/{{ _qemu_name }}.tar.xz"
-    dest: "{{ _qemu_download_dest }}"
-    remote_src: yes
-  when: _offline_mode | d(False)
-
 - name: remove qemu-img if installed
   command: rpm -e --nodeps qemu-img
   ignore_errors: true
@@ -32,7 +25,6 @@
   delay: "{{ retry_delay }}"
   when:
   - not qemu_dest_dir.stat.exists
-  - not (_offline_mode | d(False))
 
 - name: ensure install dir exists
   file:

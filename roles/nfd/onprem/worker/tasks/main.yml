@@ -3,14 +3,6 @@
 
 ---
 
-# Load image from offline package
-- name: load nfd-worker image
-  docker_image:
-    name: quay.io/kubernetes_incubator/node-feature-discovery
-    load_path: "{{ _offline_docker_images_path }}/nfd-worker.tar"
-    source: load
-  when: _offline_mode
-
 # Stop nfd-worker container
 - name: remove nfd-worker container
   docker_container:

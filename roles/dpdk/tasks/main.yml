@@ -3,13 +3,6 @@
 
 ---
 
-- name: offline | copy DPDK archive for offline
-  copy:
-    src: "{{ _offline_archives_path }}/{{ _dpdk_name }}.tar.xz"
-    dest: "{{ _dpdk_download_dest }}"
-    remote_src: yes
-  when: _offline_mode | d(False)
-
 - name: get current kernel
   command: uname -r
   register: unamer
@@ -49,7 +42,6 @@
   # install kernel-devel package if:
   # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
   # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
-  # OnPrem Offline does not support kernel customization so `custom_kernel` is enabled and `kernel_skip` is defined and false
   when:
   - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
   - yum_list_kernel_devel.rc == 1   # kernel-(rt-)devel is missing

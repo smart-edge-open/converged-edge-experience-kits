@@ -14,8 +14,6 @@
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
-  # Do not add remote repositories in offline mode
-  when: not (_offline_mode | d(False))
 
 - name: clear yum cache
   command: yum clean all
@@ -38,14 +36,6 @@
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
-  when: not (_offline_mode | d(False))
-
-- name: offline | install docker-compose
-  pip:
-    name: "{{ _docker_compose_package }}"
-    state: present
-    extra_args: "--no-index --find-links {{ _offline_pip_path }}"
-  when: _offline_mode | d(False)
 
 - name: set up proxy
   include_tasks: proxy.yml
@@ -95,18 +85,3 @@
     get_url:
       url: "{{ _docker_compose_completion_url }}"
       dest: "/etc/bash_completion.d"
-  when: not (_offline_mode | d(False))
-
-- name: offline | setup docker bash completion
-  block:
-  - name: copy Docker CLI bash completion
-    copy:
-      src: "{{ _offline_path }}/docker/docker"
-      dest: "/etc/bash_completion.d/"
-      remote_src: yes
-  - name: copy Docker Compose bash completion
-    copy:
-      src: "{{ _offline_path }}/docker/docker-compose"
-      dest: "/etc/bash_completion.d/"
-      remote_src: yes
-  when: _offline_mode | d(False)
