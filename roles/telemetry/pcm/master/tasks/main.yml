@@ -95,6 +95,22 @@
   with_inventory_hostnames:
   - controller_group
 
+- name: add instance label to all metrics
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '([a-zA-Z0-9_]+\{)'
+    replace: '\1instance=\"{{ hostvars[item]["ansible_hostname"] }}\",'
+  with_inventory_hostnames:
+  - controller_group
+
+- name: change sample duration time for all metrics
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '\[3s\]'
+    replace: '[12s]'
+  with_inventory_hostnames:
+  - controller_group
+
 - name: get grafana pod name
   shell: >
     set -o pipefail && \

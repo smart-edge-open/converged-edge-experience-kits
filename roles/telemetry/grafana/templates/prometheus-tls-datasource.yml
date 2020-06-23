@@ -21,7 +21,7 @@ data:
          type: prometheus
          url: https://prometheus:9099
          withCredentials: true
-         isDefault: false
+         isDefault: true
          jsonData:
            tlsAuth: true
            tlsAuthWithCACert: true
