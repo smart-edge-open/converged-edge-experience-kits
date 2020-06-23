@@ -17,17 +17,20 @@
     with_items: "{{ ptp_vars.results }}"
     changed_when: true
 
-  - name: Register hardware timestamp support
-    command: ethtool -T {{ ptp_port }}
+  - name: Register heardware timestamp support
+    command: ethtool -T {{ item }}
+    with_items: "{{ ptp_port }}"
     register: hardware_timestamp
+
 
   - name: Verify if the hardware supports PTP
     fail:
       msg: "The host's NIC does not support PTP"
     when:
-      ('SOF_TIMESTAMPING_TX_HARDWARE' not in hardware_timestamp.stdout) and
-      ('SOF_TIMESTAMPING_RX_HARDWARE' not in hardware_timestamp.stdout) and
-      ('SOF_TIMESTAMPING_RAW_HARDWARE' not in hardware_timestamp.stdout)
+      ('SOF_TIMESTAMPING_TX_HARDWARE' not in item.stdout  ) and
+      ('SOF_TIMESTAMPING_RX_HARDWARE' not in  item.stdout  ) and
+      ('SOF_TIMESTAMPING_RAW_HARDWARE' not in item.stdout )
+    with_items: "{{ hardware_timestamp.results }}"
   when: inventory_hostname in groups['ptp_master'] or
     inventory_hostname in groups['ptp_slave_group']
 

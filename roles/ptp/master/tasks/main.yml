@@ -5,6 +5,7 @@
 
 - name: Configure the server acting as the PTP master for PTP slaves
   block:
+
   - name: Start port snchronization towards PTP GM or local CLOCK_REALTIME
     command: ./ptp4l -f ./configs/default_slave.cfg -2 -i {{ ptp_port_gm }} -m
     args:
@@ -20,10 +21,15 @@
     register: ptp4l_master_gm_job_res
     retries: "{{ number_of_retries }}"
     delay: "{{ retry_delay }}"
-    failed_when: ptp4l_master_gm_job_res.stderr is defined and
-                 ptp4l_master_gm_job_res.stderr | length > 0
     ignore_errors: true
     when: (ptp_port_gm is defined) and (ptp_port_gm is not none)
+
+  - name: Fail if command returned error
+    fail:
+      msg: "The command ( {{ item.cmd }}) returned error {{ item.stderr }}"
+    when: item.stderr is defined and
+          item.stderr | length > 0
+    loop: "{{ ptp4l_master_gm_job_res.results }}"
 
   - name: Synchronize local timer clock
     command: ./phc2sys  -s {{ _master_clock }} -w -m -R 8
@@ -39,9 +45,14 @@
     register: phc2sys_master_job_res
     retries: "{{ number_of_retries }}"
     delay: "{{ retry_delay }}"
-    failed_when: phc2sys_master_job_res.stderr is defined and
-                 phc2sys_master_job_res.stderr | length > 0
     ignore_errors: true
+
+  - name: Fail if command returned error
+    fail:
+      msg: "The command ( {{ item.cmd }}) returned error {{ item.stderr }}"
+    when: item.stderr is defined and
+          item.stderr | length > 0
+    loop: "{{ phc2sys_master_job_res.results }}"
 
   - name: Apply patch to config
     patch:
@@ -50,45 +61,63 @@
     delegate_to: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
 
   - name: Start PTP master port towards slave(s)
-    command: ./ptp4l -f ./configs/default.cfg -2 -i {{ ptp_port }} –m
+    command: ./ptp4l -f ./configs/default.cfg -2 -i {{ item }} –m
     args:
       chdir: "{{ _linuxptp_git_repo.download_dir }}"
     async: "{{ async_time }}"
     poll: 0
     register: ptp_to_node
-    failed_when: ptp_to_node.stderr is defined and ptp_to_node.stderr | length > 0
+    with_items: "{{ hostvars[inventory_hostname].ptp_port }}"
     ignore_errors: true
 
   - name: Check previous command status - if not failed
     async_status:
-      jid: '{{ ptp_to_node.ansible_job_id }}'
+      jid: '{{ loop_item.ansible_job_id }}'
     register: ptp_to_node_job_res
     retries: "{{ number_of_retries }}"
     delay: "{{ retry_delay }}"
-    failed_when: ptp_to_node_job_res.stderr is defined and
-                 ptp_to_node_job_res.stderr | length > 0
     ignore_errors: true
+    loop: "{{ ptp_to_node.results }}"
+    loop_control:
+      loop_var: loop_item
+
+  - name: Fail if command returned error
+    fail:
+      msg: "The command ( {{ item.cmd }}) returned error {{ item.stderr }}"
+    when: item.stderr is defined and
+          item.stderr | length > 0
+    loop: "{{ ptp_to_node_job_res.results }}"
 
   - name: Synchronize local NIC PTP master clock to local NIC PTP slave clock
-    command: ./phc2sys -c {{ ptp_port }} -s {{ _master_clock }} -w -m -R 8
+    command: ./phc2sys -c {{ item }} -s {{ _master_clock }} -w -m -R 8
     args:
       chdir: "{{ _linuxptp_git_repo.download_dir }}"
     async: "{{ async_time }}"
     poll: 0
     register: phc_master_node
+    with_items: "{{ hostvars[inventory_hostname].ptp_port }}"
 
   - name: Check previous command status - if not failed
     async_status:
-      jid: '{{ ptp_to_node.ansible_job_id }}'
+      jid: "{{ loop_item.ansible_job_id }}"
     register: phc_master_node_job_res
     retries: "{{ number_of_retries }}"
     delay: "{{ retry_delay }}"
     ignore_errors: true
-    failed_when: phc_master_nodejob_res.stderr is defined and
-                 phc_master_node_job_res.stderr | length > 0
+    loop: "{{ phc_master_node.results }}"
+    loop_control:
+      loop_var: loop_item
+
+  - name: Fail if command returned error
+    fail:
+      msg: "The command ( {{ item.cmd }}) returned error {{ item.stderr }}"
+    when: item.stderr is defined and
+          item.stderr | length > 0
+    loop: "{{ phc_master_node_job_res.results }}"
 
   - name: verify PTP running on this machine
     include_tasks: ../../common/tasks/verify_ptp_status.yml
+
   when:
     inventory_hostname in groups['ptp_master']
 
