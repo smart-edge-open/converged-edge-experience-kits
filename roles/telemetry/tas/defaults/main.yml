@@ -7,7 +7,7 @@ _tas_repo:
     url: "https://github.com/intel/telemetry-aware-scheduling.git"
     commit: "a13708825e854da919c6fdf05d50753113d04831"
 
-_prometheus_svc_url: "http://prometheus-svc.telemetry.svc:8080/"
+_prometheus_svc_url: "https://prometheus:9099/"
 
 _descheduler_deployment_files:
   - descheduler_rbac.yaml
