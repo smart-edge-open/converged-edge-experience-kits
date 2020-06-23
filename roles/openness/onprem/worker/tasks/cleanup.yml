@@ -12,6 +12,7 @@
     target: clean
     params:
       RTE_SDK: "{{ ansible_local.dpdk._dpdk_install_dir }}"
+  when: ansible_local.dpdk._dpdk_install_dir is defined
 
 - include_tasks: subtasks/remove_containers.yml
 - include_tasks: subtasks/remove_images.yml
