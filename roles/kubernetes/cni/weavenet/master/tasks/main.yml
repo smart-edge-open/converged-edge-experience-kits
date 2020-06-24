@@ -16,7 +16,7 @@
   - 6784/udp
 
 - name: apply WeaveNet via the addon
-  shell: "kubectl apply -f {{ _weavenet_yaml }}"
+  shell: set -o pipefail && kubectl apply -f "{{ _weavenet_yaml }}"
   register: result
   retries: "{{ number_of_retries }}"
   until: result is succeeded

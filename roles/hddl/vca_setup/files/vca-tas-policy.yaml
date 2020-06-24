@@ -12,7 +12,7 @@ spec:
       rules:
       - metricname: vpu_device_thermal
         operator: GreaterThan
-        target: 60
+        target: 80
     dontschedule:
       rules:
       - metricname: vpu_device_memory

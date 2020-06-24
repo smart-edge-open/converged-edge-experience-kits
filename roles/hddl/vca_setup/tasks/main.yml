@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: download hddl-daemon yaml
+  get_url:
+    url: "{{ _vca_hddl_yaml }}"
+    dest: /tmp/hddl_daemonset.yaml
+    force: yes
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: update hddl-daemon yaml to use vcaca-ubuntu1804-analytics-hddldaemon:20.2
+  replace:
+    path: /tmp/hddl_daemonset.yaml
+    regexp: 'vcaca-ubuntu1804-analytics-hddldaemon'
+    replace: 'vcaca-ubuntu1804-analytics-hddldaemon:20.2'
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: deploy hddl-daemon for VCA node
+  command: kubectl apply -f /tmp/hddl_daemonset.yaml
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: wait for hddldaemon pod to come up
+  shell: set -o pipefail && kubectl get pods -n kube-system -l app=intel-vpu-hddl | awk '$3=="Running"'
+  register: hddldaemon_pod_running
+  retries: 30
+  delay: 10
+  until: hddldaemon_pod_running.rc == 0
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: false
+
+- name: run vpu metrics on all VCA nodes -- this automatically starts hddl daemon
+  command: "ssh {{ vca_node_ip }} /opt/intel/vcaa/vpu_metric/run.sh start"
+  register: run_vpu_metrics
+  failed_when: run_vpu_metrics.rc != 0
+  changed_when: run_vpu_metrics.rc == 0
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+
+- name: deploy vca policy that uses this vpu metrics
+  block:
+    - name: create tmp folder
+      tempfile:
+        state: directory
+        suffix: .vca_policy
+      register: tmp_dir
+    - name: copy vca policy files
+      copy:
+        src: "vca-tas-policy.yaml"
+        dest: "{{ tmp_dir.path }}/"
+    - name: deploy the vca policy
+      command: kubectl apply -f "{{ tmp_dir.path }}/vca-tas-policy.yaml"
+      changed_when: true
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true
