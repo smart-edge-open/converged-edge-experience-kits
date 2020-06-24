@@ -3,9 +3,9 @@
 
 ---
 
-_openvino_name: "l_openvino_toolkit_p_2019.3.334.tgz"
+_openvino_name: "l_openvino_toolkit_p_2020.2.120.tgz"
 
-_openvino_url: "http://registrationcenter-download.intel.com/akdlm/irc_nas/15944/{{ _openvino_name }}"
+_openvino_url: "http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/{{ _openvino_name }}"
 
 _openvino_download_dest: "/temp/{{ _openvino_name }}"
 _openvino_download_dir: "/temp/openvino"

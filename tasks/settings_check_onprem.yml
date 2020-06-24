@@ -26,7 +26,3 @@
   when:
     - onprem_dataplane == "ovncni"
     - onprem_iac_enable | default(False)
-
-- name: hddl precheck
-  include_tasks: "../roles/hddl/common/tasks/precheck.yml"
-  when: onprem_hddl_enable | default(False)

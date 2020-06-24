@@ -3,10 +3,6 @@
 
 ---
 
-- name: check if ion module already installed
-  stat:
-    path: /sys/module/myd_ion
-  register: ion
 
 - name: check if vsc module already installed
   stat:
@@ -56,7 +52,7 @@
       chdir: "{{ _openvino_download_dir }}"
   - name: install OpenVino kernel drivers and udev rules
     shell: "{{ _openvino_hddl_dependency_install }}" # noqa 305
-  when: not udev.stat.exists or not vsc.stat.exists or not ion.stat.exists
+  when: not udev.stat.exists or not vsc.stat.exists
 
 - name: build HDDL image
   block:
