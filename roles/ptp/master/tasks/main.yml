@@ -3,7 +3,7 @@
 
 ---
 
-- name: Configure the server acting as the PTP master for PTP slaves
+- name: Configure the server to act as the PTP Slave for PTP GM
   block:
 
   - name: Start port snchronization towards PTP GM or local CLOCK_REALTIME
@@ -13,7 +13,6 @@
     async: "{{ async_time }}"
     poll: 0
     register: ptp4l_to_gm
-    when: (ptp_port_gm is defined) and (ptp_port_gm is not none)
 
   - name: Check previous command status - if not failed
     async_status:
@@ -22,7 +21,6 @@
     retries: "{{ number_of_retries }}"
     delay: "{{ retry_delay }}"
     ignore_errors: true
-    when: (ptp_port_gm is defined) and (ptp_port_gm is not none)
 
   - name: Fail if command returned error
     fail:
@@ -53,6 +51,12 @@
     when: item.stderr is defined and
           item.stderr | length > 0
     loop: "{{ phc2sys_master_job_res.results }}"
+
+  when: (ptp_port_gm is defined) and (ptp_port_gm is not none) and
+    (inventory_hostname in groups['ptp_master'])
+
+- name: Configure the server for acting as the PTP Master for PTP Slaves
+  block:
 
   - name: Apply patch to config
     patch:

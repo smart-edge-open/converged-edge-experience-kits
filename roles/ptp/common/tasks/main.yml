@@ -5,12 +5,12 @@
 
 - name: Verify if host's environment supports PTP
   block:
-  - name: Rgister kernel ptp settings from /boot/config
+  - name: Register kernel ptp settings from /boot/config
     shell: "grep {{ item }}= /boot/config-`uname -r`"
     loop: "{{ _kernel_ptp_config_vars }}"
     register: ptp_vars
 
-  - name: Verify if kernel configuration supports PTP
+  - name: Fail if kernel configuration does not support PTP
     fail:
       msg: "The host's kernel configuration does not support PTP"
     when: "'=n' in  item.stdout"
@@ -22,8 +22,7 @@
     with_items: "{{ ptp_port }}"
     register: hardware_timestamp
 
-
-  - name: Verify if the hardware supports PTP
+  - name: Fail if the hardware does not support PTP
     fail:
       msg: "The host's NIC does not support PTP"
     when:
@@ -31,6 +30,7 @@
       ('SOF_TIMESTAMPING_RX_HARDWARE' not in  item.stdout  ) and
       ('SOF_TIMESTAMPING_RAW_HARDWARE' not in item.stdout )
     with_items: "{{ hardware_timestamp.results }}"
+
   when: inventory_hostname in groups['ptp_master'] or
     inventory_hostname in groups['ptp_slave_group']
 

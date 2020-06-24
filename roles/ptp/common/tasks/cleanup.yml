@@ -30,6 +30,7 @@
 - name: Remove linuxptp installation
   file:
     path: "{{ item }}"
+    state: absent
   with_items:
   - /usr/local/sbin/ptp4l
   - /usr/local/sbin/hwstamp_ctl
@@ -38,19 +39,19 @@
   - /usr/local/sbin/phc_ctl
   - /usr/local/sbin/pmc
   - /usr/local/sbin/timemaster
-  - /usr/local/man/man8/ptp4l8
-  - /usr/local/man/man8/hwstamp_ctl8
-  - /usr/local/man/man8/nsm8
-  - /usr/local/man/man8/phc2sys8
-  - /usr/local/man/man8/phc_ctl8
-  - /usr/local/man/man8/pmc8
-  - /usr/local/mani/man8/timemaster8
+  - /usr/local/man/man8/ptp4l.8
+  - /usr/local/man/man8/hwstamp_ctl.8
+  - /usr/local/man/man8/nsm.8
+  - /usr/local/man/man8/phc2sys.8
+  - /usr/local/man/man8/phc_ctl.8
+  - /usr/local/man/man8/pmc.8
+  - /usr/local/man/man8/timemaster.8
   changed_when: true
   ignore_errors: true
 
 - name: Remove linuxptp sources
   file:
-    dir:  "{{ _linuxptp_git_repo.download_dir }}"
+    path:  "{{ _linuxptp_git_repo.download_dir }}"
     state: absent
   changed_when: true
   ignore_errors: true
