@@ -57,6 +57,15 @@
 
     - role: openness/network_edge/master
 
+    - role: telemetry/certs
+    - role: telemetry/prometheus
+    - role: telemetry/opentelemetry/master
+    - role: telemetry/collectd/master
+    - role: telemetry/tas
+    - role: telemetry/cadvisor/master
+
+    - role: fpga_cfg
+      when: fpga_sriov_userspace_enable | default(False)
     - role: kubevirt/master
       when: kubevirt_enable | default(True)
     - role: opae_fpga/master
@@ -70,8 +79,15 @@
     - role: hddl/network_edge/master
       when: ne_hddl_enable | default(False)
 
+    - role: telemetry/grafana
+      when: telemetry_grafana_enable | default(True)
+    - role: telemetry/pcm/master
+      when: telemetry_pcm_enable | default(False)
+
 - hosts: edgenode_group
   roles:
+    - role: telemetry/collectd/worker
+    - role: telemetry/cadvisor/worker
     - role: openness/network_edge/worker
     - role: kubevirt/worker
       when: kubevirt_enable | default(True)
@@ -81,3 +97,4 @@
       when: ne_cmk_enable | default(False)
     - role: hddl/network_edge/worker
       when: ne_hddl_enable | default(False)
+
