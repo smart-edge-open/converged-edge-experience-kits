@@ -6,7 +6,7 @@
 - name: include certs variables
   include_vars: ../../certs/defaults/main.yml
 
-- name: certificates for grafana
+- name: certificates for Grafana
   block:
   - name: create directory for server certificates
     file:
@@ -39,7 +39,7 @@
       path: "{{ _telemetry_certs_dest }}/grafana/key.pem"
     register: telemetry_grafana_key
 
-- name: open port for grafana
+- name: open port for Grafana
   ignore_errors: yes
   firewalld:
     port: 32000/tcp
@@ -79,6 +79,12 @@
       - "{{ _grafana_chart_dir }}"
       - "{{ _grafana_chart_dir }}/templates"
       - "{{ _grafana_chart_dir }}/templates/test"
+    changed_when: true
+
+  - name: create Grafana files directory
+    file:
+      name: "{{ _grafana_chart_dir }}/files"
+      state: directory
     changed_when: true
 
   - name: download Grafana chart
@@ -134,13 +140,18 @@
     with_items: "{{ _pv_names }}"
     changed_when: true
 
+  - name: copy Grafana preview dashboard file
+    copy:
+      src: preview-dashboard.json
+      dest: "{{ _grafana_chart_dir }}/files/preview-dashboard.json"
+
   - name: template prometheus-tls datasource
     template:
       src: "prometheus-tls-datasource.yml"
       dest: "{{ tmp_dir.path }}/prometheus-tls-datasource.yml"
     changed_when: true
 
-  - name: add prometheus datasource to grafana
+  - name: add prometheus datasource to Grafana
     command: kubectl apply -f "{{ tmp_dir.path }}/prometheus-tls-datasource.yml"
     changed_when: true
 
@@ -148,13 +159,24 @@
     command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }}"
     changed_when: true
 
-  - name: wait for grafana pod to be ready
+  - name: wait for Grafana pod to be ready
     command: >
       kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
       --for=condition=Ready pods --timeout=600s
     changed_when: false
-    with_inventory_hostnames:
-    - controller_group
+
+  - name: get Grafana pod name
+    shell: >
+      set -o pipefail && \
+        kubectl get pod --selector=app.kubernetes.io/instance=grafana -n telemetry -o name | awk -F '/' '{print $2}'
+    register: grafana_pod_name
+    changed_when: False
+
+  - name: copy Grafana preview dashboard to provisioning folder
+    command: >
+      kubectl cp {{ _grafana_chart_dir }}/files/preview-dashboard.json
+      telemetry/{{ grafana_pod_name.stdout }}:/tmp/dashboards/
+    changed_when: False
 
   - name: remove temporary directory
     file:
