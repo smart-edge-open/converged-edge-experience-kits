@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include variables
+  include_vars: ../defaults/main.yml
+
+- name: remove VAS chart directory
+  file:
+    path: "{{ ne_helm_charts_default_dir }}/{{ _vas_helmReleaseName }}"
+    state: absent
+
+- name: uninstall if an older version
+  command: helm uninstall {{ _vas_helmReleaseName }}
+  changed_when: true
+  ignore_errors: yes

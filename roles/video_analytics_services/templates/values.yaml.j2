@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# platform specifies the target platform
+platform: xeon
+
+# frameworks specifies the target frameworks
+frameworks:
+{% for item in _frameworks %}
+  - {{ item }}
+{% endfor %}
+
+# namespace specifices the namespace that VAS will be deployed in
+namespace: {{ _vas_namespace }}
+
+# registry specifies the docker registry in use
+registry: {{ _registry_ip_address }}:{{ _registry_port }}
+
+# servingImage video analytics serving image
+servingImage: {{ _va_serving.image }}
+
+# servingPort video analytics serving image
+servingPort: {{ _va_serving.port }}
+
+# servingTag video analytics serving image tag
+servingTag: {{ _va_serving.tag }}
+
+# sidecarImage video analytics serving sidecar image
+sidecarImage: {{ _vas_sidecar.image }}
+
+# sidecarTag video analytics serving sidecar tag
+sidecarTag: {{ _vas_sidecar.tag }}
+
+# replicas specifies the number of analytics instances running
+replicas: 1

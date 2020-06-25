@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+{{- if ne .Values.namespace "default" }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $.Values.namespace }}
+---
+{{- end }}
+{{- range $framework := $.Values.frameworks }}
+{{- if eq $.Values.namespace "default" }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: analytics-{{ $framework }}-policy
+  namespace: {{ $.Values.namespace }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: {{ $.Values.servingPort }}
+---
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-{{ $framework }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  clusterIP: None
+  selector:
+    app: va-serving-{{ $framework }}
+  ports:
+    - protocol: TCP
+      port: {{ $.Values.servingPort }}
+      targetPort: {{ $.Values.servingPort }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-{{ $framework }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: {{ $.Values.replicas }}
+  selector:
+    matchLabels:
+      app: va-serving-{{ $framework }}
+  template:
+    metadata:
+      labels:
+        app: va-serving-{{ $framework }}
+    spec:
+      containers:
+      - name: vas-gateway
+        image: {{ $.Values.registry }}/{{ $.Values.servingImage }}-{{ $framework }}:{{ $.Values.servingTag }}
+        imagePullPolicy: IfNotPresent
+      - name: vas-sidecar
+        image: {{ $.Values.registry }}/{{ $.Values.sidecarImage }}:{{ $.Values.sidecarTag }}
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: NAMESPACE
+            value: {{ $.Values.namespace }}
+          - name: VAS_PORT
+            value: "{{ $.Values.servingPort }}"
+          - name: PLATFORM
+            value: {{ $.Values.platform }}
+          - name: FRAMEWORK
+            value: {{ $framework }}
+---
+{{ end }}

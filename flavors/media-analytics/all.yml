@@ -16,5 +16,5 @@ k8s_device_plugins_enable: true
 ## Network Edge Node Feature Discovery (NFD)
 ne_nfd_enable: true
 
-# Deploy Video Analytics serving 
-video_analytics_serving_enable: true
+# Deploy Video Analytics services 
+video_analytics_services_enable: true

@@ -74,6 +74,9 @@
     - role: telemetry/pcm/master
       when: telemetry_pcm_enable | default(False)
 
+    - role: video_analytics_services
+      when: video_analytics_services_enable | default(False)
+
 - hosts: edgenode_group
   roles:
     - role: opae_fpga/worker

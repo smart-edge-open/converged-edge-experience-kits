@@ -88,6 +88,10 @@
     include_tasks: ./roles/fpga_cfg/tasks/cleanup.yml
     when: fpga_sriov_userspace_enable | default(False)
 
+  - name: video analytics services cleanup
+    include_tasks: ./roles/video_analytics_services/tasks/cleanup.yml
+    when: video_analytics_services_enable | default(False)
+
   - name: helm cleanup
     block:
     - name: load helm variables
