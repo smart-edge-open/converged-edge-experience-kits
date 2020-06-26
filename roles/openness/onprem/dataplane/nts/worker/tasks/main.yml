@@ -34,25 +34,14 @@
     name: "{{ _docker_nts_container_name }}"
     state: absent
 
-- name: set OVS-disabled default values
-  set_fact:
-    ovs_enabled: false
-    _ovs_bridge_name: ""
-  when: _ovs_version is not defined
-
-- name: set OVS-enabled default values
-  set_fact:
-    ovs_enabled: true
-  when: _ovs_version is defined
-
 - name: up nts container
   command: "docker-compose up --no-start --no-build nts"
   args:
     chdir: "{{ _git_repo_dest }}"
   environment:
     VER: "{{ _docker_containers_ver }}"
-    OVSE: "{{ ovs_enabled }}"
-    OVS_BRIDGE_NAME: "{{ _ovs_bridge_name }}"
+    OVSE: "{{ onprem_iac_enable | default(False) }}"
+    OVS_BRIDGE_NAME: "{{ _ovs_bridge_name if (onprem_iac_enable | default(False)) else ''  }}"
     NTS_MEM_MB_S0: "{{ docker_nts_mem_mb_s0 }}"
     NTS_MEM_MB_S1: "{{ docker_nts_mem_mb_s1 }}"
   changed_when: true
