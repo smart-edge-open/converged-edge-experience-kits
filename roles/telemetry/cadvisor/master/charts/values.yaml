@@ -23,7 +23,7 @@ proxy:
     internalCadvisorPort: 9106
     serverName: cadvisor
     name: cadvisor-proxy
-    certsDest: /root/certs/cadvisor
+    certsDest: /root/certs/cadvisor/
     image: nginx:alpine
     pathToNginxCfg: /etc/nginx/nginx.conf
     configMap: cadvisor-proxy-config

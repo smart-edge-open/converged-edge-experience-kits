@@ -105,8 +105,7 @@ spec:
           name: {{ .Values.proxy.configMap }}
       - name: cert-vol
         hostPath:
-          path: /etc/openness/certs/telemetry/cadvisor
-          type: Directory
+          path: /etc/openness/certs/telemetry/
       - name: ca
         secret:
           secretName: root-ca
