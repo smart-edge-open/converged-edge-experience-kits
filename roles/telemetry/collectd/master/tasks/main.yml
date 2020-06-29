@@ -53,6 +53,11 @@
         src: "{{ _collectd_rdt_patch_path }}"
         dest: "{{ _collectd_install_path }}"
 
+    - name: copy module check script to build folder
+      copy:
+        src: "{{ _collectd_check_module_script_path }}"
+        dest: "{{ _collectd_install_path }}"
+
     - name: Build collectd image and apply daemonset
       block:
       - name: build collectd with FPGA plugin and OPAE image

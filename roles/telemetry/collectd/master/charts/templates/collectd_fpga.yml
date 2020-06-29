@@ -55,7 +55,8 @@ spec:
         image: {{ .Values.collectd_fpga.image }}
         imagePullPolicy: {{ .Values.pullPolicy }}
         command: ["/bin/sh","-c"]
-        args: [ "cd /root/collectd_plugin/collectd_install && \
+        args: [ "source /root/check_if_modules_loaded.sh && \
+              cd /root/collectd_plugin/collectd_install && \
               sbin/collectd -f -C /opt/collectd/etc/collectd.conf.d"]
         securityContext:
           privileged: true
