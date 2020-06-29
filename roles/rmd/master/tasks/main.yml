@@ -37,3 +37,18 @@
   args:
     chdir: "{{ _rmd_operator_dir }}"
   when: rmd_installed.rc == 1
+
+- name: check if network policy exists
+  shell: kubectl get networkpolicy | grep rmd-policy
+  ignore_errors: yes
+  register: netpolicy_installed
+  changed_when: false
+
+- name: copy the network policy to /tmp
+  copy:
+    src: rmdNetworkPolicy.yaml
+    dest: "/tmp"
+
+- name: create the network policy
+  command: kubectl create -f /tmp/rmdNetworkPolicy.yaml
+  when: netpolicy_installed.rc == 1

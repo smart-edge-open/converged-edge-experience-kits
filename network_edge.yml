@@ -77,6 +77,9 @@
     - role: video_analytics_services
       when: video_analytics_services_enable | default(False)
 
+    - role: rmd/master
+      when: rmd_operator_enable | default(False)
+
 - hosts: edgenode_group
   roles:
     - role: opae_fpga/worker
@@ -100,6 +103,9 @@
 
     - role: telemetry/pcm/worker
       when: telemetry_pcm_enable | default(False)
+
+    - role: rmd/worker
+      when: rmd_operator_enable | default(False)
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group

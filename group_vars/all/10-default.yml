@@ -193,6 +193,9 @@ telemetry_pcm_enable: False
 ## Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
 telemetry_flavor: common
 
+## Network Edge RMD
+rmd_operator_enable: False
+
 ##################################################
 ##### On Premises
 
