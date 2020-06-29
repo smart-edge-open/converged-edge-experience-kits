@@ -1,0 +1,13 @@
+--- _pod.tpl	2020-06-26 13:57:01.803000000 +0200
++++ _pod.tpl.new	2020-06-26 13:59:30.809000000 +0200
+@@ -340,7 +340,9 @@
+ {{- end -}}
+ {{- if .Values.sidecar.dashboards.enabled }}
+   - name: sc-dashboard-volume
+-    emptyDir: {}
++    hostPath:
++      path: {{ .Values.dashboardsDir }}
++      type: DirectoryOrCreate
+ {{- if .Values.sidecar.dashboards.SCProvider }}
+   - name: sc-dashboard-provider
+     configMap:

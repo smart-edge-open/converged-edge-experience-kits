@@ -97,4 +97,3 @@
       when: ne_cmk_enable | default(False)
     - role: hddl/network_edge/worker
       when: ne_hddl_enable | default(False)
-

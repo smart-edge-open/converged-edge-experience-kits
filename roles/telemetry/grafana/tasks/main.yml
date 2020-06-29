@@ -140,11 +140,6 @@
     with_items: "{{ _pv_names }}"
     changed_when: true
 
-  - name: copy Grafana preview dashboard file
-    copy:
-      src: preview-dashboard.json
-      dest: "{{ _grafana_chart_dir }}/files/preview-dashboard.json"
-
   - name: template prometheus-tls datasource
     template:
       src: "prometheus-tls-datasource.yml"
@@ -153,6 +148,54 @@
 
   - name: add prometheus datasource to Grafana
     command: kubectl apply -f "{{ tmp_dir.path }}/prometheus-tls-datasource.yml"
+    changed_when: true
+
+  - name: create Grafana dashboards provisioning directory
+    file:
+      path: "{{ _grafana_dashboards_prov }}"
+      state: directory
+      mode: '0755'
+
+  - name: create Grafana dashboards directory for json files
+    file:
+      path: "{{ _grafana_dashboards_conf }}"
+      state: directory
+      mode: '0755'
+
+  - name: copy Grafana dashboards provisioning file
+    template:
+      src: "default-dashboards-providers.yml"
+      dest: "{{ _grafana_dashboards_prov }}"
+
+  - name: copy example dashboard to controller
+    copy:
+      src: example-dashboard.json
+      dest: "{{ _grafana_dashboards_conf }}/example-dashboard.json"
+
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
+
+  - name: apply _pod.tpl patch
+    patch:
+      src: _pod.tpl.patch
+      dest: "{{ _grafana_chart_dir }}/templates/_pod.tpl"
+      strip: 1
+      binary: no
+      backup: no
+
+  - name: find backup files
+    find:
+      paths: "{{ _grafana_chart_dir }}/templates"
+      patterns: "*.orig"
+    register: backup_files
+
+  - name: remove backup files
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ backup_files.files }}"
     changed_when: true
 
   - name: install Grafana release
@@ -164,19 +207,6 @@
       kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
       --for=condition=Ready pods --timeout=600s
     changed_when: false
-
-  - name: get Grafana pod name
-    shell: >
-      set -o pipefail && \
-        kubectl get pod --selector=app.kubernetes.io/instance=grafana -n telemetry -o name | awk -F '/' '{print $2}'
-    register: grafana_pod_name
-    changed_when: False
-
-  - name: copy Grafana preview dashboard to provisioning folder
-    command: >
-      kubectl cp {{ _grafana_chart_dir }}/files/preview-dashboard.json
-      telemetry/{{ grafana_pod_name.stdout }}:/tmp/dashboards/
-    changed_when: False
 
   - name: remove temporary directory
     file:

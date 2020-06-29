@@ -8,6 +8,9 @@ _pv_names:
   - grafana-volume-1
   - grafana-volume-2
 
+_grafana_dashboards_conf: /var/lib/grafana/dashboards
+_grafana_dashboards_prov: /etc/grafana/provisioning/dashboards
+
 _grafana_chart_dir: "{{ ne_helm_charts_default_dir }}/grafana"
 _grafana_chart_commit: "d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a"
 _grafana_chart_url: "https://raw.githubusercontent.com/helm/charts/{{ _grafana_chart_commit }}/stable/grafana/"

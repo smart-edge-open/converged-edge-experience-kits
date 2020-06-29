@@ -5,6 +5,8 @@
 
 nodeSelector: {"node-role.kubernetes.io/master":""}
 
+dashboardsDir: "{{ _grafana_dashboards_conf }}"
+
 tolerations:
  - key: "node-role.kubernetes.io/master"
    operator: "Exists"
@@ -30,7 +32,7 @@ persistence:
     - kubernetes.io/pvc-protection
 
 adminUser: admin
-adminPassword: {{ telemetry_grafana_pass }}
+adminPassword: "{{ telemetry_grafana_pass }}"
 
 sidecar:
   dashboards:
