@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: load telemetry/tas defaults
+  include_vars: ../defaults/main.yml
+
+- name: find TAS directory
+  find:
+    paths: /tmp
+    patterns: 'ansible.*tas'
+    file_type: directory
+  register: find_tas_dir
+
+- name: remove TAS components
+  block:
+  - name: set TAS dir variable
+    set_fact:
+      tas_dir: "{{ find_tas_dir.files[0].path }}"
+
+  - name: remove Descheduler
+    command: kubectl delete -f "{{ tas_dir }}/{{ item }}"
+    changed_when: true
+    ignore_errors: true
+    with_items: "{{ _descheduler_deployment_files }}"
+
+  - name: remove TAS
+    shell: >
+      set -o pipefail &&
+      kubectl kustomize . | kubectl delete -f -
+    args:
+      chdir: "{{ tas_dir }}/tas-repo/deploy/"
+    changed_when: true
+    ignore_errors: true
+
+  - name: find Prometheus TAS adapter directory
+    find:
+      paths: /tmp
+      patterns: 'ansible.*tas-adapter'
+      file_type: directory
+    register: find_tas_adapter_dir
+
+  - name: remove Prometheus TAS adapter
+    block:
+    - name: set TAS dir variable
+      set_fact:
+        tas_adapter_dir: "{{ find_tas_adapter_dir.files[0].path }}"
+
+    - name: remove Prometheus Adapter using Helm
+      command: helm uninstall prometheus-adapter
+      changed_when: true
+      ignore_errors: true
+
+    - name: remove TAS adapter directory
+      file:
+        state: absent
+        path: "{{ tas_dir }}"
+    when: find_tas_adapter_dir.files | length > 0
+
+  - name: remove TAS directory
+    file:
+      state: absent
+      path: "{{ tas_dir }}"
+  when: find_tas_dir.files | length > 0
+
