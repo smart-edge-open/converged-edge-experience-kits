@@ -65,4 +65,5 @@ telemetry_flavor: flexran
 telemetry_grafana_enable: True
 
 ###RMD
-#rmd_enable: True # TODO Uncomment once feature available
+rmd_operator_enable: True
+
