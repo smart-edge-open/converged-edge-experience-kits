@@ -3,4 +3,4 @@
 
 ---
 
-_vca_hddl_yaml: "https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/master/VCAC-A/script/setup_hddl_daemonset.yaml"
+_vca_hddl_yaml: "https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/v20.4/VCAC-A/script/setup_hddl_daemonset.yaml"

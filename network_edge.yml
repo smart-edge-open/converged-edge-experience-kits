@@ -131,7 +131,6 @@
     - role: machine_setup/conditional_reboot
     - role: machine_setup/vca_node_setup
     - role: kubernetes/worker
-    - role: hddl/vca_setup
     - role: docker_registry/worker
     - role: kubernetes/cni
     - role: telemetry/collectd/worker
@@ -139,3 +138,4 @@
     - role: openness/network_edge/worker
     - role: telemetry/pcm/worker
       when: telemetry_pcm_enable | default(False)
+    - role: hddl/vca_setup
