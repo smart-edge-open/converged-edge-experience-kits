@@ -2,97 +2,128 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+# Common platform setup playbook
+- hosts: controller_group:edgenode_group
+  any_errors_fatal: true
+
+  pre_tasks:
+    - name: set node name
+      set_fact: node_name={{ ansible_hostname | lower }}
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
+
+  roles:
+    - role: machine_setup/os_setup
+    - role: time/ntp
+      when: ntp_enable | default(False)
+    - role: time/verify
+      when: "'edgenode_group' in group_names"
+    - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(True))
+    - role: machine_setup/grub
+
+    - role: machine_setup/configure_tuned
+      when: "not (tuned_skip | default(False)) and 'edgenode_group' in group_names"
+    - role: machine_setup/conditional_reboot
+
+    - role: git_repo
+    - role: golang
+    - role: docker
+    - role: dependency_build
 
 # Playbook for Network Edge deployment
-
 - hosts: controller_group
-  vars:
-    hugepage_amount: "1024"
-
-  pre_tasks:
-  - name: fail if more than 1 controller
-    fail:
-      msg: "Only one controller is supported"
-    when:
-    - groups['controller_group'] is defined
-    - (groups['controller_group']|length>1)
-  - name: validate hostname
-    include_tasks: ./tasks/precheck_hostname.yml
-  - name: validate requested CNIs
-    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
-
   roles:
-    - role: machine_setup/os_setup
-    # - role: time/ntp
-    - role: machine_setup/grub
-    - role: machine_setup/conditional_reboot
-    - role: git_repo
-    - role: golang
-    - role: docker
     - role: kubernetes/master
+    - role: docker_registry/master
+    - role: kubernetes/helm
     - role: kubernetes/cni
-    # - role: kubernetes/device_plugins
-    - role: openness/network_edge/master
-    - role: cnca/master
-    - role: kubevirt/master
-    # - role: ngc_test/master
-    # - role: opae_fpga/master
-    - role: nfd/network_edge
-    # - role: biosfw/master
-    # - role: cmk/master
-    # - role: hddl/network_edge/master
+    - role: kubernetes/device_plugins
+      when: k8s_device_plugins_enable | default(False)
 
+    - role: openness/network_edge/master
+    - role: kubevirt/master
+      when: kubevirt_enable | default(True)
+
+    - role: telemetry/certs
+    - role: telemetry/prometheus
+    - role: telemetry/opentelemetry/master
+    - role: telemetry/collectd/master
+    - role: telemetry/tas
+    - role: telemetry/cadvisor/master
+
+    - role: fpga_cfg
+      when: fpga_sriov_userspace_enable | default(False)
+    - role: opae_fpga/master
+      when: ne_opae_fpga_enable | default(False)
+    - role: nfd/network_edge
+      when: ne_nfd_enable | default(True)
+    - role: biosfw/master
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/master
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/master
+      when: ne_hddl_enable | default(False)
+    - role: ptp/master
+      when: ptp_sync_enable | default(False)
+
+    - role: telemetry/grafana
+      when: telemetry_grafana_enable | default(True)
+    - role: telemetry/pcm/master
+      when: telemetry_pcm_enable | default(False)
+
+    - role: video_analytics_services
+      when: video_analytics_services_enable | default(False)
+
+    - role: rmd/master
+      when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_group
-  vars:
-    hugepage_amount: "1024"
-
-  pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - name: validate hostname
-    include_tasks: ./tasks/precheck_hostname.yml
-  - name: validate requested CNIs
-    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
-
   roles:
-    - role: machine_setup/os_setup
-    # - role: time/ntp
-    - role: time/verify
-
-    - role: machine_setup/custom_kernel
-    - role: machine_setup/grub
-    - role: machine_setup/configure_tuned
-    - role: machine_setup/conditional_reboot
-    - role: git_repo
-    - role: golang
-    - role: docker
-    # - role: opae_fpga/worker
+    - role: opae_fpga/worker
+      when: ne_opae_fpga_enable | default(False)
     - role: kubernetes/worker
+    - role: docker_registry/worker
     - role: kubernetes/cni
+    - role: telemetry/collectd/worker
+    - role: telemetry/cadvisor/worker
     - role: openness/network_edge/worker
     - role: kubevirt/worker
-    # - role: biosfw/worker
-    # - role: cmk/worker
-    # - role: hddl/network_edge/worker
+      when: kubevirt_enable | default(True)
+    - role: biosfw/worker
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/worker
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/worker
+      when: ne_hddl_enable | default(False)
+    - role: ptp/worker
+      when: ptp_sync_enable | default(False)
 
+    - role: telemetry/pcm/worker
+      when: telemetry_pcm_enable | default(False)
+
+    - role: rmd/worker
+      when: rmd_operator_enable | default(False)
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group
+  any_errors_fatal: true
 
   pre_tasks:
-  - debug:
-      msg: "Setting up {{ inventory_hostname }} at {{ ansible_host }}"
-  - name: validate hostname
-    include_tasks: ./tasks/precheck_hostname.yml
-  - name: validate requested CNIs
-    include_tasks: ./roles/kubernetes/cni/tasks/precheck.yml
+    - name: set node name
+      set_fact: node_name={{ ansible_hostname | lower }}
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
 
   roles:
     - role: machine_setup/os_setup
-    # - role: time/ntp
+    - role: time/ntp
+      when: ntp_enable | default(False)
     - role: time/verify
-
     - role: git_repo
     - role: golang
     - role: docker
@@ -100,6 +131,11 @@
     - role: machine_setup/conditional_reboot
     - role: machine_setup/vca_node_setup
     - role: kubernetes/worker
+    - role: docker_registry/worker
     - role: kubernetes/cni
+    - role: telemetry/collectd/worker
+    - role: telemetry/cadvisor/worker
     - role: openness/network_edge/worker
-    - role: kubevirt/worker
+    - role: telemetry/pcm/worker
+      when: telemetry_pcm_enable | default(False)
+    - role: hddl/vca_setup

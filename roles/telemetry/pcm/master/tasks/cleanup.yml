@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove grafana dashboards config folder
+  file:
+    path: "{{ _grafana_dashboards_conf }}"
+    state: absent
+
+- name: remove grafana dashboards provisioning folder
+  file:
+    path: "{{ _grafana_dashboards_prov }}"
+    state: absent
+
+- name: unistall pcm
+  command: helm uninstall pcm --namespace telemetry
+  ignore_errors: yes
+  changed_when: true

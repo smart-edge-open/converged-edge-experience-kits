@@ -1,0 +1,33 @@
+--- configs/default_slave.cfg	2020-05-15 16:56:52.848147116 +0100
++++ configs/default_slave.cfg	2020-05-15 16:56:20.108545081 +0100
+@@ -3,25 +3,25 @@
+ # Default Data Set
+ #
+ twoStepFlag		1
+-slaveOnly		0
++slaveOnly		1
+ priority1		128
+-priority2		128
++priority2		255
+ domainNumber		0
+ #utc_offset		37
+-clockClass		248
++clockClass		255
+ clockAccuracy		0xFE
+ offsetScaledLogVariance	0xFFFF
+ free_running		0
+ freq_est_interval	1
+ dscp_event		0
+ dscp_general		0
+-dataset_comparison	ieee1588
++dataset_comparison	G.8275.x
+ G.8275.defaultDS.localPriority	128
+ #
+ # Port Data Set
+ #
+ logAnnounceInterval	1
+-logSyncInterval		0
++logSyncInterval		-4
+ logMinDelayReqInterval	0
+ logMinPdelayReqInterval	0
+ announceReceiptTimeout	3

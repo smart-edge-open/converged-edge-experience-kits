@@ -1,0 +1,88 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../../certs/defaults/main.yml
+
+- name: include grafana variables
+  include_vars: ../../../grafana/defaults/main.yml
+
+- name: create telemetry namespace if needed
+  block:
+  - name: check if telemetry namespace exists
+    command: kubectl get ns telemetry
+    ignore_errors: yes
+    register: get_ns_telemetry
+  - name: create telemetry namespace
+    command: kubectl create namespace telemetry
+    when: get_ns_telemetry.rc == 1
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: open port for pcm
+  ignore_errors: yes
+  firewalld:
+    port: 9739/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: wait for pcm pod to be ready
+  command: >
+    kubectl wait --field-selector=spec.nodeName={{ hostvars[item]['ansible_hostname'] }}
+    --namespace=telemetry --for=condition=Ready pods --selector=app=pcm --timeout=600s
+  changed_when: false
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: get pcm dashboards from nodes
+  get_url:
+    url: "https://{{ hostvars[item]['ansible_host'] }}:32100/dashboard/prometheus"
+    dest: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    use_proxy: false
+    force: yes
+    client_cert: "{{ _telemetry_certs_dest }}/pcm/cert.pem"
+    client_key: "{{ _telemetry_certs_dest }}/pcm/key.pem"
+    validate_certs: no
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+# This is for ensuring, that we don't get two same titles or UIDs
+- name: add prefix to title in dashboard json files
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '  "title": "Processor Counter Monitor'
+    replace: '  "title": "{{ hostvars[item]["ansible_hostname"] }} - Processor Counter Monitor'
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: add prefix to UID in dashboard json files
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '  "uid": "'
+    replace: '  "uid": "{{ hostvars[item]["ansible_hostname"] }}-'
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: add instance label to all metrics
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '([a-zA-Z0-9_]+\{)'
+    replace: '\1instance=\"{{ hostvars[item]["ansible_hostname"] }}\",'
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: change sample duration time for all metrics
+  replace:
+    path: "{{ _grafana_dashboards_conf }}/{{ hostvars[item]['ansible_hostname'] }}.json"
+    regexp: '\[3s\]'
+    replace: '[12s]'
+  with_inventory_hostnames:
+  - edgenode_group
+  delegate_to: "{{ groups['controller_group'][0] }}"

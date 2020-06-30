@@ -2,17 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
-- name: clone intel-device-plugins-for-kubernetes repo
-  git:
-    repo: "{{ device_plugins.url }}"
-    dest: "{{ device_plugins.download_dir }}"
-    clone: yes
-    update: no
-    version: "{{ device_plugins.commit }}"
-
-- name: VPU device plugin
-  import_tasks: vpu_plugin.yml
-
-- name: GPU device plugin
-  import_tasks: gpu_plugin.yml
+- include_tasks: download.yml
+- include_tasks: vpu_plugin.yml
+- include_tasks: gpu_plugin.yml

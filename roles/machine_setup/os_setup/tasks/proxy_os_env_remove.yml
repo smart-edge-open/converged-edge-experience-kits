@@ -17,4 +17,4 @@
     - ftp_proxy
     - no_proxy
     - NO_PROXY
-  when: proxy_os_remove_old
+  when: proxy_remove_old

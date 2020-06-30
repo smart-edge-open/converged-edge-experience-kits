@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_ovs_version: "2.11.1"
+_ovs_url: "https://www.openvswitch.org/releases/openvswitch-{{ _ovs_version }}.tar.gz"
+_ovs_download_dest: "/tmp/openvswitch-{{ _ovs_version }}.tar.gz"
+_ovs_install_location: "/opt/ovs-{{ _ovs_version }}"
+_ovs_bridge_name: "br0"
+
+iac_ovs_cores_hex: "0x10"
+iac_ovs_socket_mem: "1024,0"
+
+_dpdk_make_target: "x86_64-native-linuxapp-gcc"

@@ -2,24 +2,21 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
-- name: delete vpu-plugin kustomization
-  command: kubectl delete -k deployments/vpu_plugin
-  args:
-    chdir: "{{ device_plugins.download_dir }}"
+- name: uninstall gpu plugin
+  command: helm uninstall {{ _gpu_plugin.helmReleaseName }}
   changed_when: true
   ignore_errors: yes
 
 - name: delete gpu-plugin kustomization
-  command: kubectl delete -k deployments/gpu_plugin
-  args:
-    chdir: "{{ device_plugins.download_dir }}"
+  command: helm uninstall {{ _vpu_plugin.helmReleaseName }}
   changed_when: true
   ignore_errors: yes
 
-- name: remove the downloaded intel-device-plugins
+- name: remove the downloaded intel-device-plugins and relevent helm charts
   file:
     name: "{{ item }}"
     state: absent
   with_items:
-  - "{{ device_plugins.download_dir }}"
+  - "{{ _device_plugins.download_dir }}"
+  - "{{ ne_helm_charts_default_dir }}/gpu-plugin"
+  - "{{ ne_helm_charts_default_dir }}/vpu-plugin"

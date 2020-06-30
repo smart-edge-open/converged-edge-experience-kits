@@ -24,32 +24,40 @@
 
 - name: create VCA directory
   file:
-    path: "{{ vca_dest }}"
+    path: "{{ _vca_dest }}"
     state: directory
 
 - name: download VCA image
   unarchive:
-    src: "{{ vca_image_url }}"
-    dest: "{{ vca_dest }}"
+    src: "{{ _vca_image_url }}"
+    dest: "{{ _vca_dest }}"
     remote_src: yes
-    creates: "{{ vca_dest }}/README"
+    creates: "{{ _vca_dest }}/README"
     extra_opts: [--strip-components=1]
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: create VCA cache directory
   file:
-    dest: "{{ vca_dest }}/VCAC-A/cache"
+    dest: "{{ _vca_dest }}/VCAC-A/cache"
     state: directory
 
 - name: download VCA pre-requisites
   get_url:
     url: "{{ item }}"
-    dest: "{{ vca_dest }}/VCAC-A/cache"
-  with_items: "{{ vca_download_files }}"
+    dest: "{{ _vca_dest }}/VCAC-A/cache"
+  with_items: "{{ _vca_download_files }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: build Host Kernel and VCA Driver
-  command: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/scripts/build.sh -c"
+  command: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/scripts/build.sh -c -o centos7"
   args:
-    creates: "{{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/"
+    creates: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/"
   ignore_errors: yes
   register: ret
   failed_when: >
@@ -69,13 +77,20 @@
   register: installed_kernel
   changed_when: false
 
+- name: remove old VCA RPMs
+  shell: "set -o pipefail && rpm -qa | grep -e {{ item }} | xargs yum -y erase"
+  ignore_errors: yes
+  with_items: "{{ _vca_rpm_files }}"
+  when: "'VCA' not in installed_kernel.stdout"
+
 - name: install VCA kernel packages, driver and utility
-  command: "rpm -ivh {{ vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}"
-  with_items: "{{ vca_rpm_files }}"
+  command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}.rpm" # noqa 303
+  with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
 
 - name: configure VCA kernel to be the default at boot
-  command: grub2-set-default 0
+  shell: grubby --set-default /boot/vmlinuz-3.10.0-*.VCA+
+  changed_when: true
   when: "'VCA' not in installed_kernel.stdout"
 
 - name: request reboot if VCA kernel is newly installed

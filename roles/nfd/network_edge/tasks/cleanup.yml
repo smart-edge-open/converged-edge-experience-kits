@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove Node Feature Discovery release if exist
+  block:
+  - name: check if NFD release exists
+    command: helm status {{ _nfd_release_name }} --namespace=openness
+    ignore_errors: yes
+    register: get_release_nfd
+  - name: remove NFD release
+    command: helm uninstall {{ _nfd_release_name }} --namespace=openness
+    when: get_release_nfd.rc == 0
+    changed_when: true
+
+- name: remove Node Feature Discovery directories and files
+  file:
+    path: "{{ _nfd_chart_dir }}"
+    state: absent

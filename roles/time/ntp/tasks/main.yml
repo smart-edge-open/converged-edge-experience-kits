@@ -2,6 +2,8 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+- name: include time/verify/defaults vars
+  include_vars: ../../verify/defaults/main.yml
 
 - name: stop and disable chronyd service if available
   systemd:
@@ -59,3 +61,7 @@
         daemon_reload: yes
     - name: set hardware clock
       command: hwclock -w
+    - name: create ntp time set flag
+      file:
+        path: "{{ _ntp_time_set }}"
+        state: touch

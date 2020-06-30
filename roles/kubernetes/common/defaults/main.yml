@@ -3,13 +3,13 @@
 
 ---
 
-kubernetes_version: "1.17.0"
+_kubernetes_version: "1.18.4"
 
-kubernetes_packages: "kubelet-{{ kubernetes_version }},kubeadm-{{ kubernetes_version }},kubectl-{{ kubernetes_version }}"
+_kubernetes_packages: "kubelet-{{ _kubernetes_version }},kubeadm-{{ _kubernetes_version }},kubectl-{{ _kubernetes_version }}"
 
-kubernetes_repository_url: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
-kubernetes_repository_key:
+_kubernetes_repository_url: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+_kubernetes_repository_key:
   - https://packages.cloud.google.com/yum/doc/yum-key.gpg
   - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
-kubernetes_packages_to_remove: "kubelet,kubeadm,kubectl"
+_kubernetes_packages_to_remove: "kubelet,kubeadm,kubectl"

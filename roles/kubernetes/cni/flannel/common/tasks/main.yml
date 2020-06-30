@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+# TODO: Remove firewall changes once https://github.com/coreos/flannel/issues/1033 is fixed and released
+# To apply the rules in runtime and save them they are run with and without '--permanent' option
+- name: "[WORKAROUND] add firewall rule for flannel(Source)"
+  command: firewall-cmd {{ item }} --direct --add-rule ipv4 filter FORWARD 10 -s {{ flannel_cidr }} -j ACCEPT
+  ignore_errors: yes
+  changed_when: true
+  with_items:
+    - ""
+    - "--permanent"
+
+- name: "[WORKAROUND] add firewall rule for flannel(Destination)"
+  command: firewall-cmd {{ item }} --direct --add-rule ipv4 filter FORWARD 10 -d {{ flannel_cidr }} -j ACCEPT
+  ignore_errors: yes
+  changed_when: true
+  with_items:
+    - ""
+    - "--permanent"

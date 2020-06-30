@@ -5,7 +5,7 @@
 
 - name: copy files to /var/lib/appliance
   copy:
-    src: "{{ git_repo_dest }}/configs"
+    src: "{{ _git_repo_dest }}/configs"
     dest: /var/lib/appliance/
     directory_mode: yes
     remote_src: yes

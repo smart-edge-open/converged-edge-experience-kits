@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
-opae_local_path_stp: "./opae_fpga/n3000-1-3-5-beta-rte-setup.zip"
-opae_local_path_cfg: "./opae_fpga/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip"
-opae_remote_path: "{{ git_repo_dest }}/build/fpga_opae/"
-vran_image_dir: "/temp/vran_images/"
-
+_opae_local_path_stp: "./opae_fpga/n3000-1-3-5-beta-rte-setup.zip"
+_opae_local_path_cfg: "./opae_fpga/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip"
+_opae_remote_path: "{{ _git_repo_dest }}/build/fpga_opae/"
+_vran_image_dir: "/temp/vran_images/"

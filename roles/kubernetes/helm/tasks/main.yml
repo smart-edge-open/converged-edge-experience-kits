@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: Create directories for helm charts
+  file:
+    path: "{{ ne_helm_charts_default_dir }}"
+    state: directory
+
+- name: check whether helm exist
+  block:
+  - name: check /usr/local/bin/helm exist
+    stat:
+      path: "{{ _helm_binary_path }}"
+    register: helm_bin
+  - name: check helm version
+    shell: helm version | grep -E {{ _helm_version }}
+    register: grep_helm_version
+    ignore_errors: yes
+    changed_when: False
+    when: helm_bin.stat.exists
+
+- name: download helm archive and installation
+  block:
+  - name: create temp directory
+    tempfile:
+      state: directory
+      suffix: .helm
+    register: helm_tmp_dir
+  - name: download
+    get_url:
+      url:  "{{ _helm_download_url }}/{{ _helm_download_item }}"
+      dest: "{{ helm_tmp_dir.path }}/{{ _helm_download_item }}"
+    register: helm_download_result
+    retries: "{{ number_of_retries }}"
+    until: helm_download_result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: unarchive
+    unarchive:
+      src:  "{{ helm_tmp_dir.path }}/{{ _helm_download_item }}"
+      dest: "{{ helm_tmp_dir.path }}"
+      remote_src: yes
+  - name: copy to/user/local/bin
+    copy:
+      src: "{{ helm_tmp_dir.path }}/linux-amd64/helm"
+      dest: "{{ _helm_binary_path }}"
+      mode: preserve
+      remote_src: yes
+  - name: remove downloaded package
+    file:
+      path: "{{ helm_tmp_dir.path }}/{{ _helm_download_item }}"
+      state: absent
+  - name: remove unarchive sources
+    file:
+      path: "{{ helm_tmp_dir.path }}/linux-amd64"
+      state: absent
+  when: (not helm_bin.stat.exists) or (helm_bin.stat.exists and (grep_helm_version.rc == 1))

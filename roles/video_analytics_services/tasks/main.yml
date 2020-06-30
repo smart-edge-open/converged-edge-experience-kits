@@ -1,0 +1,104 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: clone video analytics serving repo
+  git:
+    repo: "{{ _video_analytics_serving.repo }}"
+    dest: "{{ _video_analytics_serving.dest }}"
+    clone: yes
+    update: no
+    version: "{{ _video_analytics_serving.commit }}"
+
+- name: uninstall old video analytics serving release if exists
+  block:
+  - name: grep exsiting release
+    shell: helm list | grep {{ _vas_helmReleaseName }} | awk '{print $9}'
+    ignore_errors: yes
+    register: vas_helm_release
+  - name: grep chart version
+    shell: helm list | grep {{ _vas_helmReleaseName }}-{{ _vas_helmChartVersion }} | awk '{print $9}'
+    ignore_errors: yes
+    register: vas_helm_chart
+  - name: uninstall if an older version
+    command: helm uninstall {{ _vas_helmReleaseName }}
+    ignore_errors: yes
+    when: (vas_helm_chart.stdout | length == 0) and (vas_helm_release.stdout | length > 0)
+
+- name: build, tag and push the video analytics serving images to docker registry
+  block:
+  - name: build VAS image
+    shell: "source /etc/profile && ./build.sh --base {{ item.image }} --framework {{ item.name }}"
+    args:
+      chdir: "{{ _video_analytics_serving.dest }}/docker"
+    changed_when: true
+    register: build_status
+    retries: "{{ number_of_retries }}"
+    until: build_status is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _frameworks }}"
+  - name: tag the VAS image
+    docker_image:
+      name: "{{ _va_serving.image }}-{{ item.name }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _va_serving.image }}-{{ item.name }}"
+      tag: "{{ _va_serving.tag }}"
+      push: yes
+      source: local
+    changed_when: true
+    with_items: "{{ _frameworks }}"
+  when: vas_helm_chart.stdout | length == 0
+
+- name: build, tag and push the video analytics serving images to docker registry
+  block:
+  - name: build VAS sidecar image
+    shell: source /etc/profile && make {{ _vas_sidecar.name }}
+    args:
+      chdir: "{{ _git_repo_dest }}"
+  - name: build VAS sidecar image
+    docker_image:
+      name: "{{ _vas_sidecar.image }}"
+      tag: "{{ _vas_sidecar.tag }}"
+      source: build
+      build:
+        path: "{{ _git_repo_dest }}/{{ _vas_sidecar.name }}"
+        use_config_proxy: yes
+        pull: yes
+  - name: tag VAS sidecar image and push to docker registry
+    docker_image:
+      name: "{{ _vas_sidecar.image }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _vas_sidecar.image }}"
+      tag: "{{ _vas_sidecar.tag }}"
+      push: yes
+      source: local
+
+- name: template Helm chart on the master node and deploy VAS with the Helm Charts
+  block:
+  - name: create chart directory
+    file:
+     path: "{{ ne_helm_charts_default_dir }}/{{ _vas_helmReleaseName }}"
+     state: directory
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ role_path }}/charts/"
+      dest: "{{ ne_helm_charts_default_dir }}/{{ _vas_helmReleaseName }}"
+  - name: template Chart.yaml
+    template:
+      src: "Chart.yaml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/{{ _vas_helmReleaseName }}/Chart.yaml"
+      force: yes
+  - name: template values.yaml
+    template:
+      src: "values.yaml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/{{ _vas_helmReleaseName }}/values.yaml"
+      force: yes
+  - name: helm install VAS release
+    command: helm install {{ _vas_helmReleaseName }} {{ _vas_helmReleaseName }}
+    args:
+      chdir: "{{ ne_helm_charts_default_dir }}"
+  - name: check if deployed successfully
+    shell: helm list | grep {{ _vas_helmReleaseName }} | awk '{print $8}'
+    register: vas_helm_status
+    ignore_errors: yes
+    failed_when: "'deployed' not in vas_helm_status.stdout"
+  when: vas_helm_chart.stdout | length == 0

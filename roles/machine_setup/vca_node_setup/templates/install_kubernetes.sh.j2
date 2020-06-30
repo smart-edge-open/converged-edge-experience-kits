@@ -1,0 +1,69 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+vca_k8s_kubelet_ver="kubelet={{ _kubernetes_version }}-00"
+vca_k8s_kubeadm_ver="kubeadm={{ _kubernetes_version }}-00"
+vca_k8s_kubectl_ver="kubectl={{ _kubernetes_version }}-00"
+
+rm -f /var/lib/apt/lists/lock
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
+if [ $? -ne 0 ]; then
+   echo "apt-get update failed"
+   exit 1
+fi
+
+apt-get install -y curl
+if [ $? -ne 0 ]; then
+   echo "install curl failed"
+   exit 1
+fi
+
+apt-get install -y apt-transport-https
+if [ $? -ne 0 ]; then
+   echo "install transport-https failed"
+   exit 1
+fi
+
+apt-get install -y gnupg
+if [ $? -ne 0 ]; then
+   echo "install gnupg failed"
+   exit 1
+fi
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+if [ $? -ne 0 ]; then
+   echo "curl apt-key failed"
+   exit 1
+fi
+
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+if [ $? -ne 0 ]; then
+   echo "deb for kuberneters-xenial main failed"
+   exit 1
+fi
+
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
+if [ $? -ne 0 ]; then
+   echo "apt-get set check-date  failed"
+   exit 1
+fi
+
+apt install -y $vca_k8s_kubelet_ver $vca_k8s_kubeadm_ver $vca_k8s_kubectl_ver
+if [ $? -ne 0 ]; then
+   echo "install k8s components failed"
+   exit 1
+fi
+
+## VCA NFD Features
+VCACA_NFD_FILE=/opt/intel/openvino/k8s-nfd/nfd-vca-features
+VCACA_NFD_K8S_DIR=/etc/kubernetes/node-feature-discovery/features.d
+if test -f "$VCACA_NFD_FILE"; then
+    echo "$VCACA_NFD_FILE exist"
+else
+    echo "[Error] $VCACA_NFD_FILE not exist"
+    exit 1
+fi
+mkdir -p $VCACA_NFD_K8S_DIR
+sed 's/node.vcaa.nfd\///g' $VCACA_NFD_FILE > $VCACA_NFD_K8S_DIR/vca
+echo "completed whole setup for vca node k8s setup"

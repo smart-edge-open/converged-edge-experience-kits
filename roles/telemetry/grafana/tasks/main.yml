@@ -1,0 +1,216 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../certs/defaults/main.yml
+
+- name: certificates for Grafana
+  block:
+  - name: create directory for server certificates
+    file:
+      name: "{{ _telemetry_certs_dest }}/grafana"
+      state: directory
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _telemetry_certs_dest }}/CA/cert.pem"
+      dest: "{{ _telemetry_certs_dest }}/grafana/root.pem"
+      state: link
+  - name: create server certificate signed by root CA certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh grafana {{ _telemetry_certs_dest }}/grafana {{ _telemetry_certs_dest }}/CA"
+  - name: delete symbolic link to root's cert
+    file:
+      path: "{{ _telemetry_certs_dest }}/grafana/root.pem"
+      state: absent
+
+- name: store certs in variables for later use
+  block:
+  - name: store root CA cert
+    slurp:
+      path: "{{ _telemetry_certs_dest }}/CA/cert.pem"
+    register: telemetry_root_ca_cert
+  - name: store grafana cert
+    slurp:
+      path: "{{ _telemetry_certs_dest }}/grafana/cert.pem"
+    register: telemetry_grafana_cert
+  - name: store grafana key
+    slurp:
+      path: "{{ _telemetry_certs_dest }}/grafana/key.pem"
+    register: telemetry_grafana_key
+
+- name: open port for Grafana
+  ignore_errors: yes
+  firewalld:
+    port: 32000/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: check if Grafana release already exists
+  command: helm status grafana -n telemetry
+  ignore_errors: yes
+  register: get_release_grafana
+  changed_when: false
+
+- name: install Grafana chart
+  block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: grafana
+    register: tmp_dir
+    delegate_to: localhost
+
+  - name: template values.yml to tmp directory
+    template:
+      src: values.yml
+      dest: "{{ tmp_dir.path }}/"
+
+  - name: add default Helm repository
+    command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    changed_when: true
+
+  - name: create Grafana chart template directory
+    file:
+      name: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ _grafana_chart_dir }}"
+      - "{{ _grafana_chart_dir }}/templates"
+      - "{{ _grafana_chart_dir }}/templates/test"
+    changed_when: true
+
+  - name: create Grafana files directory
+    file:
+      name: "{{ _grafana_chart_dir }}/files"
+      state: directory
+    changed_when: true
+
+  - name: download Grafana chart
+    get_url:
+      url: "{{ _grafana_chart_url }}/{{ item }}"
+      dest: "{{ _grafana_chart_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _grafana_chart }}"
+
+  - name: download Grafana chart templates
+    get_url:
+      url: "{{ _grafana_chart_url }}/{{ item }}"
+      dest: "{{ _grafana_chart_dir }}/templates"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _grafana_chart_templates }}"
+
+  - name: download Grafana chart test templates
+    get_url:
+      url: "{{ _grafana_chart_url }}/{{ item }}"
+      dest: "{{ _grafana_chart_dir }}/templates/test"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _grafana_chart_test_templates }}"
+
+  - name: create directory for persistent volumes
+    file:
+      path: "{{ _pv_dir }}"
+      state: directory
+
+  - name: create directories for persistent volumes
+    file:
+      path: "{{ _pv_dir }}/{{ item }}"
+      state: directory
+    with_items: "{{ _pv_names }}"
+
+  - name: template definitions of persistent volumes
+    template:
+      src: "volume.yml"
+      dest: "{{ tmp_dir.path }}/{{ item }}.yml"
+    with_items: "{{ _pv_names }}"
+    changed_when: true
+
+  - name: apply definitions of persistent volumes
+    command: kubectl apply -n telemetry -f "{{ tmp_dir.path }}/{{ item }}.yml"
+    with_items: "{{ _pv_names }}"
+    changed_when: true
+
+  - name: template prometheus-tls datasource
+    template:
+      src: "prometheus-tls-datasource.yml"
+      dest: "{{ tmp_dir.path }}/prometheus-tls-datasource.yml"
+    changed_when: true
+
+  - name: add prometheus datasource to Grafana
+    command: kubectl apply -f "{{ tmp_dir.path }}/prometheus-tls-datasource.yml"
+    changed_when: true
+
+  - name: create Grafana dashboards provisioning directory
+    file:
+      path: "{{ _grafana_dashboards_prov }}"
+      state: directory
+      mode: '0755'
+
+  - name: create Grafana dashboards directory for json files
+    file:
+      path: "{{ _grafana_dashboards_conf }}"
+      state: directory
+      mode: '0755'
+
+  - name: copy Grafana dashboards provisioning file
+    template:
+      src: "default-dashboards-providers.yml"
+      dest: "{{ _grafana_dashboards_prov }}"
+
+  - name: copy example dashboard to controller
+    copy:
+      src: example-dashboard.json
+      dest: "{{ _grafana_dashboards_conf }}/example-dashboard.json"
+
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
+
+  - name: apply _pod.tpl patch
+    patch:
+      src: _pod.tpl.patch
+      dest: "{{ _grafana_chart_dir }}/templates/_pod.tpl"
+      strip: 1
+      binary: no
+      backup: no
+
+  - name: find backup files
+    find:
+      paths: "{{ _grafana_chart_dir }}/templates"
+      patterns: "*.orig"
+    register: backup_files
+
+  - name: remove backup files
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ backup_files.files }}"
+    changed_when: true
+
+  - name: install Grafana release
+    command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }}"
+    changed_when: true
+
+  - name: wait for Grafana pod to be ready
+    command: >
+      kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
+      --for=condition=Ready pods --timeout=600s
+    changed_when: false
+
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+  when: get_release_grafana.rc != 0

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# since the pod is part of DaemonSet it will be recreated after deletion
+- name: recreate SR-IOV device plugin pod if already exists
+  shell: >
+    kubectl delete -n kube-system $(kubectl get pods -n kube-system
+    --field-selector spec.nodeName={{ node_name }} -o=NAME
+    | grep device-plugin )
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+  changed_when: true

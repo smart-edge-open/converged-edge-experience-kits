@@ -5,8 +5,12 @@
 
 - name: download Dockerfile
   git:
-    repo: "{{ hddldaemon_container.url }}"
-    dest: "{{ hddldaemon_container.download_dir }}"
+    repo: "{{ _hddldaemon_container.url }}"
+    dest: "{{ _hddldaemon_container.download_dir }}"
     clone: yes
     update: no
-    version: "{{ hddldaemon_container.commit }}"
+    version: "{{ _hddldaemon_container.commit }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"

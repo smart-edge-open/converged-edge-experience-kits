@@ -5,108 +5,188 @@
 
 - name: Install KubeVirt
   block:
-  - name: KV Operator Install
-    command: kubectl apply -f "{{ kubevirt_operator_url }}"
-  - name: KV Controller Install
-    command: kubectl apply -f "{{ kubevirt_cr_url }}"
-
-- name: Download Krew plugin
-  block:
-  - name: Make Krew directory
-    file:
-      path: "{{ krew_dir }}"
+  - name: create temporary directory
+    tempfile:
       state: directory
-  - name: Check if already downloaded
+      suffix: kubevirt-operator
+    register: tmp_dir
+  - name: download KV Operator
+    get_url:
+      url: "{{ _kubevirt_operator_url }}"
+      dest: "{{ tmp_dir.path }}/virt-operator.yaml"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: template kustomization.yml to tmp directory
+    template:
+      src: kustomization.yml.j2
+      dest: "{{ tmp_dir.path }}/kustomization.yml"
+    with_items:
+      - virt
+  - name: copy CMK toleration patch to tmp directory
+    copy:
+      src: add_cmk_toleration.yml
+      dest: "{{ tmp_dir.path }}/"
+  - name: KV Operator Install
+    shell: kubectl kustomize . | kubectl apply -f -
+    args:
+      chdir: "{{ tmp_dir.path }}"
+  - name: KV Controller Install
+    command: kubectl apply -f "{{ _kubevirt_cr_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+
+- name: download Krew plugin
+  block:
+  - name: make Krew directory
+    file:
+      path: "{{ _krew_dir }}"
+      state: directory
+  - name: check if already downloaded
     stat:
-      path: "{{ krew_dir }}/krew.tar.gz"
+      path: "{{ _krew_dir }}/krew.tar.gz"
     register: krew_download
-  - name: Download Krew yaml
+  - name: download Krew yaml
     get_url:
-      url: "{{ krew_tar_url }}"
-      dest: "{{ krew_dir }}"
+      url: "{{ _krew_tar_url }}"
+      dest: "{{ _krew_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
     when: not krew_download.stat.exists
-  - name: Download Krew tar.gz
+  - name: download Krew tar.gz
     get_url:
-      url: "{{ krew_yaml_url }}"
-      dest: "{{ krew_dir }}"
+      url: "{{ _krew_yaml_url }}"
+      dest: "{{ _krew_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
     when: not krew_download.stat.exists
   - name: Unpack Krew
     unarchive:
-      src: "{{ krew_dest }}"
-      dest: "{{ krew_dir }}"
+      src: "{{ _krew_dest }}"
+      dest: "{{ _krew_dir }}"
       remote_src: True
       extra_opts: "--strip-components=1"
 
-- name: Install Krew plugin
+- name: install Krew plugin
   block:
   - name: Install Krew
     shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" install --manifest=krew.yaml --archive=krew.tar.gz
     args:
-      chdir: "{{ krew_dir }}"
+      chdir: "{{ _krew_dir }}"
   - name: Update Krew
     shell: KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_amd64" && "$KREW" update
     args:
-      chdir: "{{ krew_dir }}"
+      chdir: "{{ _krew_dir }}"
   - name: Add path to profile
     lineinfile:
       state: present
       dest: /etc/profile
       line: export PATH="${PATH}:${HOME}/.krew/bin"
 
-- name: Install Virtctl plugin
+- name: install Virtctl plugin
   shell: ${HOME}/.krew/bin/kubectl-krew install virt
   changed_when: true
 
-- name: Install CDI
+- name: install CDI
   block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: cdi-operator
+    register: tmp_dir
+  - name: download CDI Operator
+    get_url:
+      url: "{{ _cdi_operator_url }}"
+      dest: "{{ tmp_dir.path }}/"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: template kustomization.yml to tmp directory
+    template:
+      src: kustomization.yml.j2
+      dest: "{{ tmp_dir.path }}/kustomization.yml"
+    with_items:
+      - cdi
+  - name: copy CMK toleration patch to tmp directory
+    copy:
+      src: add_cmk_toleration.yml
+      dest: "{{ tmp_dir.path }}/"
+  - name: KV Operator Install
+    shell: kubectl kustomize . | kubectl apply -f -
+    args:
+      chdir: "{{ tmp_dir.path }}"
   - name: CDI Operator Install
-    command: kubectl apply -f "{{ cdi_operator_url }}"
+    command: kubectl apply -f "{{ _cdi_operator_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   - name: CDI Controller Install
-    command: kubectl apply -f "{{ cdi_cr_url }}"
+    command: kubectl apply -f "{{ _cdi_cr_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
 
-- name: Label CDI namespace
+- name: label CDI namespace
   command: kubectl label namespace/cdi ns=cdi --overwrite=true
   changed_when: true
 
-- name: Create temp directory for KubeVirt related yaml
+- name: create temp directory for KubeVirt related yaml
   tempfile:
     state: directory
     suffix: -kubevirt
   register: kv_dir
 
-- name: Copy traffic rule file for CDI
+- name: copy traffic rule file for CDI
   copy:
     src: cdiNetworkPolicy.yaml
     dest: "{{ kv_dir.path }}/cdiNetworkPolicy.yaml"
 
-- name: Copy Local Volume Storage Class
+- name: copy Local Volume Storage Class
   copy:
     src: localStorageClass.yaml
     dest: "{{ kv_dir.path }}/localStorageClass.yaml"
 
-- name: Check if CDI traffic rule exists
+- name: check if CDI traffic rule exists
   command: kubectl get networkpolicy cdi-upload-proxy-policy
   ignore_errors: yes
   register: cdi_exist
   changed_when: false
 
-- name: Set CDI traffic rule
+- name: set CDI traffic rule
   command: kubectl create -f cdiNetworkPolicy.yaml
   args:
     chdir: "{{ kv_dir.path }}"
   changed_when: true
   when: cdi_exist.rc != 0
 
-- name: Check if LVSC exists
+- name: check if LVSC exists
   command: kubectl get sc local-storage
   ignore_errors: yes
   register: lvsc_exist
   changed_when: false
 
-- name: Create Local Volume Storage Class
+- name: create Local Volume Storage Class
   command: kubectl create -f localStorageClass.yaml
   args:
     chdir: "{{ kv_dir.path }}"
-  when: storage_class == "local-volume" and lvsc_exist.rc != 0
-
-
+  when: _storage_class == "local-volume" and lvsc_exist.rc != 0

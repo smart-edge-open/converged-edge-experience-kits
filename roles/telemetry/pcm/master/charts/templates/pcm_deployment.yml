@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.pcm.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ .Values.pcm.name }}
+      app: {{ .Values.pcm.app }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.pcm.name }}
+        app: {{ .Values.pcm.app }}
+    spec:
+      hostNetwork: true
+      initContainers:
+      - name: {{ .Values.certs.name }}
+        image: {{ .Values.certs.image }}
+        command: ["/bin/sh","-c"]
+        args: [ "rm -Rf {{ .Values.proxy.certsDest }} && \
+              mkdir {{ .Values.proxy.certsDest }} && \
+              /root/certgen/entrypoint_tls.sh {{ .Values.proxy.serverName }} {{ .Values.proxy.certsDest }} /root/CA && \
+              chmod 644 {{ .Values.proxy.certsDest }}/cert.pem {{ .Values.proxy.certsDest }}/key.pem"]
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "0.1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        - name: certgen
+          mountPath: /root/certgen
+      containers:     
+      - name: {{ .Values.proxy.name }} 
+        image: {{ .Values.proxy.image }} 
+        volumeMounts:
+        - name: proxy-config
+          mountPath: {{ .Values.proxy.pathToNginxCfg }} 
+          subPath: nginx.conf
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        ports:
+        - containerPort: {{ .Values.proxy.metricsPcmPort }}
+      - name:  {{ .Values.pcm.name }}
+        image: {{ .Values.pcm.image }}
+        resources: {}
+        securityContext:
+          privileged: true
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - effect: NoSchedule
+        key: cmk
+        operator: Exists
+      volumes:
+      - name: proxy-config
+        configMap:
+          name: {{ .Values.proxy.configMap }}
+      - name: cert-vol
+        hostPath:
+          path: /etc/openness/certs/telemetry
+          type: DirectoryOrCreate
+      - name: ca
+        secret:
+          secretName: root-ca
+      - name: certgen
+        secret:
+          secretName: certgen
+          defaultMode: 0744

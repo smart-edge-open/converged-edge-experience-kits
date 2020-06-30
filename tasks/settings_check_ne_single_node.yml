@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: verify inventory
+  block:
+  - name: fail if `edgenode_group` doesn't contain only one node
+    fail:
+      msg: |
+        For single-node Network Edge deployment `edgenode_group` group in the inventory.ini should contain only one node, e.g.:
+
+        # inventory.ini file
+        [edgenode_group]
+        node01
+    when:
+    - groups['edgenode_group'] is defined
+    - groups['edgenode_group'] | length != 1
+
+  - name: fail if controller and node are not the same machine
+    fail:
+      msg: |
+        For single-node Network Edge deployment Controller and Node should be the same machine, e.g.
+
+        # inventory.ini file
+        controller ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+        node01 ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+    when:
+    - hostvars[groups['controller_group'][0]]['ansible_host'] != hostvars[groups['edgenode_group'][0]]['ansible_host']

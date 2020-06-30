@@ -11,17 +11,17 @@ export PATH=$PATH:/usr/local/share/ovn/scripts:/usr/share/openvswitch/scripts
 ovs-ctl restart --no-ovs-vswitchd --system-id=random
 
 # Start ovsdb
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="{{ ovs_dpdk_socket_mem }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="{{ ovncni_dpdk_socket_mem }}"
 ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true
-ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="{{ ovs_dpdk_pmd_cpu_mask }}"
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask="{{ ovs_dpdk_lcore_mask }}"
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-hugepage-dir="{{ huge_dir }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="{{ ovncni_dpdk_pmd_cpu_mask }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask="{{ ovncni_dpdk_lcore_mask }}"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-hugepage-dir="{{ _huge_dir }}"
 
 ovs-ctl restart --no-ovsdb-server  --system-id=random
 ovs-ctl --protocol=udp --dport=6081 enable-protocol
 
-{% if host_ip == controller_ip %}
-# Start northd only on controller (host_ip == controller_ip)
+{% if _host_ip == _controller_ip %}
+# Start northd only on controller (_host_ip == _controller_ip)
 ovn-ctl --db-nb-create-insecure-remote=yes --db-sb-create-insecure-remote=yes start_northd
 {% endif %}
 
@@ -34,8 +34,8 @@ ovn-ctl restart_controller_vtep
 ovn-nbctl --wait=hv set NB_Global . options:mac_prefix="0e:00:00"
 
 # Configure ovn-sb
-ovs-vsctl set open . external-ids:ovn-encap-ip={{ host_ip }}
-ovs-vsctl set open . external-ids:ovn-remote=tcp:{{ controller_ip }}:6642
+ovs-vsctl set open . external-ids:ovn-encap-ip={{ _host_ip }}
+ovs-vsctl set open . external-ids:ovn-remote=tcp:{{ _controller_ip }}:6642
 ovs-vsctl set open . external-ids:ovn-remote-probe-interval=10000
 ovs-vsctl set open . external-ids:ovn-encap-type=geneve
 

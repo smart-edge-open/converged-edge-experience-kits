@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Kube-ovn with OVS-DPDK
+kubeovn_dpdk: false
+
+# Network Edge Processor Counter Monitor (PCM)
+telemetry_pcm_enable: false
+
+# Network Edge's Kubernetes CNIs
+# sriov CNI for CDN Content Delivery
+kubernetes_cnis:
+   - kubeovn
+   - sriov
+
+# Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
+topology_manager:
+  policy: "single-numa-node"

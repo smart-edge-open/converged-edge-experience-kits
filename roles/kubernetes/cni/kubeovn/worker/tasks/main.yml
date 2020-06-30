@@ -4,7 +4,7 @@
 ---
 
 - name: check if packages installed in proper version
-  shell: rpm -q openvswitch | grep {{ ovn_version.main }}-{{ ovn_version.subversion }} | wc -l # noqa 306
+  shell: rpm -q openvswitch | grep {{ _ovn_version.main }}-{{ _ovn_version.subversion }} | wc -l # noqa 306
   args:
     warn: false
   register: rpm_grep
@@ -14,15 +14,19 @@
   block:
   - name: remove old packages
     yum:
-      name: "{{ ovs_packages_to_remove }}"
+      name: "{{ _ovs_packages_to_remove }}"
       state: absent
   - name: installing OVS tool dependencies
     yum:
-      name: "{{ ovs_dependencies_yum }}"
+      name: "{{ _ovs_dependencies_yum }}"
   - name: installing OVS tool
-    command: yum install -y {{ ovs_package_url }}
+    command: yum install -y {{ _ovs_package_url }}
     args:
       warn: false
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
   when: "'1' not in rpm_grep.stdout"
 
 - name: open kube-ovn firewall rules
@@ -43,9 +47,9 @@
   - name: wait for running ovs-ovn pod
     shell: >
       set -o pipefail &&
-      kubectl get pods -n kube-ovn
+      kubectl get pods -n kube-system
       -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
-      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep -E "ovs-ovn"
+      --field-selector spec.nodeName={{ node_name }} | grep -E "ovs-ovn"
     register: kubeovn_pods
     delegate_to: "{{ groups['controller_group'][0] }}"
     retries: 30
@@ -61,9 +65,9 @@
   - name: events of ovs-ovn pod
     shell: >
       set -o pipefail &&
-      kubectl describe pod -n kube-ovn
-      $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name
-      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep ovs-ovn) |
+      kubectl describe pod -n kube-system
+      $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name
+      --field-selector spec.nodeName={{ node_name }} | grep ovs-ovn) |
       sed -n '/^Events:/,//p'
     changed_when: false
     delegate_to: "{{ groups['controller_group'][0] }}"
@@ -71,9 +75,9 @@
   - name: try to get ovs-ovn execution logs
     shell: >
       set -o pipefail &&
-      kubectl logs -n kube-ovn
-      $(kubectl get pods -n kube-ovn -o custom-columns=NAME:.metadata.name
-      --field-selector spec.nodeName={{ ansible_hostname | lower }} | grep ovs-ovn)
+      kubectl logs -n kube-system
+      $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name
+      --field-selector spec.nodeName={{ node_name }} | grep ovs-ovn)
     changed_when: false
     delegate_to: "{{ groups['controller_group'][0] }}"
     ignore_errors: true

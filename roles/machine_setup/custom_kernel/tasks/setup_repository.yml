@@ -8,11 +8,24 @@
   - name: setup repository for kernel | get repository file
     get_url:
       url: "{{ kernel_repo_url }}"
-      dest: "{{ kernel_repo_dest }}"
+      dest: "{{ _kernel_repo_dest }}"
       mode: 0644
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: not ( calico_ebpf_enabled )
+
+  - name: setup ebpf custom kernel repo and GPG key
+    command: rpm -Uvh "{{ ebpf_kernel_package }}"
+    args:
+      warn: false
+    register: temp_result
+    ignore_errors: yes
+    when: calico_ebpf_enabled
 
   - name: find out place for GPG key
-    command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ kernel_repo_dest }}
+    command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ _kernel_repo_dest }}
     register: gpg_key_filepath
 
   - name: set GPG key filepath
@@ -31,11 +44,16 @@
       url: "{{ kernel_repo_key }}"
       dest: "{{ repo_gpg_filepath }}"
       mode: 0644
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: not ( calico_ebpf_enabled )
+
   - name: setup repository for kernel | import GPG key
     rpm_key:
       state: present
       key: "{{ repo_gpg_filepath }}"
 
   when:
-  - not offline_mode # online mode only, for offline RPMs are cached
   - kernel_repo_url is defined and kernel_repo_url|length > 0 # url to repository file not be empty

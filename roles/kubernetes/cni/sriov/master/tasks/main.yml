@@ -3,86 +3,95 @@
 
 ---
 
-- name: include sriov/common default vars
-  include_vars: ../../common/defaults/main.yml
+- name: check if SR-IOV CNI and device plugin release already exists
+  command: helm status sriov-release
+  ignore_errors: yes
+  register: get_release_sriov
+  changed_when: false
 
-# Deploy SRIOV-CNI
-- name: deploy CNI
-  command: kubectl apply -f ./images/k8s-v1.16/sriov-cni-daemonset.yaml
-  args:
-    chdir: "{{ sriov_cni.download_dir }}"
-  changed_when: true
-
-# Create temporary directory for SR-IOV network CRD
-- name: create temp dir
-  tempfile:
-    state: directory
-    suffix: -sriov-crd
-  register: tmp_dir
-
-# Copy SR-IOV network CRD to temporary directory
-- name: create SR-IOV network CRD
-  copy:
-    src: openness-sriov-crd.yml
-    dest: "{{ tmp_dir.path }}/openness-sriov-crd.yml"
-
-# Copy SR-IOV network CRD to temporary directory
-- name: create SR-IOV network CRD for VM
-  copy:
-    src: openness-sriov-vm-crd.yml
-    dest: "{{ tmp_dir.path }}/openness-sriov-vm-crd.yml"
-  when: kubevirt.enabled
-
-# Create SR-IOV network
-- name: deploy SR-IOV network CRD
-  command: kubectl apply -f openness-sriov-crd.yml
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: true
-
-# Create SR-IOV network for VM
-- name: deploy SR-IOV network CRD for VM
-  command: kubectl apply -f openness-sriov-vm-crd.yml
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  when: kubevirt.enabled
-
-# Copy ConfigMap variants
-- name: Copy ConfigMap variants for SRIOV
+- name: install SR-IOV CNI and device plugin
   block:
-  - name: Copy base config
+  - name: download CNI plugin
+    git:
+      repo: "{{ _sriov_cni.url }}"
+      dest: "{{ _sriov_cni.download_dir }}"
+      clone: yes
+      update: no
+      version: "{{ _sriov_cni.commit }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
+  - name: download device plugin
+    git:
+      repo: "{{ _sriov_dev_plugin.url }}"
+      dest: "{{ _sriov_dev_plugin.download_dir }}"
+      clone: yes
+      update: no
+      version: "{{ _sriov_dev_plugin.commit }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
+  - name: build CNI image
+    docker_image:
+      build:
+        path: "{{ _sriov_cni.download_dir }}"
+        use_config_proxy: yes
+        pull: yes
+      name: "{{ _registry_ip_address }}:{{ _registry_port }}/sriov-cni"
+      push: yes
+      source: build
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
+  - name: build device plugin image
+    command: make image
+    args:
+      chdir: "{{ _sriov_dev_plugin.download_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    changed_when: true
+
+  - name: tag and push device plugin image to local registry
+    docker_image:
+      name: nfvpe/sriov-device-plugin
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/sriov-device-plugin"
+      push: yes
+      source: local
+
+  - name: remove local device plugin image
+    docker_image:
+      state: absent
+      name: nfvpe/sriov-device-plugin
+
+  - name: copy sriov chart
     copy:
-      src: "{{ config_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ config_map_name }}"
-  - name: Copy FPGA config
-    copy:
-      src: "{{ fpga_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ fpga_map_name }}"
-  - name: Copy VM config
-    copy:
-      src: "{{ vm_map_name }}"
-      dest: "{{ tmp_dir.path }}/{{ vm_map_name }}"
+      src: "sriov"
+      dest: "{{ ne_helm_charts_default_dir }}"
 
-# Add VM config to base config
-- name: Add VM config to base config
-  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ vm_map_name }}' {{ tmp_dir.path }}/{{ config_map_name }}
-  when: kubevirt.enabled
+  - name: download device plugin chart templates
+    get_url:
+      url: "{{ _sriov_dp_cek_url }}/{{ item }}"
+      dest: "{{ ne_helm_charts_default_dir }}/sriov/templates"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _sriov_dp_cek_chart_templates }}"
 
-# Add FPGA config to base config
-- name: Add FPGA config to base config
-  shell: sed -i -e '0,/},/!b;//r {{ tmp_dir.path }}/{{ fpga_map_name }}' {{ tmp_dir.path }}/{{ config_map_name }}
-  when: fpga_sriov_userspace.enabled
-
-# Create/deploy a sample configMap to be used for SRIOV-DEVICE plugin
-- name: deploy dev plugin configMap
-  command: kubectl apply -f {{ config_map_name }}
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: true
-
-# Deploy SRIOV-DEVICE Plugin
-- name: deploy dev plugin
-  command: kubectl apply -f ./deployments/k8s-v1.16/sriovdp-daemonset.yaml
-  args:
-    chdir: "{{ sriov_dev_plugin.download_dir }}"
-  changed_when: true
+  - name: install SR-IOV CNI and device plugin release
+    command: >
+      helm install sriov-release {{ ne_helm_charts_default_dir }}/sriov --set registry_ip={{ _registry_ip_address }}
+      --set registry_port={{ _registry_port }} --set sriov_kubevirt_enable={{ sriov_kubevirt_enable }}
+      --set fpga_sriov_userspace_enable={{ fpga_sriov_userspace_enable }}
+      --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/sriov-device-plugin
+      --set image.tag=latest
+    changed_when: true
+  when: get_release_sriov.rc != 0

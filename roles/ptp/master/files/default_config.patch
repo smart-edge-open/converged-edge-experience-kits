@@ -1,0 +1,20 @@
+diff --git a/configs/default.cfg b/configs/default.cfg
+index c5a8b57..4bfedcb 100644
+--- a/configs/default.cfg
++++ b/configs/default.cfg
+@@ -15,13 +15,13 @@ free_running		0
+ freq_est_interval	1
+ dscp_event		0
+ dscp_general		0
+-dataset_comparison	ieee1588
++dataset_comparison	G.8275.x
+ G.8275.defaultDS.localPriority	128
+ #
+ # Port Data Set
+ #
+ logAnnounceInterval	1
+-logSyncInterval		0
++logSyncInterval		-4
+ logMinDelayReqInterval	0
+ logMinPdelayReqInterval	0
+ announceReceiptTimeout	3

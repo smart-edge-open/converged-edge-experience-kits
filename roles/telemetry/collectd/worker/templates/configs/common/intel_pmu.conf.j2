@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+LoadPlugin intel_pmu
+
+<Plugin intel_pmu>
+  ReportHardwareCacheEvents true
+  ReportKernelPMUEvents true
+  ReportSoftwareEvents true
+  Cores "[0-4]"
+</Plugin>

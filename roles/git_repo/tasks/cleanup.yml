@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Remove old repository folder
   file:
-    path: "{{ git_repo_dest }}"
+    path: "{{ _git_repo_dest }}"
     state: absent

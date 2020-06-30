@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -8,10 +8,11 @@
 
 - name: build cleanup
   make:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
     target: clean
     params:
-      RTE_SDK: "{{ ansible_local.dpdk.dpdk_install_dir }}"
+      RTE_SDK: "{{ ansible_local.dpdk._dpdk_install_dir }}"
+  when: ansible_local.dpdk._dpdk_install_dir is defined
 
 - include_tasks: subtasks/remove_containers.yml
 - include_tasks: subtasks/remove_images.yml

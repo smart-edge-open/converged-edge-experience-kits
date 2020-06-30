@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
-syscfg_local_path: "./biosfw/syscfg_package.zip"
-syscfg_remote_path: "{{ git_repo_dest }}/build/biosfw/syscfg_package.zip"
+_syscfg_local_path: "./biosfw/syscfg_package.zip"
+_syscfg_remote_path: "{{ _git_repo_dest }}/build/biosfw/syscfg_package.zip"

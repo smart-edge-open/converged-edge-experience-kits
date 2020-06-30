@@ -6,7 +6,7 @@
 - name: Update appliance config file
   shell: >
     set -o pipefail &&
-    jq '.Enrollment.Endpoint="{{ enrollment_endpoint }}" | .UseSyslog=true |
+    jq '.Enrollment.Endpoint="{{ _enrollment_endpoint }}" | .UseSyslog=true |
     .SyslogAddr="192.168.122.1:514"' /var/lib/appliance/configs/appliance.json |
     sponge /var/lib/appliance/configs/appliance.json
   args:
@@ -15,7 +15,7 @@
 - name: Update EVA config file
   shell: >
     set -o pipefail &&
-    jq '.ControllerEndpoint="{{ enrollment_endpoint }}"' /var/lib/appliance/configs/eva.json |
+    jq '.ControllerEndpoint="{{ _enrollment_endpoint }}"' /var/lib/appliance/configs/eva.json |
     sponge /var/lib/appliance/configs/eva.json
   args:
   changed_when: true
@@ -23,7 +23,7 @@
 - name: Update ELA config file
   shell: >
     set -o pipefail &&
-    jq '.ControllerEndpoint="{{ enrollment_endpoint }}"' /var/lib/appliance/configs/ela.json |
+    jq '.ControllerEndpoint="{{ _enrollment_endpoint }}"' /var/lib/appliance/configs/ela.json |
     sponge /var/lib/appliance/configs/ela.json
   args:
   changed_when: true

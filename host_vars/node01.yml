@@ -11,3 +11,16 @@ sriov:
   vm_vf_ports: 0
 
 ovs_ports: []
+
+# ptp_port keeps the host's interface(s) connected to:
+# - a PTP MASTER node, in this case it should keep only one interface name, e.g.:
+#   ptp_port: enp134s0f1
+# - PTP SLAVE(S), then should store a list of interfaces connected to slaves, e.g.:
+#   ptp_port:
+#   - enp134s0f1
+ptp_port:
+
+# ptp_port_gm is the host's interface connected to a Grand Master, e.g.:
+# ptp_port_gm: enp134s0f0
+ptp_port_gm:
+

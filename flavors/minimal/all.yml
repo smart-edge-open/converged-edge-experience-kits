@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+## Kube-ovn with OVS-DPDK
+kubeovn_dpdk: false
+
+# Kube-virt settings
+kubevirt_enable: false
+
+## Network Edge Processor Counter Monitor (PCM)
+telemetry_pcm_enable: false

@@ -4,23 +4,23 @@
 ---
 
 - name: load kubeovn common variables
-  include_vars: ./roles/kubernetes/cni/kubeovn/common/defaults/main.yml
+  include_vars: ../../common/defaults/main.yml
 
 - name: kube-ovn cleanup
   block:
   - name: download kube-ovn cleanup script
     get_url:
-      url: "{{ kubeovn_cleanup_url }}"
-      dest: "{{ kubeovn_cleanup_dest }}"
+      url: "{{ _kubeovn_cleanup_url }}"
+      dest: "{{ _kubeovn_cleanup_dest }}"
       mode: 0755
   - name: change hardcoded tag
     replace:
-      path: "{{ kubeovn_cleanup_dest }}"
+      path: "{{ _kubeovn_cleanup_dest }}"
       regexp: "kube-ovn/master"
-      replace: "kube-ovn/{{ kubeovn_version }}"
+      replace: "kube-ovn/{{ _kubeovn_version }}"
   - name: execute kube-ovn cleanup script
-    command: "timeout 120 {{ kubeovn_cleanup_dest }}"
+    command: "timeout 120 {{ _kubeovn_cleanup_dest }}"
     ignore_errors: yes
 
 - name: cleanup kubeovn common
-  include_tasks: ./roles/kubernetes/cni/kubeovn/common/tasks/cleanup.yml
+  include_tasks: ../../common/tasks/cleanup.yml

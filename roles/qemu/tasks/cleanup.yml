@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - name: remove sources
   file:
-    path: "{{ qemu_download_url }}"
+    path: "{{ _qemu_download_url }}"
     state: absent
 
 - name: remove binaries
   file:
-    path: "{{ qemu_install_dir }}"
+    path: "{{ _qemu_install_dir }}"
     state: absent

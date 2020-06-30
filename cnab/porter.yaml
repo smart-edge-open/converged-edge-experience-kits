@@ -1,0 +1,189 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+name: OpenNESS
+version: 0.1.0
+description: "OpenNESS experience kit on azure cloud VMs"
+tag: openness/oek:0.1.0
+
+dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+  - az
+
+credentials:
+  - name: AZ_CLIENT_ID
+    env: AZURE_CLIENT_ID
+  - name: AZ_TENANT_ID
+    env: AZURE_TENANT_ID
+  - name: AZ_CLIENT_SECRET
+    env: AZURE_CLIENT_SECRET
+
+parameters:
+  - name: git_repo
+    type: string
+    description: "OpenNESS experience kit repository url"
+    default: "https://github.com/open-ness/openness-experience-kits"
+    applyTo:
+      - install
+
+  - name: git_token
+    type: string
+    sensitive: true
+    description: "Token for accessing private repository. Used in url as: https://<git_token>:x-oauth-basic@<git_repo>"
+    default: ""
+    applyTo:
+      - install
+
+  - name: oek_vars
+    type: string
+    description: "Extra OpenNESS experience kit variables to override the defaults"
+    default: ""
+    applyTo:
+      - install
+
+  - name: oek_flavor
+    type: string
+    description: "OpenNESS experience kit flavor"
+    default: "minimal"
+    applyTo:
+      - install
+
+  - name: ansible_user
+    type: string
+    description: "Username used by ansible automation scripts"
+    default: "root"
+    applyTo:
+      - install
+
+  - name: ansible_limits
+    type: string
+    description: "OpenNESS experience kit ansible limits"
+    default: ""
+    applyTo:
+      - install
+
+  - name: ssh_identity
+    type: string
+    description: "Public key used to login to the VMs after installation"
+    sensitive: true
+    applyTo:
+      - install
+
+  - name: az_vm_count
+    type: integer
+    description: "Number of VMs to provision. One VM will result in a single cluster deployment"
+    default: 2
+    applyTo:
+      - install
+
+  - name: az_vm_username
+    type: string
+    description: "VM default username"
+    default: "oekuser"
+    applyTo:
+      - install
+
+  - name: az_vm_flavor
+    type: string
+    description: "VM size"
+    default: "Standard_B2s"
+    applyTo:
+      - install
+
+  - name: az_vm_disk_size
+    type: integer
+    description: "VM OS disk size[GB]"
+    default: 80
+    applyTo:
+      - install
+
+  - name: az_vm_image
+    type: string
+    description: "VM base image"
+    default: "OpenLogic:CentOS-LVM:7-LVM:7.6.20190721"
+    applyTo:
+      - install
+
+  - name: az_resource_group
+    type: string
+    description: "Azure resource group name"
+    default: "oek-deployment"
+
+  - name: az_group_location
+    type: string
+    description: "Location of azure resource group. Run `az account list-locations -o table` to list available options"
+    default: "westeurope"
+    applyTo:
+      - install
+
+  - name: az_vmss
+    type: string
+    description: "Azure vm scale set name"
+    default: "oek-vmss"
+    applyTo:
+      - install
+
+install:
+  - az:
+      description: "[Azure] Login"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZ_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZ_CLIENT_SECRET}}"
+        tenant: "{{ bundle.credentials.AZ_TENANT_ID}}"
+      suppress-output: true
+  - az:
+      description: "[Azure] Create resource group {{ bundle.parameters.az_resource_group }} in {{ bundle.parameters.az_group_location }}"
+      arguments:
+        - group
+        - create
+      flags:
+        resource-group: "{{ bundle.parameters.az_resource_group}}"
+        location: "{{ bundle.parameters.az_group_location}}"
+      suppress-output: true
+  - az:
+      description: "[Azure] Create VM scale set[{{ bundle.parameters.az_vm_count }} VMs]"
+      arguments:
+        - vmss
+        - create
+      flags:
+        resource-group: "{{ bundle.parameters.az_resource_group}}"
+        name: "{{ bundle.parameters.az_vmss }}"
+        image: "{{ bundle.parameters.az_vm_image}}"
+        vm-sku: "{{ bundle.parameters.az_vm_flavor }}"
+        os-disk-size-gb: "{{ bundle.parameters.az_vm_disk_size }}"
+        instance-count: "{{ bundle.parameters.az_vm_count }}"
+        public-ip-per-vm:
+        generate-ssh-keys:
+        vm-domain-name: "oekvm"
+        admin-username: "{{ bundle.parameters.az_vm_username}}"
+        load-balancer: '""'
+      suppress-output: true
+
+  - exec:
+      description: "Install OpenNESS experience kit"
+      command: "./install.sh"
+
+uninstall:
+  - az:
+      description: "[Azure] Login"
+      arguments:
+        - login
+      flags:
+        service-principal:
+        username: "{{ bundle.credentials.AZ_CLIENT_ID}}"
+        password: "{{ bundle.credentials.AZ_CLIENT_SECRET}}"
+        tenant: "{{ bundle.credentials.AZ_TENANT_ID}}"
+      suppress-output: true
+  - az:
+      description: "[Azure] Remove resource group {{ bundle.parameters.az_resource_group }}. It will take some time..."
+      arguments:
+        - group
+        - delete
+      flags:
+        resource-group: "{{ bundle.parameters.az_resource_group}}"
+        "yes":

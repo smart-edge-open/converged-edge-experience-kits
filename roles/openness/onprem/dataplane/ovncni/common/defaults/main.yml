@@ -3,31 +3,29 @@
 
 ---
 
-ovs_files_to_clean:
+_ovs_files_to_clean:
 - /var/run/openvswitch/
 
-dockerimage_files_to_rm:
+_dockerimage_files_to_rm:
 - Dockerfile
 - start_ovs_ovn.sh
 
-huge_dir: /dev/hugepages
-ovs_dir: /var/run/openvswitch
+_huge_dir: /dev/hugepages
+_ovs_dir: /var/run/openvswitch
 
-ovs_dpdk: true
-dpdk_version: 18.11.2
-dpdk_install_dir: /opt/dpdk-{{ dpdk_version }}
+_dpdk_version: 18.11.6
+_dpdk_install_dir: /opt/dpdk-{{ _dpdk_version }}
 
-ovn_img_dpdk_version: "{{ dpdk_version }}"
-ovn_img_dpdk_dir: /usr/src/dpdk-{{ ovn_img_dpdk_version }}/
-ovn_img_dpdk_target: x86_64-native-linuxapp-gcc
-ovn_img_dpdk_build: "{{ ovn_img_dpdk_dir }}{{ ovn_img_dpdk_target }}"
-ovs_img_version: 2.12.0
+_ovn_img_dpdk_version: "{{ _dpdk_version }}"
+_ovn_img_dpdk_dir: /usr/src/dpdk-{{ _ovn_img_dpdk_version }}/
+_ovn_img_dpdk_target: x86_64-native-linuxapp-gcc
+_ovn_img_dpdk_build: "{{ _ovn_img_dpdk_dir }}{{ _ovn_img_dpdk_target }}"
+_ovs_img_version: 2.12.0
 
-ovs_dpdk_socket_mem: "1024,0"
-ovs_dpdk_pmd_cpu_mask: "0x4"
-ovs_dpdk_lcore_mask: "0x2"
-ovs_dpdk_resource_limits: 1G
+ovncni_dpdk_socket_mem: "1024,0"
+ovncni_dpdk_pmd_cpu_mask: "0x4"
+ovncni_dpdk_lcore_mask: "0x2"
+ovncni_dpdk_resource_limits: 1G
 
-host_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
-controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
-
+_host_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+_controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"

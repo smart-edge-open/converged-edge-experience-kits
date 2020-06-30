@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+### Network Edge's Kubernetes CNIs
+# List of requested CNIs to be used in Network Edge mode
+# CNIs are applied in order of definition
+# Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
+# Available CNIs:
+# - kubeovn (note: must be main/primary/first CNI),
+# - weavenet
+# - flannel
+# - calico
+# - sriov (note: cannot be main or standalone)
+# - userspace (note: cannot be main or standalone)
+# NOTE - For VCAC-A setup, use `weavenet` CNI
+kubernetes_cnis:
+  - calico
+  - sriov
+# Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
+calico_cidr: "10.243.0.0/16"
+
+### SR-IOV CNI
+# FPGA SRIOV Userspace
+fpga_sriov_userspace_enable: true
+
+# FPGA Userspace VF configuration
+fpga_userspace_vf:
+  enabled: true
+  vendor_id: "8086"
+  vf_device_id: "0d90"
+  pf_device_id: "0d8f"
+  vf_number: "2"
+  vf_driver: "vfio-pci"
+
+## OPAE FPGA
+ne_opae_fpga_enable: True
+
+### BIOSFW
+# Enable BIOSFW feature (requires SYSCFG package provided by user)
+ne_biosfw_enable: true
+
+### Kubernetes Topology Manager configuration (for worker)
+# CPU settings
+cpu:
+  # CPU policy - possible values: none (disabled), static (default)
+  policy: "static"
+  # Reserved CPUs
+  reserved_cpus: 1
+
+# Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
+topology_manager:
+  policy: "single-numa-node"
+
+## Network Edge Node Feature Discovery (NFD)
+ne_nfd_enable: True
+
+###Telemetry
+## Network Edge Processor Counter Monitor (PCM)
+telemetry_pcm_enable: true
+
+## Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
+telemetry_flavor: flexran
+
+## Network Edge Grafana
+telemetry_grafana_enable: True
+
+###RMD
+rmd_operator_enable: True
+

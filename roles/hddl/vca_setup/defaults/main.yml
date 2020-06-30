@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_vca_hddl_yaml: "https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/v20.4/VCAC-A/script/setup_hddl_daemonset.yaml"

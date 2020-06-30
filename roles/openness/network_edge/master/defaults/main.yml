@@ -3,11 +3,11 @@
 
 ---
 
-certs_dest: /etc/openness/certs
-configs_dest: /etc/openness/configs
+_certs_dest: /etc/openness/certs
+_configs_dest: /etc/openness/configs
 
-openness_yamls:
-- "{{ git_repo_dest }}/network-edge/openness.yaml"
-- "{{ git_repo_dest }}/network-edge/default_network_policy.yaml"
+_openness_yamls:
+- "{{ _git_repo_dest }}/network-edge/openness.yaml"
+- "{{ _git_repo_dest }}/network-edge/default_network_policy.yaml"
 
-kubeovn_openness_yaml: "{{ git_repo_dest }}/network-edge/kube-ovn/interfaceservice.yaml"
+_kubeovn_openness_yaml: "{{ _git_repo_dest }}/network-edge/kube-ovn/interfaceservice.yaml"

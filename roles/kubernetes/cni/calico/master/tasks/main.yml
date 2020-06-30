@@ -26,8 +26,12 @@
 
 - name: download calico yml
   get_url:
-    url: "{{ calico_url }}"
+    url: "{{ _calico_url }}"
     dest: "{{ tmp_dir.path }}/calico.yml"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: copy kustomization.yml
   copy:
@@ -37,6 +41,12 @@
   - kustomization.yml
   - customize_calico_container.yml
 
+- name: Overwrite kustomization_ebpf.yml for ebpf
+  copy:
+    src: "kustomization_ebpf.yml"
+    dest: "{{ tmp_dir.path }}/kustomization.yml"
+  when: calico_ebpf_enabled
+
 - name: create kustomization files from templates
   template:
     src: "{{ item }}.j2"
@@ -44,6 +54,36 @@
   with_items:
   - customize_calico_conf.yml
   - change_cidr.yml
+
+- name: Add Kubernetes service host to the calico configmap
+  block:
+  - name: get the endpoint IP
+    shell: kubectl  get endpoints | grep kuber | awk 'BEGIN { FS = "[ ]+" } { print $2}' | awk -F ":" '{print $1}'
+    args:
+      warn: false
+    register: endpoint_ip
+  - name: get the endpoint Port
+    shell: kubectl  get endpoints | grep kuber | awk 'BEGIN { FS = "[ ]+" } { print $2}' | awk -F ":" '{print $2}'
+    args:
+      warn: false
+    register: endpoint_port
+  - name: replace host line
+    lineinfile:
+      dest: "{{ tmp_dir.path }}/calico.yml"
+      regexp: '^  kubernetes_service_host: (.*)$'
+      line: '  kubernetes_service_host: "{{ endpoint_ip.stdout }}"'
+      backrefs: yes
+  - name: replace port line
+    lineinfile:
+      dest: "{{ tmp_dir.path }}/calico.yml"
+      regexp: '^  kubernetes_service_port: (.*)$'
+      line: '  kubernetes_service_port: "{{ endpoint_port.stdout }}"'
+      backrefs: yes
+  - name: disable kube-proxy
+    shell: kubectl patch ds -n kube-system kube-proxy -p '{"spec":{"template":{"spec":{"nodeSelector":{"non-calico":"true"}}}}}'
+    args:
+      warn: false
+  when: calico_ebpf_enabled
 
 - name: apply calico.yml with change
   shell: >
@@ -64,3 +104,4 @@
   when:
   - apply_netdef is defined
   - apply_netdef
+  - not ( calico_ebpf_enabled )

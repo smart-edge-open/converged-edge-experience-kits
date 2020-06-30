@@ -1,0 +1,112 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: customize EVA config - Enable OVS
+  shell: >
+    set -o pipefail &&
+    jq '.OpenvSwitch=true | .OpenvSwitchBridge="{{ _ovs_bridge_name }}"' {{ _git_repo_dest }}/configs/eva.json |
+    sponge {{ _git_repo_dest }}/configs/eva.json
+  args:
+  changed_when: true
+
+- name: customize ELA config - add blacklisted ports
+  shell: >
+    set -o pipefail &&
+    jq '.PCIBlacklist +=  ["{{ item }}"]'  {{ _git_repo_dest }}/configs/ela.json |
+    sponge {{ _git_repo_dest }}/configs/ela.json
+  args:
+  loop: "{{ ovs_ports }}"
+  changed_when: true
+
+- name: check if already installed
+  stat:
+    path: "{{ _ovs_install_location }}"
+  register: ovs_dest_dir
+
+- name: download
+  get_url:
+    url: "{{ _ovs_url }}"
+    dest: "{{ _ovs_download_dest }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  when:
+  - not ovs_dest_dir.stat.exists
+
+- name: create ovs installation directory
+  file:
+    path: "{{ _ovs_install_location }}"
+    state: directory
+
+- name: extract ovs
+  unarchive:
+    src: "{{ _ovs_download_dest }}"
+    dest: "{{ _ovs_install_location }}"
+    remote_src: yes
+    extra_opts: "--strip-components=1"
+
+- name: reload ansible facts
+  gather_facts:
+    parallel: yes
+
+- name: compile ovs
+  command: "{{ item }}"
+  with_items:
+    - ./boot.sh
+    - ./configure --with-dpdk="{{ ansible_local["dpdk"]["_dpdk_install_dir"] }}/{{ _dpdk_make_target }}"
+    - make -j
+    - make install
+  args:
+    chdir: "{{ _ovs_install_location }}"
+  changed_when: true
+
+- name: create and copy openvswitch-nonetwork.service
+  template:
+    src: openvswitch-nonetwork.service.j2
+    dest: /usr/lib/systemd/system/openvswitch-nonetwork.service
+
+- name: copy openvswitch.service
+  copy:
+    src: openvswitch.service
+    dest: /usr/lib/systemd/system
+
+- name: enable and start OVS daemon
+  systemd:
+    name: openvswitch
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: ovs_daemon
+  retries: 30
+  delay: 10
+  until: ovs_daemon.status is defined
+
+- name: add OVS bridge
+  shell: |
+    set -o pipefail
+    export PATH=$PATH:/usr/local/share/openvswitch/scripts
+    # Remove bridges if there are any
+    ovs-vsctl list-br | while read line ; do ovs-vsctl del-br $line ; done
+    # Adding bridge
+    ovs-vsctl add-br {{ _ovs_bridge_name }} -- set bridge {{ _ovs_bridge_name }} datapath_type=netdev
+    mkdir /tmp/openvswitch
+    chown qemu:qemu /tmp/openvswitch
+  args:
+  changed_when: true
+
+- name: add ovs physical port
+  command: ovs-vsctl add-port {{ _ovs_bridge_name }} dpdk-p{{ index }} -- set Interface dpdk-p{{ index }} type=dpdk options:dpdk-devargs={{ item }}
+  loop: "{{ ovs_ports }}"
+  loop_control:
+    index_var: index
+  changed_when: true
+
+- name: print interfaces
+  debug:
+    msg: "port dpdk-p{{ index }} connected to {{ item }}"
+  loop: "{{ ovs_ports }}"
+  loop_control:
+    index_var: index

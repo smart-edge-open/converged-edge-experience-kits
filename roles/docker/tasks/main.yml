@@ -7,11 +7,13 @@
   yum_repository:
     name: docker
     description: Docker CE repository
-    baseurl: "{{ docker_repository_url }}"
-    gpgkey: "{{ docker_repository_key }}"
+    baseurl: "{{ _docker_repository_url }}"
+    gpgkey: "{{ _docker_repository_key }}"
     gpgcheck: yes
-  # Do not add remote repositories in offline mode
-  when: not offline_mode
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: clear yum cache
   command: yum clean all
@@ -21,27 +23,23 @@
 
 - name: install Docker CE
   yum:
-    name: "{{ docker_packages }}"
+    name: "{{ _docker_packages }}"
     state: present
   notify:
   - enable and start docker service
 
 - name: install docker-compose
   pip:
-    name: "{{ docker_compose_package }}"
+    name: "{{ _docker_compose_package }}"
     state: present
-  when: not offline_mode
-
-- name: offline | install docker-compose
-  pip:
-    name: "{{ docker_compose_package }}"
-    state: present
-    extra_args: "--no-index --find-links {{ offline_pip_path }}"
-  when: offline_mode
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: set up proxy
   include_tasks: proxy.yml
-  when: proxy_os_enable|bool
+  when: proxy_enable|bool
 
 - name: set cgroups driver to systemd
   block:
@@ -59,13 +57,13 @@
 - name: restart services if needed
   meta: flush_handlers
 
-- name:  Find docker audit files
+- name: find docker audit files
   stat:
     path: "{{ item }}"
-  with_items: "{{ docker_audit_files }}"
+  with_items: "{{ _docker_audit_files }}"
   register: stats
 
-- name: Add audit rules for docker
+- name: add audit rules for docker
   lineinfile:
     path: /etc/audit/rules.d/docker.rules
     line: "-w {{ item.item }} -k docker"
@@ -73,6 +71,17 @@
   when: item.stat.exists
   with_items: "{{ stats.results }}"
 
-- name: Restart auditd
+- name: restart auditd
   command: service auditd restart # noqa 303
   changed_when: true
+
+- name: setup docker bash completion
+  block:
+  - name: download Docker CLI bash completion
+    get_url:
+      url: "{{ _docker_completion_url }}"
+      dest: "/etc/bash_completion.d"
+  - name: download Docker Compose bash completion
+    get_url:
+      url: "{{ _docker_compose_completion_url }}"
+      dest: "/etc/bash_completion.d"

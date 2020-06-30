@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-sriovdp-config
+  namespace: {{ .Values.namespace }}
+data:
+  config.json: |
+    {
+        "resourceList": [{
+                "resourceName": "intel_sriov_netdevice",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["154c", "10ed"],
+                    "drivers": ["iavf", "i40evf", "ixgbevf"]
+                }
+            },
+            {{- if .Values.sriov_kubevirt_enable }}
+            {
+                "resourceName": "intel_sriov_vm",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["154c", "10ed"],
+                    "drivers": ["vfio-pci"]
+                }
+            },
+            {{- end }}
+            {{- if .Values.fpga_sriov_userspace_enable }}
+            {
+                "resourceName": "intel_fec_lte",
+                "deviceType": "accelerator",
+                "selectors": {
+                    "vendors": ["1172"],
+                    "devices": ["5050"],
+                    "drivers": ["igb_uio", "vfio-pci"]
+                }
+            },
+            {
+                "resourceName": "intel_fec_5g",
+                "deviceType": "accelerator",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["0d90"],
+                    "drivers": ["igb_uio", "vfio-pci"]
+                }
+            },
+            {{- end }}
+            {
+                "resourceName": "intel_sriov_dpdk",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["154c", "10ed"],
+                    "drivers": ["igb_uio"]
+                }
+            }
+        ]
+    }

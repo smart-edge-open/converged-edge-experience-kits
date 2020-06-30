@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../certs/defaults/main.yml
+
+- name: include grafana variables
+  include_vars: ../defaults/main.yml
+
+- name: remove grafana certificates
+  file:
+    path: "{{ _telemetry_certs_dest }}/grafana"
+    state: absent
+
+- name: remove grafana chart template directory
+  file:
+    path: "{{ _grafana_chart_dir }}"
+    state: absent
+
+- name: remove grafana dashboard directory
+  file:
+    path: "{{ _grafana_dashboards_conf }}"
+    state: absent
+
+- name: remove grafana provisioning directory
+  file:
+    path: "{{ _grafana_dashboards_prov }}"
+    state: absent
+
+- name: close grafana port
+  ignore_errors: yes
+  firewalld:
+    port: 32000/tcp
+    permanent: yes
+    state: disabled
+    immediate: yes
+
+- name: uninstall grafana using Helm
+  command: "helm uninstall grafana --namespace telemetry"
+  changed_when: true
+  ignore_errors: yes
+
+- name: delete definitions of persistent volumes
+  command: "kubectl delete pv {{ item }} -n telemetry"
+  with_items: "{{ _pv_names }}"
+  changed_when: true
+  ignore_errors: yes
+
+- name: delete directory for persistent volumes
+  file:
+    path: "{{ _pv_dir }}"
+    state: absent

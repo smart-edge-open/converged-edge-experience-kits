@@ -1,0 +1,70 @@
+diff --git a/Dockerfile.node b/Dockerfile.node
+index 40e7337..c8c66f5 100644
+--- a/Dockerfile.node
++++ b/Dockerfile.node
+@@ -3,21 +3,48 @@ FROM centos:7
+ ENV PYTHONDONTWRITEBYTECODE yes
+ 
+ RUN yum install -y  \
++        gcc gcc-c++ make autoconf automake libtool rpm-build \
+         PyYAML bind-utils \
+         openssl \
+-        numactl-libs \
++        numactl-libs numactl-devel \
+         firewalld-filesystem \
+         libpcap \
+         hostname \
+         iproute strace socat nc \
+-        unbound unbound-devel && \
+-        yum clean all
++        unbound unbound-devel \
++        libpcap-devel \
++        libmnl-devel \
++        libibumad \
++        libibverbs-devel \
++        libibverbs \
++        libmlx5 \
++        libibverbs-utils \
++        dpdk-devel
+ 
+ ENV OVS_VERSION=2.12.0
+ ENV OVS_SUBVERSION=5
+ 
+-RUN rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/openvswitch-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
+-    rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/openvswitch-devel-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
++ENV DPDK_VERSION=18.11.6
++ENV DPDK_DIR=/opt/dpdk-$DPDK_VERSION
++ENV DPDK_TARGET=x86_64-native-linuxapp-gcc
++ENV DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
++
++COPY . $DPDK_DIR
++
++RUN cd ~ && \
++    curl -OL https://github.com/alauda/ovs/archive/$OVS_VERSION-$OVS_SUBVERSION.tar.gz && \
++    tar xf $OVS_VERSION-$OVS_SUBVERSION.tar.gz && \
++    rm -f $OVS_VERSION-$OVS_SUBVERSION.tar.gz && \
++    cd ovs-$OVS_VERSION-$OVS_SUBVERSION && \
++    sed -e 's/@VERSION@/0.0.1/' rhel/openvswitch-fedora.spec.in > /tmp/tmp_ovs.spec && \
++    yum-builddep -y /tmp/tmp_ovs.spec && \
++    ./boot.sh && \
++    ./configure --prefix=/usr/ --with-dpdk=$DPDK_BUILD && \
++    make -j$(nproc) && make rpm-fedora RPMBUILD_OPT="--with dpdk --without check" && \
++    make install
++
++RUN rpm -ivh ~/ovs-${OVS_VERSION}-${OVS_SUBVERSION}/rpm/rpmbuild/RPMS/x86_64/openvswitch-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
++    rpm -ivh ~/ovs-${OVS_VERSION}-${OVS_SUBVERSION}/rpm/rpmbuild/RPMS/x86_64/openvswitch-devel-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
+     rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/ovn-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
+     rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/ovn-vtep-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
+     rpm -ivh https://github.com/alauda/ovs/releases/download/${OVS_VERSION}-${OVS_SUBVERSION}/ovn-central-${OVS_VERSION}-${OVS_SUBVERSION}.el7.x86_64.rpm && \
+@@ -28,6 +55,9 @@ RUN mkdir -p /var/run/openvswitch && \
+     mkdir -p /opt/cni/bin
+ 
+ COPY ovs-healthcheck.sh /root/ovs-healthcheck.sh
+-COPY start-ovs.sh /root/start-ovs.sh
++COPY start-ovs-dpdk.sh /root/start-ovs-dpdk.sh
++
++RUN rm -rf ~/ovs-${OVS_VERSION}-${OVS_SUBVERSION}
++RUN rm -rf $DPDK_DIR
+ 
+-CMD ["/bin/bash", "/root/start-ovs.sh"]
++CMD ["/bin/bash", "/root/start-ovs-dpdk.sh"]

@@ -5,5 +5,5 @@
 
 - name: Delete PV directories
   file:
-    path: "{{ default_pv_dir }}"
+    path: "{{ kubevirt_default_pv_dir }}"
     state: absent

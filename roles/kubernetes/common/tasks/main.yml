@@ -7,15 +7,19 @@
   yum_repository:
     name: kubernetes
     description: Kubernetes repository
-    baseurl: "{{ kubernetes_repository_url }}"
-    gpgkey: "{{ kubernetes_repository_key }}"
+    baseurl: "{{ _kubernetes_repository_url }}"
+    gpgkey: "{{ _kubernetes_repository_key }}"
     gpgcheck: yes
     enabled: true
     repo_gpgcheck: true
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: install packages
   yum:
-    name: "{{ kubernetes_packages }}"
+    name: "{{ _kubernetes_packages }}"
     state: present
     skip_broken: yes
     update_cache: yes
@@ -25,7 +29,7 @@
 
 - name: set up proxy
   include_tasks: proxy.yml
-  when: proxy_os_enable
+  when: proxy_enable
 
 - name: allow bridged packets to traverse iptables rules
   block:
@@ -59,3 +63,9 @@
 
 - name: restart services if needed
   meta: flush_handlers
+
+- name: setup kubectl bash completion
+  shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+
+- name: setup kubeadm bash completion
+  shell: kubeadm completion bash > /etc/bash_completion.d/kubeadm

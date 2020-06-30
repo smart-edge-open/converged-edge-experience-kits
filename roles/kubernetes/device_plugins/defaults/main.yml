@@ -3,7 +3,21 @@
 
 ---
 
-device_plugins:
+_device_plugins:
   url: "https://github.com/intel/intel-device-plugins-for-kubernetes"
   download_dir : "/opt/intel_device_plugins"
-  commit: "2f142aa9422dc64a28c0c99c48d132e8ca1b9f83"
+  commit: "826707420250c0d10f351f8274766101c7ecf58e"
+
+_gpu_plugin:
+  image: "intel-gpu-plugin"
+  tag: 0.17.0
+  nodeSelector: "vcac-zone"
+  helmChartVersion: 0.1.0
+  helmReleaseName: "intel-gpu-plugin"
+
+_vpu_plugin:
+  image: "intel-vpu-plugin"
+  tag: 0.17.0
+  nodeSelector: "vcac-zone"
+  helmChartVersion: 0.1.0
+  helmReleaseName: "intel-vpu-plugin"

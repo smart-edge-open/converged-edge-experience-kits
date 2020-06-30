@@ -7,10 +7,10 @@
   block:
   - name: create directory for root CA
     file:
-      name: "{{ certs_dest }}/CA"
+      name: "{{ _certs_dest }}/CA"
       state: directory
   - name: create root CA
-    command: "{{ git_repo_dest }}/network-edge/tls_pair.sh openness {{ certs_dest }}/CA"
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh openness {{ _certs_dest }}/CA"
 
 - name: create root CA secret
   block:
@@ -21,8 +21,8 @@
   - name: create secret with root CA
     shell: >
       kubectl create secret generic root-ca
-      --from-file={{ certs_dest }}/CA/key.pem
-      --from-file={{ certs_dest }}/CA/cert.pem
+      --from-file={{ _certs_dest }}/CA/key.pem
+      --from-file={{ _certs_dest }}/CA/cert.pem
       --namespace=openness
     when: get_secret_rootca.rc == 1
 
@@ -35,8 +35,8 @@
   - name: create secret with certificate generator
     shell: >
       kubectl create secret generic certgen
-      --from-file={{ git_repo_dest }}/network-edge/tls_pair.sh
-      --from-file={{ git_repo_dest }}/network-edge/entrypoint_tls.sh
+      --from-file={{ _git_repo_dest }}/network-edge/tls_pair.sh
+      --from-file={{ _git_repo_dest }}/network-edge/entrypoint_tls.sh
       --namespace=openness
     when: get_secret_certgen.rc == 1
 
@@ -44,28 +44,28 @@
   block:
   - name: create directory for Interface Service client certificate
     file:
-      name: "{{ certs_dest }}/client/edgedns"
+      name: "{{ _certs_dest }}/client/edgedns"
       state: directory
   - name: create EdgeDNS client certificate
-    command: "{{ git_repo_dest }}/network-edge/tls_pair.sh edgedns.openness {{ certs_dest }}/client/edgedns {{ certs_dest }}/CA"
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh edgedns.openness {{ _certs_dest }}/client/edgedns {{ _certs_dest }}/CA"
   - name: create symbolic link to root's cert
     file:
-      src: "{{ certs_dest }}/CA/cert.pem"
-      dest: "{{ certs_dest }}/client/edgedns/root.pem"
+      src: "{{ _certs_dest }}/CA/cert.pem"
+      dest: "{{ _certs_dest }}/client/edgedns/root.pem"
       state: link
 
 - name: certificates for EAA
   block:
   - name: create directory for EAA and EAA CA certificate
     file:
-      name: "{{ certs_dest }}/eaa/CA"
+      name: "{{ _certs_dest }}/eaa/CA"
       state: directory
   - name: create EAA root CA certificate
-    command: "{{ git_repo_dest }}/network-edge/tls_pair.sh ca.eaa.openness {{ certs_dest }}/eaa/CA"
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh ca.eaa.openness {{ _certs_dest }}/eaa/CA"
   - name: create symbolic link to root's cert
     file:
-      src: "{{ certs_dest }}/eaa/CA/cert.pem"
-      dest: "{{ certs_dest }}/eaa/root.pem"
+      src: "{{ _certs_dest }}/eaa/CA/cert.pem"
+      dest: "{{ _certs_dest }}/eaa/root.pem"
       state: link
   - name: create EAA certificate signed by EAA root CA certificate
-    command: "{{ git_repo_dest }}/network-edge/tls_pair.sh eaa.openness {{ certs_dest }}/eaa {{ certs_dest }}/eaa/CA"
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh eaa.openness {{ _certs_dest }}/eaa {{ _certs_dest }}/eaa/CA"

@@ -5,8 +5,13 @@
 
 - debug:
     msg: "Installing the following packages: {{ os_yum_base_packages }}"
-- name: Install base OS rpm packages
+- name: install IUS repository
+  yum:
+    name: https://repo.ius.io/ius-release-el7.rpm
+    state: present
+- name: install base OS rpm packages
   yum:
     name: "{{ os_yum_base_packages }}"
     state: present
+    enablerepo: ius-archive
     skip_broken: yes

@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: telemetry.intel.com/v1alpha1
+kind: TASPolicy
+metadata:
+  name: vca-vpu-policy
+  namespace: default
+spec:
+  strategies:
+    deschedule:
+      rules:
+      - metricname: vpu_device_thermal
+        operator: GreaterThan
+        target: 80
+    dontschedule:
+      rules:
+      - metricname: vpu_device_memory
+        operator: GreaterThan
+        target: 50
+      - metricname: vpu_device_utilization
+        operator: GreaterThan
+        target: 50
+    scheduleonmetric:
+      rules:
+      - metricname: vpu_device_utilization
+        operator: LessThan

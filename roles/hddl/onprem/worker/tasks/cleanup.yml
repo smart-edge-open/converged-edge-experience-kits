@@ -5,24 +5,24 @@
 
 - name: check if downloaded
   stat:
-    path: "{{ openvino_download_dir }}"
+    path: "{{ _openvino_download_dir }}"
   register: ov_dl_dir
 
 - name: remove openvino
   block:
   - name: configure installation mode to uninstall OpenVino
     lineinfile:
-      path: "{{ openvino_silent_config }}"
+      path: "{{ _openvino_silent_config }}"
       regexp: '^PSET_MODE='
       line: PSET_MODE=uninstall
   - name: uninstall OpenVino
-    command: "{{ openvino_install_command }}"
+    command: "{{ _openvino_install_command }}"
     args:
-      chdir: "{{ openvino_download_dir }}"
+      chdir: "{{ _openvino_download_dir }}"
     ignore_errors: yes
   - name: remove OpenVino temporary download directory
     file:
-      path: "{{ openvino_download_dir }}"
+      path: "{{ _openvino_download_dir }}"
       state: absent
   - name: OpenVino delete file glob
     find:

@@ -4,3 +4,5 @@
 ---
 
 os_remove_yum_plugins: false
+_base_noproxy: "localhost,virt-api,kubevirt.svc,virt-api.kubevirt.svc,cdi-api,cdi.svc,127.0.0.1"
+_kubernetes_default_cidr: "10.96.0.0/16,10.32.0.0/12"

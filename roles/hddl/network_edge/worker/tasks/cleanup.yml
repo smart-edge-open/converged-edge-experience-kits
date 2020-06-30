@@ -10,8 +10,19 @@
     name: "{{ item }}"
     state: absent
   with_items:
-  - "{{ hddldaemon_container.download_dir }}"
+  - "{{ _hddldaemon_container.download_dir }}"
   ignore_errors: yes
+
+- name: check Docker container hddldaemon is running
+  shell: docker ps -a | grep ov_hddl
+  changed_when: false
+  ignore_errors: yes
+  register: hddldaemon_container_running
+
+- name: remove hddldaemon container
+  command: docker rm -f ov_hddl
+  ignore_errors: yes
+  when: hddldaemon_container_running.stdout
 
 - name: docker stop and rmi
   shell: docker images | grep vcaca-centos7618-analytics-hddldaemon | awk '{print $1 ":" $2}' | xargs docker rmi -f

@@ -1,0 +1,90 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Verify if host's environment supports PTP
+  block:
+  - name: Register kernel ptp settings from /boot/config
+    shell: "grep {{ item }}= /boot/config-`uname -r`"
+    loop: "{{ _kernel_ptp_config_vars }}"
+    register: ptp_vars
+
+  - name: Fail if kernel configuration does not support PTP
+    fail:
+      msg: "The host's kernel configuration does not support PTP"
+    when: "'=n' in  item.stdout"
+    with_items: "{{ ptp_vars.results }}"
+    changed_when: true
+
+  - name: Register heardware timestamp support
+    command: ethtool -T {{ item }}
+    with_items: "{{ ptp_port }}"
+    register: hardware_timestamp
+
+  - name: Fail if the hardware does not support PTP
+    fail:
+      msg: "The host's NIC does not support PTP"
+    when:
+      ('SOF_TIMESTAMPING_TX_HARDWARE' not in item.stdout  ) and
+      ('SOF_TIMESTAMPING_RX_HARDWARE' not in  item.stdout  ) and
+      ('SOF_TIMESTAMPING_RAW_HARDWARE' not in item.stdout )
+    with_items: "{{ hardware_timestamp.results }}"
+
+  when: inventory_hostname in groups['ptp_master'] or
+    inventory_hostname in groups['ptp_slave_group']
+
+- name: Install ptp
+  block:
+  - name: Open firewall rules
+    ignore_errors: yes
+    firewalld:
+      port: "{{ item }}"
+      permanent: yes
+      state: enabled
+      immediate: yes
+    with_items:
+    - 319/udp
+    - 320/udp
+
+  - name: Reload firewall rules
+    command: firewall-cmd --reload
+    changed_when: true
+    ignore_errors: yes
+
+  - name: Download linuxptp git repository
+    git:
+      repo: "{{ _linuxptp_git_repo.dir }}"
+      dest: "{{ _linuxptp_git_repo.download_dir }}"
+      version: "{{ _linuxptp_git_repo.branch }}"
+      force: yes
+
+  - name: Install patch utility
+    yum:
+      name: patch
+      state: present
+
+  - name: Compile and install linuxapp
+    command: "{{ item }}"
+    with_items:
+      - make -j
+      - make install
+    args:
+      chdir: "{{ _linuxptp_git_repo.download_dir }}"
+
+  - name: Copy config file
+    copy:
+      src: "{{ _linuxptp_git_repo.download_dir }}/configs/default.cfg"
+      dest: "{{ _linuxptp_git_repo.download_dir }}/configs/default_slave.cfg"
+      remote_src: "{{ _if_remote_src }}"
+    delegate_to: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+
+  - name: Apply patch to config
+    patch:
+      src: "{{ _config_slave_patch }}"
+      basedir:  "{{ _linuxptp_git_repo.download_dir }}"
+      strip: 0
+  when:
+    (inventory_hostname in groups['ptp_master'] or
+    inventory_hostname in groups['ptp_slave_group'])
+

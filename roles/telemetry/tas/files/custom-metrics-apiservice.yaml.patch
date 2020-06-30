@@ -1,0 +1,11 @@
+--- custom-metrics-apiservice.yaml	2020-06-17 16:47:05.932000000 +0200
++++ custom-metrics-apiservice.yaml.new	2020-06-19 11:58:45.829000000 +0200
+@@ -5,7 +5,7 @@
+ spec:
+   service:
+     name: custom-metrics-apiserver
+-    namespace: custom-metrics
++    namespace: {{ .Values.apiServiceNamespace }}
+   group: custom.metrics.k8s.io
+   version: v1beta1
+   insecureSkipTLSVerify: true

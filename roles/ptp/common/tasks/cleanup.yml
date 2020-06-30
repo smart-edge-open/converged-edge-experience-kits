@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Kill ptp4l and phc2sys processes
+  command: pkill "{{ item }}"
+  with_items:
+  - ptp4l
+  - phc2sys
+  ignore_errors: true
+  changed_when: true
+
+- name: Close firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: disabled
+    immediate: yes
+  with_items:
+  - 319/udp
+  - 320/udp
+
+- name: Reload firewall rules
+  command: firewall-cmd --reload
+  changed_when: true
+  ignore_errors: yes
+
+- name: Remove linuxptp installation
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /usr/local/sbin/ptp4l
+  - /usr/local/sbin/hwstamp_ctl
+  - /usr/local/sbin/nsm
+  - /usr/local/sbin/phc2sys
+  - /usr/local/sbin/phc_ctl
+  - /usr/local/sbin/pmc
+  - /usr/local/sbin/timemaster
+  - /usr/local/man/man8/ptp4l.8
+  - /usr/local/man/man8/hwstamp_ctl.8
+  - /usr/local/man/man8/nsm.8
+  - /usr/local/man/man8/phc2sys.8
+  - /usr/local/man/man8/phc_ctl.8
+  - /usr/local/man/man8/pmc.8
+  - /usr/local/man/man8/timemaster.8
+  changed_when: true
+  ignore_errors: true
+
+- name: Remove linuxptp sources
+  file:
+    path:  "{{ _linuxptp_git_repo.download_dir }}"
+    state: absent
+  changed_when: true
+  ignore_errors: true
+

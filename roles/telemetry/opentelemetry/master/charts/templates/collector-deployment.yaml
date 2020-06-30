@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.collector.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 120
+  replicas: {{ .Values.collector.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.component }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.component }}
+    spec:
+      containers:
+      - name: {{ .Values.proxy.name }}
+        image: {{ .Values.proxy.image }}
+        volumeMounts:
+        - name: collector-proxy-config
+          mountPath: {{ .Values.proxy.pathToNginxCfg }}
+          subPath: nginx.conf
+        - name: cert-vol-p
+          mountPath: /root/certs/{{ .Values.proxy.serverNamePrometheus }}
+        - name: cert-vol-a
+          mountPath: /root/certs/{{ .Values.proxy.serverNameAgent }}
+        ports:
+        - containerPort: {{ .Values.proxy.metricPrometheusPort }}
+        - containerPort: {{ .Values.proxy.internalPrometheusPort }}
+        - containerPort: {{ .Values.proxy.opencensusport }}
+      - name: {{ .Values.collector.name }}
+        command:
+          - "/otelcol"
+          - "--config=/conf/otel-collector-config.yaml"
+          - "--mem-ballast-size-mib=683"
+          - "--log-level=DEBUG"
+        image: {{ .Values.collector.image }}
+        resources:
+          limits:
+            cpu: {{ .Values.collector.resources.limits.cpu }}
+            memory: {{ .Values.collector.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.collector.resources.requests.cpu }}
+            memory: {{ .Values.collector.resources.requests.memory }}
+        ports:
+          - name: opencensus
+            containerPort: {{ .Values.collector.opencensusport }}
+        volumeMounts:
+        - name: {{ .Values.collector.configmapName }}
+          mountPath: /conf
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133 # Health Check extension default port.
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133 # Health Check extension default port.
+      volumes:
+        - name: {{ .Values.collector.configmapName }}
+          configMap:
+            name: {{ .Values.collector.configMap }}
+        - hostPath:
+            path: "{{ .Values.certs.certsHostPath }}/{{ .Values.proxy.serverNamePrometheus }}"
+            type: Directory
+          name: cert-vol-p
+        - hostPath:
+            path: "{{ .Values.certs.certsHostPath }}/{{ .Values.proxy.serverNameAgent }}"
+            type: Directory
+          name: cert-vol-a
+        - name: {{ .Values.proxy.configMap }}
+          configMap:
+            name: {{ .Values.proxy.configMap }}

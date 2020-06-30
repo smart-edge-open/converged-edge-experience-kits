@@ -3,22 +3,22 @@
 
 ---
 
-- name: download CPU Manager plugin
-  git:
-    repo: "{{ cmk_url }}"
-    dest: "{{ cmk_download_dir }}"
-    version: "{{ cmk_commit }}"
-    update: no
+- name: check if CMK release already exists
+  command: helm status cmk-release -n cmk-namespace
+  ignore_errors: yes
+  register: get_release_cmk
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: false
 
-- name: build CPU Manager image
-  shell: source /etc/profile && make
-  args:
-    chdir: "{{ cmk_download_dir }}"
-  changed_when: true
+- name: include docker registry vars
+  include_vars: ../../../docker_registry/master/defaults/main.yml
 
-- name: create CMK cluster-init pod, ns, svc and rbac rules
-  command: "kubectl apply -f /tmp/cmk.yml"
+# CMK deployment is called on Controller after node is ready
+- name: deploy CMK with Helm chart
+  command:  >
+    helm install cmk-release -f {{ ne_helm_charts_default_dir }}/cmk-values.yml {{ _cmk_chart_dir }}
+    --namespace=cmk-namespace
   delegate_to: "{{ groups['controller_group'][0] }}"
   run_once: true
   changed_when: true
-
+  when: get_release_cmk.rc != 0

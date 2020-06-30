@@ -3,13 +3,6 @@
 
 ---
 
-- name: offline | copy QEMU archive for offline
-  copy:
-    src: "{{ offline_archives_path }}/{{ qemu_name }}.tar.xz"
-    dest: "{{ qemu_download_dest }}"
-    remote_src: yes
-  when: offline_mode
-
 - name: remove qemu-img if installed
   command: rpm -e --nodeps qemu-img
   ignore_errors: true
@@ -19,39 +12,42 @@
 
 - name: check if already installed
   stat:
-    path: "{{ qemu_install_dir }}"
+    path: "{{ _qemu_install_dir }}"
   register: qemu_dest_dir
 
 - name: download archive
   get_url:
-    url: "{{ qemu_download_url }}"
-    dest: "{{ qemu_download_dest }}"
+    url: "{{ _qemu_download_url }}"
+    dest: "{{ _qemu_download_dest }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   when:
   - not qemu_dest_dir.stat.exists
-  - not offline_mode
 
 - name: ensure install dir exists
   file:
-    path: "{{ qemu_install_dir }}"
+    path: "{{ _qemu_install_dir }}"
     state: directory
 
 - name: extract archive
   unarchive:
-    src: "{{ qemu_download_dest }}"
-    dest: "{{ qemu_install_dir }}"
+    src: "{{ _qemu_download_dest }}"
+    dest: "{{ _qemu_install_dir }}"
     extra_opts: "--strip-components=1"
     remote_src: yes
-    creates: "{{ qemu_install_dir }}/README"
+    creates: "{{ _qemu_install_dir }}/README"
 
-- name: Install zlib-devel package
+- name: install zlib-devel package
   yum:
     name: "zlib-devel"
     state: present
 
 - name: configure
-  command: ./configure --target-list={{ qemu_targets }} --enable-kvm
+  command: ./configure --target-list={{ _qemu_targets }} --enable-kvm
   args:
-    chdir: "{{ qemu_install_dir }}"
+    chdir: "{{ _qemu_install_dir }}"
   changed_when: true
 
 - name: detect amount of cores
@@ -61,7 +57,7 @@
 
 - name: compile and install
   make:
-    chdir: "{{ qemu_install_dir }}"
+    chdir: "{{ _qemu_install_dir }}"
     target: install
   environment:
     "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"

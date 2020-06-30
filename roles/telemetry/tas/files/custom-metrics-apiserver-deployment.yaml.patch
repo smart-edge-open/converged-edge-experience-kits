@@ -1,0 +1,54 @@
+--- custom-metrics-apiserver-deployment.yaml	2020-06-17 16:47:05.931000000 +0200
++++ custom-metrics-apiserver-deployment.yaml.new	2020-06-19 12:41:52.857000000 +0200
+@@ -4,7 +4,7 @@
+   labels:
+     app: custom-metrics-apiserver
+   name: custom-metrics-apiserver
+-  namespace: custom-metrics
++  namespace: {{ .Values.deploymentNamespace }}
+ spec:
+   replicas: 1
+   selector:
+@@ -16,6 +16,11 @@
+         app: custom-metrics-apiserver
+       name: custom-metrics-apiserver
+     spec:
++      tolerations:
++        - effect: NoSchedule
++          key: node-role.kubernetes.io/master
++      nodeSelector:
++        node-role.kubernetes.io/master: ""
+       serviceAccountName: custom-metrics-apiserver
+       containers:
+       - name: custom-metrics-apiserver
+@@ -25,7 +30,8 @@
+         - --tls-cert-file=/var/run/serving-cert/tls.crt
+         - --tls-private-key-file=/var/run/serving-cert/tls.key
+         - --logtostderr=true
+-        - --prometheus-url=http://prom-service.monitoring.svc:9090/
++        - --prometheus-url={{ .Values.prometheusServiceUrl }}
++        - --prometheus-auth-config=/opt/tls-config/tls-config.yml
+         - --metrics-relist-interval=1m
+         - --v=10
+         - --config=/etc/adapter/config.yaml
+@@ -40,6 +46,10 @@
+           readOnly: true
+         - mountPath: /tmp
+           name: tmp-vol
++        - mountPath: /opt/tls-config
++          name: tls-config
++        - mountPath: /opt/CA
++          name: ca
+       volumes:
+       - name: volume-serving-cert
+         secret:
+@@ -49,3 +59,9 @@
+           name: adapter-config
+       - name: tmp-vol
+         emptyDir: {}
++      - name: tls-config
++        hostPath:
++          path: /etc/openness/certs/telemetry/tas-adapter
++      - name: ca
++        secret:
++          secretName: root-ca

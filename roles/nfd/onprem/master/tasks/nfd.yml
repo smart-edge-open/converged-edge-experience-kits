@@ -15,34 +15,25 @@
   command: firewall-cmd --reload
   changed_when: false
 
-- name: offline | load NFD docker image
-  docker_image:
-    name: nfd-master
-    load_path: "{{ offline_docker_images_path }}/nfd-master.tar"
-    source: load
-  when: offline_mode
-
 - name: build NFD master image
   block:
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
   - name: build NFD master binary
     shell: source /etc/profile && go build -o dist/nfd-master ./cmd/nfd-master
     args:
-      chdir: "{{ git_repo_dest }}"
-      creates: "{{ git_repo_dest }}/dist/nfd-master"
+      chdir: "{{ _git_repo_dest }}"
+      creates: "{{ _git_repo_dest }}/dist/nfd-master"
   - name: build Docker image
     command: docker-compose build nfd-master
     args:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
   always:
   - name: remove temporary .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
-  when: not offline_mode
+    include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: bring up NFD master
   command: docker-compose up -d --no-build nfd-master
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   changed_when: true
-

@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Adding kubernetes default CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + _kubernetes_default_cidr }}"
+
+- name: Adding kubeovn CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + kubeovn_cidr }}"
+  when: '"kubeovn" in kubernetes_cnis'
+
+- name: Adding weavenet CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + weavenet_cidr }}"
+  when: '"weavenet" in kubernetes_cnis'
+
+- name: Adding VCA CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + vca_cidr }}"
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: Adding calico CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + calico_cidr }}"
+  when: '"calico" in kubernetes_cnis'
+
+- name: Adding flannel CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + flannel_cidr }}"
+  when: '"flannel" in kubernetes_cnis'
+
+- name: Adding base noproxy setting to user defined ones
+  set_fact:
+      proxy_noproxy: "{{ proxy_noproxy + ',' + _base_noproxy }}"
+  when: proxy_noproxy | length > 0
+
+- name: Adding base noproxy setting to user defined ones
+  set_fact:
+      proxy_noproxy: "{{ _base_noproxy }}"
+  when: proxy_noproxy | length == 0
+
+- name: Build noproxy result
+  debug:
+    msg: "Final noproxy value:{{ proxy_noproxy }} "
+

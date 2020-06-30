@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: False
+    server: {{ _prometheus_svc_url }}
+    certificate-authority: /opt/CA/cert.pem
+  name: openness
+contexts:
+- context:
+    cluster: openness
+    namespace: telemetry
+    user: tls
+  name: openness.context
+current-context: openness.context
+kind: Config
+preferences: {}
+users:
+- name: tls
+  user:
+    client-certificate: /var/run/serving-cert/tls.crt
+    client-key: /var/run/serving-cert/tls.key

@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_fpga_config_local_path: "./fpga_config/bbdev_config_service"
+
+_fpga_config:
+  image: "fpga-config-utility"
+  tag: 0.1.0
+

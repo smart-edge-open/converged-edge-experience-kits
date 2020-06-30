@@ -17,7 +17,7 @@
         state: present
         force_source: yes
         build:
-          path: "{{ dpdk_install_dir }}"
+          path: "{{ _dpdk_install_dir }}"
           dockerfile: Dockerfile
           pull: yes
           use_config_proxy: yes
@@ -25,9 +25,8 @@
     - name: clean docker image files from dpdk directory
       file:
         state: absent
-        path: "{{ dpdk_install_dir }}/{{ item }}"
-      with_items: "{{ dockerimage_files_to_rm }}"
-  when: ovs_dpdk and not offline_mode
+        path: "{{ _dpdk_install_dir }}/{{ item }}"
+      with_items: "{{ _dockerimage_files_to_rm }}"
 
 - name: open ovn firewall rules
   ignore_errors: yes
@@ -48,11 +47,11 @@
     published_ports:
       - 6081:6081/udp
     volumes:
-      - "{{ huge_dir }}:{{ huge_dir }}:rw"
-      - "{{ ovs_dir }}:{{ ovs_dir }}:rw"
+      - "{{ _huge_dir }}:{{ _huge_dir }}:rw"
+      - "{{ _ovs_dir }}:{{ _ovs_dir }}:rw"
       - /dev:/dev:rw
       - /lib/modules:/lib/modules:rw
-    memory: "{{ ovs_dpdk_resource_limits }}"
+    memory: "{{ ovncni_dpdk_resource_limits }}"
 
 - name: waiting for OVS DB on the node
   wait_for:
@@ -64,14 +63,14 @@
   - name: build ovn cni executable
     shell: source /etc/profile && make ovncni
     args:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
   - name: create /opt/cni/bin/
     file:
       path: /opt/cni/bin/
       state: directory
   - name: copy ovn cni to /opt/cni/bin/ovn
     copy:
-      src: "{{ git_repo_dest }}/dist/ovncni/ovncni"
+      src: "{{ _git_repo_dest }}/dist/ovncni/ovncni"
       dest: /opt/cni/bin/ovn
       remote_src: yes
       mode: '0755'
@@ -80,7 +79,7 @@
   lineinfile:
     path: /etc/environment
     state: present
-    line: "OVN_NB_DB=tcp:{{ controller_ip }}:6641"
+    line: "OVN_NB_DB=tcp:{{ _controller_ip }}:6641"
 
 - name: update EVA config file
   shell: >

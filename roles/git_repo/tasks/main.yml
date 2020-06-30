@@ -2,17 +2,26 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: online mode
   block:
     - debug:
         msg: "Using git token for repository checkout"
       when: git_repo_token|length > 0
 
+    - name: set branch for controller repository
+      set_fact:
+        git_repo_branch: "{{ controller_repository_branch }}"
+      when: "'controller_group' in group_names"
+
+    - name: set branch for node repository
+      set_fact:
+        git_repo_branch: "{{ edgenode_repository_branch }}"
+      when: "'edgenode_group' in group_names"
+
     - name: checkout clean repository
       git:
         repo: "{{ git_repo_url }}"
-        dest: "{{ git_repo_dest }}"
+        dest: "{{ _git_repo_dest }}"
         version: "{{ git_repo_branch }}"
         force: yes
       when: always_clean_repository
@@ -20,17 +29,7 @@
     - name: make sure repository exists
       git:
         repo: "{{ git_repo_url }}"
-        dest: "{{ git_repo_dest }}"
+        dest: "{{ _git_repo_dest }}"
         version: "{{ git_repo_branch }}"
         update: no
       when: not always_clean_repository
-  when: not offline_mode
-
-- name: offline mode
-  block:
-    - name: copy repository to proper path
-      copy:
-        src: "{{ offline_path }}/{{ git_repo_dest.split('/')[-1] }}"
-        dest: "/opt"
-        remote_src: yes
-  when: offline_mode

@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: telemetry-node-certs
+  labels:
+    app: telemetry-node-certs
+spec:
+  selector:
+    matchLabels:
+      name: telemetry-node-certs
+  template:
+    metadata:
+      name:  telemetry-node-certs
+      annotations:
+        prometheus.io.scrape: "true"
+      labels:
+        name: telemetry-node-certs
+    spec:
+      hostPID: true
+      containers:
+      - name: openssl
+        image: emberstack/openssl:latest
+        command: ["/bin/sh","-c"]
+        args: ["rm -Rf /root/certs/node_exporter && \
+              mkdir /root/certs/node_exporter && \
+              /root/certgen/entrypoint_tls.sh node_exporter /root/certs/node_exporter /root/CA && \
+              chmod 644 /root/certs/node_exporter/cert.pem /root/certs/node_exporter/key.pem && \
+              sleep 4294967295"]
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "0.1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        - name: certgen
+          mountPath: /root/certgen
+      volumes:
+      - name: cert-vol
+        hostPath:
+          path: {{ _telemetry_certs_dest }}
+          type: DirectoryOrCreate
+      - name: ca
+        secret:
+          secretName: root-ca
+      - name: certgen
+        secret:
+          secretName: certgen
+          defaultMode: 0744

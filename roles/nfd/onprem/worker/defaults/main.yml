@@ -3,12 +3,12 @@
 
 ---
 
-certs_dest: /var/lib/appliance/certs
+_certs_dest: /var/lib/appliance/certs
 
-nfd_version: "v0.5.0"
+_nfd_version: "v0.5.0"
 
-nfd_worker_container_name: "nfd-worker"
-nfd_master_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
-nfd_port: "8082"
-nfd_master_endpoint: "{{ nfd_master_ip }}:{{ nfd_port }}"
-nfd_update_interval: "300s"
+_nfd_worker_container_name: "nfd-worker"
+_nfd_master_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+_nfd_port: "8082"
+_nfd_master_endpoint: "{{ _nfd_master_ip }}:{{ _nfd_port }}"
+_nfd_update_interval: "300s"

@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
-
----
-
-- op: replace
-  path: /spec/containers/0/args/0
-  value: "/cmk/cmk.py cluster-init --host-list={{ cmk_host_list }} --num-exclusive-cores={{ cmk_num_exclusive_cores }} --num-shared-cores={{ cmk_num_shared_cores }} --saname=cmk-serviceaccount --namespace=cmk-namespace"

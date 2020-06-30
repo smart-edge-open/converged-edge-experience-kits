@@ -9,8 +9,8 @@
     state: directory
   with_items:
   - /etc/openness
-  - "{{ certs_dest }}"
-  - "{{ configs_dest }}"
+  - "{{ _certs_dest }}"
+  - "{{ _configs_dest }}"
 
 - name: create openness namespace if needed
   block:
@@ -34,10 +34,10 @@
   - name: create secret with EAA certs
     shell: >
       kubectl create secret generic eaa-tls
-      --from-file=rootCA.key={{ certs_dest }}/eaa/CA/key.pem
-      --from-file=rootCA.pem={{ certs_dest }}/eaa/CA/cert.pem
-      --from-file=server.key={{ certs_dest }}/eaa/key.pem
-      --from-file=server.pem={{ certs_dest }}/eaa/cert.pem
+      --from-file=rootCA.key={{ _certs_dest }}/eaa/CA/key.pem
+      --from-file=rootCA.pem={{ _certs_dest }}/eaa/CA/cert.pem
+      --from-file=server.key={{ _certs_dest }}/eaa/key.pem
+      --from-file=server.pem={{ _certs_dest }}/eaa/cert.pem
       --namespace=openness
     when: get_secret_eaa.rc == 1
 
@@ -50,14 +50,14 @@
   - name: create configmap with syslog configs
     shell: >
       kubectl create configmap syslog-conf
-      --from-file={{ git_repo_dest }}/network-edge/syslog-ng-k8s-master.conf
-      --from-file={{ git_repo_dest }}/network-edge/syslog-ng-k8s-worker.conf
+      --from-file={{ _git_repo_dest }}/network-edge/syslog-ng-k8s-master.conf
+      --from-file={{ _git_repo_dest }}/network-edge/syslog-ng-k8s-worker.conf
       --namespace=openness
     when: get_configmap_syslog.rc == 1
 
 - name: apply openness definitions
   command: kubectl apply -f {{ item }}
-  with_items: "{{ openness_yamls }}"
+  with_items: "{{ _openness_yamls }}"
   changed_when: true
 
 - name: copy logrotate config

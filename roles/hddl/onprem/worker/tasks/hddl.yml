@@ -3,10 +3,6 @@
 
 ---
 
-- name: check if ion module already installed
-  stat:
-    path: /sys/module/myd_ion
-  register: ion
 
 - name: check if vsc module already installed
   stat:
@@ -24,70 +20,58 @@
     file:
       path: "/temp"
       state: directory
-  - name: offline | copy openvino archive for offline
-    copy:
-      src: "{{ offline_archives_path }}/{{ openvino_name }}"
-      dest: "{{ openvino_download_dest }}"
-      remote_src: yes
-    when: offline_mode
   - name: check if already downloaded
     stat:
-      path: "{{ openvino_download_dir }}"
+      path: "{{ _openvino_download_dir }}"
     register: ov_dl_dir
   - name: download OpenVino - may take a while (~750MB file)
     get_url:
-      url: "{{ openvino_url }}"
-      dest: "{{ openvino_download_dest }}"
+      url: "{{ _openvino_url }}"
+      dest: "{{ _openvino_download_dest }}"
     when:
     - not ov_dl_dir.stat.exists
-    - not offline_mode
   - name: ensure download dir exists
     file:
-      path: "{{ openvino_download_dir }}"
+      path: "{{ _openvino_download_dir }}"
       state: directory
   - name: extract OpenVino
     unarchive:
-      src: "{{ openvino_download_dest }}"
-      dest: "{{ openvino_download_dir }}"
+      src: "{{ _openvino_download_dest }}"
+      dest: "{{ _openvino_download_dir }}"
       extra_opts: "--strip-components=1"
       remote_src: yes
-      creates: "{{ openvino_silent_config }}"
+      creates: "{{ _openvino_silent_config }}"
   - name: configure licence agreement
     lineinfile:
-      path: "{{ openvino_silent_config }}"
+      path: "{{ _openvino_silent_config }}"
       regexp: '^ACCEPT_EULA='
       line: ACCEPT_EULA=accept
   - name: install OpenVino
-    command: "{{ openvino_install_command }}"
+    command: "{{ _openvino_install_command }}"
     args:
-      chdir: "{{ openvino_download_dir }}"
+      chdir: "{{ _openvino_download_dir }}"
   - name: install OpenVino kernel drivers and udev rules
-    shell: "{{ openvino_hddl_dependency_install }}" # noqa 305
-  when: not udev.stat.exists or not vsc.stat.exists or not ion.stat.exists
-
-- name: offline | build HDDL
-  include_tasks: offline_build.yml
-  when: offline_mode
+    shell: "{{ _openvino_hddl_dependency_install }}" # noqa 305
+  when: not udev.stat.exists or not vsc.stat.exists
 
 - name: build HDDL image
-  block: 
+  block:
   - name: create temporary custom .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
-  - name: build HDDL 
+    include_tasks: ../../../../git_repo/tasks/gitconfig_bootstrap.yml
+  - name: build HDDL
     shell: source /etc/profile && make hddllog
     args:
-      chdir: "{{ git_repo_dest }}"
+      chdir: "{{ _git_repo_dest }}"
   always:
   - name: remove temporary .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
-  when: not offline_mode
+    include_tasks: ../../../../git_repo/tasks/gitconfig_remove.yml
 
 - name: bring up hddlservice container
   command: "docker-compose up -d --no-build hddlservice"
   args:
-    chdir: "{{ git_repo_dest }}/build/hddlservice"
+    chdir: "{{ _git_repo_dest }}/build/hddlservice"
   environment:
-    VER: "{{ docker_hddlservice_tag }}"
+    VER: "{{ _docker_hddlservice_tag }}"
   changed_when: true
 
 - name: wait until VPU is bound to Myriad driver

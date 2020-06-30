@@ -1,0 +1,103 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.collectd.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ .Values.collectd.name }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.collectd.name }}
+    spec:
+      hostNetwork: true
+      initContainers:
+      - name: {{ .Values.certs.name }}
+        image: {{ .Values.certs.image }}
+        command: ["/bin/sh","-c"]
+        args: [ "rm -Rf {{ .Values.proxy.certsDest }} && \
+              mkdir {{ .Values.proxy.certsDest }} && \
+              /root/certgen/entrypoint_tls.sh {{ .Values.proxy.serverName }} {{ .Values.proxy.certsDest }} /root/CA && \
+              chmod 644 {{ .Values.proxy.certsDest }}/cert.pem {{ .Values.proxy.certsDest }}/key.pem"]
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "0.1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        - name: certgen
+          mountPath: /root/certgen
+      containers:     
+      - name: {{ .Values.proxy.name }} 
+        image: {{ .Values.proxy.image }} 
+        volumeMounts:
+        - name: proxy-config
+          mountPath: {{ .Values.proxy.pathToNginxCfg }} 
+          subPath: nginx.conf
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        ports:
+        - containerPort: {{ .Values.proxy.metricsCollectdPort }}
+      - name:  {{ .Values.collectd.name }}
+        image: {{ .Values.collectd.image }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: {{ .Values.collectd.resources.requests.cpu }}
+          limits:
+            cpu: {{ .Values.collectd.resources.limits.cpu }}
+            memory: {{ .Values.collectd.resources.limits.memory }}
+        volumeMounts:
+        - name: varrun
+          mountPath: /var/run
+        - name: tmp
+          mountPath: /tmp
+        - name: cfg
+          mountPath: /opt/collectd/etc/collectd.conf.d
+        - name: pmd
+          mountPath: /pmd
+      tolerations:
+      - effect: NoSchedule
+        key: cmk
+        operator: Exists
+      volumes:
+      - name: varrun 
+        hostPath:
+          path: /var/run
+      - name: tmp
+        hostPath:
+          path: /tmp
+      - name: cfg
+        hostPath:
+          path: /etc/openness/collectd/configs
+      - name: pmd
+        hostPath:
+          path: /etc/openness/collectd/pmd
+      - name: proxy-config
+        configMap:
+          name: {{ .Values.proxy.configMap }}
+      - name: cert-vol
+        hostPath:
+          path: /etc/openness/certs/telemetry/
+      - name: ca
+        secret:
+          secretName: root-ca
+      - name: certgen
+        secret:
+          secretName: certgen
+          defaultMode: 0744

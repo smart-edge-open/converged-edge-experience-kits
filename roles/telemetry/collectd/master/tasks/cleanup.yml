@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include collectd variables
+  include_vars: ../defaults/main.yml
+
+- name: remove collectd chart template directory
+  file:
+    path: "{{ ne_helm_charts_default_dir }}/collectd"
+    state: absent
+
+- name: uninstall collectd using Helm
+  command: "helm uninstall collectd --namespace telemetry"
+  changed_when: true
+  ignore_errors: yes

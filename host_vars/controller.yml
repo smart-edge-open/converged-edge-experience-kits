@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# ptp_port keeps the host's interface(s) that are connected to:
+# - a PTP MASTER node - in this case it should keep only one interface name, e.g.:
+#   ptp_port: enp134s0f1
+# - or PTP SLAVE(S) - then it should store a list of interfaces connected to slaves, e.g.:
+#   ptp_port:
+#   - enp134s0f1
+ptp_port:
+
+# ptp_port_gm is the host's interface connected to a Grand Master, e.g.:
+# ptp_port_gm: enp134s0f0
+ptp_port_gm:
+

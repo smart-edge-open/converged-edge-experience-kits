@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
@@ -8,7 +8,7 @@
     path: "{{ item }}"
     state: absent
   with_items:
-    - "{{ git_repo_dest }}/certs/key.pem"
-    - "{{ git_repo_dest }}/certs/cert.pem"
-    - "{{ git_repo_dest }}/certs/cacerts.pem"
-    - "{{ git_repo_dest }}/certs/root.pem"
+    - "{{ _git_repo_dest }}/certs/key.pem"
+    - "{{ _git_repo_dest }}/certs/cert.pem"
+    - "{{ _git_repo_dest }}/certs/cacerts.pem"
+    - "{{ _git_repo_dest }}/certs/root.pem"

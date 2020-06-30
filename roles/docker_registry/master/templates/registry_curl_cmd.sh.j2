@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+set -eu
+
+helpPrint()
+{
+   echo ""
+   echo "Usage: $0 list : show all images on docker registry"
+   echo -e "\t- tag <image-name> : show all tags availabe on image-name"
+   echo -e "\t- delete <image-name> <tag-name> : delete image tag from repo"
+   echo -e "Example:"
+   echo -e "    $0 list"
+   echo -e "    $0 tag nginx"
+   echo -e "    $0 delete  nginx latest"
+   echo -e "    $0 delete  nginx 1.18"
+   exit 1 # Exit with help
+}
+
+show_image_name()
+{
+
+    curl --key "$key" --cert "$cert" --cacert "$cacert" -X \
+        GET https://"${docker_registry_ip}"/v2/_catalog
+
+}
+
+show_image_tag_list()
+{
+    image_name=$1
+    curl --key "$key" --cert "$cert" --cacert "$cacert" -X \
+        GET https://"${docker_registry_ip}"/v2/"${image_name}"/tags/list
+}
+
+delete_tag()
+{
+    image_name=$1
+    tag_name=$2
+
+#get imaga registry sha id 
+    tag_sha_id=$(curl --key "$key" --cert "$cert" --cacert "$cacert" -I \
+        -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+        https://"${docker_registry_ip}"/v2/"${image_name}"/manifests/"${tag_name}" \
+        | awk '$1 == "Docker-Content-Digest:" { print $2 }' | tr -d $'\r' )
+
+#delete image tag
+    curl --key "$key" --cert "$cert" --cacert "$cacert" -X \
+        DELETE https://"${docker_registry_ip}"/v2/"${image_name}"/manifests/"${tag_sha_id}"
+
+}
+
+if [[ $# -eq 0 ]] ; then
+    helpPrint
+fi
+
+docker_registry_ip={{ _registry_ip_address }}:{{ _registry_port }}
+registry_cert_path="/etc/docker/certs.d/${docker_registry_ip}"
+key="./client.key"
+cert="./client.cert"
+cacert="./ca.crt"
+
+cd $registry_cert_path
+
+
+echo -e  "\n**************Docker registry  curl command output****************\n"
+
+    case $1 in
+      list )
+      
+	     echo "list of image available on docker registry:$docker_registry_ip"
+         show_image_name "$registry_cert_path"
+         ;;
+      tag )
+         if [ "$2" != "" ]
+         then
+	        echo "$docker_registry_ip image $2 tag list:"
+            show_image_tag_list "$2"
+         else
+            echo "Missing/Wrong argument"
+            helpPrint
+         fi
+         ;;
+      delete )
+         if [ "$2" != "" ] && [ "$3" != "" ]
+         then
+            echo "delete image $2:$3  from docker registry:$docker_registry_ip"
+            delete_tag "$2" "$3"
+         else
+            echo "Missing/Wrong argument"
+            helpPrint
+         fi
+         ;;
+      *)
+         echo "Missing/Wrong argument"
+         helpPrint 
+    esac

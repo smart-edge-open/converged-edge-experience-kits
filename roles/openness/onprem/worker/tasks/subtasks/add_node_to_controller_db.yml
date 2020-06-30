@@ -5,11 +5,11 @@
 
 - name: get controller's IP
   set_fact:
-    controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+    _controller_ip: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
 
 - name: make an auth request
   uri:
-    url: http://{{ controller_ip }}:8080/auth
+    url: http://{{ _controller_ip }}:8080/auth
     method: POST
     body_format: json
     body:
@@ -27,7 +27,7 @@
 
 - name: get list of added nodes
   uri:
-    url: http://{{ controller_ip }}:8080/nodes
+    url: http://{{ _controller_ip }}:8080/nodes
     method: GET
     headers:
       Authorization: Bearer {{ auth_token }}
@@ -42,7 +42,7 @@
 
 - name: add the node if needed
   uri:
-    url: http://{{ controller_ip }}:8080/nodes
+    url: http://{{ _controller_ip }}:8080/nodes
     method: POST
     body_format: json
     body:

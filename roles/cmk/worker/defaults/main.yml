@@ -3,6 +3,6 @@
 
 ---
 
-cmk_url: "https://github.com/intel/CPU-Manager-for-Kubernetes"
-cmk_commit: "b3aedd39a8b7f3be7377f94e81d4efdc83e052ee"
-cmk_download_dir: "/tmp/cmk"
+# The CMK chart directory on Controller (should be the same as in roles/cmk/master/defaults/main.yml)
+_cmk_chart_dir: "{{ ne_helm_charts_default_dir }}/cpu-manager-for-kubernetes"
+_cmk_tag: "v1.4.1"

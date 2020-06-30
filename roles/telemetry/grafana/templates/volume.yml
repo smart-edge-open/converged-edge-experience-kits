@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: "{{ item }}"
+spec:
+  storageClassName: grafana
+  capacity:
+    storage: 10Gi
+  persistentVolumeReclaimPolicy: Recycle
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "{{ _pv_dir }}/{{ item }}"

@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_tas_repo:
+    url: "https://github.com/intel/telemetry-aware-scheduling.git"
+    commit: "a13708825e854da919c6fdf05d50753113d04831"
+
+_prometheus_svc_url: "https://prometheus:9099/"
+
+_descheduler_deployment_files:
+  - descheduler_rbac.yaml
+  - descheduler_policy.yaml
+  - descheduler_cronjob.yaml

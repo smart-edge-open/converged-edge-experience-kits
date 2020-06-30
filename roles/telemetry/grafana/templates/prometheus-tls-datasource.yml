@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: telemetry
+  labels:
+    grafana_datasource: '1'
+data:
+  prometheus-tls.yaml: |-
+       apiVersion: 1
+       datasources:
+       - name: Prometheus-TLS
+         access: proxy
+         editable: true
+         orgId: 1
+         type: prometheus
+         url: https://prometheus:9099
+         withCredentials: true
+         isDefault: true
+         jsonData:
+           tlsAuth: true
+           tlsAuthWithCACert: true
+         secureJsonData:
+           tlsCACert: |
+             {{ telemetry_root_ca_cert['content'] | b64decode | trim | indent(width=13, indentfirst=False) }}
+           tlsClientCert: |
+             {{ telemetry_grafana_cert['content'] | b64decode | trim | indent(width=13, indentfirst=False) }}
+           tlsClientKey: |
+             {{ telemetry_grafana_key['content'] | b64decode | trim | indent(width=13, indentfirst=False) }}
+         version: 1
+         editable: false

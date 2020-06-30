@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+image:
+  repository: {{ _registry_ip_address }}:{{ _registry_port }}/cmk
+  tag: {{ _cmk_tag }}
+
+hosts:
+  list: {{ cmk_host_list }}
+
+numSharedCores: {{ cmk_num_shared_cores }}
+numExclusiveCores: {{ cmk_num_exclusive_cores }}

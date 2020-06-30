@@ -1,0 +1,247 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+server:
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  extraInitContainers:
+    - name: setup-permissions
+      image: busybox
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        runAsNonRoot: false
+      volumeMounts:
+        - name: storage-volume
+          mountPath: /data
+      command: ["/bin/chmod","-R","777", "/data"]
+  extraVolumes:
+    - name: cert-vol
+      hostPath:
+        path: "{{ _telemetry_certs_dest }}"
+        type: Directory
+    - name: ca
+      secret:
+        secretName: root-ca
+    - name: proxy-config
+      configMap:
+        name: prometheus-proxy-config 
+  extraVolumeMounts:
+    - name: cert-vol
+      mountPath: /opt/prometheus/certs/
+  global:
+    scrape_interval: 5s
+    scrape_timeout: 4s
+  service:
+    nodePort: 30000
+    type: NodePort
+  sidecarContainers:
+  - name: server-proxy
+    image: nginx:alpine
+    securityContext:
+      runAsUser: 0 
+      runAsNonRoot: false
+    volumeMounts:
+    - name: proxy-config
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+    - name: ca
+      mountPath: /root/CA
+    - name: cert-vol
+      mountPath: /opt/prometheus/certs/
+    ports:
+    - containerPort: 9099
+
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'kubelet-metrics'
+
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        kubernetes_sd_configs:
+        - role: node
+
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/${1}/proxy/metrics
+
+      - job_name: 'node-exporter'
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: node_exporter
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          regex: '.*node-exporter.*'
+          action: keep
+        - source_labels: [__address__]
+          regex: '.*:9100'
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: instance
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+
+      - job_name: 'otel-collector'
+        scrape_interval: 10s
+        static_configs:
+          - targets: ['otel-collector.telemetry.svc:9107']
+          - targets: ['otel-collector.telemetry.svc:9105']
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: otel_collector
+
+      - job_name: 'collectd'
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: collectd
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          regex: 'collectd.*'
+          action: keep
+        - source_labels: [__address__]
+          regex: '.*:9103'
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: instance
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+
+      - job_name: 'cadvisor'
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: cadvisor
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          regex: 'cadvisor.*'
+          action: keep
+        - source_labels: [__address__]
+          regex: '.*:9105'
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: instance
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+
+{% if telemetry_pcm_enable | d(false) %}
+      - job_name: 'pcm'
+        scheme: https
+        tls_config:
+          ca_file: /opt/prometheus/certs/CA/cert.pem
+          cert_file: /opt/prometheus/certs/prometheus/cert.pem
+          key_file: /opt/prometheus/certs/prometheus/key.pem
+          server_name: pcm
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          regex: 'pcm.*'
+          action: keep
+        - source_labels: [__address__]
+          regex: '.*:9739'
+          action: keep
+        - source_labels: ['__address__']
+          separator:     ':'
+          regex:         '(.*):(9739)'
+          target_label:  '__address__'
+          replacement:   '${1}:32100'
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: instance
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+{% endif %}
+
+nodeExporter:
+  image:
+    tag: v1.0.0-rc.0
+  extraArgs:
+    web.config: /opt/config/web-config.yml
+    collector.textfile.directory: /opt/vpumetrics
+  extraConfigmapMounts:
+    - name: config-vol
+      mountPath: /opt/config/
+      configMap: node-exporter-cm
+  extraHostPathMounts:
+    - name: cert-vol
+      hostPath: "{{ _telemetry_certs_dest }}"
+      mountPath: /opt/certs/
+      type: DirectoryOrCreate
+    - name: vpumetrics
+      hostPath: /tmp/node-exporter
+      mountPath: /opt/vpumetrics
+      type: DirectoryOrCreate
+  extraSecretMounts:
+    - name: ca
+      secretName: root-ca
+      mountPath: /opt/CA
+  hostNetwork: false
+  tolerations:
+    - effect: NoSchedule
+      key: cmk
+      operator: Exists
+
+kubeStateMetrics:
+  enabled: false
+
+proxy:
+  apiPort: 9099
+  internalPort: 9090
+  serverName: prometheus
+  certsDest:  /opt/prometheus/certs
+  image: nginx:alpine
+  configMap: prometheus-proxy-config
+  service:
+    name: prometheus
+

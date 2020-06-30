@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_sriov_chart_dir: "{{ ne_helm_charts_default_dir }}/sriov-net-dp"
+
+_sriov_cni:
+  url: "https://github.com/intel/sriov-cni"
+  download_dir : "/tmp/_sriov_cni"
+  commit: "v2.3"
+
+_sriov_dev_plugin:
+  url: "https://github.com/intel/sriov-network-device-plugin"
+  download_dir: "/tmp/_sriov_dev_plugin"
+  commit: "4e0302aeb4812844524005686b74175d8b0fc515"
+
+fpga_sriov_userspace_enable: false
+
+# VM support
+sriov_kubevirt_enable: false
+
+_sriov_dp_cek_commit: "be472b5ec0728bcca60bf86ffb085c9ec46de08e"
+_sriov_dp_cek_url: "https://raw.githubusercontent.com/intel/container-experience-kits/\
+  {{ _sriov_dp_cek_commit }}/roles/sriov-dp-install/charts/sriov-net-dp"
+_sriov_dp_cek_chart_templates:
+- "templates/sriovdp-daemonset.yaml"
+- "templates/sriovdp-sa.yaml"

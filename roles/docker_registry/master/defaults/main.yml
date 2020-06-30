@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+_registry_version: "2"
+_registry_port: "5000"
+_registry_ip_address: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+_registry_host: "{{ groups['controller_group'][0] }}"
+_registry_location: /opt/docker-registry/

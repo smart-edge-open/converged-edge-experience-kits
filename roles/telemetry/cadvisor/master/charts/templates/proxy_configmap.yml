@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.proxy.configMap }}
+  labels:
+    name: {{ .Values.proxy.configMap }}
+  namespace: {{ .Values.namespace }}
+data:
+  nginx.conf: |-
+    worker_processes  1;
+    events {
+        worker_connections  1024; 
+    }
+    
+    http {
+        include       mime.types;
+        default_type  application/octet-stream;
+        sendfile        on;
+        keepalive_timeout  65;
+        server {
+            listen                 {{ .Values.proxy.metricsCadvisorPort }} ssl;
+            server_name            {{ .Values.proxy.serverName }};
+            ssl_certificate        {{ .Values.proxy.certsDest }}/cert.pem;
+            ssl_certificate_key    {{ .Values.proxy.certsDest }}/key.pem;
+            ssl_client_certificate {{ .Values.proxy.certsDest }}/root.pem;
+            ssl_verify_client      on;
+            location / {
+                proxy_pass http://localhost:{{ .Values.proxy.internalCadvisorPort }}/;
+                } 
+            } 
+    }

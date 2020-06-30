@@ -3,8 +3,60 @@
 
 ---
 
-- name: deploy gpu-plugin kustomization
-  command: kubectl apply -k deployments/gpu_plugin
-  args:
-    chdir: "{{ device_plugins.download_dir }}"
-  changed_when: true
+- name: check current release and chart, and uninstall old release
+  block:
+  - name: grep exsiting release
+    shell: helm list | grep {{ _gpu_plugin.helmReleaseName }} | awk '{print $9}'
+    ignore_errors: yes
+    register: grep_gpuplugin_helm_release
+  - name: grep chart version
+    shell: helm list | grep {{ _gpu_plugin.helmReleaseName }}-{{ _gpu_plugin.helmChartVersion }} | awk '{print $9}'
+    ignore_errors: yes
+    register: grep_gpuplugin_helm_chart
+  - name: uninstall when older chart
+    command: helm uninstall {{ _gpu_plugin.helmReleaseName }}
+    ignore_errors: yes
+    when: (grep_gpuplugin_helm_chart.stdout | length == 0) and (grep_gpuplugin_helm_release.stdout | length > 0)
+
+- name: build ,tag and push the GPU image
+  block:
+  - name: build GPU plugin image
+    shell: source /etc/profile && make intel-gpu-plugin
+    args:
+      chdir: "{{ _device_plugins.download_dir }}"
+    changed_when: true
+    register: build_result
+    retries: "{{ number_of_retries }}"
+    until: build_result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: tag the GPU plugin image
+    docker_image:
+      name: intel/intel-gpu-plugin
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/intel-gpu-plugin"
+      tag: "{{ _gpu_plugin.tag }}"
+      push: yes
+      source: local
+    changed_when: true
+  when: grep_gpuplugin_helm_chart.stdout | length == 0
+
+- name: template Helm chart on the master node and deploy gpu-plugin with the Helm Charts
+  block:
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ role_path }}/charts/gpu-plugin"
+      dest: "{{ ne_helm_charts_default_dir }}"
+  - name: template values.yaml
+    template:
+      src: "gpu_values.yaml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/gpu-plugin/values.yaml"
+      force: yes
+  - name: helm install gpu-plugin release
+    command: helm install {{ _gpu_plugin.helmReleaseName }} gpu-plugin
+    args:
+      chdir: "{{ ne_helm_charts_default_dir }}"
+  - name: check whether it is deployed successfully
+    shell: helm list | grep {{ _gpu_plugin.helmReleaseName }} | awk '{print $8}'
+    register: grep_gpuplugin_helm_status
+    ignore_errors: yes
+    failed_when: "'deployed' not in grep_gpuplugin_helm_status.stdout"
+  when: grep_gpuplugin_helm_chart.stdout | length == 0

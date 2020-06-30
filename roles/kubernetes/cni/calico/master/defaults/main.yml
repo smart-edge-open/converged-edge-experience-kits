@@ -3,7 +3,9 @@
 
 ---
 
-calico_version: v3.12
-calico_url: https://docs.projectcalico.org/{{ calico_version }}/manifests/calico.yaml
+_calico_version: "v3.14"
+_calico_manifest: "{{ 'calico-bpf.yaml' if calico_ebpf_enabled else 'calico.yaml' }}"
+_calico_url: https://docs.projectcalico.org/{{ _calico_version }}/manifests/{{ _calico_manifest }}
+calico_ipam_type: "{{ 'calico-ipam' if calico_ebpf_enabled else 'host-local' }}"
 
 calico_cidr: "10.243.0.0/16"

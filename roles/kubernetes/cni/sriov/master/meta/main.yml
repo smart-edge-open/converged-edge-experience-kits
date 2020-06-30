@@ -4,4 +4,7 @@
 ---
 
 dependencies:
-- role: kubernetes/cni/sriov/common
+- role: sriov_device_init/network_edge
+  vars:
+    _git_repo_dest: "/opt/edgenode"
+  when: single_node_deployment | default(false)

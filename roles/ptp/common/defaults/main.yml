@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_kernel_ptp_config_vars:
+- 'CONFIG_PPS'
+- 'CONFIG_NETWORK_PHY_TIMESTAMPING'
+- 'PTP_1588_CLOCK'
+
+_hw_timestamp_on: true
+_kernel_ptp_on: false
+
+_linuxptp_git_repo:
+  dir: http://git.code.sf.net/p/linuxptp/code
+  download_dir: /opt/linuxptp/
+  branch: v2.0
+
+_controller_name: "{{ groups['controller_group'][0] }}"
+_config_slave_patch: default_slave.patch
+
+_port_type: "{{ 'SLAVE' if (inventory_hostname in groups['ptp_slave_group']) else 'MASTER' }}"
+
+_if_remote_src: "{{ false if inventory_hostname in groups['controller_group'] else true }}"
+
+async_time: 2592000
+

@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.collector.name }}
+  namespace: {{ .Values.namespace }} 
+  labels:
+    component: {{ .Values.component }} 
+spec:
+  ports:
+    - name: metrics
+      port: {{ .Values.proxy.metricPrometheusPort }}
+      protocol: TCP
+      targetPort: {{ .Values.proxy.metricPrometheusPort }}
+    - name: opencensus
+      port: {{ .Values.proxy.opencensusport }}
+      protocol: TCP
+      targetPort: {{ .Values.proxy.opencensusport }}
+    - name: prometheus
+      port: {{ .Values.proxy.internalPrometheusPort }}
+      protocol: TCP
+      targetPort: {{ .Values.proxy.internalPrometheusPort }}
+  selector:
+    component: {{ .Values.component }}

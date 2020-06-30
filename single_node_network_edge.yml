@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+# Playbook for single node Network Edge cluster deployment
+
+- hosts: edgenode_group
+  pre_tasks:
+    - name: set node name
+      set_fact: node_name={{ ansible_hostname | lower }}
+    - name: create helper variable
+      set_fact:
+        single_node_deployment: true
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: check deployment settings for single node deployment
+      include_tasks: ./tasks/settings_check_ne_single_node.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
+
+  roles:
+    - role: machine_setup/os_setup
+
+    - role: time/ntp
+      when: ntp_enable | default(False)
+
+    - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(False))
+    - role: machine_setup/grub
+    - role: machine_setup/configure_tuned
+      when: not (tuned_skip | default(False))
+    - role: machine_setup/conditional_reboot
+
+    - role: git_repo
+    - role: golang
+    - role: docker
+    - role: opae_fpga/worker
+      when: ne_opae_fpga_enable | default(False)
+
+- hosts: controller_group
+  pre_tasks:
+    - name: set node name
+      set_fact: node_name={{ ansible_hostname | lower }}
+    - name: create helper variable
+      set_fact:
+        single_node_deployment: true
+
+  roles:
+    - role: machine_setup/os_setup
+    - role: git_repo
+    - role: kubernetes/master
+    - role: docker_registry/master
+    - role: kubernetes/helm
+    - role: kubernetes/cni
+    - role: kubernetes/device_plugins
+      when: k8s_device_plugins_enable | default(False)
+
+    - role: openness/network_edge/master
+
+    - role: telemetry/certs
+    - role: telemetry/prometheus
+    - role: telemetry/opentelemetry/master
+    - role: telemetry/collectd/master
+    - role: telemetry/tas
+    - role: telemetry/cadvisor/master
+
+    - role: fpga_cfg
+      when: fpga_sriov_userspace_enable | default(False)
+    - role: kubevirt/master
+      when: kubevirt_enable | default(True)
+    - role: opae_fpga/master
+      when: ne_opae_fpga_enable | default(False)
+    - role: nfd/network_edge
+      when: ne_nfd_enable | default(True)
+    - role: biosfw/master
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/master
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/master
+      when: ne_hddl_enable | default(False)
+
+    - role: telemetry/grafana
+      when: telemetry_grafana_enable | default(True)
+    - role: telemetry/pcm/master
+      when: telemetry_pcm_enable | default(False)
+
+- hosts: edgenode_group
+  roles:
+    - role: telemetry/collectd/worker
+    - role: telemetry/cadvisor/worker
+    - role: openness/network_edge/worker
+    - role: kubevirt/worker
+      when: kubevirt_enable | default(True)
+    - role: biosfw/worker
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/worker
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/worker
+      when: ne_hddl_enable | default(False)

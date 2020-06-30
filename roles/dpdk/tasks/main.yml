@@ -3,16 +3,17 @@
 
 ---
 
-- name: offline | copy DPDK archive for offline
-  copy:
-    src: "{{ offline_archives_path }}/{{ dpdk_name }}.tar.xz"
-    dest: "{{ dpdk_download_dest }}"
-    remote_src: yes
-  when: offline_mode
-
 - name: get current kernel
   command: uname -r
   register: unamer
+  changed_when: false
+
+- name: check if kernel-(rt-)devel is already installed
+  shell: >
+    set -o pipefail &&
+    yum list installed | grep -E "kernel-(rt-)?devel(.*){{ '.'.join(unamer.stdout.split('.')[:-1]) }}"
+  register: yum_list_kernel_devel
+  ignore_errors: true
   changed_when: false
 
 - name: install kernel-devel package
@@ -41,37 +42,48 @@
   # install kernel-devel package if:
   # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
   # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
-  # OnPrem Offline does not support kernel customization so `custom_kernel` is enabled and `kernel_skip` is defined and false
-  when: (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+  when:
+  - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+  - yum_list_kernel_devel.rc == 1   # kernel-(rt-)devel is missing
 
 - name: check if already installed
   stat:
-    path: "{{ dpdk_install_dir }}"
+    path: "{{ _dpdk_install_dir }}"
   register: dpdk_dest_dir
 
 - name: download
   get_url:
-    url: "{{ dpdk_download_url }}"
-    dest: "{{ dpdk_download_dest }}"
-    checksum: "md5:{{ dpdk_checksum }}"
+    url: "{{ _dpdk_download_url }}"
+    dest: "{{ _dpdk_download_dest }}"
+    checksum: "md5:{{ _dpdk_checksum }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   when: not dpdk_dest_dir.stat.exists
 
 - name: ensure install dir exists
   file:
-    path: "{{ dpdk_install_dir }}"
+    path: "{{ _dpdk_install_dir }}"
     state: directory
 
 - name: extract
   unarchive:
-    src: "{{ dpdk_download_dest }}"
-    dest: "{{ dpdk_install_dir }}"
+    src: "{{ _dpdk_download_dest }}"
+    dest: "{{ _dpdk_install_dir }}"
     extra_opts: "--strip-components=1"
     remote_src: yes
-    creates: "{{ dpdk_install_dir }}/README"
+    creates: "{{ _dpdk_install_dir }}/README"
+
+- name: WA Fix for compilation error for rte_kni ko
+  command: sed -i 's/ -Werror//g'  "{{ _dpdk_install_dir }}/kernel/linux/kni/Makefile"
+  args:
+    warn: false
+  when: calico_ebpf_enabled
 
 - name: check if already compiled
   stat:
-    path: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
+    path: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
   register: igb_uio_module
 
 - name: remove old dpdk path to compiled DPDK
@@ -93,7 +105,7 @@
 
 - name: compile
   make:
-    chdir: "{{ dpdk_install_dir }}"
+    chdir: "{{ _dpdk_install_dir }}"
     target: install
     params:
       T: x86_64-native-linuxapp-gcc
@@ -113,7 +125,7 @@
 
 - name: copy kernel modules
   copy:
-    src: "{{ dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/{{ item }}"
+    src: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/{{ item }}"
     dest: "/lib/modules/{{ unamer.stdout }}/kernel/drivers/"
     remote_src: yes
   with_items:
@@ -144,11 +156,11 @@
   - "uio_pci_generic"
   - "uio"
 
-  - name: unload vfio
-    modprobe:
-      name: vfio
-      state: absent
-    ignore_errors: yes
+- name: unload vfio
+  modprobe:
+    name: vfio
+    state: absent
+  ignore_errors: yes
 
 - name: load uio and igb_uio modules
   modprobe:

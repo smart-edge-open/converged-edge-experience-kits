@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+nodeSelector: {"node-role.kubernetes.io/master":""}
+
+dashboardsDir: "{{ _grafana_dashboards_conf }}"
+
+tolerations:
+ - key: "node-role.kubernetes.io/master"
+   operator: "Exists"
+   effect: "NoSchedule"
+
+service:
+  type: NodePort
+  nodePort: 32000
+  port: 80
+  targetPort: 3000
+  annotations: {}
+  labels: {}
+  portName: service
+
+persistence:
+  type: pvc
+  enabled: true
+  storageClassName: grafana
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  finalizers:
+    - kubernetes.io/pvc-protection
+
+adminUser: admin
+adminPassword: "{{ telemetry_grafana_pass }}"
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    searchNamespace: true
+
+  datasources:
+    enabled: true
+    label: grafana_datasource
+    searchNamespace: null

@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
 - name: install libvirt
   yum:
-    name: "{{ libvirt_packages }}"
+    name: "{{ _libvirt_packages }}"
     state: present
     skip_broken: yes
 

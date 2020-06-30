@@ -3,20 +3,60 @@
 
 ---
 
-- name: create vpu-plugin kustomization.yml
-  copy:
-    src: kustomization.yaml
-    dest: "{{ device_plugins.download_dir }}/deployments/vpu_plugin/base/kustomization.yaml"
-  changed_when: true
+- name: check current release and chart, and uninstall old release
+  block:
+  - name: grep exsiting release
+    shell: helm list | grep {{ _vpu_plugin.helmReleaseName }} | awk '{print $9}'
+    ignore_errors: yes
+    register: grep_vpuplugin_helm_release
+  - name: grep chart version
+    shell: helm list | grep {{ _vpu_plugin.helmReleaseName }}-{{ _vpu_plugin.helmChartVersion }} | awk '{print $9}'
+    ignore_errors: yes
+    register: grep_vpuplugin_helm_chart
+  - name: uninstall when older chart
+    command: helm uninstall {{ _vpu_plugin.helmReleaseName }}
+    ignore_errors: yes
+    when: (grep_vpuplugin_helm_chart.stdout | length == 0) and (grep_vpuplugin_helm_release.stdout | length > 0)
 
-- name: copy vpu-plugin nodeselector
-  copy:
-    src: add_node_selector.yaml
-    dest: "{{ device_plugins.download_dir }}/deployments/vpu_plugin/base/add_node_selector.yaml"
-  changed_when: true
+- name: build ,tag and push the VPU image
+  block:
+  - name: build VPU plugin image
+    shell: source /etc/profile && make intel-vpu-plugin
+    args:
+      chdir: "{{ _device_plugins.download_dir }}"
+    changed_when: true
+    register: build_result
+    retries: "{{ number_of_retries }}"
+    until: build_result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: tag the VPU plugin image
+    docker_image:
+      name: intel/intel-vpu-plugin
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/intel-vpu-plugin"
+      tag: "{{ _vpu_plugin.tag }}"
+      push: yes
+      source: local
+    changed_when: true
+  when: grep_vpuplugin_helm_chart.stdout | length == 0
 
-- name: deploy vpu-plugin kustomization
-  command: kubectl apply -k deployments/vpu_plugin
-  args:
-    chdir: "{{ device_plugins.download_dir }}"
-  changed_when: true
+- name: template Helm chart on the master node and deploy vpu-plugin with the Helm Charts
+  block:
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ role_path }}/charts/vpu-plugin"
+      dest: "{{ ne_helm_charts_default_dir }}"
+  - name: template values.yaml
+    template:
+      src: "vpu_values.yaml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/vpu-plugin/values.yaml"
+      force: yes
+  - name: helm install vpu-plugin release
+    command: helm install {{ _vpu_plugin.helmReleaseName }} vpu-plugin
+    args:
+      chdir: "{{ ne_helm_charts_default_dir }}"
+  - name: check whether it is deployed successfully
+    shell: helm list | grep {{ _vpu_plugin.helmReleaseName }} | awk '{print $8}'
+    register: grep_vpuplugin_helm_status
+    ignore_errors: yes
+    failed_when: "'deployed' not in grep_vpuplugin_helm_status.stdout"
+  when: grep_vpuplugin_helm_chart.stdout | length == 0

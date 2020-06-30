@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_pv_dir: /opt/prometheus
+_pv_names:
+  - prometheus-volume-1
+  - prometheus-volume-2
+
+_prometheus_chart_dir: "{{ ne_helm_charts_default_dir }}/prometheus"
+_prometheus_chart_commit: "98d951ea63065349fa8a31f552376207fb6115e6"
+_prometheus_chart_url: "https://raw.githubusercontent.com/helm/charts/{{ _prometheus_chart_commit }}/stable/prometheus/"
+
+_prometheus_chart:
+  - ".helmignore"
+  - "Chart.yaml"
+  - "values.yaml"
+
+_prometheus_chart_templates:
+  - "templates/NOTES.txt"
+  - "templates/_helpers.tpl"
+  # - "templates/alertmanager-clusterrole.yaml"
+  # - "templates/alertmanager-clusterrolebinding.yaml"
+  # - "templates/alertmanager-configmap.yaml"
+  # - "templates/alertmanager-deployment.yaml"
+  # - "templates/alertmanager-ingress.yaml"
+  # - "templates/alertmanager-networkpolicy.yaml"
+  # - "templates/alertmanager-pdb.yaml"
+  # - "templates/alertmanager-podsecuritypolicy.yaml"
+  # - "templates/alertmanager-pvc.yaml"
+  # - "templates/alertmanager-service-headless.yaml"
+  # - "templates/alertmanager-service.yaml"
+  # - "templates/alertmanager-serviceaccount.yaml"
+  # - "templates/alertmanager-statefulset.yaml"
+  - "templates/node-exporter-daemonset.yaml"
+  - "templates/node-exporter-podsecuritypolicy.yaml"
+  - "templates/node-exporter-role.yaml"
+  - "templates/node-exporter-rolebinding.yaml"
+  - "templates/node-exporter-service.yaml"
+  - "templates/node-exporter-serviceaccount.yaml"
+  # - "templates/pushgateway-clusterrole.yaml"
+  # - "templates/pushgateway-clusterrolebinding.yaml"
+  # - "templates/pushgateway-deployment.yaml"
+  # - "templates/pushgateway-ingress.yaml"
+  # - "templates/pushgateway-networkpolicy.yaml"
+  # - "templates/pushgateway-pdb.yaml"
+  # - "templates/pushgateway-podsecuritypolicy.yaml"
+  # - "templates/pushgateway-pvc.yaml"
+  # - "templates/pushgateway-service.yaml"
+  # - "templates/pushgateway-serviceaccount.yaml"
+  - "templates/server-clusterrole.yaml"
+  - "templates/server-clusterrolebinding.yaml"
+  - "templates/server-configmap.yaml"
+  - "templates/server-deployment.yaml"
+  - "templates/server-ingress.yaml"
+  - "templates/server-networkpolicy.yaml"
+  - "templates/server-pdb.yaml"
+  - "templates/server-podsecuritypolicy.yaml"
+  - "templates/server-pvc.yaml"
+  - "templates/server-service-headless.yaml"
+  - "templates/server-service.yaml"
+  - "templates/server-serviceaccount.yaml"
+  - "templates/server-statefulset.yaml"
+  - "templates/server-vpa.yaml"

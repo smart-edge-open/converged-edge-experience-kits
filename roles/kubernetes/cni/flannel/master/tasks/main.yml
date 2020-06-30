@@ -2,18 +2,17 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: open flannel firewall rules
   ignore_errors: yes
   firewalld:
-    port: 8285/udp
+    port: 8472/udp
     permanent: yes
     state: enabled
     immediate: yes
 
 - name: patch node's Pod CIDR
   # flannel's CIDR is read from node's PodCIDR
-  command: kubectl patch node "{{ ansible_hostname }}" -p '{"spec":{"podCIDR":"{{ flannel_cidr }}"}}'
+  command: kubectl patch node "{{ node_name }}" -p '{"spec":{"podCIDR":"{{ flannel_cidr | ipsubnet(24, groups['all'].index(inventory_hostname)) }}" } }'
   changed_when: true
 
 - name: create temp dir
@@ -24,8 +23,12 @@
 
 - name: download flannel yml
   get_url:
-    url: "{{ flannel_url }}"
+    url: "{{ _flannel_url }}"
     dest: "{{ tmp_dir.path }}/kube-flannel.yml"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
 
 - name: copy kustomization.yml
   copy:
@@ -37,8 +40,8 @@
     src: "{{ item }}.j2"
     dest: "{{ tmp_dir.path }}/{{ item }}"
   with_items:
-  - customize_flannel_conf.yml
-  - flannel_change_cidr.yml
+    - customize_flannel_conf.yml
+    - flannel_change_cidr.yml
 
 - name: kustomize flannel
   shell: kubectl kustomize . > kustomized-flannel.yml
@@ -54,12 +57,12 @@
 
 - name: apply Flannel's NetworkAttachmentDefinition
   block:
-  - name: copy NetworkAttachmentDefinition to remote
-    template:
-      src: flannel_network_definition.yml.j2
-      dest: "{{ tmp_dir.path }}/flannel_network_definition.yml"
-  - name: apply Flannel's NetworkAttachmentDefinition
-    command: kubectl apply -f {{ tmp_dir.path }}/flannel_network_definition.yml
+    - name: copy NetworkAttachmentDefinition to remote
+      template:
+        src: flannel_network_definition.yml.j2
+        dest: "{{ tmp_dir.path }}/flannel_network_definition.yml"
+    - name: apply Flannel's NetworkAttachmentDefinition
+      command: kubectl apply -f {{ tmp_dir.path }}/flannel_network_definition.yml
   when:
-  - apply_netdef is defined
-  - apply_netdef
+    - apply_netdef is defined
+    - apply_netdef

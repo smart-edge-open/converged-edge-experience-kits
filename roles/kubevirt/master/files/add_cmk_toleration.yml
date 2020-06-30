@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- op: add
+  path: /spec/template/spec/tolerations
+  value:
+    - effect: NoSchedule
+      key: cmk
+      operator: Exists

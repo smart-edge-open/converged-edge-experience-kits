@@ -2,20 +2,28 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+_nfd_image_name: "quay.io/kubernetes_incubator/node-feature-discovery"
+_nfd_tag: "v0.5.0"
 
-certs_dest: /etc/openness/certs
+_nfd_chart_dir: "{{ ne_helm_charts_default_dir }}/node-feature-discovery"
+_nfd_cek_commit: "df61e6e46beb10ad596206ab25b04dbeb9162663"
+_nfd_cek_url:
+  "https://raw.githubusercontent.com/intel/container-experience-kits/\
+  {{ _nfd_cek_commit }}/roles/nfd-install/charts/node-feature-discovery"
 
-nfd_version: "v0.4.0"
+_nfd_release_name: "nfd-release"
 
-nfd_netpol: "{{ git_repo_dest }}/network-edge/nfd_network_policy.yml"
+_nfd_chart:
+  - ".helmignore"
+  - "Chart.yaml"
+  - "values.yaml"
 
-nfd_base_url: "https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/{{ nfd_version }}"
-nfd_yamls:
-- nfd-master.yaml
-- nfd-worker-daemonset.yaml
-
-kustomization_files_to_copy:
-- add_nfd_namespace.yml
-- kustomization.yml
-- replace_cluster_role_binding_namespace.yml
-- replace_service_account_namespace.yml
+_nfd_chart_templates:
+  - "templates/NOTES.txt"
+  - "templates/_helpers.tpl"
+  - "templates/config.yml"
+  - "templates/master.yml"
+  - "templates/rbac.yml"
+  - "templates/service.yml"
+  - "templates/tls.yml"
+  - "templates/worker.yml"

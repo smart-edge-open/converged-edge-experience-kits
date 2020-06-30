@@ -3,47 +3,61 @@
 
 ---
 
-- name: create temp dir
-  tempfile:
-    state: directory
-    suffix: -multus
-  register: tmp_dir
+- name: check if multus release already exists
+  command: helm status multus-release
+  ignore_errors: yes
+  register: get_release_multus
 
-- name: download Multus daemonSet
-  get_url:
-    url: "{{ multus_daemonset_url }}"
-    dest: "{{ tmp_dir.path }}/multus-daemonset.yml"
+- name: install Multus-cni chart
+  block:
+  - name: wait for docker registry to start
+    shell: >
+      set -o pipefail &&
+      kubectl get pods --field-selector status.phase=Running -n openness | grep -q docker-registry-deployment
+    register: docker_registry_started
+    retries: 60
+    delay: 15
+    until: docker_registry_started.rc == 0
+    changed_when: false
 
-- name: create kustomization.yml
-  copy:
-    src: kustomization.yml
-    dest: "{{ tmp_dir.path }}/kustomization.yml"
+  - name: pull multus image
+    docker_image:
+      name: "{{ _multus_image_name }}"
+      tag: "{{ _multus_image_tag }}"
+      source: pull
 
-- name: create rename_default_net.yml
-  copy:
-    src: rename_default_net.yml
-    dest: "{{ tmp_dir.path }}/rename_default_net.yml"
+  - name: tag multus image and push to docker registry
+    docker_image:
+      name: "{{ _multus_image_name }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/multus"
+      tag: "{{ _multus_image_tag }}"
+      push: yes
+      source: local
 
-- name: setup Multus
-  shell: >
-    set -o pipefail &&
-    kubectl kustomize . | kubectl apply -f -
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: true
+  - name: remove local image
+    docker_image:
+      state: absent
+      name: "{{ _multus_image_name }}"
+      tag: "{{ _multus_image_tag }}"
 
-- name: wait for Multus to start
-  shell: >
-    set -o pipefail &&
-    kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
-  register: multus_started
-  retries: 30
-  delay: 10
-  until: multus_started.rc == 0
-  changed_when: false
+  - name: copy multus-cni chart
+    copy:
+      src: "multus-cni"
+      dest: "{{ ne_helm_charts_default_dir }}"
 
-- name: remove temp directory
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
+  - name: install multus-cni chart
+    command: >
+      helm install multus-release {{ ne_helm_charts_default_dir }}/multus-cni
+      --set registry_ip={{ _registry_ip_address }} --set registry_port={{ _registry_port }} --set image_tag={{ _multus_image_tag }}
+    changed_when: true
+
+  - name: wait for Multus to start
+    shell: >
+      set -o pipefail &&
+      kubectl get pods --field-selector status.phase=Running -n kube-system | grep -q kube-multus-ds-amd64
+    register: multus_started
+    retries: 30
+    delay: 10
+    until: multus_started.rc == 0
+    changed_when: false
+  when: get_release_multus.rc != 0

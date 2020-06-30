@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+#Common values
+namespace: telemetry
+pullPolicy: IfNotPresent
+component: otel-collector
+rootSecretName: root-ca
+
+#Collector Values
+collector:
+  image: otel/opentelemetry-collector-dev:latest
+  replicas: 1
+  name: otel-collector
+  configMap: otel-collector-conf
+  configmapName: otel-collector-config-vol
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 400Mi
+  metricPrometheusPort: 9106    #Prometheus Metrics coming from agents
+  opencensusport: 55678         #OpenCensus receiver port
+  internalPrometheusPort: 8888  #Collectors own metrics
+
+  receivers: opencensus
+  opencensus:
+    endpoint: "0.0.0.0:55678"
+
+  exporters: prometheus
+  prometheus:
+    endpoint: "0.0.0.0:9106"
+    namespace: opentelemetry
+    const_labels:
+      label1: value1
+
+#Certs Values
+certs:
+  image: emberstack/openssl:latest
+  name: telemetry-collector-certs
+  certsHostPath: "{{ _telemetry_certs_dest }}" 
+
+#Proxy Values
+proxy:
+  metricPrometheusPort: 9105    #Prometheus Metrics coming from agents, exposed by nginx
+  internalPrometheusPort: 9107  #Collectors own metrics, exposed by nginx
+  opencensusport: 55668
+  serverNamePrometheus: otel_collector
+  serverNameAgent: otel-collector.telemetry.svc
+  name: otel-collector-proxy
+  image: nginx:alpine
+  pathToNginxCfg: /etc/nginx/nginx.conf
+  configMap: collector-proxy-config

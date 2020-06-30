@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: customize EVA config - Disable OVS
+  shell: >
+    set -o pipefail &&
+    jq '.OpenvSwitch=false | .OpenvSwitchBridge= ""' {{ _git_repo_dest }}/configs/eva.json |
+    sponge {{ _git_repo_dest }}/configs/eva.json
+  args:
+  changed_when: true
+
+- name: customize ELA config - reset PCI blacklist
+  shell: >
+    set -o pipefail &&
+    jq '.PCIBlacklist =  []'  {{ _git_repo_dest }}/configs/ela.json |
+    sponge {{ _git_repo_dest }}/configs/ela.json
+  args:
+  changed_when: true

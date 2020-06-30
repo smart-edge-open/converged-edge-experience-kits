@@ -5,7 +5,7 @@
 
 - name: copy biosfw plugin to dir with executables
   copy:
-    src: "{{ git_repo_dest }}/network-edge/kubectl-biosfw"
-    dest: "{{ biosfw_plugin_dest }}"
+    src: "{{ _git_repo_dest }}/network-edge/kubectl-biosfw"
+    dest: "{{ _biosfw_plugin_dest }}"
     mode: 0755
     remote_src: yes

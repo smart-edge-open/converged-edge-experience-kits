@@ -1,0 +1,281 @@
+diff --git a/Makefile.am b/Makefile.am
+index 591ac7c..388e139 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1073,6 +1073,12 @@ filecount_la_SOURCES = src/filecount.c
+ filecount_la_LDFLAGS = $(PLUGIN_LDFLAGS)
+ endif
+ 
++if BUILD_PLUGIN_FPGA_TELEMETRY
++pkglib_LTLIBRARIES += fpga_telemetry.la
++fpga_telemetry_la_SOURCES = src/fpga_telemetry.c
++fpga_telemetry_la_LDFLAGS = ${PLUGIN_LDFLAGS}
++endif
++
+ if BUILD_PLUGIN_FSCACHE
+ pkglib_LTLIBRARIES += fscache.la
+ fscache_la_SOURCES = src/fscache.c
+diff --git a/configure.ac b/configure.ac
+index 2a3152c..3166436 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -6577,6 +6577,7 @@ plugin_dpdk_telemetry="no"
+ plugin_entropy="no"
+ plugin_ethstat="no"
+ plugin_fhcount="no"
++plugin_fpga_telemetry="no"
+ plugin_fscache="no"
+ plugin_gps="no"
+ plugin_gpu_nvidia="no"
+@@ -6643,6 +6644,7 @@ if test "x$ac_system" = "xLinux"; then
+   plugin_drbd="yes"
+   plugin_entropy="yes"
+   plugin_fhcount="yes"
++  plugin_fpga_telemetry="yes"
+   plugin_fscache="yes"
+   plugin_hugepages="yes"
+   plugin_interface="yes"
+@@ -7035,6 +7037,7 @@ AC_PLUGIN([ethstat],             [$plugin_ethstat],           [Stats from NIC dr
+ AC_PLUGIN([exec],                [yes],                       [Execution of external programs])
+ AC_PLUGIN([fhcount],             [$plugin_fhcount],           [File handles statistics])
+ AC_PLUGIN([filecount],           [yes],                       [Count files in directories])
++AC_PLUGIN([fpga_telemetry],      [$plugin_fpga_telemetry],    [FPGA telemetry plugin])
+ AC_PLUGIN([fscache],             [$plugin_fscache],           [fscache statistics])
+ AC_PLUGIN([gmond],               [$with_libganglia],          [Ganglia plugin])
+ AC_PLUGIN([gps],                 [$plugin_gps],               [GPS plugin])
+@@ -7479,6 +7482,7 @@ AC_MSG_RESULT([    ethstat . . . . . . . $enable_ethstat])
+ AC_MSG_RESULT([    exec  . . . . . . . . $enable_exec])
+ AC_MSG_RESULT([    fhcount . . . . . . . $enable_fhcount])
+ AC_MSG_RESULT([    filecount . . . . . . $enable_filecount])
++AC_MSG_RESULT([    fpga_telemetry  . . . $enable_fpga_telemetry])
+ AC_MSG_RESULT([    fscache . . . . . . . $enable_fscache])
+ AC_MSG_RESULT([    gmond . . . . . . . . $enable_gmond])
+ AC_MSG_RESULT([    gps . . . . . . . . . $enable_gps])
+diff --git a/src/collectd.conf.in b/src/collectd.conf.in
+index e335f9c..868a186 100644
+--- a/src/collectd.conf.in
++++ b/src/collectd.conf.in
+@@ -130,6 +130,7 @@
+ #@BUILD_PLUGIN_EXEC_TRUE@LoadPlugin exec
+ #@BUILD_PLUGIN_FHCOUNT_TRUE@LoadPlugin fhcount
+ #@BUILD_PLUGIN_FILECOUNT_TRUE@LoadPlugin filecount
++@BUILD_PLUGIN_TELEMETRY_TRUE@LoadPlugin fpga_telemetry
+ #@BUILD_PLUGIN_FSCACHE_TRUE@LoadPlugin fscache
+ #@BUILD_PLUGIN_GMOND_TRUE@LoadPlugin gmond
+ #@BUILD_PLUGIN_GPS_TRUE@LoadPlugin gps
+@@ -685,6 +686,9 @@
+ #	</Directory>
+ #</Plugin>
+ 
++#<Plugin fpga_telemetry>
++#</Plugin>
++
+ #<Plugin gmond>
+ #  MCReceiveFrom "239.2.11.71" "8649"
+ #  <Metric "swap_total">
+diff --git a/src/collectd.conf.pod b/src/collectd.conf.pod
+index cb9e40f..03f861c 100644
+--- a/src/collectd.conf.pod
++++ b/src/collectd.conf.pod
+@@ -3363,6 +3363,11 @@ Sets the I<type instance> used to dispatch values. Defaults to an empty string
+ 
+ =back
+ 
++=head2 Plugin C<fpga_telemetry>
++
++The I<FPGA_Telemetry> plugin records the current power and temperature
++from an FPGA card.
++
+ =head2 Plugin C<GenericJMX>
+ 
+ The I<GenericJMX plugin> is written in I<Java> and therefore documented in
+diff --git a/src/fpga_telemetry.c b/src/fpga_telemetry.c
+new file mode 100644
+index 0000000..fe48b84
+--- /dev/null
++++ b/src/fpga_telemetry.c
+@@ -0,0 +1,171 @@
++/*
++ * MIT License
++ *
++ * Copyright(c) 2016 Intel Corporation. All rights reserved.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++ * SOFTWARE.
++ */
++
++#include "collectd.h"
++#include "plugin.h"
++#include "utils/common/common.h"
++
++#include <malloc.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <unistd.h>
++
++#define PLUGIN_NAME "fpga_telemetry_plugin"
++#define PLUGIN_TYPE_POWER "fpga_telemetry_power"
++#define PLUGIN_TYPE_TEMP "fpga_telemetry_temp"
++
++#define READ_BUFFER_SIZE 2048
++
++static int fpga_telemetry_read_info(const char *fpga_telemetry_info, const char *filepath) {
++  char *cmd_path;
++
++  cmd_path = calloc(1, READ_BUFFER_SIZE);
++
++  strcat(cmd_path, "fpgainfo ");
++  strcat(cmd_path, fpga_telemetry_info);
++  strcat(cmd_path, " > ");
++  strcat(cmd_path, filepath);
++
++  system(cmd_path);
++
++  free(cmd_path);
++
++  return 0;
++}
++
++static int fpga_telemetry_parse_dispatch_info(const char *filepath, const char* plugin_type) {
++  FILE *fd;
++  ssize_t bytes_read = 1;
++  size_t buf_size = READ_BUFFER_SIZE;
++  char *read_buf;
++  char *plugin_instance = NULL;
++  char *device_id_ptr = NULL;
++  const char *start_of_telemetry = "Pr Interface Id";
++  const char *device_id_check = "PCIe s:b:d.f";
++  int result_found = 0;
++  value_list_t fpga_telemetry_stats = VALUE_LIST_INIT;
++
++  fd = fopen(filepath, "r");
++  if (fd == NULL) {
++    INFO(PLUGIN_NAME " Failed to open file %s", filepath);
++    return -1;
++  }
++
++  while (bytes_read != -1) {
++    read_buf = malloc(READ_BUFFER_SIZE);
++    bytes_read = getline(&read_buf, &buf_size, fd);
++    if (bytes_read == -1) {
++      free(read_buf);
++      fclose(fd);
++      break;
++    }
++
++    if (plugin_instance == NULL) {
++      plugin_instance = strstr(read_buf, device_id_check);
++      if (plugin_instance != NULL) {
++        char *result = strtok_r(plugin_instance, ".", &device_id_ptr);
++        if (result == NULL) {
++          return -1;
++        }
++
++        result = strtok_r(NULL, ":", &device_id_ptr);
++        if (result == NULL) {
++          return -1;
++        }
++
++        char *device_id = strtok_r(NULL, " ", &device_id_ptr);
++        if (device_id == NULL) {
++          return -1;
++        }
++        stpncpy(device_id_ptr, device_id, strlen(device_id)-1);
++        sstrncpy(fpga_telemetry_stats.plugin_instance, device_id_ptr, sizeof(fpga_telemetry_stats.plugin_instance));
++      }
++    }
++
++    if (result_found == 0) {
++      char *fpga_telemetry_start = strstr(read_buf, start_of_telemetry);
++      if (fpga_telemetry_start != NULL) {
++        result_found = 1;
++      }
++    } else {
++      char *counter_value = NULL;
++
++      char *counter_name = strtok_r(plugin_instance, ":", &counter_value);
++      if (counter_name == NULL) {
++        return -1;
++      }
++
++      char *value_result = strtok_r(NULL, " ", &counter_value);
++      if (value_result == NULL) {
++        return -1;
++      }
++
++      gauge_t fpga_telemetry_value = atof(value_result);
++      fpga_telemetry_stats.values = &(value_t){.gauge = fpga_telemetry_value};
++      fpga_telemetry_stats.values_len = 1;
++      sstrncpy(fpga_telemetry_stats.plugin, PLUGIN_NAME, sizeof(fpga_telemetry_stats.plugin));
++      sstrncpy(fpga_telemetry_stats.type, plugin_type, sizeof(fpga_telemetry_stats.type));
++      sstrncpy(fpga_telemetry_stats.type_instance, counter_name, sizeof(fpga_telemetry_stats.type_instance));
++      plugin_dispatch_values(&fpga_telemetry_stats);
++    }
++    free(read_buf);
++  }
++
++  return 0;
++}
++
++static int fpga_telemetry_read(__attribute__((unused)) user_data_t *ud) {
++  INFO(PLUGIN_NAME ":%s:%d", __FUNCTION__, __LINE__);
++
++  const char *fpga_telemetry_cmds[] = {"power", "temp"};
++  const char *fpga_telemetry_results_filepath = "/root/collectd_plugin/fpga_telemetry_results.txt";
++  const char *fpga_telemetry_plugin_type[] = {PLUGIN_TYPE_POWER, PLUGIN_TYPE_TEMP};
++  int num_stats = (int)(sizeof(fpga_telemetry_cmds)/sizeof(char*));
++
++  for (int i = 0; i < num_stats; i++) {
++    fpga_telemetry_read_info(fpga_telemetry_cmds[i], fpga_telemetry_results_filepath);
++    fpga_telemetry_parse_dispatch_info(fpga_telemetry_results_filepath, fpga_telemetry_plugin_type[i]);
++  }
++
++  return 0;
++}
++
++static int fpga_telemetry_shutdown(void) {
++  INFO(PLUGIN_NAME ":%s:%d", __FUNCTION__, __LINE__);
++
++  return 0;
++}
++
++static int fpga_telemetry_init(void) {
++  INFO(PLUGIN_NAME ":%s:%d", __FUNCTION__, __LINE__);
++
++  return 0;
++}
++
++void module_register(void) {
++  plugin_register_init(PLUGIN_NAME, fpga_telemetry_init);
++  plugin_register_complex_read(NULL, PLUGIN_NAME, fpga_telemetry_read, 0, NULL);
++  plugin_register_shutdown(PLUGIN_NAME, fpga_telemetry_shutdown);
++}
+diff --git a/src/types.db b/src/types.db
+index 28fa417..66f18fe 100644
+--- a/src/types.db
++++ b/src/types.db
+@@ -101,6 +101,8 @@ files                   value:GAUGE:0:U
+ filter_result           value:DERIVE:0:U
+ flow                    value:GAUGE:0:U
+ fork_rate               value:DERIVE:0:U
++fpga_telemetry_power    value:GAUGE:0:U
++fpga_telemetry_temp     value:GAUGE:0:U
+ freepages               value:GAUGE:0:U
+ frequency               value:GAUGE:0:U
+ frequency_error         value:GAUGE:-1000000:1000000

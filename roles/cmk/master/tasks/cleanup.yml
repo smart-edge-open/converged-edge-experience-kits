@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove CPU Manager release if exist
+  block:
+  - name: check if CPU Manager release exists
+    command: helm status cmk-release --namespace=cmk-namespace
+    ignore_errors: yes
+    register: get_release_cmk
+  - name: remove CPU Manager release
+    command: helm uninstall cmk-release --namespace=cmk-namespace
+    when: get_release_cmk.rc == 0
+    changed_when: true
+
+- name: delete cmk-namespace if exist
+  block:
+  - name: check if cmk-namespace exists
+    command: kubectl get ns cmk-namespace
+    ignore_errors: yes
+    register: get_ns_cmk_namespace
+  - name: delete cmk-namespace
+    command: kubectl delete namespace cmk-namespace
+    when: get_ns_cmk_namespace.rc == 0
+    changed_when: true
+
+- name: remove CPU Manager directories and files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ _cmk_main_dir }}"
+    - "{{ _cmk_chart_dir }}"
+    - "{{ ne_helm_charts_default_dir }}/cmk-values.yml"

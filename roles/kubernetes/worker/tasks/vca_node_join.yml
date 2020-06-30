@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: check if VCA node already in cluster
+  command: kubectl get node {{ vca_node_name }}
+  register: get_node
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+  changed_when: false
+
+- name: join VCA node the cluster
+  block:
+  # If playbook failed because kubeadm join failed, then most probably /etc/kubernetes was created
+  # Next execution of the playbook will also fail, because /etc/kubernetes exists
+  # So, since the node is no part of cluster, let's try to delete /etc/kubernetes just in case
+  - name: remove /etc/kubernetes
+    command: "ssh {{ vca_node_ip }} rm -rf /etc/kubernetes"
+  - name: obtain the join command
+    command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ vca_node_name }}"
+    register: join_command
+    delegate_to: "{{ groups['controller_group'][0] }}"
+  - name: join VCA node to the cluster
+    command: "ssh {{ vca_node_ip }} '{{ join_command.stdout }}'"
+  when: get_node.rc == 1
+
+- name: set VCA node role as a worker
+  command: kubectl label node {{ vca_node_name }} node-role.kubernetes.io/worker=worker --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: label VCA node with vcac-zone=yes
+  command: kubectl label node {{ vca_node_name }} vcac-zone=yes --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: group VCA nodes into vcac-pool
+  command: kubectl label node {{ vca_node_name }} vcac-pool={{ inventory_hostname }} --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: label VCA node with hddl-zone=yes
+  command: kubectl label node {{ vca_node_name }} hddl-zone=yes --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true

@@ -1,0 +1,165 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../certs/defaults/main.yml
+
+- name: certificates for prometheus
+  block:
+  - name: create directory for server certificates
+    file:
+      name: "{{ _telemetry_certs_dest }}/prometheus"
+      state: directory
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _telemetry_certs_dest }}/CA/cert.pem"
+      dest: "{{ _telemetry_certs_dest }}/prometheus/root.pem"
+      state: link
+  - name: create server certificate signed by root CA certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh prometheus {{ _telemetry_certs_dest }}/prometheus {{ _telemetry_certs_dest }}/CA"
+  - name: delete symbolic link to root's cert
+    file:
+      path: "{{ _telemetry_certs_dest }}/prometheus/root.pem"
+      state: absent
+
+- name: open port for Prometheus
+  ignore_errors: yes
+  firewalld:
+    port: 30000/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: check if Prometheus release already exists
+  command: helm status prometheus -n telemetry
+  ignore_errors: yes
+  register: get_release_prometheus
+  changed_when: false
+
+- name: install Prometheus chart
+  block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: prometheus
+    register: tmp_dir
+
+  - name: template values.yml to tmp directory
+    template:
+      src: values.yml.j2
+      dest: "{{ tmp_dir.path }}/values.yml"
+
+  - name: add default Helm repository
+    command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    changed_when: true
+
+  - name: create Prometheus chart template directory
+    file:
+      name: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ _prometheus_chart_dir }}"
+      - "{{ _prometheus_chart_dir }}/templates"
+    changed_when: true
+
+  - name: download Prometheus chart
+    get_url:
+      url: "{{ _prometheus_chart_url }}/{{ item }}"
+      dest: "{{ _prometheus_chart_dir }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _prometheus_chart }}"
+
+  - name: download Prometheus chart templates
+    get_url:
+      url: "{{ _prometheus_chart_url }}/{{ item }}"
+      dest: "{{ _prometheus_chart_dir }}/templates"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _prometheus_chart_templates }}"
+
+  - name: create directory for persistent volumes
+    file:
+      path: "{{ _pv_dir }}"
+      state: directory
+
+  - name: create directories for persistent volumes
+    file:
+      path: "{{ _pv_dir }}/{{ item }}"
+      state: directory
+    with_items: "{{ _pv_names }}"
+
+  - name: template definitions of persistent volumes
+    template:
+      src: "volume.yml"
+      dest: "{{ tmp_dir.path }}/{{ item }}.yml"
+    with_items: "{{ _pv_names }}"
+    changed_when: true
+
+  - name: apply definitions of persistent volumes
+    command: kubectl apply -n telemetry -f "{{ tmp_dir.path }}/{{ item }}.yml"
+    with_items: "{{ _pv_names }}"
+    changed_when: true
+
+  - name: copy template file
+    copy:
+      src: node-exporter-configmap.yaml
+      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-configmap.yaml"
+
+  - name: copy server-service-tls template file
+    copy:
+      src: server-service-tls.yaml
+      dest: "{{ _prometheus_chart_dir }}/templates/server-service-tls.yaml"
+
+  - name: copy server proxy template file
+    copy:
+      src: server-proxy-configmap.yaml
+      dest: "{{ _prometheus_chart_dir }}/templates/server-proxy-configmap.yaml"
+
+  - name: template telemetry-certs-daemonset
+    template:
+      src: telemetry-certs-daemonset.yml.j2
+      dest: "{{ _prometheus_chart_dir }}/templates/telemetry-certs-daemonset.yaml"
+
+  - name: install patch utility
+    yum:
+      name: patch
+      state: present
+
+  - name: apply node-exporter-daemonset patch
+    patch:
+      src: node-exporter-daemonset.patch
+      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-daemonset.yaml"
+      strip: 1
+      binary: no
+      backup: no
+
+  - name: find backup files
+    find:
+      paths: "{{ _prometheus_chart_dir }}/templates"
+      patterns: "*.orig"
+    register: backup_files
+
+  - name: remove backup files
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ backup_files.files }}"
+    changed_when: true
+
+  - name: install Prometheus release
+    command: "helm install prometheus --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _prometheus_chart_dir }}"
+    changed_when: true
+
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+  when: get_release_prometheus.rc != 0

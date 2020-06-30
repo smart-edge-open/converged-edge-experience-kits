@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+#Common values
+namespace: telemetry
+pullPolicy: IfNotPresent
+component: pcm
+
+#Pcm Values
+pcm:
+  image: opcm/pcm
+  replicas: 1
+  name: pcm
+  app: pcm
+
+#Proxy Values
+proxy:
+  metricsPcmPort: 9739
+  internalPcmPort: 9738
+  serverName: pcm
+  name: pcm-proxy
+  certsDest: /root/certs/pcm
+  image: nginx:alpine
+  pathToNginxCfg: /etc/nginx/nginx.conf
+  configMap: pcm-proxy-config
+
+#Certs Values
+certs:
+  image: emberstack/openssl:latest
+  name: openssl
+
+#Service Values
+service:
+  name: pcm
+  type: NodePort
+  port: 3000
+  targetPort: 9739
+  nodePort: 32100

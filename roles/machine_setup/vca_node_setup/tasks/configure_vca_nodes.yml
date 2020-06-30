@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: prepare VCAC-A nodes
+  block:
+    - name: delete VCAC-A node from ~/.ssh/known_hosts
+      lineinfile:
+        path: ~/.ssh/known_hosts
+        regexp: '^{{ vca_node_ip }}'
+        state: absent
+      ignore_errors: yes
+
+    - name: establish password-less access from host to VCAC-A node
+      shell: |
+        ssh-keygen -q -N '' -C "$HOSTNAME" -f ~/.ssh/id_rsa <<< y > /dev/null
+        sshpass -p "{{ _vca_img_pswd }}" ssh-copy-id -o StrictHostKeyChecking=no root@"{{ vca_node_ip }}"
+      changed_when: true
+
+    - name: remove resolv.conf soft link file (../run/systemd/resolve/stub-resolv.conf) on VCA node
+      command: "ssh {{ vca_node_ip }} rm -f /etc/resolv.conf"
+      changed_when: true
+
+    - name: copy resolv & env files to VCAC-A node
+      command: "scp /etc/{{ item }} {{ vca_node_ip }}:/etc/"
+      with_items:
+        - resolv.conf
+        - environment
+      changed_when: true
+
+    - name: install timezone on VCA node
+      shell: |
+        set -o pipefail
+        ssh "{{ vca_node_ip }}" apt update
+        ssh "{{ vca_node_ip }}" apt install -y dbus tzdata
+        ssh "{{ vca_node_ip }}" timedatectl set-timezone $(timedatectl | awk '/Time zone:/{print$3}')
+      changed_when: true
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+
+# Start configuration on vca-node.
+# Because vca-node is behind NAT and not in the ansible inventory, need below mitigation for the configuration.
+- name: copy install scripts to VCA node
+  block:
+    - name: copy install scripts to host
+      template:
+        src: "{{ item }}.j2"
+        dest: "{{ _vca_dest }}/{{ item }}"
+        mode: a+x
+      with_items:
+        - install_docker.sh
+        - install_kubernetes.sh
+    - name: scp install scripts to VCA node
+      command: "scp {{ _vca_dest }}/{{ item }} {{ vca_node_ip }}:/root/"
+      with_items:
+        - install_docker.sh
+        - install_kubernetes.sh
+    - name: create `docker.service.d` folder
+      command: "ssh {{ vca_node_ip }} mkdir -p /etc/systemd/system/docker.service.d/"
+    - name: scp proxy to node
+      command: "scp /etc/systemd/system/docker.service.d/http-proxy.conf {{ vca_node_ip }}:/root/"
+    - name: create `.docker` folder
+      command: "ssh {{ vca_node_ip }} mkdir -p /root/.docker/"
+    - name: scp config to node
+      command: "scp /root/.docker/config.json {{ vca_node_ip }}:/root/.docker/config.json"
+    - name: install docker & kubernetes on VCA node
+      command: "ssh {{ vca_node_ip }} ./{{ item }}"
+      with_items:
+        - install_docker.sh
+        - install_kubernetes.sh
+      changed_when: true

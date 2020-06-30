@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 
 ---
 
-golang_version: "1.12.13"
-golang_download_checksum: "da036454cb3353f9f507f0ceed4048feac611065e4e1818b434365eb32ac9bdc"
+_golang_version: "1.12.13"
+_golang_download_checksum: "da036454cb3353f9f507f0ceed4048feac611065e4e1818b434365eb32ac9bdc"
 
-golang_download_name: "go{{ golang_version }}.linux-amd64.tar.gz"
-golang_download_url: "https://dl.google.com/go/{{ golang_download_name }}"
-golang_download_dest: "/tmp/{{ golang_download_name }}"
+_golang_download_name: "go{{ _golang_version }}.linux-amd64.tar.gz"
+_golang_download_url: "https://dl.google.com/go/{{ _golang_download_name }}"
+_golang_download_dest: "/tmp/{{ _golang_download_name }}"

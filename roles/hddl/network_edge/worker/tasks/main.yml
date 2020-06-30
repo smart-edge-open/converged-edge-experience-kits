@@ -4,44 +4,46 @@
 ---
 - name: remove old centos directory for hddldaemon
   file:
-    path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
+    path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
     state: absent
 
 - name: create centos directory for hddldaemon
   block:
     - name: create 1st level folder
       file:
-        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
+        path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810"
         state: directory
     - name: create 2nd level folder
       file:
-        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
+        path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
         state: directory
     - name: create 3rd level folder
       file:
-        path: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
+        path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
         state: directory
 
 - name: copy files from ubuntu for hddldaemon
   copy:
-    src: "{{ hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/analytics/hddldaemon"
-    dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
+    src: "{{ _hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/analytics/hddldaemon"
+    dest: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics"
     remote_src: yes
 
 - name: create kustomization files from templates
   template:
     src: "{{ item }}.j2"
-    dest: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon/{{ item }}"
+    dest: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon/{{ item }}"
     mode: 0777
   with_items:
   - build.sh
+  - run_hddl.sh
+  - init_hddl.sh
   - shell.sh
   - Dockerfile
 
 - name: build hddlaaemon container image
-  shell: ./build.sh
+  command: ./build.sh
   args:
-    chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
+    chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/centos-7.6.1810/analytics/hddldaemon"
   changed_when: true
 
 - name: create hddldaemonSet
@@ -50,4 +52,27 @@
   run_once: true
   changed_when: true
   args:
-    chdir: "{{ hddldaemon_container.download_dir }}/VCAC-A/script"
+    chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/script"
+
+- name: set hddl worker node name
+  block:
+  - name: get hostname
+    command: hostname
+    register: hddlhostname_output
+  - name: set hddlhostname
+    set_fact:
+      hddl_worker_node_name: "{{ hddlhostname_output.stdout |lower }}"
+
+- name: label hddl worker node with hddl-zone=yes
+  command: kubectl label node {{ hddl_worker_node_name }} hddl-zone=yes --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: wait for running ov_hddl container
+  docker_container_info:
+    name: ov_hddl
+  register: hddldaemon_container_result
+  retries: 30
+  delay: 5
+  until: hddldaemon_container_result.exists
+  changed_when: false

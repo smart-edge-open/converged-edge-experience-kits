@@ -8,8 +8,8 @@
 - name: Reseting ela config
   shell: >
     set -o pipefail &&
-    jq '.PCIBlacklist =  []'  {{ git_repo_dest }}/configs/ela.json |
-    sponge {{ git_repo_dest }}/configs/ela.json
+    jq '.PCIBlacklist =  []'  {{ _git_repo_dest }}/configs/ela.json |
+    sponge {{ _git_repo_dest }}/configs/ela.json
   args:
   changed_when: true
 

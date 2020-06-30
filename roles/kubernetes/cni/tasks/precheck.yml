@@ -22,8 +22,23 @@
   - '"kubeovn" in kubernetes_cnis'
   - kubernetes_cnis[0] != "kubeovn"
 
+- name: fail if calico-ebpf isn't a primary CNI (calico-ebpf works as primary only)
+  # As of now calcio-ebpf works only in primary, not working with kubeovn as primary.
+  # They are conflicting each other.
+  fail:
+    msg: "Due to calico-ebpf implementation it is only currently supported as a primary (main, 1st) CNI"
+  when:
+  - '"calico" in kubernetes_cnis'
+  - kubernetes_cnis[0] != "calico"
+  - calico_ebpf_enabled
+
+- name: load kubernetes/cni defaults
+  include_vars:
+    file: ../defaults/main.yml
+    name: defaults
+
 - name: fail if requested CNI is not available
   fail:
     msg: "Requested CNI is not available: {{ item }}"
   with_items: "{{ kubernetes_cnis }}"
-  when: "item not in available_kubernetes_cnis"
+  when: "item not in defaults._available_kubernetes_cnis"

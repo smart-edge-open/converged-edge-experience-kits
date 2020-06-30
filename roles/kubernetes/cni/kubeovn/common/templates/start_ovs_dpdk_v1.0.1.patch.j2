@@ -1,0 +1,18 @@
+diff --git a/start-ovs-dpdk.sh b/start-ovs-dpdk.sh
+index 851961a..44fa64f 100755
+--- a/start-ovs-dpdk.sh
++++ b/start-ovs-dpdk.sh
+@@ -46,6 +46,13 @@ if [[ `nproc` -gt 12 ]]; then
+ fi
+ 
+ # Start ovsdb
++
++ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="{{ kubeovn_dpdk_socket_mem }}"
++ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true
++ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask={{ kubeovn_dpdk_pmd_cpu_mask }}
++ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask={{ kubeovn_dpdk_lcore_mask }}
++ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-hugepage-dir="/hugepages"
++
+ /usr/share/openvswitch/scripts/ovs-ctl restart --no-ovsdb-server  --system-id=random
+ /usr/share/openvswitch/scripts/ovs-ctl --protocol=udp --dport=6081 enable-protocol
+ 

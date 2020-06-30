@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
-
----
-
-cnca_plugin_name: "kubectl-cnca"
-cnca_plugin_dest: "/usr/local/bin/kubectl-cnca"
-certs_dest: "/etc/openness/certs"

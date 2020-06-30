@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: check if cadvisor already exists
+  command: helm status cadvisor -n telemetry
+  ignore_errors: yes
+  changed_when: False
+  register: get_cadvisor
+
+- name: copy Helm chart to Controller node
+  block:
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ role_path }}/charts/"
+      dest: "{{ _cadvisor_chart_dir }}"
+
+- name: install cadvisor using Helm
+  command: "helm install cadvisor --namespace telemetry {{ _cadvisor_chart_dir }}"
+  changed_when: true
+  when: get_cadvisor.rc != 0

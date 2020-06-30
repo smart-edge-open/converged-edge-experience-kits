@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: print group_vars
+  shell: grep -v -E "^#|^$|^--|git_repo_token" "group_vars/{{ item.path }}" || true
+  delegate_to: localhost
+  with_filetree: ./group_vars
+  changed_when: false
+  run_once: true
+  when:
+  - item.state == 'file' or item.state == 'link'
+
+- name: print host_vars
+  shell: grep -v -E "^#|^$|^--" "host_vars/{{ item.path }}" || true
+  delegate_to: localhost
+  with_filetree: ./host_vars
+  changed_when: false
+  run_once: true
+  when:
+  - item.state == 'file' or item.state == 'link'
+  - "'_example_variables' not in item.path"
+
+- name: print vars about environment
+  debug:
+    msg: |
+      ansible ver: {{ ansible_version.string }}
+      distro: {{ ansible_distribution }} {{ ansible_distribution_version }}
+      hostname: {{ ansible_hostname }}
+      cmdline: {{ ansible_proc_cmdline }}
+      interfaces: {{ ansible_interfaces }}
+      memory: {{ ansible_memory_mb }}
+      cpu: {{ ansible_processor }}

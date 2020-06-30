@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include certs variables
+  include_vars: ../../certs/defaults/main.yml
+
+- name: check if OpenTelemetry release already exists
+  command: helm status otel-collector -n telemetry
+  ignore_errors: yes
+  register: get_release_collector
+  changed_when: false
+
+- name: template Helm chart, copy and install to Controller node
+  block:
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ role_path }}/charts/"
+      dest: "{{ _otel_collector_chart_dir }}"
+
+  - name: template and copy values.yaml
+    template:
+      src: "values.yaml.j2"
+      dest: "{{ _otel_collector_chart_dir }}/values.yaml"
+      force: yes
+
+  - name: install otel collector using Helm
+    command: "helm install otel-collector --namespace telemetry {{ _otel_collector_chart_dir }}"
+    changed_when: true
+  when: get_release_collector.rc != 0
+

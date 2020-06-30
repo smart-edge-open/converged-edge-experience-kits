@@ -19,19 +19,20 @@ do
   echo "ACTION==\"add\", SUBSYSTEM==\"net\", KERNEL==\"eth${CARD}\", ENV{NM_UNMANAGED}=\"1\"" >> $net_rule
 done
 systemctl restart systemd-udevd
-vcactl pwrbtn-long 0 0
-vcactl pwrbtn-short 0 0
-vcactl reset 0 0 --force
-systemctl stop firewalld
+
+for CARD in $(seq 0 $CARDS_NUM)
+do
+  vcactl pwrbtn-long ${CARD} 0
+  vcactl pwrbtn-short ${CARD} 0
+  vcactl reset ${CARD} 0 --force
+done
 sleep 10
 
 for CARD in $(seq 0 $CARDS_NUM)
 do
-  vcactl config 0 0 node-name vcanode0${CARD}
   vcactl boot ${CARD} 0 vcablk0 --force
 done
 sleep 30
+
 vcactl status
 vcactl network ip
-echo 1 > /proc/sys/net/ipv4/ip_forward
-iptables -t nat -A POSTROUTING -s 172.32.1.1 -d 0/0 -j MASQUERADE

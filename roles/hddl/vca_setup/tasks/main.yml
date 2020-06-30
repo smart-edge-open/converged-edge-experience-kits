@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: run vpu metrics on all VCA nodes -- this automatically starts hddl daemon
+  command: "ssh {{ vca_node_ip }} /opt/intel/vcaa/vpu_metric/run.sh start"
+  register: run_vpu_metrics
+  failed_when: run_vpu_metrics.rc != 0
+  changed_when: run_vpu_metrics.rc == 0
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+
+- name: wait for hddl daemon ready
+  command: "scp {{ vca_node_ip }}:/var/tmp/hddl_service_ready.mutex /tmp/"
+  register: get_hddl_ready
+  retries: 30
+  delay: 30
+  until: get_hddl_ready.rc == 0
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  changed_when: true
+
+- name: wait for metrics generated on VCAC-C node, normally take about 5 minutes
+  command: "scp {{ vca_node_ip }}:/tmp/node-exporter/vpu_device_thermal.prom /tmp/"
+  register: get_vpu_metrics
+  retries: 100
+  delay: 30
+  until: get_vpu_metrics.rc == 0
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  changed_when: true
+
+- name: wait for metrics graped on controller TAS, normally take about 1 minutes
+  command: "kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/nodes/*/vpu_device_thermal"
+  register: grape_vpu_metrics
+  retries: 30
+  delay: 30
+  until: grape_vpu_metrics.rc == 0
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: deploy vca policy that uses this vpu metrics
+  block:
+    - name: create tmp folder
+      tempfile:
+        state: directory
+        suffix: .vca_policy
+      register: tmp_dir
+    - name: copy vca policy files
+      copy:
+        src: "vca-tas-policy.yaml"
+        dest: "{{ tmp_dir.path }}/"
+    - name: deploy the vca policy
+      command: kubectl apply -f "{{ tmp_dir.path }}/vca-tas-policy.yaml"
+      changed_when: true
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true

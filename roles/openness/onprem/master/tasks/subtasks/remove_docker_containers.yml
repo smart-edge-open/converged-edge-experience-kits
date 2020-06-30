@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: check Docker service
   command: systemctl status docker
   ignore_errors: true
@@ -12,7 +11,7 @@
   register: docker_service_status
 
 - name: check if repository folder exists
-  command: "stat {{ git_repo_dest }}"
+  command: "stat {{ _git_repo_dest }}"
   ignore_errors: true
   register: repo_folder_result
   changed_when: false
@@ -20,8 +19,7 @@
 - name: remove all Docker containers
   command: docker-compose rm --stop -f
   args:
-    chdir: "{{ git_repo_dest }}"
+    chdir: "{{ _git_repo_dest }}"
   when:
     - docker_service_status.rc == 0
     - repo_folder_result.rc == 0
-

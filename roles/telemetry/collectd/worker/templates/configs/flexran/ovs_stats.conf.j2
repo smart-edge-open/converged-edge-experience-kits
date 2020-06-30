@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+<LoadPlugin ovs_stats>
+   Interval 1
+</LoadPlugin>
+<Plugin "ovs_stats">
+   Socket "/var/run/openvswitch/db.sock"
+</Plugin>

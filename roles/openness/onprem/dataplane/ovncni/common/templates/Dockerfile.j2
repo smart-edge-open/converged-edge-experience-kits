@@ -5,13 +5,13 @@ FROM centos:7
 
 ENV PYTHONDONTWRITEBYTECODE yes
 
-ENV DPDK_VERSION={{ ovn_img_dpdk_version }}
+ENV DPDK_VERSION={{ _ovn_img_dpdk_version }}
 ENV DPDK_DIR=/usr/src/dpdk-$DPDK_VERSION
-ENV DPDK_TARGET={{ ovn_img_dpdk_target }}
+ENV DPDK_TARGET={{ _ovn_img_dpdk_target }}
 ENV DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
-ENV OVS_VERSION={{ ovs_img_version }}
-{% if host_ip != controller_ip %}
-ENV OVN_NB_DB=tcp:{{ controller_ip }}:6641
+ENV OVS_VERSION={{ _ovs_img_version }}
+{% if _host_ip != _controller_ip %}
+ENV OVN_NB_DB=tcp:{{ _controller_ip }}:6641
 {% endif %}
 
 RUN yum install -y \
@@ -19,12 +19,12 @@ RUN yum install -y \
   libcap-ng libcap-ng-devel libcap-devel \
   numactl-devel numactl-libs \
   unbound unbound-devel \
-  openssl openssl-devel \
+  openssl-devel \
   itables iproute \
   && \
   yum install -y epel-release \
   && \
-  yum install -y python-pip
+  yum install -y python-pip openssl11
 
 RUN pip install six
 
@@ -34,13 +34,13 @@ COPY x86_64-native-linuxapp-gcc $DPDK_DIR/x86_64-native-linuxapp-gcc
 WORKDIR /root
 
 RUN curl -OL https://www.openvswitch.org/releases/openvswitch-$OVS_VERSION.tar.gz && \
-    tar xf openvswitch-$OVS_VERSION.tar.gz && \
-    rm -f openvswitch-$OVS_VERSION.tar.gz && \
-    cd openvswitch-$OVS_VERSION && \
-    ./boot.sh && \
-    ./configure --prefix=/usr/ --localstatedir=/var --with-dpdk=$DPDK_BUILD && \
-    make -j$(nproc) && \
-    make install
+  tar xf openvswitch-$OVS_VERSION.tar.gz && \
+  rm -f openvswitch-$OVS_VERSION.tar.gz && \
+  cd openvswitch-$OVS_VERSION && \
+  ./boot.sh && \
+  ./configure --prefix=/usr/ --localstatedir=/var --with-dpdk=$DPDK_BUILD && \
+  make -j$(nproc) && \
+  make install
 
 RUN mkdir -p /var/run/openvswitch /etc/cni/net.d /opt/cni/bin
 

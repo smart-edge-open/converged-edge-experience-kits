@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: cleanup docker-registry
+  command: "{{ item }}"
+  with_items:
+    - kubectl -n openness delete  deployment docker-registry-deployment
+    - kubectl -n openness delete secret  docker-registry-rootca docker-registry-server-cert
+    - docker rmi -f  registry:"{{ _registry_version }}"
+  changed_when: true
+  ignore_errors: yes
+
+- name: force delete docker registry pod if available
+  shell: for p in $(kubectl get pods -n openness | grep docker-registry | awk '{print $1}'); do kubectl delete pod $p -n openness --grace-period=0 --force;done
+  changed_when: true
+  ignore_errors: yes
+
+- name: delete certificate from master node
+  file:
+    path: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
+    state: absent
+  ignore_errors: yes
+
+- name: delete docker-registry file
+  file:
+    path: "{{ _registry_location }}"
+    state: absent
+  ignore_errors: yes
+
+- name: remove file registry_curl_cmd.sh
+  file:
+    path: "{{ ansible_env.HOME }}/registry_curl_cmd.sh"
+    state: absent
+  ignore_errors: yes

@@ -1,0 +1,31 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+{% for item in _vca_node_docker_packages_url %}
+wget -c --no-check-certificate {{ item }}
+{% endfor %}
+
+if [ $? -ne 0 ]; then
+   echo "get docker pakcages  failed"
+   exit 1
+fi
+
+apt-get install iptables -y
+apt --fix-broken install -y
+apt-get install iptables -y
+
+dpkg -i *.deb
+if [ $? -ne 0 ]; then
+   echo "install docker  failed"
+   exit 1
+fi
+
+mkdir -p /etc/systemd/system/docker.service.d/
+cp -f /root/http-proxy.conf /etc/systemd/system/docker.service.d/
+mkdir -p ~/.docker
+cp -f /root/config.json /root/.docker/
+
+systemctl enable docker --now
+systemctl daemon-reload
+systemctl restart docker

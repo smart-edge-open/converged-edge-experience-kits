@@ -14,6 +14,17 @@
     src: openness-userspace-crd.yml.j2
     dest: "{{ tmp_dir.path }}/openness-userspace-crd.yml"
 
+- name: check if OpenNESS Userspace CNI CRD already exists
+  shell: kubectl get network-attachment-definitions | grep userspace-openness
+  register: userspace_openness_crd
+  ignore_errors: true
+  changed_when: false
+
+- name: delete existing OpenNESS Userspace CNI CRD
+  command: kubectl delete network-attachment-definitions userspace-openness
+  changed_when: true
+  when: userspace_openness_crd is not failed
+
 - name: apply OpenNESS Userspace CNI CRD
   command: kubectl create -f openness-userspace-crd.yml
   args:

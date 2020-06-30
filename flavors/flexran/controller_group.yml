@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+## Custom FlexRAN flavor configuration
+# CPUs to be isolated (for RT procesess)
+cpu_isol: "2-23,26-47"
+# CPUs not to be isolate (for non-RT processes) - minimum of two OS cores necessary for controller
+cpu_os: "0-1,24-25"
+
+## Kernel configuration
+# Skip kernel configuration
+# If true, kernel will not be installed (default for Edge Controller)
+# If false, package composed from variables kernel_package and kernel_version will be installed together with it's devel
+kernel_skip: false
+
+# Version of the kernel.
+kernel_version: 3.10.0-1062.12.1.rt56.1042.el7.x86_64
+
+## GRUB configuration
+# Size of a single hugepage (2M or 1G)
+hugepage_size: "1G"
+# Amount of hugepages
+hugepage_amount: "20"
+# Default grub parameters
+default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
+# Additional grub parameters
+additional_grub_params: "selinux=0 enforcing=0 nmi_watchdog=0 softlockup_panic=0 intel_pstate=disable mce=off idle=poll
+ isolcpus={{ cpu_isol }} rcu_nocbs={{ cpu_isol }} kthread_cpus={{ cpu_os }} irqaffinity={{ cpu_os }} nohz_full={{ cpu_isol }}"
+

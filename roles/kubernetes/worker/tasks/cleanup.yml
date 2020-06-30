@@ -3,26 +3,19 @@
 
 ---
 
-- name: remove VCA node from the cluster
-  block:
-  - name: "[k8s master] drain the VCA node"
-    command: kubectl drain {{ vca_node_name }} --ignore-daemonsets --timeout=60s
-    delegate_to: "{{ groups['controller_group'][0] }}"
-    ignore_errors: yes
-    changed_when: true
-  - name: "[k8s master] delete the VCA node"
-    command: kubectl delete node {{ vca_node_name }}
-    delegate_to: "{{ groups['controller_group'][0] }}"
-    ignore_errors: yes
-    changed_when: true
-  - name: check if kubeadm is installed
-    shell: ssh {{ vca_node_name }} command -v kubeadm >/dev/null 2>&1
-    register: kubeadm_exec
-    ignore_errors: yes
-    changed_when: false
-  - name: reset kubeadm on VCA node
-    command: ssh {{ vca_node_name }} kubeadm reset --force
-    when: kubeadm_exec.rc == 0
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: remove VCAC-A node(s) from the cluster
+  include_tasks: vca_node_cleanup.yml
+  vars:
+    vca_node_name: "{{ inventory_hostname }}-vca{{ vca_idx }}"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']
 
 - name: remove the node from the cluster

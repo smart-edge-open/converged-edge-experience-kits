@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+LoadPlugin exec
+
+<Plugin exec>
+     Exec "collectd_exec" "/opt/collectd/etc/collectd.conf.d/ovs_pmd_stats.sh"
+     NotificationExec "collectd_exec" "/opt/collectd/etc/collectd.conf.d/write_notification.sh"
+</Plugin>

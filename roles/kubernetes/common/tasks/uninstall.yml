@@ -38,7 +38,7 @@
 
 - name: uninstall packages
   yum:
-    name: "{{ kubernetes_packages_to_remove }}"
+    name: "{{ _kubernetes_packages_to_remove }}"
     state: absent
 
 - name: remove repository
@@ -51,3 +51,8 @@
   args:
     warn: false
   changed_when: true
+
+- name: remove CNI directory
+  file:
+    name: /etc/cni/net.d
+    state: absent

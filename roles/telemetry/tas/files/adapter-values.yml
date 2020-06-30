@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+deploymentNamespace: telemetry
+serviceAccountNamespace: telemetry
+configMapNamespace: telemetry
+serviceNamespace: telemetry
+apiServiceNamespace: telemetry

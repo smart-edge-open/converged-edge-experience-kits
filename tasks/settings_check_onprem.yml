@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: check common settings
+  include_tasks: settings_check_common.yml
+
+- name: fail if dataplane is incorrect
+  fail:
+    msg: |
+      `onprem_dataplane` contains incorrect value ({{ onprem_dataplane }})
+      Expected one of the following:
+      - "nts"
+      - "ovncni"
+  when:
+    - onprem_dataplane != "nts"
+    - onprem_dataplane != "ovncni"
+
+- name: Inter-App Communication is conflicting with OVNCNI
+  fail:
+    msg: |
+      Inter-App Communication (IAC) feature is not supported together with OVNCNI dataplane.
+      Conflicting variables from `group_vars/all/10-default.yml`:
+        onprem_dataplane: "ovncni"
+        onprem_iac_enable: True
+  when:
+    - onprem_dataplane == "ovncni"
+    - onprem_iac_enable | default(False)

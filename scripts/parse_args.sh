@@ -4,9 +4,11 @@
 # Check first parameter given to script and sets Ansible's --limit accordingly.
 # If it starts with 'c' ('c', 'controller', 'ctrl', etc.), then '--limit controller_group' is used.
 # If it starts with 'n' ('n', 'node', 'nodes', etc.), then '--limit edgenode_group' is used.
-
-case "$1" in
-    c*) limit_param="--limit controller_group";;
-    n*) limit_param="--limit edgenode_group";;
-    *) limit_param=""
-esac
+get_limit() {
+    local arg=${1:-}
+    case "$arg" in
+        c*) echo "--limit controller_group";;
+        n*) echo "--limit edgenode_group";;
+        *) echo ""
+    esac
+}

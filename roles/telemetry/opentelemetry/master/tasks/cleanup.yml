@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include otel collector variables
+  include_vars: ../defaults/main.yml
+
+- name: remove otel collector chart template directory
+  file:
+    path: "{{ _otel_collector_chart_dir }}"
+    state: absent
+
+- name: uninstall otel collector using Helm
+  command: "helm uninstall otel-collector --namespace telemetry"
+  changed_when: true
+  ignore_errors: yes
+
