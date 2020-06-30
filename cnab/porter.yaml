@@ -24,7 +24,7 @@ parameters:
   - name: git_repo
     type: string
     description: "OpenNESS experience kit repository url"
-    default: "https://github.com/otcshare/openness-experience-kits"
+    default: "https://github.com/open-ness/openness-experience-kits"
     applyTo:
       - install
 

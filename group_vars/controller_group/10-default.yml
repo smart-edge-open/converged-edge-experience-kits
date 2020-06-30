@@ -62,7 +62,7 @@ os_yum_base_packages:
   "git2u-all,jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,rsync,\
   device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch,openssl11"
 
-git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgecontroller.git
+git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgecontroller.git
 _git_repo_dest: /opt/edgecontroller
 
 ## Network Edge Helm Charts Storage Default Directory
