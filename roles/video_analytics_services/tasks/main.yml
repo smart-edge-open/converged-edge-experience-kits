@@ -29,7 +29,7 @@
 - name: build, tag and push the video analytics serving images to docker registry
   block:
   - name: build VAS image
-    shell: "source /etc/profile && ./build.sh --base openvisualcloud/xeon-ubuntu1804-analytics-{{ item }} --framework {{ item }}"
+    shell: "source /etc/profile && ./build.sh --base {{ item.image }} --framework {{ item.name }}"
     args:
       chdir: "{{ _video_analytics_serving.dest }}/docker"
     changed_when: true
@@ -40,8 +40,8 @@
     with_items: "{{ _frameworks }}"
   - name: tag the VAS image
     docker_image:
-      name: "{{ _va_serving.image }}-{{ item }}"
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _va_serving.image }}-{{ item }}"
+      name: "{{ _va_serving.image }}-{{ item.name }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _va_serving.image }}-{{ item.name }}"
       tag: "{{ _va_serving.tag }}"
       push: yes
       source: local

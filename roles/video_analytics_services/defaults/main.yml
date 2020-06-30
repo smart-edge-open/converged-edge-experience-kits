@@ -23,5 +23,5 @@ _vas_helmChartVersion: 0.1.0
 _vas_namespace: default
 
 _frameworks:
-#  - gstreamer
-  - ffmpeg
+#  - { name: ffmpeg, image: openvisualcloud/xeon-ubuntu1804-analytics-ffmpeg }
+  - { name: gstreamer, image: openvisualcloud/xeon-ubuntu1804-analytics-gst }
