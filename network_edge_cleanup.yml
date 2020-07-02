@@ -159,9 +159,13 @@
   - name: load git variables
     include_vars: ./roles/git_repo/defaults/main.yml
 
-  - name: cleanup git
+  - name: cleanup git repos
     include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
+  - name: cleanup git
+    yum:
+      name: git*
+      state: absent
 
 
 - hosts: edgenode_group
