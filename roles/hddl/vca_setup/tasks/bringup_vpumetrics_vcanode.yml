@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: wait for hddl daemon process on vca node ready
+  command: "ssh {{ vca_node_ip }} ls /var/tmp/hddl_service_ready.mutex >/dev/null"
+  register: get_hddl_ready
+  retries: "{{ _vca_hddl_retries_num }}"
+  delay: "{{ _vca_hddl_retries_delay }}"
+  until: get_hddl_ready.rc == 0
+  changed_when: true
+
+- name: run vpu metrics on all VCA nodes -- this automatically starts hddl daemon
+  command: "ssh {{ vca_node_ip }} /opt/intel/vcaa/vpu_metric/run.sh start"
+  register: run_vpu_metrics
+  failed_when: run_vpu_metrics.rc != 0
+  changed_when: run_vpu_metrics.rc == 0
+
+- name: wait for vpu metrics ready
+  command: "ssh {{ vca_node_ip }} ls /tmp/node-exporter/vpu_device_thermal.prom >/dev/null"
+  register: get_metrics_ready
+  retries: "{{ _vca_hddl_retries_num }}"
+  delay: "{{ _vca_hddl_retries_delay }}"
+  until: get_metrics_ready.rc == 0
+  changed_when: true

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: download hddl-daemon yaml
+  get_url:
+    url: "{{ _vca_hddl_yaml }}"
+    dest: /tmp/hddl_daemonset.yaml
+    force: yes
+  register: result
+  retries: "{{ _vca_hddl_retries_num }}"
+  delay: "{{ _vca_hddl_retries_delay }}"
+  until: result is succeeded
+  delegate_to: "{{ groups['controller_group'][0] }}"
+
+- name: deploy hddl-daemon for VCA node
+  command: kubectl apply -f /tmp/hddl_daemonset.yaml
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: wait for hddldaemon pod to come up
+  shell: set -o pipefail && kubectl get pods -n kube-system -l app=intel-vpu-hddl | awk '$3=="Running"'
+  register: hddldaemon_pod_running
+  retries: "{{ _vca_hddl_retries_num }}"
+  delay: "{{ _vca_hddl_retries_delay }}"
+  until: hddldaemon_pod_running.rc == 0
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: false

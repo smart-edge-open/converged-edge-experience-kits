@@ -3,4 +3,7 @@
 
 ---
 
-_vca_hddl_yaml: "https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/v20.4/VCAC-A/script/setup_hddl_daemonset.yaml"
+_vca_hddl_yaml: "https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/e824ebfb71267bb36c2d52aa222250d76b5f3a38/VCAC-A/script/setup_hddl_daemonset.yaml"
+_vca_hddl_retries_num: 100
+_vca_hddl_retries_delay: 20
+_vca_hddl_vputaspolicy_yaml_dir: /tmp/vpu_taspolicy
