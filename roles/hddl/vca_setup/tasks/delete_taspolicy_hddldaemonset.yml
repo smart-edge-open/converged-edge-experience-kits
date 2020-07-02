@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: k8s controller delete TAS policy and hddl daemonset
+  block:
+    - name: k8s delete hddl daemonset
+      command: "kubectl delete -f /tmp/hddl_daemonset.yaml"
+      ignore_errors: yes
+      changed_when: true
+    - name: wait for hddldaemon pod to terminate
+      shell: "set -o pipefail && kubectl get pods -n kube-system -l app=intel-vpu-hddl"
+      register: hddldaemon_pod_status
+      retries: "{{ _vca_hddl_retries_num }}"
+      delay: "{{ _vca_hddl_retries_delay }}"
+      until: "'vpu-hddl' not in hddldaemon_pod_status.stdout"
+      changed_when: true
+    - name: delete hddl daemonset file
+      file:
+        path: "/tmp/hddl_daemonset.yaml"
+        state: absent
+      ignore_errors: yes
+      changed_when: true
+    - name: delete TAS policy
+      command: "kubectl delete -f {{ _vca_hddl_vputaspolicy_yaml_dir }}/vca-tas-policy.yaml"
+      ignore_errors: yes
+      changed_when: true
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true

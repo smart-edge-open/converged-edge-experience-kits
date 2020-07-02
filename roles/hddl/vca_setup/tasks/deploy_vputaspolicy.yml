@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: wait for metrics grep on controller - TAS-- normally take about 1 minutes
+  command: "kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/nodes/*/vpu_device_thermal"
+  register: grep_vpu_metrics
+  retries: "{{ _vca_hddl_retries_num }}"
+  delay: "{{ _vca_hddl_retries_delay }}"
+  until: grep_vpu_metrics.rc == 0
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: deploy vca policy that uses this vpu metrics
+  block:
+    - name: create tmp folder
+      file:
+        path: "{{ _vca_hddl_vputaspolicy_yaml_dir }}"
+        state: directory
+    - name: copy vca policy files
+      copy:
+        src: "vca-tas-policy.yaml"
+        dest: "{{ _vca_hddl_vputaspolicy_yaml_dir }}/"
+    - name: deploy the vca policy
+      command: kubectl apply -f "{{ _vca_hddl_vputaspolicy_yaml_dir }}/vca-tas-policy.yaml"
+      changed_when: true
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true
