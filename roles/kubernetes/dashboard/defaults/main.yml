@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+disable_dashboard_tls: false
+
+_dashboard_version: v2.0.3
+_dashboard_port: 30443
+_dashboard_namespace: kube-system
+
+_dashboard_chart_url: "https://raw.githubusercontent.com/kubernetes/dashboard/{{ _dashboard_version }}/aio/deploy/helm-chart/kubernetes-dashboard"
+_dashboard_chart_dir: "{{ ne_helm_charts_default_dir }}/kubernetes-dashboard"
+
+_dashboard_chart_files:
+  - .helmignore
+  - Chart.yaml
+  - requirements.lock
+  - requirements.yaml
+  - values.yaml
+  - templates/NOTES.txt
+  - templates/_helpers.tpl
+  - templates/clusterrole-metrics.yaml
+  - templates/clusterrole-readonly.yaml
+  - templates/clusterrolebinding-metrics.yaml
+  - templates/clusterrolebinding-readonly.yaml
+  - templates/deployment.yaml
+  - templates/ingress.yaml
+  - templates/networkpolicy.yaml
+  - templates/pdb.yaml
+  - templates/role.yaml
+  - templates/rolebinding.yaml
+  - templates/secret.yaml
+  - templates/service.yaml
+  - templates/serviceaccount.yaml

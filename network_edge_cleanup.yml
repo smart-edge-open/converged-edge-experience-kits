@@ -96,6 +96,10 @@
   - name: cleanup cAdvisor
     include_tasks: ./roles/telemetry/cadvisor/master/tasks/cleanup.yml
 
+  - name: kubernetes dashboard cleanup
+    include_tasks: ./roles/kubernetes/dashboard/tasks/cleanup.yml
+    when: kubernetes_dashboard_enable | default(False)
+
   - name: cleanup telemetry certificates
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
 

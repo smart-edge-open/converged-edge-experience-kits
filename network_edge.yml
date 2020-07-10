@@ -42,6 +42,8 @@
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
       when: k8s_device_plugins_enable | default(False)
+    - role: kubernetes/dashboard
+      when: kubernetes_dashboard_enable | default(False)
 
     - role: openness/network_edge/master
     - role: kubevirt/master

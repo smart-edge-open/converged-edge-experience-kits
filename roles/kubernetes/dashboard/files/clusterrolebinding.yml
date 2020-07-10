@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "kubernetes-dashboard.fullname" . }}-openness
+  labels:
+{{ include "kubernetes-dashboard.labels" . | indent 4 }}
+subjects:
+  - name: {{ template "kubernetes-dashboard.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+    kind: ServiceAccount
+roleRef:
+  name: {{ template "kubernetes-dashboard.fullname" . }}-openness
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole

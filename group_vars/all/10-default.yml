@@ -143,6 +143,10 @@ kubevirt_pv_vm_max_num: 64
 # Kubernetes device plugins
 k8s_device_plugins_enable: false
 
+# Kubernetes Dashboard
+kubernetes_dashboard_enable: false
+disable_dashboard_tls: false
+
 ### BIOSFW
 # Enable BIOSFW feature (requires SYSCFG package provided by user)
 ne_biosfw_enable: false
