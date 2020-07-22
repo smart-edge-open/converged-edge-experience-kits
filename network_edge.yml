@@ -45,7 +45,7 @@
     - role: kubernetes/dashboard
       when: kubernetes_dashboard_enable | default(False)
 
-    - role: openness/network_edge/master
+    - role: openness/master
     - role: kubevirt/master
       when: kubevirt_enable | default(True)
 
@@ -60,7 +60,7 @@
       when: fpga_sriov_userspace_enable | default(False)
     - role: opae_fpga/master
       when: ne_opae_fpga_enable | default(False)
-    - role: nfd/network_edge
+    - role: nfd
       when: ne_nfd_enable | default(True)
     - role: biosfw/master
       when: ne_biosfw_enable | default(False)
@@ -91,7 +91,7 @@
     - role: kubernetes/cni
     - role: telemetry/collectd/worker
     - role: telemetry/cadvisor/worker
-    - role: openness/network_edge/worker
+    - role: openness/worker
     - role: kubevirt/worker
       when: kubevirt_enable | default(True)
     - role: biosfw/worker
@@ -137,7 +137,7 @@
     - role: kubernetes/cni
     - role: telemetry/collectd/worker
     - role: telemetry/cadvisor/worker
-    - role: openness/network_edge/worker
+    - role: openness/worker
     - role: telemetry/pcm/worker
       when: telemetry_pcm_enable | default(False)
     - role: hddl/vca_setup

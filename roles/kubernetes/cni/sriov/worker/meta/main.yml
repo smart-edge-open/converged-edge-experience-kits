@@ -4,4 +4,4 @@
 ---
 
 dependencies:
-- role: sriov_device_init/network_edge
+- role: sriov_device_init

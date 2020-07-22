@@ -1,9 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
-
----
-
-_apache_packages: "httpd,mod_ssl"
-_certs_path: /etc/ssl/certs
-
-ip_address: ""

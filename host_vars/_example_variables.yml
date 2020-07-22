@@ -45,9 +45,6 @@ tuned_vars: |
 # provide a package / URL to kernel-devel package
 dpdk_kernel_devel: http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm
 
-# -- ovs
-ovs_ports: []
-
 # -- sriov_device_init
 sriov:
   network_interfaces: {}

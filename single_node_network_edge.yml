@@ -57,7 +57,7 @@
     - role: kubernetes/dashboard
       when: kubernetes_dashboard_enable | default(False)
 
-    - role: openness/network_edge/master
+    - role: openness/master
 
     - role: telemetry/certs
     - role: telemetry/prometheus
@@ -72,7 +72,7 @@
       when: kubevirt_enable | default(True)
     - role: opae_fpga/master
       when: ne_opae_fpga_enable | default(False)
-    - role: nfd/network_edge
+    - role: nfd
       when: ne_nfd_enable | default(True)
     - role: biosfw/master
       when: ne_biosfw_enable | default(False)
@@ -90,7 +90,7 @@
   roles:
     - role: telemetry/collectd/worker
     - role: telemetry/cadvisor/worker
-    - role: openness/network_edge/worker
+    - role: openness/worker
     - role: kubevirt/worker
       when: kubevirt_enable | default(True)
     - role: biosfw/worker

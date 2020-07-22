@@ -34,7 +34,7 @@ proxy_noproxy: ""
 os_remove_yum_plugins: true
 
 ##################################################
-##### Common settings for Network Edge & On Premises
+##### Network Edge
 
 ### OpenNESS Git Repositories
 # Following variables specify branch/SHA/tag to be checked out for Edge Controller and Edge Node repositories
@@ -65,10 +65,6 @@ retry_delay: 5
 
 ## PTP synchronization between nodes
 ptp_sync_enable: False
-
-
-##################################################
-##### Network Edge
 
 ### Network Edge's Kubernetes CNIs
 # List of requested CNIs to be used in Network Edge mode
@@ -199,55 +195,3 @@ telemetry_flavor: common
 
 ## Network Edge RMD
 rmd_operator_enable: False
-
-##################################################
-##### On Premises
-
-### Controller settings
-# Password for Controller's database
-mysql_root_password: "pass"
-# Password for Controller UI/REST API
-cce_admin_password: "pass"
-# Log level for Edge Controller
-cce_log_level: "debug"
-
-### On Premises dataplane
-# Dataplane to be used for On-Premises mode
-# Available dataplanes:
-# - nts
-# - ovncni
-onprem_dataplane: "nts"
-
-### NTS DPDK settings
-# Amount of hugepages to use on 1st NUMA node (in MB)
-docker_nts_mem_mb_s0: "2048"
-# Amount of hugepages to use on 2nd NUMA node (in MB)
-docker_nts_mem_mb_s1: "0"
-
-### OVNCNI DPDK settings
-# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
-ovncni_dpdk_socket_mem: "1024,0"
-# Core bitmask for datapath packet processing. 0x4 selects core 2
-ovncni_dpdk_pmd_cpu_mask: "0x4"
-# Core bitmask for DPDK initialization. 0x2 selects core 1
-ovncni_dpdk_lcore_mask: "0x2"
-# Memory limit for OVNCNI's OVS container
-ovncni_dpdk_resource_limits: 1G
-
-### On-Premises InterApp-Communication
-# WARNING: Only for deployment with NTS dataplane
-onprem_iac_enable: false
-# Core bitmask for DPDK initialization.
-iac_ovs_cores_hex: "0x10"
-# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
-iac_ovs_socket_mem: "1024,0"
-
-### HTTP server on the Edge Controller
-# IP address that should be used instead of Controller's IP from inventory
-ip_address: ""
-
-## On-Premises HDDL
-onprem_hddl_enable: False
-
-## On-Premises Node Feature Discovery (NFD)
-onprem_nfd_enable: True

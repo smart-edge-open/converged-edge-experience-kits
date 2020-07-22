@@ -5,7 +5,7 @@
 - hosts: controller_group
   tasks:
   # following roles are not cleaned up directly, they're cleaned when Kubernetes cluster is reset
-  # - nfd/network_edge
+  # - nfd
   # - multus
   # - sriov/master
 
@@ -67,9 +67,9 @@
   - name: Node Feature Discovery cleanup
     block:
     - name: load nfd variables
-      include_vars: ./roles/nfd/network_edge/defaults/main.yml
+      include_vars: ./roles/nfd/defaults/main.yml
     - name: cleanup nfd
-      include_tasks: ./roles/nfd/network_edge/tasks/cleanup.yml
+      include_tasks: ./roles/nfd/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
 
   - name: load docker_registry variables
@@ -79,10 +79,10 @@
     include_tasks: ./roles/docker_registry/master/tasks/cleanup.yml
 
   - name: load network edge variables
-    include_vars: ./roles/openness/network_edge/master/defaults/main.yml
+    include_vars: ./roles/openness/master/defaults/main.yml
 
   - name: cleanup network edge
-    include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
+    include_tasks: ./roles/openness/master/tasks/cleanup.yml
 
   - name: cleanup prometheus
     include_tasks: ./roles/telemetry/prometheus/tasks/cleanup.yml
@@ -202,10 +202,10 @@
       when: ne_hddl_enable | default(False)
 
     - name: load network edge variables
-      include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+      include_vars: ./roles/openness/worker/defaults/main.yml
 
     - name: cleanup network edge
-      include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
+      include_tasks: ./roles/openness/worker/tasks/cleanup.yml
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
@@ -271,10 +271,10 @@
       include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
 
     - name: load network edge variables
-      include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+      include_vars: ./roles/openness/worker/defaults/main.yml
 
     - name: cleanup network edge
-      include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
+      include_tasks: ./roles/openness/worker/tasks/cleanup.yml
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml

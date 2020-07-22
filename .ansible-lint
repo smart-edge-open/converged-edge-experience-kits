@@ -12,7 +12,7 @@ exclude_paths:
   - roles/telemetry/prometheus/files/
   - roles/telemetry/pcm/master/charts/
   - roles/telemetry/tas/files/
-  - roles/nfd/network_edge/files/
+  - roles/nfd/files/
   - roles/kubernetes/cni/sriov/master/files
   - roles/telemetry/opentelemetry/master/charts
   - roles/fpga_cfg/charts

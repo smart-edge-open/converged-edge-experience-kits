@@ -1,9 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019 Intel Corporation
-
----
-
-- name: remove customized /etc/docker/daemon.json file
-  file:
-    path: /etc/docker/daemon.json
-    state: absent

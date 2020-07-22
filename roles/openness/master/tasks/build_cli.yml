@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: create temporary custom .openness_gitconfig
+  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+
+- name: Build CLIs
+  block:
+  - name: build and copy EdgeDNS CLI
+    block:
+    - name: download modules for EdgeDNS cli
+      shell: source /etc/profile && go mod download
+      args:
+        chdir: "{{ _git_repo_dest }}/cmd/edgednscli"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+    - name: build EdgeDNS cli
+      shell: source /etc/profile && go build -o dist/edgednscli ./cmd/edgednscli
+      args:
+        chdir: "{{ _git_repo_dest }}"
+    - name: copy EdgeDNS cli
+      copy:
+        src: "{{ item }}"
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: '0755'
+      with_items:
+      - "{{ _git_repo_dest }}/dist/edgednscli"
+      - "{{ _git_repo_dest }}/network-edge/kubectl-edgedns"
+
+  always:
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
