@@ -7,7 +7,7 @@
 - hosts: edgenode_group
   pre_tasks:
     - name: set node name
-      set_fact: node_name={{ ansible_hostname | lower }}
+      set_fact: node_name={{ ansible_nodename | lower }}
     - name: create helper variable
       set_fact:
         single_node_deployment: true
@@ -40,7 +40,7 @@
 - hosts: controller_group
   pre_tasks:
     - name: set node name
-      set_fact: node_name={{ ansible_hostname | lower }}
+      set_fact: node_name={{ ansible_nodename | lower }}
     - name: create helper variable
       set_fact:
         single_node_deployment: true
