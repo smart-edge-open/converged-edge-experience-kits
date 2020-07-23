@@ -53,6 +53,10 @@
       src: "{{ _certs_dest }}/CA/cert.pem"
       dest: "{{ _certs_dest }}/client/edgedns/root.pem"
       state: link
+  - name: set CA private key mode
+    file:
+      path: "{{ _certs_dest }}/client/edgedns/key.pem"
+      mode: '0600'
 
 - name: certificates for EAA
   block:
