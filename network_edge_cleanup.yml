@@ -9,6 +9,14 @@
   # - multus
   # - sriov/master
 
+  - name: istio cleanup
+    block:
+    - name: load istio variables
+      include_vars: ./roles/istio/defaults/main.yml
+    - name: cleanup istio
+      include_tasks: ./roles/istio/tasks/cleanup.yml
+    when: ne_istio_enable | default(True)
+
   - name: grafana cleanup
     include_tasks: ./roles/telemetry/grafana/tasks/cleanup.yml
     when: telemetry_grafana_enable | default(True)

@@ -86,6 +86,9 @@
     - role: telemetry/pcm/master
       when: telemetry_pcm_enable | default(False)
 
+    - role: istio
+      when: ne_istio_enable | default(True)
+
 - hosts: edgenode_group
   roles:
     - role: telemetry/collectd/worker

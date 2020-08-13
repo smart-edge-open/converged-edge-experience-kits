@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_istio_main_dir: "/opt/istio"
+
+_istio_version: "1.6.7"
+_istio_base_url: "https://istio.io/downloadIstio"
+_istio_dest_dir: "{{ _istio_main_dir }}/istio-{{ _istio_version }}"

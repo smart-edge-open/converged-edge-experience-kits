@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create istio main directory
+  file:
+    path: "{{ _istio_main_dir }}"
+    state: directory
+  changed_when: true
+
+- name: download istio
+  shell: set -o pipefail && curl -L {{ _istio_base_url }} | ISTIO_VERSION={{ _istio_version }} sh -
+  args:
+    chdir: "{{ _istio_main_dir }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  changed_when: true
+ # Alteratively we could download from https://github.com/istio/istio/releases/download/{{ _istio_version }}/istio-{{ _istio_version }}-linux-amd64.tar.gz
+ # and unpack
+
+- name: add istioctl path to /etc/profile
+  lineinfile:
+    state: present
+    dest: /etc/profile
+    line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"
+
+- name: deploy the Istio operator
+  shell: "set -o pipefail && helm template {{ _istio_dest_dir }}/manifests/charts/istio-operator/ \
+    --set hub=docker.io/istio \
+    --set tag={{ _istio_version }} \
+    --set operatorNamespace=istio-operator \
+    --set istioNamespace=istio-system | kubectl apply -f -"
+  changed_when: true
+
+- name: create the Istio profile
+  block:
+    - name: create istio-system namespace
+      command: kubectl create ns istio-system
+      ignore_errors: yes
+    - name: create default.yaml
+      template:
+        src: default.yaml.j2
+        dest: "{{ _istio_main_dir }}/default.yaml"
+    - name: create the Istio profile
+      command: "kubectl apply -f {{ _istio_main_dir }}/default.yaml"
+      changed_when: true
+
+- name: add istio-injection label to default namespace
+  command: kubectl label namespace default istio-injection=enabled --overwrite
+  changed_when: true

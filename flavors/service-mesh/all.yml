@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+## Kube-ovn with OVS-DPDK
+kubeovn_dpdk: false
+
+# Kube-virt settings
+kubevirt_enable: false
+
+## Network Edge Processor Counter Monitor (PCM)
+telemetry_pcm_enable: false
+
+kernel_skip: true
+
+## Istio Service Mesh
+ne_istio_enable: true
+# Istio dployment profile possible values: default, demo, minimal, remote
+istio_deployment_profile: "default"

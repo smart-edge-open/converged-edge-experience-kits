@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove istio-injection label to default namespace
+  command: kubectl label namespace default istio-injection-
+  changed_when: true
+
+- name: delete the istio deployment
+  command: kubectl delete istiooperators.install.istio.io -n istio-system openness-istiocontrolplane
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove istio-operator namespace
+  command: kubectl delete ns istio-operator --grace-period=0 --force
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove the istio profile
+  shell: "source /etc/profile && set -o pipefail && istioctl manifest generate -s profile={{ istio_deployment_profile }} | kubectl delete -f -"
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove istio-system namespace
+  command: kubectl delete ns istio-system --grace-period=0 --force
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove istio directory
+  file:
+    path: "{{ _istio_main_dir }}"
+    state: absent
+
+- name: remove istioctl path from /etc/profile
+  lineinfile:
+    state: absent
+    dest: /etc/profile
+    line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"

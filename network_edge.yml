@@ -76,6 +76,9 @@
     - role: telemetry/pcm/master
       when: telemetry_pcm_enable | default(False)
 
+    - role: istio
+      when: ne_istio_enable | default(True)
+
     - role: video_analytics_services
       when: video_analytics_services_enable | default(False)
 
