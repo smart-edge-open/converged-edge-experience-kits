@@ -28,3 +28,10 @@
   args:
     chdir: "{{ _rmd_operator_dir }}"
   changed_when: false
+
+- name: set the mountpoint for resctrl
+  mount:
+    path: /sys/fs/resctrl
+    src: resctrl
+    fstype: resctrl
+    state: mounted
