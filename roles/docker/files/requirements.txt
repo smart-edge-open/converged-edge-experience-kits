@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2020-2020 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 
 backports.ssl-match-hostname==3.5.0.1
 bcrypt==3.1.7
