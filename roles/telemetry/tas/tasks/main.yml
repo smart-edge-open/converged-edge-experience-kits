@@ -135,8 +135,19 @@
 
 - name: Kubernetes Scheduler Extender
   block:
+  - name: replace TAS service url
+    replace:
+      path: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration/scheduler-extender-configmap.yaml"
+      regexp: 'https://tas-service\.default\.svc\.cluster\.local:9001'
+      replace: "{{ _tas_svc_url }}"
+
+  - name: patch Kubernetes Scheduler Extender configuration script
+    patch:
+      src: "configure-scheduler.sh.patch"
+      dest: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration/configure-scheduler.sh"
+
   - name: configure Kubernetes Scheduler Extender
-    command: "bash configure-scheduler.sh"
+    command: "bash configure-scheduler.sh {{ _tas_svc_domain }}"
     register: configure_scheduler_result
     failed_when: "configure_scheduler_result.rc != 0 or 'error:' in configure_scheduler_result.stderr"
     changed_when: true
@@ -160,12 +171,6 @@
     shell: source /etc/profile && make image
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
-
-  - name: replace TAS service url
-    replace:
-      path: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration/scheduler-extender-configmap.yaml"
-      regexp: 'https://tas-service\.default\.svc\.cluster\.local:9001'
-      replace: "https://tas-service.telemetry.svc.cluster.local:9001"
 
   - name: copy kustomization.yaml to TAS directory
     copy:
