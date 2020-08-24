@@ -10,3 +10,6 @@
 
 - include_tasks: istio.yml
   when: "'controller_group' in group_names"
+
+- include_tasks: smi.yml
+  when: "'controller_group' in group_names"

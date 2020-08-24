@@ -3,6 +3,14 @@
 
 ---
 
+- name: remove SMI crds, operator, and rbac configuration
+  command: kubectl delete -f "{{ item }}"
+  ignore_errors: yes
+  changed_when: true
+  with_items:
+    - "{{ _smi_crds_yaml }}"
+    - "{{ _smi_operator_yaml }}"
+
 - name: remove istio-injection label to default namespace
   command: kubectl label namespace default istio-injection-
   changed_when: true
