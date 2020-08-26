@@ -8,3 +8,19 @@ metadata:
   name: openness-istiocontrolplane
 spec:
   profile: {{ istio_deployment_profile }}
+  addonComponents:
+    grafana:
+      enabled: false
+    prometheus:
+      enabled: false
+    kiali:
+      enabled: true
+  meshConfig:
+    enablePrometheusMerge: false
+  values:
+    kiali:
+      dashboard:
+        grafanaURL:
+        grafanaInClusterURL: "http://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:32000"
+      prometheusNamespace: telemetry
+      prometheusAddr: "http://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:30000"

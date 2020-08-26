@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    app: kiali
+type: Opaque
+data:
+  username: {{ istio_kiali_username | b64encode }}
+  passphrase: {{ istio_kiali_password | b64encode }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiali-nodeport
+  namespace: istio-system
+spec:
+  ports:
+  - name: kialinodeport
+    port: 20001
+    protocol: TCP
+    targetPort: 20001
+    nodePort: {{ istio_kiali_nodeport }}
+  selector:
+    app: kiali
+  sessionAffinity: None
+  type: NodePort
