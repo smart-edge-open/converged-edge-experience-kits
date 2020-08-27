@@ -80,5 +80,8 @@ os_yum_base_packages:
   moreutils,jq,python-devel,createrepo,psmisc,bash-completion,rsync,openssl11"
 _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
 
+# URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
+docker_images: []
+
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git
 _git_repo_dest: /opt/edgenode

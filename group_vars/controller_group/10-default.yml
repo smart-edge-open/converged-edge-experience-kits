@@ -62,6 +62,9 @@ os_yum_base_packages:
   "git2u-all,jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,rsync,\
   device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch,openssl11"
 
+## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
+docker_images: []
+
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git
 _git_repo_dest: /opt/edgenode
 

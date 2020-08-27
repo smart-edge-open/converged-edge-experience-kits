@@ -90,3 +90,25 @@
       get_url:
         url: "{{ _docker_compose_completion_url }}"
         dest: "/etc/bash_completion.d"
+
+- name: create the directory for docker images
+  file:
+    path: "{{ docker_images_dir }}"
+    state: directory
+
+- name: download docker images
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ docker_images_dir }}"
+  with_items: "{{ docker_images }}"
+
+- name: find docker images
+  find:
+    paths: "{{ docker_images_dir }}"
+    patterns: "*.tar*"
+  register: docker_image_files
+
+- name: load docker images
+  command: "docker load -i {{ item.path }}"
+  with_items: "{{ docker_image_files.files }}"
+  changed_when: true
