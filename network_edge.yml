@@ -76,12 +76,6 @@
     - role: telemetry/pcm/master
       when: telemetry_pcm_enable | default(False)
 
-    - role: istio
-      when: ne_istio_enable | default(False)
-
-    - role: video_analytics_services
-      when: video_analytics_services_enable | default(False)
-
     - role: rmd/master
       when: rmd_operator_enable | default(False)
 
@@ -144,3 +138,14 @@
     - role: telemetry/pcm/worker
       when: telemetry_pcm_enable | default(False)
     - role: hddl/vca_setup
+
+# Playbook for post Network Edge deployment
+- hosts: controller_group
+  any_errors_fatal: true
+
+  roles:
+    - role: istio
+      when: ne_istio_enable | default(False)
+
+    - role: video_analytics_services
+      when: video_analytics_services_enable | default(False)
