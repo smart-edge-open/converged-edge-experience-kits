@@ -26,18 +26,11 @@
     line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"
 
 - name: deploy the Istio operator
-  shell: "set -o pipefail && helm template {{ _istio_dest_dir }}/manifests/charts/istio-operator/ \
-    --set hub=docker.io/istio \
-    --set tag={{ _istio_version }} \
-    --set operatorNamespace=istio-operator \
-    --set istioNamespace=istio-system | kubectl apply -f -"
+  shell: "source /etc/profile && istioctl install --set profile={{ istio_deployment_profile }}"
   changed_when: true
 
 - name: create the Istio profile
   block:
-    - name: create istio-system namespace
-      command: kubectl create ns istio-system
-      ignore_errors: yes
     - name: create default.yaml
       template:
         src: default.yaml.j2

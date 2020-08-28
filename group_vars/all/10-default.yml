@@ -65,6 +65,9 @@ retry_delay: 5
 ## PTP synchronization between nodes
 ptp_sync_enable: False
 
+## Istio no_proxy settings
+istio_noproxy: "istio-sidecar-injector.istio-system.svc"
+
 ### Network Edge's Kubernetes CNIs
 # List of requested CNIs to be used in Network Edge mode
 # CNIs are applied in order of definition

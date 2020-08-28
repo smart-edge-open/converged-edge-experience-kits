@@ -20,9 +20,7 @@
 - name: wait for smi-adapter-istio pod to become running
   shell: set -o pipefail && kubectl get pods -n istio-system -l name=smi-adapter-istio | awk '$3=="Running"'
   register: smi_pod_running
-  retries: "{{ number_of_retries }}"
+  retries: "{{ number_of_retries * 2 }}"
   delay: "{{ retry_delay }}"
-  until: >
-    (smi_pod_running.rc == 0) and
-    ('No resources found' not in smi_pod_running.stderr)
+  until: "'smi-adapter-istio' in smi_pod_running.stdout"
   changed_when: true

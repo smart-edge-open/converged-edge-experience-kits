@@ -31,7 +31,8 @@
   changed_when: true
 
 - name: remove the istio deployment
-  shell: "source /etc/profile && set -o pipefail && istioctl manifest generate -f {{ _istio_main_dir }}/default.yaml | kubectl delete -f -"
+  shell: "source /etc/profile && set -o pipefail && \
+    istioctl manifest generate --set profile={{ istio_deployment_profile }} | kubectl delete --ignore-not-found=true -f -"
   ignore_errors: yes
   changed_when: true
 

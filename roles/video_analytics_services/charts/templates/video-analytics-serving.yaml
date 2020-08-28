@@ -1,22 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 
 ---
-
-{{- if ne .Values.namespace "default" }}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ $.Values.namespace }}
----
-{{- end }}
-{{- range $framework := $.Values.frameworks }}
-{{- if eq $.Values.namespace "default" }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: analytics-{{ $framework }}-policy
-  namespace: {{ $.Values.namespace }}
+  name: analytics-policy
+  namespace: default
 spec:
   podSelector: {}
   policyTypes:
@@ -28,16 +18,25 @@ spec:
     - protocol: TCP
       port: {{ $.Values.servingPort }}
 ---
-{{- end }}
+{{- range $platform := $.Values.platforms }}
+{{- range $framework := $.Values.frameworks }}
 apiVersion: v1
 kind: Service
 metadata:
+  {{- if eq $platform "xeon" }}
   name: analytics-{{ $framework }}
-  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}
+  {{- end }}
+  namespace: default
 spec:
   clusterIP: None
   selector:
+    {{- if eq $platform "xeon" }}
     app: va-serving-{{ $framework }}
+    {{- else }}
+    app: va-serving-{{ $framework }}-{{ $platform }}
+    {{- end }}
   ports:
     - protocol: TCP
       port: {{ $.Values.servingPort }}
@@ -46,17 +45,29 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  {{- if eq $platform "xeon" }}
   name: analytics-{{ $framework }}
-  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}
+  {{- end }}
+  namespace: default
 spec:
   replicas: {{ $.Values.replicas }}
   selector:
     matchLabels:
+      {{- if eq $platform "xeon" }}
       app: va-serving-{{ $framework }}
+      {{- else }}
+      app: va-serving-{{ $framework }}-{{ $platform }}
+      {{- end }}
   template:
     metadata:
       labels:
+        {{- if eq $platform "xeon" }}
         app: va-serving-{{ $framework }}
+        {{- else }}
+        app: va-serving-{{ $framework }}-{{ $platform }}
+        {{- end }}
     spec:
       containers:
       - name: vas-gateway
@@ -67,12 +78,13 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
           - name: NAMESPACE
-            value: {{ $.Values.namespace }}
+            value: default
           - name: VAS_PORT
             value: "{{ $.Values.servingPort }}"
           - name: PLATFORM
-            value: {{ $.Values.platform }}
+            value: {{ $platform }}
           - name: FRAMEWORK
             value: {{ $framework }}
 ---
-{{ end }}
+{{- end }}
+{{- end }}

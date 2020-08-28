@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: default
+  namespace: default
+spec:
+  host: "*"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+{{- if eq $.Values.istioEnabled true }}
+{{- range $platform := $.Values.platforms }}
+{{- range $framework := $.Values.frameworks }}
+{{- if eq $platform "xeon" }}
+# allow authenticated apps to consume Xeon video analytics serivces in the service mesh
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-analytics-{{ $framework }}
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: analytics-{{ $framework }}
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["*"]
+        namespaces: ["default"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "DELETE"]
+{{- else }}
+# allow premium apps to consume HW-assisted video analytics serivces in the service mesh
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-analytics-{{ $framework }}-{{ $platform }}
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: analytics-{{ $framework }}-{{ $platform }}
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["*"]
+        namespaces: ["default"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "DELETE"]
+{{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

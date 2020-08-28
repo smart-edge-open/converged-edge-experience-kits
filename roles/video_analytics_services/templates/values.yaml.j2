@@ -1,17 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-# platform specifies the target platform
-platform: xeon
+# platforms specifies the target platforms
+platforms:
+  - xeon
+{% if ne_hddl_enable == true %}
+  - hddl
+{% endif %}
+{% if inventory_hostname in groups['edgenode_vca_group'] %}
+  - vcac-a
+{% endif %}
 
 # frameworks specifies the target frameworks
 frameworks:
 {% for item in _frameworks %}
   - {{ item.name }}
 {% endfor %}
-
-# namespace specifices the namespace that VAS will be deployed in
-namespace: {{ _vas_namespace }}
 
 # registry specifies the docker registry in use
 registry: {{ _registry_ip_address }}:{{ _registry_port }}
@@ -33,3 +37,6 @@ sidecarTag: {{ _vas_sidecar.tag }}
 
 # replicas specifies the number of analytics instances running
 replicas: 1
+
+# enable Istio service mesh integration
+istioEnabled: {{ ne_istio_enable }}
