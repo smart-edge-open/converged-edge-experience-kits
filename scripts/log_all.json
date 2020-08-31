@@ -1,0 +1,7 @@
+{
+    "commands": [
+        "git status",
+        "git diff",
+        "git log -n100"
+    ]
+}

@@ -71,3 +71,6 @@ fi
 ansible-playbook -vv \
     "${playbook}" \
     --inventory inventory.ini ${limit}
+
+python scripts/log_all.py
+
