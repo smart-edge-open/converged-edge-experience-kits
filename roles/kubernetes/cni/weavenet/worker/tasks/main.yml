@@ -14,9 +14,6 @@
   - 6783/udp
   - 6784/udp
 
-- name: reload firewall rules
-  command: firewall-cmd --reload
-  changed_when: false
 
 - name: patch node's Pod CIDR
   command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"{{ weavenet_cidr }}" }}'

@@ -27,9 +27,7 @@ firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 0 -o $eth_host
 firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i eth0 -o $eth_host -j ACCEPT
 firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i $eth_host -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-## reload firewall
-firewall-cmd --reload
-systemctl restart firewalld
+
 ## list-all
 firewall-cmd --zone=public --list-all
 firewall-cmd --zone=internal --list-all
