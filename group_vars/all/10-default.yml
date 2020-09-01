@@ -38,8 +38,8 @@ os_remove_yum_plugins: true
 
 ### OpenNESS Git Repositories
 # Following variables specify branch/SHA/tag to be checked out for Edge Controller and Edge Node repositories
-controller_repository_branch: openness-20.06
-edgenode_repository_branch: openness-20.06
+controller_repository_branch: openness-20.06-ovn-fix
+edgenode_repository_branch: openness-20.06-ovn-fix
 
 # If True, the repository will be deleted and cloned again
 # If False, repository will be left as it is and any changes won't be overwritten.
