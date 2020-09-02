@@ -23,3 +23,8 @@ video_analytics_services_enable: true
 ne_istio_enable: false
 # Istio deployment profile possible values: default, demo, minimal, remote
 istio_deployment_profile: "default"
+
+# Kiali
+istio_kiali_username: "admin"
+istio_kiali_password: "admin"
+istio_kiali_nodeport: 30001
