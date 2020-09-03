@@ -35,11 +35,9 @@ spec:
       containers:
       - name: kube-multus
         image: "{{ .Values.registry_ip }}:{{ .Values.registry_port }}/multus:{{ .Values.image_tag }}"
-        command: ["/entrypoint.sh"]
-        args:
-        - "--multus-conf-file=auto"
-        - "--cni-version=0.3.1"
-        - "--rename-conf-file=true"
+        command: ["/bin/sh","-c"]
+        args: ["rename --verbose '.old' '' /host/etc/cni/net.d/* && \
+              /entrypoint.sh --multus-conf-file=auto --cni-version=0.3.1 --rename-conf-file=true"]
         resources:
           requests:
             cpu: "100m"
