@@ -29,7 +29,7 @@ hugepage_size: "1G"
 # Amount of hugepages
 hugepage_amount: "20"
 # Default grub parameters
-default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
+default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt rdt=l3cat"
 # Additional grub parameters
 additional_grub_params: "selinux=0 enforcing=0 nmi_watchdog=0 softlockup_panic=0 intel_pstate=disable mce=off idle=poll
  isolcpus={{ cpu_isol }} rcu_nocbs={{ cpu_isol }} kthread_cpus={{ cpu_os }} irqaffinity={{ cpu_os }} nohz_full={{ cpu_isol }}"

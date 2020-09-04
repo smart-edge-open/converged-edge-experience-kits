@@ -7,7 +7,7 @@
   git:
     repo: "{{ _rmd_operator_repo }}"
     dest: "{{ _rmd_operator_dir }}"
-    version: master
+    version: "{{ _rmd_operator_tag }}"
     update: no
 
 - name: check if RBAC objects already exist
