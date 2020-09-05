@@ -5,8 +5,4 @@
 
 - op: add
   path: /spec/template/spec/containers/0/command
-  value: [ "/bin/sh", "-c" ]
-
-- op: add
-  path: /spec/template/spec/containers/0/args
-  value: [ "[ -n $KUBERNETES_SERVICE_HOST ] && /root/start-db.sh" ]
+  value: [ "/bin/sh", "-c", "[ -n $KUBERNETES_SERVICE_HOST ] && /root/start-db.sh || { echo 'KUBERNETES_SERVICE_HOST is unset - exiting...'; exit 1; }" ]
