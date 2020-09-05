@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- op: add
+  path: /spec/template/spec/containers/0/command
+  value: [ "/bin/sh", "-c" ]
+
+- op: add
+  path: /spec/template/spec/containers/0/args
+  value: [ "[ -n $KUBERNETES_SERVICE_HOST ] && /root/start-db.sh" ]

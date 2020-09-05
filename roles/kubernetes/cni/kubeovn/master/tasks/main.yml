@@ -84,6 +84,21 @@
       args:
         chdir: "{{ tmp_dir.path }}"
 
+- name: customize ovn-central's command
+  block:
+    - name: copy kustomization
+      copy:
+        src: kustomization_ovn_central.yaml
+        dest: "{{ tmp_dir.path }}/kustomization.yaml"
+    - name: copy ovn_central kustomization file
+      copy:
+        src: ovn_central.yaml
+        dest: "{{ tmp_dir.path }}/ovn_central.yaml"
+    - name: kustomize ovn.yaml
+      shell: kubectl kustomize . > ovn.yaml
+      args:
+        chdir: "{{ tmp_dir.path }}"
+
 - name: enable DPDK support
   block:
     - name: create kustomization.yaml
