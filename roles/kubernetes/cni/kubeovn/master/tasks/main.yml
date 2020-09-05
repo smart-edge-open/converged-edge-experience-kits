@@ -95,9 +95,14 @@
         src: ovn_central.yaml
         dest: "{{ tmp_dir.path }}/ovn_central.yaml"
     - name: kustomize ovn.yaml
-      shell: kubectl kustomize . > ovn.yaml
+      shell: kubectl kustomize . > ovn-customized.yaml
       args:
         chdir: "{{ tmp_dir.path }}"
+    - name: rename ovn-customized.yaml to ovn.yaml
+      copy:
+        src: "{{ tmp_dir.path }}/ovn-customized.yaml"
+        dest: "{{ tmp_dir.path }}/ovn.yaml"
+        remote_src: yes
 
 - name: enable DPDK support
   block:
