@@ -10,6 +10,6 @@ source scripts/parse_args.sh
 filter="${1:-}"
 limit=$(get_limit "${filter}")
 
-ansible-playbook -vv \
+eval ansible-playbook -vv \
     ./network_edge_cleanup.yml \
-    --inventory inventory.ini ${limit}
+    --inventory inventory.ini "${limit}"

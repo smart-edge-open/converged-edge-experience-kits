@@ -65,12 +65,11 @@ if [[ "${filter}" == s* ]]; then
     playbook="single_node_network_edge.yml"
 else
     playbook="network_edge.yml"
-    limit=$(get_limit ${filter})
+    limit=$(get_limit "${filter}")
 fi
 
-ansible-playbook -vv \
+eval ansible-playbook -vv \
     "${playbook}" \
-    --inventory inventory.ini ${limit}
+    --inventory inventory.ini "${limit}"
 
 #python scripts/log_all.py
-
