@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- op: add
+  path: /spec/template/spec/containers/0/command
+  value: [ "/bin/sh", "-c", "if [ -z $KUBERNETES_SERVICE_HOST ]; then echo 'KUBERNETES_SERVICE_HOST is unset - exiting...'; exit 1; fi; /root/start-db.sh" ]
