@@ -64,7 +64,8 @@
     - role: telemetry/opentelemetry/master
     - role: telemetry/collectd/master
     - role: telemetry/tas
-    - role: telemetry/cadvisor/master
+    # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
+    # - role: telemetry/cadvisor/master
 
     - role: fpga_cfg
       when: fpga_sriov_userspace_enable | default(False)
@@ -92,7 +93,8 @@
 - hosts: edgenode_group
   roles:
     - role: telemetry/collectd/worker
-    - role: telemetry/cadvisor/worker
+    # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
+    # - role: telemetry/cadvisor/worker
     - role: openness/worker
     - role: kubevirt/worker
       when: kubevirt_enable | default(True)
