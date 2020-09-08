@@ -3,7 +3,7 @@
 
 ---
 _nfd_image_name: "quay.io/kubernetes_incubator/node-feature-discovery"
-_nfd_tag: "v0.5.0"
+_nfd_tag: "v0.6.0"
 
 _nfd_chart_dir: "{{ ne_helm_charts_default_dir }}/node-feature-discovery"
 _nfd_cek_commit: "df61e6e46beb10ad596206ab25b04dbeb9162663"

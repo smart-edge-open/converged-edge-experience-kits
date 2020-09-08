@@ -2,5 +2,5 @@
 # Copyright (c) 2020 Intel Corporation
 
 # Tested on v3.3 and v3.4.1 versions. With newer versions some changes in chart might be required
-_multus_image_tag: v3.4.1
+_multus_image_tag: v3.6
 _multus_image_name: nfvpe/multus
