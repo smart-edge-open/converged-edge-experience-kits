@@ -4,3 +4,4 @@
 ---
 
 _configs_dest: /etc/openness/configs
+_kafka_certs_dest: /etc/openness/certs/eaa-kafka

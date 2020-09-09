@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaUser
+metadata:
+  name: "{{ kafka_eaa_user }}"
+  labels:
+    strimzi.io/cluster: "{{ kafka_cluster }}"
+spec:
+  authentication:
+    type: tls

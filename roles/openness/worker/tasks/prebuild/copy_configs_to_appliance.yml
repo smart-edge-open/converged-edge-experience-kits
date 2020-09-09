@@ -32,6 +32,8 @@
     shell: jq '.ValidationEndpoint=""' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
   - name: change EAA common name
     shell: jq '.Certs.CommonName="eaa.openness"' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
+  - name: change Kafka URL
+    shell: jq '.KafkaBroker="{{ kafka_cluster }}-kafka-bootstrap.kafka:9093"' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
 
 - name: copy logrotate config
   copy:

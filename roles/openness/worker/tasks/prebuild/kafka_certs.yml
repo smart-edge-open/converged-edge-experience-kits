@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: check if EAA Kafka User secret exists
+  command: kubectl get secret eaa-kafka --namespace=openness
+  ignore_errors: yes
+  register: get_secret_eaa_kafka
+  changed_when: false
+
+- name: create EAA Kafka User secret
+  block:
+    - name: create directory for Kafka certs
+      file:
+        name: "{{ _kafka_certs_dest }}"
+        state: directory
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: wait for Kafka cluster CA secret
+      command: kubectl get secret {{ kafka_cluster }}-cluster-ca-cert -n kafka
+      register: kafka_ca_secret
+      retries: 10
+      delay: 30
+      until: kafka_ca_secret.rc == 0
+      delegate_to: "{{ groups['controller_group'][0] }}"
+      changed_when: false
+
+    - name: wait for EAA Kafka user secret
+      command: kubectl get secret {{ kafka_eaa_user }} -n kafka
+      register: eaa_user_secret
+      retries: 10
+      delay: 30
+      until: eaa_user_secret.rc == 0
+      delegate_to: "{{ groups['controller_group'][0] }}"
+      changed_when: false
+
+    - name: Dump Kafka CA certificate
+      shell: >
+        kubectl get secret {{ kafka_cluster }}-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.crt}' |
+        base64 -d > {{ _kafka_certs_dest }}/ca.crt
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: Dump EAA user certificate
+      shell: >
+        kubectl get secret {{ kafka_eaa_user }} -n kafka -o jsonpath='{.data.user\.crt}' |
+        base64 -d > {{ _kafka_certs_dest }}/user.crt
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: Dump EAA user key
+      shell: >
+        kubectl get secret {{ kafka_eaa_user }} -n kafka -o jsonpath='{.data.user\.key}' |
+        base64 -d > {{ _kafka_certs_dest }}/user.key
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: Create a secret
+      command: >
+        kubectl create secret generic eaa-kafka
+        --from-file={{ _kafka_certs_dest }}/ca.crt
+        --from-file={{ _kafka_certs_dest }}/user.crt
+        --from-file={{ _kafka_certs_dest }}/user.key
+        --namespace=openness
+      delegate_to: "{{ groups['controller_group'][0] }}"
+  when: get_secret_eaa_kafka.rc != 0

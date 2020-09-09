@@ -119,6 +119,9 @@
     include_tasks: ./roles/fpga_cfg/tasks/cleanup.yml
     when: fpga_sriov_userspace_enable | default(False)
 
+  - name: Kafka Cluster cleanup
+    include_tasks: ./roles/kafka/tasks/cleanup.yml
+
   - name: helm cleanup
     block:
     - name: load helm variables

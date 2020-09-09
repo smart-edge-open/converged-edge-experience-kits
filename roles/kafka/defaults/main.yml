@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_kafka_pv_dir: /opt/kafka
+_kafka_pv_names:
+  - kafka-volume
+  - zookeeper-volume
+
+_strimzi_chart_dir: "{{ ne_helm_charts_default_dir }}/strimzi"
+_strimzi_chart_dest: "{{ _strimzi_chart_dir }}/strimzi-chart.tgz"
+_strimzi_chart_url: "https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.19.0/strimzi-kafka-operator-helm-3-chart-0.19.0.tgz"
