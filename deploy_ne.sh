@@ -72,4 +72,4 @@ eval ansible-playbook -vv \
     "${playbook}" \
     --inventory inventory.ini "${limit}"
 
-#python scripts/log_all.py
+python3 scripts/log_all.py

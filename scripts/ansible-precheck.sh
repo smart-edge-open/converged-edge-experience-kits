@@ -39,3 +39,12 @@ if ! python -c 'import netaddr' 2>/dev/null; then
   fi
   echo "netaddr successfully installed"
 fi
+
+if ! command -v python3 1>/dev/null; then
+  echo "Python3 not installed..."
+  if ! yum -y install python3; then
+    echo "ERROR: Could not install Python3 package "
+    exit 1
+  fi
+  echo "Python3 successfully instaled"
+fi
