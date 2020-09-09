@@ -59,7 +59,7 @@ kubeovn_dpdk_socket_mem: "1024,0"
 
 # Packages to be installed on the Edge Controller host
 os_yum_base_packages:
-  "git2u-all,jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,rsync,\
+  "git2u-all,jq,vim-common,curl,yum-utils,python2-pip,python3,wget,bridge-utils,rsync,\
   device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch,openssl11"
 
 ## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
