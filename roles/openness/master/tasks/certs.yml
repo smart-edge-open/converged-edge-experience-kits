@@ -11,6 +11,10 @@
       state: directory
   - name: create root CA
     command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh openness {{ _certs_dest }}/CA"
+  - name: set CA private key mode
+    file:
+      path: "{{ _certs_dest }}/CA/key.pem"
+      mode: '0600'
 
 - name: create root CA secret
   block:
