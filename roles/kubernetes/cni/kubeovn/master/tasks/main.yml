@@ -84,11 +84,11 @@
       args:
         chdir: "{{ tmp_dir.path }}"
 
-- name: customize ovn-central's command
+- name: customize ovn-central's command and ovn images
   block:
     - name: copy kustomization
-      copy:
-        src: kustomization_ovn_central.yaml
+      template:
+        src: kustomization_ovn.yaml.j2
         dest: "{{ tmp_dir.path }}/kustomization.yaml"
     - name: copy ovn_central kustomization file
       copy:
@@ -102,6 +102,22 @@
       copy:
         src: "{{ tmp_dir.path }}/ovn-customized.yaml"
         dest: "{{ tmp_dir.path }}/ovn.yaml"
+        remote_src: yes
+
+- name: customize kube-ovn images
+  block:
+    - name: copy kustomization
+      template:
+        src: kustomization_kube_ovn.yaml.j2
+        dest: "{{ tmp_dir.path }}/kustomization.yaml"
+    - name: kustomize kube-ovn.yaml
+      shell: kubectl kustomize . > kube-ovn-customized.yaml
+      args:
+        chdir: "{{ tmp_dir.path }}"
+    - name: rename kube-ovn-customized.yaml to kube-ovn.yaml
+      copy:
+        src: "{{ tmp_dir.path }}/kube-ovn-customized.yaml"
+        dest: "{{ tmp_dir.path }}/kube-ovn.yaml"
         remote_src: yes
 
 - name: enable DPDK support
