@@ -15,16 +15,6 @@
   command: kubectl label namespace default istio-injection-
   changed_when: true
 
-- name: delete the istio deployment
-  command: kubectl delete istiooperators.install.istio.io -n istio-system openness-istiocontrolplane
-  ignore_errors: yes
-  changed_when: true
-
-- name: remove istio-operator namespace
-  command: kubectl delete ns istio-operator --grace-period=0 --force
-  ignore_errors: yes
-  changed_when: true
-
 - name: remove the kiali secret and nodeport
   shell: "source /etc/profile && kubectl delete -f {{ _istio_main_dir }}/kiali_def.yaml"
   ignore_errors: yes
@@ -32,7 +22,7 @@
 
 - name: remove the istio deployment
   shell: "source /etc/profile && set -o pipefail && \
-    istioctl manifest generate --set profile={{ istio_deployment_profile }} | kubectl delete --ignore-not-found=true -f -"
+    istioctl manifest generate -f {{ _istio_main_dir }}/default.yaml | kubectl delete --ignore-not-found=true -f -"
   ignore_errors: yes
   changed_when: true
 

@@ -25,18 +25,14 @@
     dest: /etc/profile
     line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"
 
-- name: deploy the Istio operator
-  shell: "source /etc/profile && istioctl install --set profile={{ istio_deployment_profile }}"
-  changed_when: true
-
-- name: create the Istio profile
+- name: deploy istio
   block:
-    - name: create default.yaml
+    - name: create default.yaml with parameters for istio deployment
       template:
         src: default.yaml.j2
         dest: "{{ _istio_main_dir }}/default.yaml"
-    - name: create the Istio profile
-      command: "kubectl apply -f {{ _istio_main_dir }}/default.yaml"
+    - name: deploy istio with istioctl
+      shell: "source /etc/profile && istioctl install -f {{ _istio_main_dir }}/default.yaml"
       changed_when: true
     - name: create kiali_def.yml
       template:
