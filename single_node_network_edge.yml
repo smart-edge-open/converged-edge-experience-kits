@@ -57,6 +57,7 @@
     - role: kubernetes/dashboard
       when: kubernetes_dashboard_enable | default(False)
 
+    - role: kafka
     - role: openness/master
 
     - role: telemetry/certs
