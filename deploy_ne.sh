@@ -72,4 +72,6 @@ eval ansible-playbook -vv \
     "${playbook}" \
     --inventory inventory.ini "${limit}"
 
-python3 scripts/log_all.py
+if ! python3 scripts/log_all.py; then
+    echo "[Warning] Log collection failed"
+fi
