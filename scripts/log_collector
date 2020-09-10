@@ -191,7 +191,8 @@ def collect_pods_logs(file_name, com):
         subprocess.run("kubectl get pods -A -o wide -o json",
                        shell=True,
                        check=False,
-                       capture_output=True).stdout.decode("utf-8"))
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT).stdout.decode("utf-8"))
 
     for pod in pods["items"]:
         command = re.sub("<POD>", pod["metadata"]["name"], com)
@@ -215,7 +216,8 @@ def collect_journalctl_services_logs(file_name, com):
         "systemctl --no-page list-unit-files --type=service --no-legend",
         shell=True,
         check=False,
-        capture_output=True).stdout.decode("utf-8")
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT).stdout.decode("utf-8")
     services = [x.split(" ", 1)[0] for x in output.splitlines()][:-1]
     for s in services:
         logging.debug("Collecting service logs for: %s", s)
