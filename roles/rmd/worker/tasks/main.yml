@@ -3,18 +3,11 @@
 #
 # ---
 
-- name: set the mountpoint for resctrl
-  mount:
-    path: /sys/fs/resctrl
-    src: resctrl
-    fstype: resctrl
-    state: mounted
-
 - name: clone RMD repository
   git:
     repo: "{{ _rmd_repo }}"
     dest: "{{ _rmd_src_dir }}"
-    version: "{{ _rmd_tag }}"
+    version: master
     update: no
 
 - name: build the RMD daemon
@@ -27,7 +20,7 @@
   git:
     repo: "{{ _rmd_operator_repo }}"
     dest: "{{ _rmd_operator_dir }}"
-    version: "{{ _rmd_operator_tag }}"
+    version: master
     update: no
 
 - name: build the RMD operator
