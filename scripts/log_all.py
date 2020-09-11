@@ -50,7 +50,10 @@ def main():
 
     with open("inventory.ini", "r") as f:
         lines = f.read().split("\n")
-        host = [v for v in lines if "controller ansibl" in v][0].split("=")[-1]
+        name = lines[lines.index("[controller_group]") + 1].strip()
+        controller = [x for x in lines
+                      if name in x and len(name) < len(x)][0].split(" ")
+        host = [x for x in controller if "ansible_host" in x][0].split("=")[-1]
 
     try:
         with tarfile.open(file_name, "w:gz") as tar:
