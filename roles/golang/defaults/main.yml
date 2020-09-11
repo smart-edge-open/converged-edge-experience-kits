@@ -3,8 +3,8 @@
 
 ---
 
-_golang_version: "1.15"
-_golang_download_checksum: "2d75848ac606061efe52a8068d0e647b35ce487a15bb52272c427df485193602"
+_golang_version: "1.14.9"
+_golang_download_checksum: "f0d26ff572c72c9823ae752d3c81819a81a60c753201f51f89637482531c110a"
 
 _golang_download_name: "go{{ _golang_version }}.linux-amd64.tar.gz"
 _golang_download_url: "https://dl.google.com/go/{{ _golang_download_name }}"
