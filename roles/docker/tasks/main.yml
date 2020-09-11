@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: add Docker repository
   yum_repository:
     name: docker
@@ -26,16 +25,22 @@
     name: "{{ _docker_packages }}"
     state: present
   notify:
-  - enable and start docker service
+    - enable and start docker service
 
-- name: install docker-compose
-  pip:
-    name: "{{ _docker_compose_package }}"
-    state: present
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
+- name: install pip dependencies
+  block:
+    - name: copy requirements.txt
+      copy:
+        src: requirements.txt
+        dest: /tmp/requirements.txt
+    - name: install dependencies
+      pip:
+        requirements: /tmp/requirements.txt
+        state: present
+    - name: install docker-compose
+      pip:
+        name: "{{ _docker_compose_package }}"
+        state: present
 
 - name: set up proxy
   include_tasks: proxy.yml
@@ -43,16 +48,16 @@
 
 - name: set cgroups driver to systemd
   block:
-  - name: make sure /etc/docker/ exists
-    file:
-      path: /etc/docker/
-      state: directory
-  - name: set cgroups driver to systemd
-    copy:
-      src: daemon.json
-      dest: /etc/docker/daemon.json
-    notify:
-    - enable and start docker service
+    - name: make sure /etc/docker/ exists
+      file:
+        path: /etc/docker/
+        state: directory
+    - name: set cgroups driver to systemd
+      copy:
+        src: daemon.json
+        dest: /etc/docker/daemon.json
+      notify:
+        - enable and start docker service
 
 - name: restart services if needed
   meta: flush_handlers
@@ -77,11 +82,11 @@
 
 - name: setup docker bash completion
   block:
-  - name: download Docker CLI bash completion
-    get_url:
-      url: "{{ _docker_completion_url }}"
-      dest: "/etc/bash_completion.d"
-  - name: download Docker Compose bash completion
-    get_url:
-      url: "{{ _docker_compose_completion_url }}"
-      dest: "/etc/bash_completion.d"
+    - name: download Docker CLI bash completion
+      get_url:
+        url: "{{ _docker_completion_url }}"
+        dest: "/etc/bash_completion.d"
+    - name: download Docker Compose bash completion
+      get_url:
+        url: "{{ _docker_compose_completion_url }}"
+        dest: "/etc/bash_completion.d"

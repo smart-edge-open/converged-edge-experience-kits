@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+resources:
+- kube-ovn.yaml
+
+
+images:
+- name: index.alauda.cn/alaudak8s/kube-ovn-controller
+  newName: kubeovn/kube-ovn-controller
+  newTag: {{ _kubeovn_version }}
+- name: index.alauda.cn/alaudak8s/kube-ovn-cni
+  newName: kubeovn/kube-ovn-cni
+  newTag: {{ _kubeovn_version }}
+- name: index.alauda.cn/alaudak8s/kube-ovn-pinger
+  newName: kubeovn/kube-ovn-pinger
+  newTag: {{ _kubeovn_version }}
+  
