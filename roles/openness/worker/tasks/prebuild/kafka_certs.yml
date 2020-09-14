@@ -63,3 +63,4 @@
         --namespace=openness
       delegate_to: "{{ groups['controller_group'][0] }}"
   when: get_secret_eaa_kafka.rc != 0
+  run_once: true
