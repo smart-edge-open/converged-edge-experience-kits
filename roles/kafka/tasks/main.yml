@@ -32,7 +32,7 @@
         dest: "{{ _strimzi_chart_dir }}"
         remote_src: True
 
-    - name: create openness namespace if needed
+    - name: create kafka namespace if needed
       command: kubectl create namespace kafka
       register: create_namespace_result
       failed_when: "create_namespace_result.rc != 0 and 'AlreadyExists' not in create_namespace_result.stderr"

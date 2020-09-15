@@ -17,3 +17,14 @@
   command: helm uninstall strimzi -n kafka
   changed_when: true
   ignore_errors: true
+
+- name: delete persistent volumes
+  command: "kubectl delete pv {{ item }} -n kafka"
+  with_items: "{{ _kafka_pv_names }}"
+  changed_when: true
+  ignore_errors: true
+
+- name: delete directory for Kafka persistent volumes
+  file:
+    path: "{{ _kafka_pv_dir }}"
+    state: absent
