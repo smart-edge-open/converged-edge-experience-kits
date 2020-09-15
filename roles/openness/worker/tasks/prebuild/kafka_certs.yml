@@ -21,7 +21,7 @@
     - name: wait for Kafka cluster CA secret
       command: kubectl get secret {{ kafka_cluster }}-cluster-ca-cert -n kafka
       register: kafka_ca_secret
-      retries: 20
+      retries: 40
       delay: 30
       until: kafka_ca_secret.rc == 0
       delegate_to: "{{ groups['controller_group'][0] }}"
@@ -30,7 +30,7 @@
     - name: wait for EAA Kafka user secret
       command: kubectl get secret {{ kafka_eaa_user }} -n kafka
       register: eaa_user_secret
-      retries: 20
+      retries: 40
       delay: 30
       until: eaa_user_secret.rc == 0
       delegate_to: "{{ groups['controller_group'][0] }}"
