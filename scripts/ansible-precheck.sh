@@ -8,7 +8,7 @@ if ! id -u 1>/dev/null; then
   exit 1
 fi
 
-if [ "${0##*/}" -eq "${BASH_SOURCE[0]##*/}" ]; then
+if [ "${0##*/}" = "${BASH_SOURCE[0]##*/}" ]; then
     echo "ERROR: This script cannot be executed directly"
     exit 1
 fi
