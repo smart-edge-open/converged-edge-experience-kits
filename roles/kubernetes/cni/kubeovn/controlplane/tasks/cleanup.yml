@@ -16,7 +16,7 @@
   - name: change hardcoded tag
     replace:
       path: "{{ _kubeovn_cleanup_dest }}"
-      regexp: "kube-ovn/master"
+      regexp: "kube-ovn/controlplane"
       replace: "kube-ovn/{{ _kubeovn_version }}"
   - name: execute kube-ovn cleanup script
     command: "timeout 120 {{ _kubeovn_cleanup_dest }}"

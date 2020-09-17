@@ -4,7 +4,7 @@
 ---
 
 - name: include docker registry vars
-  include_vars: ../../../docker_registry/master/defaults/main.yml
+  include_vars: ../../../docker_registry/controlplane/defaults/main.yml
 
 - name: check if collectd already exists
   command: helm status collectd -n telemetry

@@ -6,10 +6,10 @@
 - name: Configure PTP master
   block:
   - name: Import vars from master
-    include_vars: roles/ptp/master/defaults/main.yml
+    include_vars: roles/ptp/controlplane/defaults/main.yml
 
   - name: Configure the node to act as a ptp master
-    include_tasks: ../../master/tasks/main.yml
+    include_tasks: ../../controlplane/tasks/main.yml
   when: inventory_hostname in groups['ptp_master']
 
 - name: Configure the node to act as a ptp slave

@@ -34,7 +34,7 @@
     - role: git_repo
     - role: golang
     - role: docker
-    - role: opae_fpga/worker
+    - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
 
 - hosts: controller_group
@@ -48,8 +48,8 @@
   roles:
     - role: machine_setup/os_setup
     - role: git_repo
-    - role: kubernetes/master
-    - role: docker_registry/master
+    - role: kubernetes/controlplane
+    - role: docker_registry/controlplane
     - role: kubernetes/helm
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
@@ -58,34 +58,34 @@
       when: kubernetes_dashboard_enable | default(False)
 
     - role: kafka
-    - role: openness/master
+    - role: openness/controlplane
 
     - role: telemetry/certs
     - role: telemetry/prometheus
-    - role: telemetry/opentelemetry/master
-    - role: telemetry/collectd/master
+    - role: telemetry/opentelemetry/controlplane
+    - role: telemetry/collectd/controlplane
     - role: telemetry/tas
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
-    # - role: telemetry/cadvisor/master
+    # - role: telemetry/cadvisor/controlplane
 
     - role: fpga_cfg
       when: fpga_sriov_userspace_enable | default(False)
-    - role: kubevirt/master
+    - role: kubevirt/controlplane
       when: kubevirt_enable | default(True)
-    - role: opae_fpga/master
+    - role: opae_fpga/controlplane
       when: ne_opae_fpga_enable | default(False)
     - role: nfd
       when: ne_nfd_enable | default(True)
-    - role: biosfw/master
+    - role: biosfw/controlplane
       when: ne_biosfw_enable | default(False)
-    - role: cmk/master
+    - role: cmk/controlplane
       when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/master
+    - role: hddl/network_edge/controlplane
       when: ne_hddl_enable | default(False)
 
     - role: telemetry/grafana
       when: telemetry_grafana_enable | default(True)
-    - role: telemetry/pcm/master
+    - role: telemetry/pcm/controlplane
       when: telemetry_pcm_enable | default(False)
 
     - role: istio
@@ -93,15 +93,15 @@
 
 - hosts: edgenode_group
   roles:
-    - role: telemetry/collectd/worker
+    - role: telemetry/collectd/node
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
-    # - role: telemetry/cadvisor/worker
-    - role: openness/worker
-    - role: kubevirt/worker
+    # - role: telemetry/cadvisor/node
+    - role: openness/node
+    - role: kubevirt/node
       when: kubevirt_enable | default(True)
-    - role: biosfw/worker
+    - role: biosfw/node
       when: ne_biosfw_enable | default(False)
-    - role: cmk/worker
+    - role: cmk/node
       when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/worker
+    - role: hddl/network_edge/node
       when: ne_hddl_enable | default(False)

@@ -4,7 +4,7 @@
 ---
 
 - name: load docker-registry variables
-  include_vars: ../../master/defaults/main.yml
+  include_vars: ../../controlplane/defaults/main.yml
 
 - name: create directory for copying certificate
   file:

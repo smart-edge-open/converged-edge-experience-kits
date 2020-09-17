@@ -11,7 +11,7 @@
   changed_when: false
 
 - name: include docker registry vars
-  include_vars: ../../../docker_registry/master/defaults/main.yml
+  include_vars: ../../../docker_registry/controlplane/defaults/main.yml
 
 # CMK deployment is called on Controller after node is ready
 - name: deploy CMK with Helm chart

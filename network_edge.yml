@@ -36,8 +36,8 @@
 # Playbook for Network Edge deployment
 - hosts: controller_group
   roles:
-    - role: kubernetes/master
-    - role: docker_registry/master
+    - role: kubernetes/controlplane
+    - role: docker_registry/controlplane
     - role: kubernetes/helm
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
@@ -47,65 +47,65 @@
 
     - role: kafka
 
-    - role: openness/master
-    - role: kubevirt/master
+    - role: openness/controlplane
+    - role: kubevirt/controlplane
       when: kubevirt_enable | default(True)
 
     - role: telemetry/certs
     - role: telemetry/prometheus
-    - role: telemetry/opentelemetry/master
-    - role: telemetry/collectd/master
+    - role: telemetry/opentelemetry/controlplane
+    - role: telemetry/collectd/controlplane
     - role: telemetry/tas
-    - role: telemetry/cadvisor/master
+    - role: telemetry/cadvisor/controlplane
 
     - role: fpga_cfg
       when: fpga_sriov_userspace_enable | default(False)
-    - role: opae_fpga/master
+    - role: opae_fpga/controlplane
       when: ne_opae_fpga_enable | default(False)
     - role: nfd
       when: ne_nfd_enable | default(True)
-    - role: biosfw/master
+    - role: biosfw/controlplane
       when: ne_biosfw_enable | default(False)
-    - role: cmk/master
+    - role: cmk/controlplane
       when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/master
+    - role: hddl/network_edge/controlplane
       when: ne_hddl_enable | default(False)
-    - role: ptp/master
+    - role: ptp/controlplane
       when: ptp_sync_enable | default(False)
 
     - role: telemetry/grafana
       when: telemetry_grafana_enable | default(True)
-    - role: telemetry/pcm/master
+    - role: telemetry/pcm/controlplane
       when: telemetry_pcm_enable | default(False)
 
-    - role: rmd/master
+    - role: rmd/controlplane
       when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_group
   roles:
-    - role: opae_fpga/worker
+    - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
-    - role: kubernetes/worker
-    - role: docker_registry/worker
+    - role: kubernetes/node
+    - role: docker_registry/node
     - role: kubernetes/cni
-    - role: telemetry/collectd/worker
-    - role: telemetry/cadvisor/worker
-    - role: openness/worker
-    - role: kubevirt/worker
+    - role: telemetry/collectd/node
+    - role: telemetry/cadvisor/node
+    - role: openness/node
+    - role: kubevirt/node
       when: kubevirt_enable | default(True)
-    - role: biosfw/worker
+    - role: biosfw/node
       when: ne_biosfw_enable | default(False)
-    - role: cmk/worker
+    - role: cmk/node
       when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/worker
+    - role: hddl/network_edge/node
       when: ne_hddl_enable | default(False)
-    - role: ptp/worker
+    - role: ptp/node
       when: ptp_sync_enable | default(False)
 
-    - role: telemetry/pcm/worker
+    - role: telemetry/pcm/node
       when: telemetry_pcm_enable | default(False)
 
-    - role: rmd/worker
+    - role: rmd/node
       when: rmd_operator_enable | default(False)
 
 # Play for edge nodes that have VCAC-A card installed
@@ -131,13 +131,13 @@
     - role: machine_setup/vca_host_setup
     - role: machine_setup/conditional_reboot
     - role: machine_setup/vca_node_setup
-    - role: kubernetes/worker
-    - role: docker_registry/worker
+    - role: kubernetes/node
+    - role: docker_registry/node
     - role: kubernetes/cni
-    - role: telemetry/collectd/worker
-    - role: telemetry/cadvisor/worker
-    - role: openness/worker
-    - role: telemetry/pcm/worker
+    - role: telemetry/collectd/node
+    - role: telemetry/cadvisor/node
+    - role: openness/node
+    - role: telemetry/pcm/node
       when: telemetry_pcm_enable | default(False)
     - role: hddl/vca_setup
 

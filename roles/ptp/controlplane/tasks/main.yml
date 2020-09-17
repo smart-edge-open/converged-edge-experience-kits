@@ -60,7 +60,7 @@
 
   - name: Apply patch to config
     patch:
-      src: "../../master/files/{{ _config_patch }}"
+      src: "../../controlplane/files/{{ _config_patch }}"
       dest: "{{ _linuxptp_git_repo.download_dir }}/configs/default.cfg"
     delegate_to: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
 

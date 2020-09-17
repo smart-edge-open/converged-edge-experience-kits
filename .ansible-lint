@@ -7,13 +7,13 @@ skip_list:
 
 exclude_paths:
   - roles/telemetry/certs/files/
-  - roles/telemetry/collectd/master/files/
-  - roles/telemetry/collectd/worker/files/
+  - roles/telemetry/collectd/controlplane/files/
+  - roles/telemetry/collectd/node/files/
   - roles/telemetry/prometheus/files/
-  - roles/telemetry/pcm/master/charts/
+  - roles/telemetry/pcm/controlplane/charts/
   - roles/telemetry/tas/files/
   - roles/nfd/files/
-  - roles/kubernetes/cni/sriov/master/files
-  - roles/telemetry/opentelemetry/master/charts
+  - roles/kubernetes/cni/sriov/controlplane/files
+  - roles/telemetry/opentelemetry/controlplane/charts
   - roles/fpga_cfg/charts
   - cnab
