@@ -29,6 +29,8 @@
     block:
     - name: load pcm variables
       include_vars: ./roles/telemetry/pcm/controlplane/defaults/main.yml
+    - name: load grafana variables
+      include_vars: ./roles/telemetry/grafana/defaults/main.yml
     - name: cleanup pcm
       include_tasks: ./roles/telemetry/pcm/controlplane/tasks/cleanup.yml
     when: telemetry_pcm_enable | default(False)
