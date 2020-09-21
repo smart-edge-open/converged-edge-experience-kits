@@ -2,6 +2,7 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+
 - name: permit WeaveNet ports in firewall
   ignore_errors: yes
   firewalld:
@@ -13,7 +14,6 @@
   - 6783/tcp
   - 6783/udp
   - 6784/udp
-
 
 - name: patch node's Pod CIDR
   command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"{{ weavenet_cidr }}" }}'

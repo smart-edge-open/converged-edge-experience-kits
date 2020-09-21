@@ -13,6 +13,7 @@
 
 - name: remove istio-injection label to default namespace
   command: kubectl label namespace default istio-injection-
+  ignore_errors: yes
   changed_when: true
 
 - name: remove the kiali secret and nodeport
