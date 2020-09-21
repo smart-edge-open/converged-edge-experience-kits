@@ -21,7 +21,5 @@ _config_slave_patch: default_slave.patch
 
 _port_type: "{{ 'SLAVE' if (inventory_hostname in groups['ptp_slave_group']) else 'MASTER' }}"
 
-_if_remote_src: "{{ false if inventory_hostname in groups['controller_group'] else true }}"
-
 async_time: 2592000
 
