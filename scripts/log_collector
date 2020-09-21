@@ -81,9 +81,21 @@ def parse_options(args):
                         metavar="PATH",
                         default=".",
                         help="""Temporary directory name to use. It will be \
-                                created in /tmp to collect artifacts before \
+                                created to collect artifacts before \
                                 packing into archive. By default: \
                                 %(default)s""")
+
+    parser.add_argument("-l",
+                        "--log_level",
+                        action="store",
+                        dest="log_level",
+                        metavar="LOGGING LEVEL",
+                        default="DEBUG",
+                        choices=["DEBUG", "INFO",
+                                 "WARNING", "ERROR", "CRITICAL", "NONE"],
+                        help="""Console output logger level setting.\
+                                Choose one of: DEBUG, INFO, WARNING, ERROR, \
+                                CRITICAL, NONE. By default: %(default)s""")
 
     return parser.parse_args(args)
 
@@ -163,8 +175,8 @@ def prepare_directories_tree(options, tmp_dir, sub_dirs):
     """
     logging.info("Prepering directories tree to collect artifacts started.")
     if options.force is False and os.path.isfile(options.out):
-        logging.error("Output archive directory already exists. use --force "\
-                    "to overwrite. See --help for more details.")
+        logging.error("Output archive directory already exists. use --force "
+                      "to overwrite. See --help for more details.")
         return -1
 
     try:
@@ -243,10 +255,10 @@ def collect_command_artifacts(root_dir, config):
             prefix = os.path.join(root_dir, sub_dir)
             file_name = os.path.join(prefix, com["file_name"])
             if "<POD>" in com["command"] or "<NAMESPACE>" in com["command"]:
-                #Need to handle PODS/NAMESPACE case
+                # Need to handle PODS/NAMESPACE case
                 collect_pods_logs(file_name, com["command"])
             elif "<SERVICE>" in com["command"]:
-                #Need to handle journalctl SERVICEs logs
+                # Need to handle journalctl SERVICEs logs
                 collect_journalctl_services_logs(file_name, com["command"])
             else:
                 run_command(com["command"], file_name)
@@ -309,6 +321,11 @@ def main(options):
     Returns:
     int: Operation performance exit code. 0 on success, -1 otherwise.
     """
+    if options.log_level != "NONE":
+        stream_logger = logging.StreamHandler(sys.stdout)
+        stream_logger.setLevel(options.log_level)
+        logging.getLogger().addHandler(stream_logger)
+
     logging.info("Starting %s", os.path.basename(sys.argv[0]))
     logging.debug("Reading configuration file: %s", options.config_file)
     config = read_config_json(options.config_file)
@@ -329,5 +346,4 @@ if __name__ == "__main__":
                         filemode="w",
                         format='%(levelname)s: %(message)s',
                         level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     sys.exit(main(parse_options(sys.argv[1:])))

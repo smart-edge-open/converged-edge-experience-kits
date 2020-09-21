@@ -30,7 +30,7 @@ def read_cfg(path):
     dict: Tool configuration dictionary. Read config on success,
           default config otherwise.
     """
-    #to avoid script error default git configuration is also available.
+    # to avoid script error default git configuration is also available.
     config = ["git status", "git diff", "git log -n100"]
     if os.path.isfile(path):
         with open(path, "r") as f:
@@ -80,7 +80,7 @@ def main():
         shell=True,
         check=True)
 
-    subprocess.run("ssh root@%s ./log_collector -f" % host,
+    subprocess.run("ssh root@%s ./log_collector -f -l INFO" % host,
                    shell=True,
                    check=True)
     return 0
