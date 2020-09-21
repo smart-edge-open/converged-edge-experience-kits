@@ -35,4 +35,5 @@
   with_items:
   - "export GOROOT=/usr/local/go"
   - "export GOPATH=~/go"
+  - "export GOPRIVATE=github.com/otcshare"
   - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"
