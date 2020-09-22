@@ -6,7 +6,7 @@
 - name: Configure PTP master
   block:
   - name: Import vars from master
-    include_vars: roles/ptp/controlplane/defaults/main.yml
+    include_vars: ../../controlplane/defaults/main.yml
 
   - name: Configure the node to act as a ptp master
     include_tasks: ../../controlplane/tasks/main.yml
@@ -16,7 +16,7 @@
   block:
   - name: Load PTP defaults
     include_vars:
-      file: ./roles/ptp/common/defaults/main.yml
+      file: ../../common/defaults/main.yml
       name: defaults
 
   - name: Install patch utility
