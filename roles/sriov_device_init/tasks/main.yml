@@ -17,7 +17,7 @@
 
 - block:
   - name: check if FPGA SRIOV device is connected and get PCI address of devices
-    shell: lspci | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
+    shell: lspci -D | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
     register: pci_address
 
   - name: bind FPGA SRIOV PF to IGB UIO
@@ -33,8 +33,8 @@
     args:
   - name: create SRIOV VFs
     shell: >
-      echo 0 | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs &&
-      echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs
+      echo 0 | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs &&
+      echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs
     with_items:
       - "{{ pci_address.stdout_lines }}"
 
@@ -42,7 +42,7 @@
     lineinfile:
       state: present
       dest: /etc/rc.d/rc.local
-      line: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/0000:{{ item }}/max_vfs"
+      line: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs"
     with_items:
       - "{{ pci_address.stdout_lines }}"
 
