@@ -11,8 +11,8 @@
     - "{{ _smi_crds_yaml }}"
     - "{{ _smi_operator_yaml }}"
 
-- name: remove istio-injection label to default namespace
-  command: kubectl label namespace default istio-injection-
+- name: remove istio-injection label to the service mesh namespace
+  command: kubectl label namespace {{ istio_deployment_namespace }} istio-injection-
   ignore_errors: yes
   changed_when: true
 

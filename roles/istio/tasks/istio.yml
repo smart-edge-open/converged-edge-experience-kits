@@ -42,6 +42,17 @@
       command: "kubectl apply -f {{ _istio_main_dir }}/kiali_def.yaml"
       changed_when: true
 
-- name: add istio-injection label to default namespace
-  command: kubectl label namespace default istio-injection=enabled --overwrite
+- name: create service mesh namespace if not existant
+  block:
+    - name: check if service mesh namespace exists
+      command: kubectl get namespace {{ istio_deployment_namespace }}
+      ignore_errors: yes
+      register: get_sm_ns
+    - name: create service mesh namespace
+      command: kubectl create namespace {{ istio_deployment_namespace }}
+      changed_when: true
+      when: get_sm_ns.rc == 1
+
+- name: add istio-injection label to the service mesh namespace
+  command: kubectl label namespace {{ istio_deployment_namespace }} istio-injection=enabled --overwrite
   changed_when: true

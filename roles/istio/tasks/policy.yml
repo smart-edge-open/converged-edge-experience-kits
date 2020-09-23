@@ -4,8 +4,8 @@
 ---
 
 - name: create Istio PeerAuthentication policy file
-  copy:
-    src: authentication.yaml
+  template:
+    src: authentication.yaml.j2
     dest: "{{ _istio_main_dir }}/authentication.yaml"
 
 - name: enforce mutual TLS for Istio traffic
