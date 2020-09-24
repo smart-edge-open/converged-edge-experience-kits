@@ -49,19 +49,9 @@
     command: kubectl delete -f {{ _cdi_cr_url }} --timeout=60s
     ignore_errors: yes
 
-- name: delete vritctl
-  command: kubectl krew uninstall virt
-  ignore_errors: yes
-  changed_when: true
-
-- name: delete krew
+- name: delete virtctl plugin
   file:
-    path: ~/.krew
-    state: absent
-
-- name: delete krew directory
-  file:
-    path: "{{ _krew_dir }}"
+    path: "{{ _virtctl_dir }}/{{ _virtctl_name }}"
     state: absent
 
 - name: uninstall KuberVirt
