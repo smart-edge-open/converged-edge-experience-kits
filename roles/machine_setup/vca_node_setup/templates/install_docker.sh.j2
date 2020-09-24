@@ -11,8 +11,9 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
-apt-get install iptables -y || apt-get --fix-broken install -y
-apt-get install iptables -y
+
+apt-get install libseccomp2  iptables -y 
+
 
 dpkg -i *.deb
 if [ $? -ne 0 ]; then
