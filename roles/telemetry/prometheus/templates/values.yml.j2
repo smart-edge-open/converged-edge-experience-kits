@@ -34,6 +34,8 @@ server:
   extraVolumeMounts:
     - name: cert-vol
       mountPath: /opt/prometheus/certs/
+  persistentVolume:
+    existingClaim: "{{ _pv_names[0] }}-claim"
   global:
     scrape_interval: 5s
     scrape_timeout: 4s

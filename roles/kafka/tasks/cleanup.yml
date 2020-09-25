@@ -18,8 +18,16 @@
   changed_when: true
   ignore_errors: true
 
+- name: delete persistent volume claims
+  command: "kubectl delete pvc data-{{ kafka_cluster }}-{{ item }}-0 -n kafka"
+  changed_when: true
+  ignore_errors: true
+  with_items:
+    - kafka
+    - zookeeper
+
 - name: delete persistent volumes
-  command: "kubectl delete pv {{ item }} -n kafka"
+  command: "kubectl delete pv {{ item }}"
   with_items: "{{ _kafka_pv_names }}"
   changed_when: true
   ignore_errors: true
