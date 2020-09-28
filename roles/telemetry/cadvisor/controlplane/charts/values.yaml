@@ -16,17 +16,20 @@ cadvisor:
     limits:
       cpu: "1"
       memory: "2Gi"
+  disabledMetrics: "percpu,diskIO,tcp,udp,disk,sched"
+  storeContainerLabels: false
+  maxHousekeepingInterval: "30s"
 
 #Proxy Values
 proxy:
-    metricsCadvisorPort: 9105
-    internalCadvisorPort: 9106
-    serverName: cadvisor
-    name: cadvisor-proxy
-    certsDest: /root/certs/cadvisor/
-    image: nginx:alpine
-    pathToNginxCfg: /etc/nginx/nginx.conf
-    configMap: cadvisor-proxy-config
+  metricsCadvisorPort: 9105
+  internalCadvisorPort: 9106
+  serverName: cadvisor
+  name: cadvisor-proxy
+  certsDest: /root/certs/cadvisor/
+  image: nginx:alpine
+  pathToNginxCfg: /etc/nginx/nginx.conf
+  configMap: cadvisor-proxy-config
 
 #Certs Values
 certs:

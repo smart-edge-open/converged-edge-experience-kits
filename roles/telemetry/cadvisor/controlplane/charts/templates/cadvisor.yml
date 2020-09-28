@@ -54,6 +54,9 @@ spec:
       - name: {{ .Values.cadvisor.name }}
         args:
           - --port={{ .Values.proxy.internalCadvisorPort }}
+          - --disable_metrics={{ .Values.cadvisor.disabledMetrics }}
+          - --store_container_labels={{ .Values.cadvisor.storeContainerLabels }}
+          - --max_housekeeping_interval={{ .Values.cadvisor.maxHousekeepingInterval }}
         image: {{ .Values.cadvisor.image }} 
         imagePullPolicy: {{ .Values.pullPolicy }}
         resources:
