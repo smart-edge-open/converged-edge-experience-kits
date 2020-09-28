@@ -3,6 +3,12 @@
 
 ---
 
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
 - name: create docker registry certs for VCA node(s)
   include_tasks: node_cert.yml
   vars:

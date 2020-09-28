@@ -45,6 +45,12 @@
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true
 
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
 - name: join VCA node
   include_tasks: vca_node_join.yml
   vars:

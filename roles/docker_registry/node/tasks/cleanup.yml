@@ -9,6 +9,12 @@
     state: absent
   ignore_errors: yes
 
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
 - name: delete certificate from VCA node
   command: "ssh {{ vca_node_ip }} 'rm -rf /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}'"
   vars:
