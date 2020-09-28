@@ -63,7 +63,7 @@ number_of_retries: 10
 retry_delay: 5
 
 # - allowed_number_of_k8s_retries - configures how many Kubernetes failures are allowed
-allowed_number_of_k8s_retries: 3
+allowed_number_of_k8s_retries: 10
 
 ## PTP synchronization between nodes
 ptp_sync_enable: False
