@@ -131,7 +131,7 @@ def run_command(command, file_name):
     command(string): Command to run.
     file_name(string): Path to save results.
     """
-    logging.info("Saving command: %s to file: %s ", command, file_name)
+    logging.debug("Saving command: %s to file: %s ", command, file_name)
     with open(file_name, "w") as f:
         subprocess.run(command,
                        shell=True,
@@ -158,7 +158,7 @@ def make_targz(archive_name, src):
             logging.error(
                 "Adding artifacts to the archive %s failed with error: %s",
                 archive_name, e)
-    logging.debug("Creating %s finished.", archive_name)
+    logging.info("Creating %s succeeded.", archive_name)
 
 
 def prepare_directories_tree(options, tmp_dir, sub_dirs):
@@ -198,7 +198,7 @@ def collect_pods_logs(file_name, com):
     file_name (string): sub-directory prefix path.
     com (string): command to run.
     """
-    logging.info("Collecting pods logs started.")
+    logging.debug("Collecting pods logs started.")
     pods = json.loads(
         subprocess.run("kubectl get pods -A -o wide -o json",
                        shell=True,
@@ -223,7 +223,7 @@ def collect_journalctl_services_logs(file_name, com):
     prefix (string): sub-directory prefix path.
     com (string): command to run.
     """
-    logging.info("Collecting journalctl services logs started.")
+    logging.debug("Collecting journalctl services logs started.")
     output = subprocess.run(
         "systemctl --no-page list-unit-files --type=service --no-legend",
         shell=True,
@@ -299,15 +299,15 @@ def collect_directory(src, path):
     src (dict): Source directory info dictionary.
     path (string): Archive directory path.
     """
-    logging.info("Collecting directory %s started.", src["path"])
+    logging.debug("Collecting directory %s started.", src["path"])
     with tarfile.open(os.path.join(path, src["file_name"]),
                       "w:gz",
                       dereference=True) as tar:
         try:
             tar.add(src["path"], arcname=src["path"])
         except OSError as e:
-            logging.error("Adding file %s failed with error: %s",
-                          src["file_name"], e)
+            logging.debug("Adding file %s failed with error: %s", 
+                              src["file_name"], e)
     logging.debug("Collecting directory finished.")
 
 
@@ -344,6 +344,6 @@ def main(options):
 if __name__ == "__main__":
     logging.basicConfig(filename="log_collector.log",
                         filemode="w",
-                        format='%(levelname)s: %(message)s',
-                        level=logging.DEBUG)
+                        format='%(levelname)s: %(message)s')
+    logging.getLogger().setLevel(logging.DEBUG)
     sys.exit(main(parse_options(sys.argv[1:])))

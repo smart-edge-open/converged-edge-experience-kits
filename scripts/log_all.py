@@ -74,15 +74,20 @@ def main():
         print("ERROR: %s" % e)
         return -1
 
-    subprocess.run(
-        "scp -C %s scripts/log_collector scripts/log_collector.json root@%s:~"
-        % (file_name, host),
-        shell=True,
-        check=True)
+    try:
+        subprocess.run(
+            "scp -C %s scripts/log_collector scripts/log_collector.json root@%s:~"
+            % (file_name, host),
+            shell=True,
+            check=True)
 
-    subprocess.run("ssh root@%s ./log_collector -f -l INFO" % host,
-                   shell=True,
-                   check=True)
+        subprocess.run("ssh root@%s ./log_collector -f -l INFO" % host,
+                    shell=True,
+                    check=True)
+    except subprocess.CalledProcessError as e:
+        print("Collecting controller logs failed.")
+        print("Please check connection and run: `python3 scripts/log_all.py`")
+
     return 0
 
 
