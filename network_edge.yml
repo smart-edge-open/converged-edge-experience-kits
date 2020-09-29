@@ -83,6 +83,9 @@
 
 - hosts: edgenode_group
   roles:
+    - role: rmd/node
+      when: rmd_operator_enable | default(False)
+
     - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
     - role: kubernetes/node
@@ -104,9 +107,6 @@
 
     - role: telemetry/pcm/node
       when: telemetry_pcm_enable | default(False)
-
-    - role: rmd/node
-      when: rmd_operator_enable | default(False)
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group
