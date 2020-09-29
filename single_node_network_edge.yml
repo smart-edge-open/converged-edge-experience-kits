@@ -36,6 +36,7 @@
     - role: docker
     - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
+    - role: telemetry/collectd/node
 
 - hosts: controller_group
   pre_tasks:
@@ -93,7 +94,6 @@
 
 - hosts: edgenode_group
   roles:
-    - role: telemetry/collectd/node
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
     # - role: telemetry/cadvisor/node
     - role: openness/node
