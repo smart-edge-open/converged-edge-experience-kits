@@ -81,9 +81,6 @@ def main():
             shell=True,
             check=True)
 
-        subprocess.run("ssh root@%s ./log_collector -f -l INFO" % host,
-                    shell=True,
-                    check=True)
     except subprocess.CalledProcessError as e:
         print("Collecting controller logs failed.")
         print("Please check connection and run: `python3 scripts/log_all.py`")
