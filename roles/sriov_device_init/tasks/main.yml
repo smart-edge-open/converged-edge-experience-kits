@@ -57,8 +57,7 @@
       dest: /etc/rc.d/rc.local
       line: "{{ item }}"
     with_items:
-      - >
-        "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" |
+      - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" |
         sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id"
   when: fpga_userspace_vf.enabled
 
