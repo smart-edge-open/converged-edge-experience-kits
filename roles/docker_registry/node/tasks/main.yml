@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: create docker registry certs for VCA node(s)
+  include_tasks: node_cert.yml
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+    cert_cn: "{{ ansible_hostname }}-vca{{ vca_idx }}"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: create docker registry certs for edge node
+  include_tasks: node_cert.yml
+  vars:
+    cert_cn: "{{ ansible_hostname }}"

@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: check if Strimzi release already exists
+  command: helm status strimzi -n kafka
+  ignore_errors: yes
+  register: get_release_strimzi
+  changed_when: false
+
+- name: Strimzi Operator chart
+  block:
+    - name: create Strimzi Helm chart template directory
+      file:
+        name: "{{ _strimzi_chart_dir }}"
+        state: directory
+      changed_when: true
+
+    - name: download Strimzi Helm chart
+      get_url:
+        url: "{{ _strimzi_chart_url }}"
+        dest: "{{ _strimzi_chart_dest }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+
+    - name: unpack Strimzi chart
+      unarchive:
+        src: "{{ _strimzi_chart_dest }}"
+        dest: "{{ _strimzi_chart_dir }}"
+        remote_src: True
+
+    - name: create kafka namespace if needed
+      command: kubectl create namespace kafka
+      register: create_namespace_result
+      failed_when: "create_namespace_result.rc != 0 and 'AlreadyExists' not in create_namespace_result.stderr"
+      changed_when: true
+
+    - name: install Strimzi release
+      command: "helm install strimzi -n kafka {{ _strimzi_chart_dir }}/strimzi-kafka-operator"
+      changed_when: true
+  when: get_release_strimzi.rc != 0
+
+
+- name: Kafka Cluster
+  block:
+    - name: create directory for Kafka persistent volume
+      file:
+        path: "{{ _kafka_pv_dir }}"
+        state: directory
+
+    - name: create temporary directory
+      tempfile:
+        state: directory
+        prefix: kafka
+      register: tmp_dir
+
+    - name: create directories for persistent volumes
+      file:
+        path: "{{ _kafka_pv_dir }}/{{ item }}"
+        state: directory
+      with_items: "{{ _kafka_pv_names }}"
+
+    - name: template definitions of persistent volumes
+      template:
+        src: volume.yml
+        dest: "{{ tmp_dir.path }}/{{ item }}.yml"
+      with_items: "{{ _kafka_pv_names }}"
+      changed_when: true
+
+    - name: apply definitions of persistent volumes
+      command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/{{ item }}.yml"
+      with_items: "{{ _kafka_pv_names }}"
+      changed_when: true
+
+    - name: copy Kafka cluster definition
+      template:
+        src: kafka-cluster.yml
+        dest:  "{{ tmp_dir.path }}"
+
+    - name: apply definition of Kafka cluster definition
+      command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/kafka-cluster.yml"
+      changed_when: true
+
+    - name: copy EAA Kafka user definition
+      template:
+        src: eaa-user.yml
+        dest:  "{{ tmp_dir.path }}"
+
+    - name: apply definition of EAA Kafka user definition
+      command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/eaa-user.yml"
+      changed_when: true

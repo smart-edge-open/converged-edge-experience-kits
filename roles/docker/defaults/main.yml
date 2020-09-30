@@ -3,9 +3,9 @@
 
 ---
 
-_docker_compose_version: "1.24.1"
+_docker_compose_version: "1.26.2"
 _docker_compose_package: "docker-compose=={{ _docker_compose_version }}"
-_docker_version: "19.03.9"
+_docker_version: "19.03.12"
 _docker_packages: "docker-ce-{{ _docker_version }},docker-ce-cli-{{ _docker_version }},containerd.io"
 
 _docker_repository_url: "https://download.docker.com/linux/centos/7/$basearch/stable"

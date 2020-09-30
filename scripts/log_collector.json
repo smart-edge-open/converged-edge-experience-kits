@@ -1,0 +1,122 @@
+{
+    "os": {
+        "commands": [
+            {
+                "command": "dmidecode",
+                "file_name": "dmidecode.log"
+            },
+            {
+                "command": "ip a",
+                "file_name": "ip_a.log"
+            },
+            {
+                "command": "ip r",
+                "file_name": "ip_r.log"
+            },
+            {
+                "command": "free -m",
+                "file_name": "free.log"
+            },
+            {
+                "command": "rpm -qa",
+                "file_name": "rpm.log"
+            },
+            {
+                "command": "iptables-save",
+                "file_name": "iptables_save.log"
+            },
+            {
+                "command": "df -T",
+                "file_name": "df.log"
+            },
+            {
+                "command": "pip list",
+                "file_name": "pip_list.log"
+            },
+            {
+                "command": "sysctl -a",
+                "file_name": "sysctl.log"
+            },
+            {
+                "command": "cat /proc/mounts",
+                "file_name": "mounts.log"
+            },
+            {
+                "command": "cat /proc/cmdline",
+                "file_name": "cmdline.log"
+            },
+            {
+                "command": "env",
+                "file_name": "env.log"
+            },
+            {
+                "command": "getenforce",
+                "file_name": "getenforce.log"
+            },
+            {
+                "command": "journalctl -b",
+                "file_name": "journalctl.log"
+            },
+            {
+                "command": "systemctl list-units",
+                "file_name": "systemctl_list_units.log"
+            },
+            {
+                "command": "systemctl --no-page list-unit-files --type=service",
+                "file_name": "systemctl_list_services.log"
+            },
+            {
+                "command": "journalctl -u <SERVICE>",
+                "file_name": "journalctl_<SERVICE>.log"
+            }
+        ],
+        "paths": [
+            {
+                "path": "/var/log/yum.log",
+                "file_name": "yum.log"
+            },
+            {
+                "path": "/var/log/messages*",
+                "file_name": "messages<*>.log"
+            },
+            {
+                "path": "/etc/selinux/config",
+                "file_name": "selinux_config.log"
+            },
+            {
+                "path": "/etc/openness",
+                "file_name": "etc_openness.tar.gz"
+            }
+        ]
+    },
+    "setup": {
+        "commands": [
+            {
+                "command": "date",
+                "file_name": "Artifacts_collection_creation_date.log"
+            }
+        ],
+        "paths": []
+    },
+    "k8s": {
+        "commands": [
+            {
+                "command": "kubectl get pod -A -o wide",
+                "file_name": "kubectl_pods_info.log"
+            },
+            {
+                "command": "kubectl get nodes -o wide",
+                "file_name": "kubectl_nodes.info.log"
+            },
+            {
+                "command": "kubectl logs <POD> -n <NAMESPACE>",
+                "file_name": "kubectl_<POD>.log"
+            },
+            {
+                "command": "kubectl describe <POD> -n <NAMESPACE>",
+                "file_name": "kubectl_describe_<POD>.log"
+            }
+        ],
+        "paths": []
+    }
+}

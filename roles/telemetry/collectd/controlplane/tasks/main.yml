@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include docker registry vars
+  include_vars: ../../../docker_registry/controlplane/defaults/main.yml
+
+- name: check if collectd already exists
+  command: helm status collectd -n telemetry
+  ignore_errors: yes
+  changed_when: False
+  register: get_collectd
+
+- name: apply collectd with FPGA plugin daemonset
+  block:
+    - name: check that docker is running
+      command: systemctl status docker
+      ignore_errors: yes
+      changed_when: false
+      args:
+        warn: false
+      register: docker_status
+
+    - name: create build folder
+      file:
+        name: "{{ _collectd_install_path }}"
+        state: directory
+
+    - name: copy opae_cfg to build folder
+      copy:
+        src: "{{ _opae_local_path_cfg }}"
+        dest: "{{ _collectd_install_path }}"
+
+    - name: copy opae_stp to build folder
+      copy:
+        src: "{{ _opae_local_path_stp }}"
+        dest: "{{ _collectd_install_path }}"
+
+    - name: copy Dockerfile to build folder
+      copy:
+        src: "{{ _collectd_local_path }}"
+        dest: "{{ _collectd_install_path }}"
+
+    - name: copy collectd patch to build folder
+      copy:
+        src: "{{ _collectd_patch_path }}"
+        dest: "{{ _collectd_install_path }}"
+
+    # Workaround for building the RDT library with GCC version < 4.9.0
+    - name: copy RDT library patch to build folder
+      copy:
+        src: "{{ _collectd_rdt_patch_path }}"
+        dest: "{{ _collectd_install_path }}"
+
+    - name: copy module check script to build folder
+      copy:
+        src: "{{ _collectd_check_module_script_path }}"
+        dest: "{{ _collectd_install_path }}"
+
+    - name: Build collectd image and apply daemonset
+      block:
+      - name: build collectd with FPGA plugin and OPAE image
+        docker_image:
+          name: "{{ _collectd_image.name }}"
+          tag: "{{ _collectd_image.tag }}"
+          source: build
+          build:
+            path: "{{ _collectd_install_path }}"
+            use_config_proxy: yes
+            pull: yes
+        register: result
+        retries: "{{ number_of_retries }}"
+        until: result is succeeded
+        delay: "{{ retry_delay }}"
+
+      - name: tag and push collectd image to local registry
+        docker_image:
+          name: "{{ _collectd_image.name }}"
+          repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ _collectd_image.name }}"
+          tag: "{{ _collectd_image.tag }}"
+          push: yes
+          source: local
+
+      - name: remove local version of the image
+        docker_image:
+          state: absent
+          name: "{{ _collectd_image.name }}"
+
+      - name: remove build folder
+        file:
+          path: "{{ _collectd_install_path }}"
+          state: absent
+      when: docker_status.rc == 0
+  when: telemetry_flavor == 'flexran'
+
+- name: copy Helm chart to Controller node
+  block:
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ role_path }}/charts/"
+      dest: "{{ _collectd_chart_dir }}"
+  - name: template and copy values.yaml
+    template:
+      src: "values.yaml.j2"
+      dest: "{{ _collectd_chart_dir }}/values.yaml"
+      force: yes
+
+- name: configure Helm chart directory for flexran telemetry
+  block:
+    - name: remove non-flexran Helm chart from directory
+      file:
+        path: "{{ _collectd_chart_dir }}/templates/collectd.yml"
+        state: absent
+  when: telemetry_flavor == 'flexran'
+
+- name: configure Helm chart directory for non-flexran telemetry
+  block:
+    - name: remove flexran Helm chart from directory
+      file:
+        path:  "{{ _collectd_chart_dir }}/templates/collectd_fpga.yml"
+        state: absent
+  when: telemetry_flavor != 'flexran'
+
+- name: install collectd using Helm
+  command: "helm install collectd --namespace telemetry {{ _collectd_chart_dir }}"
+  changed_when: true
+  when: get_collectd.rc != 0

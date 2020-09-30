@@ -68,17 +68,20 @@ hugepage_size: "2M"
 # Amount of hugepages
 hugepage_amount: "2048"
 # Default grub parameters
-default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
+default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt rdt=l3cat"
 # Additional grub parameters
 additional_grub_params: ""
 
 # Packages to be installed on the Edge Node host
 os_yum_base_packages:
-  "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python2-pip,wget,bridge-utils,\
-  boost-devel,openssl-devel,pcre-devel,zlib-devel,glib2-devel,autoconf,automake,libtool,flex,bison,git,cmake,pciutils,\
+  "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python2-pip,python3,wget,bridge-utils,\
+  boost-devel,openssl-devel,pcre-devel,zlib-devel,glib2-devel,autoconf,automake,libtool,flex,bison,git2u-all,cmake,pciutils,\
   python-websocket-client,jsoncpp-devel,fcgi-devel,hiredis-devel,numactl-devel,gcc-c++,psmisc,python-httplib2,pixman-devel,\
   moreutils,jq,python-devel,createrepo,psmisc,bash-completion,rsync,openssl11"
 _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
+
+# URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
+docker_images: []
 
 git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgenode.git
 _git_repo_dest: /opt/edgenode

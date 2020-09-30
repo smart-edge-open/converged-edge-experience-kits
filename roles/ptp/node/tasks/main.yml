@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Configure PTP master
+  block:
+  - name: Import vars from master
+    include_vars: ../../controlplane/defaults/main.yml
+
+  - name: Configure the node to act as a ptp master
+    include_tasks: ../../controlplane/tasks/main.yml
+  when: inventory_hostname in groups['ptp_master']
+
+- name: Configure the node to act as a ptp slave
+  block:
+  - name: Load PTP defaults
+    include_vars:
+      file: ../../common/defaults/main.yml
+      name: defaults
+
+  - name: Install patch utility
+    yum:
+      name: patch
+      state: present
+
+  - name: Start slave port towards PTP master
+    command: ./ptp4l -f ./configs/default_slave.cfg -2 -i {{ ptp_port }} -m
+    args:
+      chdir: "{{ _linuxptp_git_repo.download_dir }}"
+    async: "{{ async_time }}"
+    poll: 0
+    register: ptp_to_master
+
+  - name: Check previous command status - if not failed
+    async_status:
+      jid: '{{ ptp_to_master.ansible_job_id }}'
+    register: ptp_to_master_job_res
+    retries: "{{ number_of_retries }}"
+    delay: "{{ retry_delay }}"
+    failed_when: ptp_to_master_job_res.stderr is defined and
+                 ptp_to_master_job_res.stderr | length > 0
+    ignore_errors: true
+
+  - name: Synchronize local clock on the slave node
+    command: ./phc2sys -s {{ ptp_port }} -w -m -R 8
+    args:
+      chdir: "{{ _linuxptp_git_repo.download_dir }}"
+    async: "{{ async_time }}"
+    poll: 0
+    register: phc2sys_on_node
+
+  - name: Check previous command status - if not failed
+    async_status:
+      jid: '{{ phc2sys_on_node.ansible_job_id }}'
+    register: ptp_to_node_job_res
+    retries: "{{ number_of_retries }}"
+    delay: "{{ retry_delay }}"
+    failed_when: phc2sys_on_node_job_res.stderr is defined and
+                 phc2sys_on_node_job_res.stderr | length > 0
+    ignore_errors: true
+
+  - name: Verify PTP running on this machine
+    include_tasks: ../../common/tasks/verify_ptp_status.yml
+  when:
+    inventory_hostname in groups['ptp_slave_group']
+

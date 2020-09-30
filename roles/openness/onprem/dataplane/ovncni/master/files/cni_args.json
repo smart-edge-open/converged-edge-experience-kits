@@ -1,5 +1,0 @@
-{
-  "extraArgs": "subnetID=cluster-switch;mtu=0",
-  "path": "/root",
-  "interfaceName": "eth0"
-}

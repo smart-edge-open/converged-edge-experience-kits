@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: "{{ item }}"
+  labels:
+    name: "{{ item }}"
+spec:
+  storageClassName:
+  capacity:
+    storage: 10Gi
+  persistentVolumeReclaimPolicy: Recycle
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "{{ _kafka_pv_dir }}/{{ item }}"

@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta1
+kind: Kafka
+metadata:
+  name: "{{ kafka_cluster }}"
+spec:
+  kafka:
+    template:
+      pod:
+        securityContext:
+          runAsUser: 0
+          fsGroup: 0
+    replicas: 1
+    listeners:
+      tls:
+        authentication:
+          type: tls
+        networkPolicyPeers:
+          - namespaceSelector: {}
+            podSelector: {}
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      selector:
+        name: "{{ _kafka_pv_names[0] }}"
+    config:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+  zookeeper:
+    template:
+        pod:
+          securityContext:
+            runAsUser: 0
+            fsGroup: 0
+    replicas: 1
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      selector:
+        name: "{{ _kafka_pv_names[1] }}"
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

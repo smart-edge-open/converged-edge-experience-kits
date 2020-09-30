@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create istio main directory
+  file:
+    path: "{{ _istio_main_dir }}"
+    state: directory
+  changed_when: true
+
+- name: download istio
+  shell: set -o pipefail && curl -L {{ _istio_base_url }} | ISTIO_VERSION={{ _istio_version }} sh -
+  args:
+    chdir: "{{ _istio_main_dir }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  changed_when: true
+
+- name: add istioctl path to /etc/profile
+  lineinfile:
+    state: present
+    dest: /etc/profile
+    line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"
+
+- name: deploy istio
+  block:
+    - name: create default.yaml with parameters for istio deployment
+      template:
+        src: default.yaml.j2
+        dest: "{{ _istio_main_dir }}/default.yaml"
+    - name: deploy istio with istioctl
+      shell: "source /etc/profile && istioctl install -f {{ _istio_main_dir }}/default.yaml"
+      changed_when: true
+    - name: create kiali_def.yml
+      template:
+        src: kiali_def.yaml.j2
+        dest: "{{ _istio_main_dir }}/kiali_def.yaml"
+    - name: create the kiali secret and nodeport
+      command: "kubectl apply -f {{ _istio_main_dir }}/kiali_def.yaml"
+      changed_when: true
+
+- name: create service mesh namespace if not existant
+  block:
+    - name: check if service mesh namespace exists
+      command: kubectl get namespace {{ istio_deployment_namespace }}
+      ignore_errors: yes
+      register: get_sm_ns
+    - name: create service mesh namespace
+      command: kubectl create namespace {{ istio_deployment_namespace }}
+      changed_when: true
+      when: get_sm_ns.rc == 1
+
+- name: add istio-injection label to the service mesh namespace
+  command: kubectl label namespace {{ istio_deployment_namespace }} istio-injection=enabled --overwrite
+  changed_when: true

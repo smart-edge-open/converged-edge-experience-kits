@@ -1,0 +1,121 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: open port for collectd
+  ignore_errors: yes
+  firewalld:
+    port: 9103/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: create directory for certificates
+  file:
+    path: /etc/openness/certs/telemetry/collectd
+    state: directory
+
+- name: create collectd config directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - /etc/openness/collectd
+  - /etc/openness/collectd/configs
+  - /etc/openness/collectd/pmd
+
+- name: download and patch ovs_pmd_stats.py script
+  block:
+  - name: create temp directory for barometer
+    tempfile:
+      state: directory
+      suffix: barometer
+    register: barometer_repo_tmp_dir
+    delegate_to: localhost
+
+  - name: checkout repository
+    git:
+      repo: "{{ _barometer_repo_url }}"
+      dest: "{{ barometer_repo_tmp_dir.path }}"
+      version: master
+      force: yes
+
+  - name: make sure repository exists
+    git:
+      repo: "{{ _barometer_repo_url }}"
+      dest: "{{ barometer_repo_tmp_dir.path }}"
+      version: master
+      update: no
+
+  - name: copy patch file to tmp directory
+    copy:
+      src: "0001-Remove-whitespace.patch"
+      dest: "{{ barometer_repo_tmp_dir.path }}/"
+
+  - name: apply patch
+    patch:
+      src: "{{ barometer_repo_tmp_dir.path }}/0001-Remove-whitespace.patch"
+      dest: "{{ barometer_repo_tmp_dir.path }}/3rd_party/ovs_pmd_stats/ovs_pmd_stats.py"
+      remote_src: yes
+
+  - name: copy patched ovs_pmd_stats.py
+    copy:
+      src: "{{ barometer_repo_tmp_dir.path }}/3rd_party/ovs_pmd_stats/ovs_pmd_stats.py"
+      dest: /etc/openness/collectd/pmd/
+      remote_src: yes
+
+  - name: remove temporary directory
+    file:
+      path: "{{ barometer_repo_tmp_dir.path }}"
+      state: absent
+
+  - name: copy ovs pmd scripts
+    copy:
+      src: "{{ item }}"
+      dest: /etc/openness/collectd/configs/
+      mode: 0755
+    with_items:
+    - ovs_pmd_stats.sh
+    - write_notification.sh
+  when: telemetry_flavor == 'corenetwork' or telemetry_flavor == 'smartcity'
+
+- name: create configuration files from templates
+  block:
+  - name: common configs
+    template:
+      src: "{{ item }}"
+      dest: /etc/openness/collectd/configs/{{ item | basename | regex_replace('\.j2$', '') }}
+    with_fileglob:
+      - ../templates/configs/common/*.j2
+  - name: telemetry flavor specific
+    template:
+      src: "{{ item }}"
+      dest: /etc/openness/collectd/configs/{{ item | basename | regex_replace('\.j2$', '') }}
+    with_fileglob:
+      - ../templates/configs/{{ telemetry_flavor }}/*.j2
+    when: telemetry_flavor != 'common'
+
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: create directory for certificates on VCA node
+  command: "ssh {{ vca_node_ip }} mkdir -p /etc/openness/certs/telemetry/collectd"
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: copy collectd folder to VCA node
+  command: "scp -r /etc/openness/collectd {{ vca_node_ip }}:/etc/openness/"
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']

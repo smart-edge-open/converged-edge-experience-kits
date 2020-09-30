@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+dependencies:
+- role: sriov_device_init
+  vars:
+    _git_repo_dest: "/opt/edgenode"
+  when: single_node_deployment | default(false)

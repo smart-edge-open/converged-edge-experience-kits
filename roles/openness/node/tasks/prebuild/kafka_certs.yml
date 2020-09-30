@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: check if EAA Kafka User secret exists
+  command: kubectl get secret eaa-kafka --namespace=openness
+  ignore_errors: yes
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: get_secret_eaa_kafka
+  changed_when: false
+
+- name: create EAA Kafka User secret
+  block:
+    - name: create directory for Kafka certs
+      file:
+        name: "{{ _kafka_certs_dest }}"
+        state: directory
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+      # Return -1 error code when the restart count of any Kafka pod is greater than allowed_number_of_k8s_retries.
+      # This mechanism is used to avoid waiting for failed pods because the Container Creation time may be quite long.
+    - name: wait for Kafka CA and User secrets
+      shell: |
+        restartCounts=`kubectl get pods -n kafka -o json | jq -r '.items[] | [.status.containerStatuses[].restartCount] | @sh'`
+        for restartCount in $restartCounts; do
+          if [ $((restartCount + 0)) -gt {{ allowed_number_of_k8s_retries }} ]; then
+            exit -1
+          fi
+        done
+        kubectl get secret {{ kafka_cluster }}-cluster-ca-cert -n kafka && kubectl get secret {{ kafka_eaa_user }} -n kafka
+      register: kafka_secret
+      retries: "{{ kafka_secret_timeout_min }}"
+      delay: 60
+      until: kafka_secret.rc != 1
+      delegate_to: "{{ groups['controller_group'][0] }}"
+      changed_when: false
+
+    - name: dump Kafka CA certificate
+      shell: >
+        kubectl get secret {{ kafka_cluster }}-cluster-ca-cert -n kafka -o jsonpath='{.data.ca\.crt}' |
+        base64 -d > {{ _kafka_certs_dest }}/ca.crt
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: dump EAA user certificate
+      shell: >
+        kubectl get secret {{ kafka_eaa_user }} -n kafka -o jsonpath='{.data.user\.crt}' |
+        base64 -d > {{ _kafka_certs_dest }}/user.crt
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: dump EAA user key
+      shell: >
+        kubectl get secret {{ kafka_eaa_user }} -n kafka -o jsonpath='{.data.user\.key}' |
+        base64 -d > {{ _kafka_certs_dest }}/user.key
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: set EAA user key private file permissions
+      file:
+        path: "{{ _kafka_certs_dest }}/user.key"
+        mode: '0600'
+      delegate_to: "{{ groups['controller_group'][0] }}"
+
+    - name: create a Kafka secret
+      command: >
+        kubectl create secret generic eaa-kafka
+        --from-file={{ _kafka_certs_dest }}/ca.crt
+        --from-file={{ _kafka_certs_dest }}/user.crt
+        --from-file={{ _kafka_certs_dest }}/user.key
+        --namespace=openness
+      delegate_to: "{{ groups['controller_group'][0] }}"
+  when: get_secret_eaa_kafka.rc != 0
+  run_once: true

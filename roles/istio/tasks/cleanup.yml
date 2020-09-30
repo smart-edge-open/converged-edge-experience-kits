@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove SMI crds, operator, and rbac configuration
+  command: kubectl delete -f "{{ item }}"
+  ignore_errors: yes
+  changed_when: true
+  with_items:
+    - "{{ _smi_crds_yaml }}"
+    - "{{ _smi_operator_yaml }}"
+
+- name: remove istio-injection label to the service mesh namespace
+  command: kubectl label namespace {{ istio_deployment_namespace }} istio-injection-
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove the kiali secret and nodeport
+  shell: "source /etc/profile && kubectl delete -f {{ _istio_main_dir }}/kiali_def.yaml"
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove the istio deployment
+  shell: "source /etc/profile && set -o pipefail && \
+    istioctl manifest generate -f {{ _istio_main_dir }}/default.yaml | kubectl delete --ignore-not-found=true -f -"
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove istio-system namespace
+  command: kubectl delete ns istio-system --grace-period=0 --force
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove istio directory
+  file:
+    path: "{{ _istio_main_dir }}"
+    state: absent
+
+- name: remove istioctl path from /etc/profile
+  lineinfile:
+    state: absent
+    dest: /etc/profile
+    line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"

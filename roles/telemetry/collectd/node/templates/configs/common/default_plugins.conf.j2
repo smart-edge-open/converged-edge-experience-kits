@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+LoadPlugin logfile
+<Plugin logfile>
+  LogLevel info
+  File STDOUT
+  Timestamp true
+</Plugin>
+
+LoadPlugin cpu
+LoadPlugin cpufreq
+LoadPlugin load

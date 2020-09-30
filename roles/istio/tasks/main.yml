@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: check if host is controller
+  debug:
+    msg: "istio is only for controller/k8s master host"
+  when: "'controller_group' not in group_names"
+
+- include_tasks: istio.yml
+  when: "'controller_group' in group_names"
+
+- include_tasks: smi.yml
+  when: "'controller_group' in group_names"
+
+- include_tasks: policy.yml
+  when: "'controller_group' in group_names"

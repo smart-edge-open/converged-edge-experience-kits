@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_configs_dest: /etc/openness/configs
+_kafka_certs_dest: /etc/openness/certs/eaa-kafka

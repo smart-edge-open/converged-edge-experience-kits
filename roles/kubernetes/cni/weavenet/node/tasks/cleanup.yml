@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: delete WeaveNet binaries
+  command: rm -rf /opt/cni/bin/weave-*
+  changed_when: true
+  ignore_errors: yes

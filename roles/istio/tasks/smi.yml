@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# Service Mesh Interface (SMI) operator for Istio
+# https://github.com/servicemeshinterface/smi-adapter-istio
+
+- name: apply SMI crds, operator, and rbac configuration
+  command: kubectl apply -f "{{ item }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  changed_when: true
+  with_items:
+    - "{{ _smi_crds_yaml }}"
+    - "{{ _smi_operator_yaml }}"
+
+- name: wait for smi-adapter-istio pod to become running
+  shell: set -o pipefail && kubectl get pods -n istio-system -l name=smi-adapter-istio | awk '$3=="Running"'
+  register: smi_pod_running
+  retries: "{{ number_of_retries * 2 }}"
+  delay: "{{ retry_delay }}"
+  until: "'smi-adapter-istio' in smi_pod_running.stdout"
+  changed_when: true

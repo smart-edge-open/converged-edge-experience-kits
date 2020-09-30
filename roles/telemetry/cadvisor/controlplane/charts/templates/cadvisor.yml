@@ -1,0 +1,118 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.cadvisor.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ .Values.cadvisor.name }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.cadvisor.name }}
+    spec:
+      initContainers:
+      - name: {{ .Values.certs.name }}
+        image: {{ .Values.certs.image }}
+        command: ["/bin/sh","-c"]
+        args: [ "rm -Rf {{ .Values.proxy.certsDest }} && \
+              mkdir {{ .Values.proxy.certsDest }} && \
+              /root/certgen/entrypoint_tls.sh {{ .Values.proxy.serverName }} {{ .Values.proxy.certsDest }} /root/CA && \
+              chmod 644 {{ .Values.proxy.certsDest }}/cert.pem {{ .Values.proxy.certsDest }}/key.pem"]
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        resources:
+          requests:
+            cpu: "0.1"
+          limits:
+            cpu: "0.1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        - name: certgen
+          mountPath: /root/certgen
+      containers:     
+      - name: {{ .Values.proxy.name }} 
+        image: {{ .Values.proxy.image }} 
+        volumeMounts:
+        - name: proxy-config
+          mountPath: {{ .Values.proxy.pathToNginxCfg }} 
+          subPath: nginx.conf
+        - name: ca
+          mountPath: /root/CA
+        - name: cert-vol
+          mountPath: /root/certs
+        ports:
+        - containerPort: {{ .Values.proxy.metricsCadvisorPort }}       
+      - name: {{ .Values.cadvisor.name }}
+        args:
+          - --port={{ .Values.proxy.internalCadvisorPort }}
+          - --disable_metrics={{ .Values.cadvisor.disabledMetrics }}
+          - --store_container_labels={{ .Values.cadvisor.storeContainerLabels }}
+          - --max_housekeeping_interval={{ .Values.cadvisor.maxHousekeepingInterval }}
+        image: {{ .Values.cadvisor.image }} 
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        resources:
+          requests:
+            cpu: {{ .Values.cadvisor.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.cadvisor.resources.limits.memory }}
+            cpu: {{ .Values.cadvisor.resources.limits.cpu }}
+        volumeMounts:
+        - name: rootfs
+          mountPath: /rootfs
+          readOnly: true
+        - name: var-run
+          mountPath: /var/run
+          readOnly: true
+        - name: sys
+          mountPath: /sys
+          readOnly: true
+        - name: docker
+          mountPath: /var/lib/docker
+          readOnly: true
+        - name: disk
+          mountPath: /dev/disk
+          readOnly: true
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: cmk
+        operator: Exists
+      volumes:
+      - name: rootfs
+        hostPath:
+          path: /
+      - name: var-run
+        hostPath:
+          path: /var/run
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: docker
+        hostPath:
+          path: /var/lib/docker
+      - name: disk
+        hostPath:
+          path: /dev/disk
+      - name: proxy-config
+        configMap:
+          name: {{ .Values.proxy.configMap }}
+      - name: cert-vol
+        hostPath:
+          path: /etc/openness/certs/telemetry/
+      - name: ca
+        secret:
+          secretName: root-ca
+      - name: certgen
+        secret:
+          secretName: certgen
+          defaultMode: 0744

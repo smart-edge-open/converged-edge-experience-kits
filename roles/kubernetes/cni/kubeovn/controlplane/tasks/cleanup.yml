@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: load kubeovn common variables
+  include_vars: ../../common/defaults/main.yml
+
+- name: kube-ovn cleanup
+  block:
+  - name: download kube-ovn cleanup script
+    get_url:
+      url: "{{ _kubeovn_cleanup_url }}"
+      dest: "{{ _kubeovn_cleanup_dest }}"
+      mode: 0755
+  - name: change hardcoded tag
+    replace:
+      path: "{{ _kubeovn_cleanup_dest }}"
+      regexp: "kube-ovn/controlplane"
+      replace: "kube-ovn/{{ _kubeovn_version }}"
+  - name: execute kube-ovn cleanup script
+    command: "timeout 120 {{ _kubeovn_cleanup_dest }}"
+    ignore_errors: yes
+
+- name: cleanup kubeovn common
+  include_tasks: ../../common/tasks/cleanup.yml

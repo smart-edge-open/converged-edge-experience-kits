@@ -202,11 +202,38 @@
     command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }}"
     changed_when: true
 
-  - name: wait for Grafana pod to be ready
-    command: >
-      kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
-      --for=condition=Ready pods --timeout=600s
-    changed_when: false
+  - name: wait for Grafana
+    block:
+    - name: wait for Grafana pod to be ready
+      command: >
+        kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
+        --for=condition=Ready pods --timeout=600s
+      changed_when: false
+    rescue:
+    - name: get grafana pod name
+      command: kubectl get pod --selector=app.kubernetes.io/instance=grafana --namespace=telemetry --output=name
+      register: grafana_pod_name
+      changed_when: false
+    - name: get grafana pod summary
+      command: kubectl get --namespace=telemetry {{ grafana_pod_name.stdout }}
+      changed_when: false
+      ignore_errors: true
+    - name: describe grafana pod
+      command: kubectl describe --namespace=telemetry {{ grafana_pod_name.stdout }}
+      changed_when: false
+      ignore_errors: true
+    - name: get containers in grafana pod
+      command: kubectl get --namespace=telemetry {{ grafana_pod_name.stdout }} -o jsonpath='{.spec.initContainers[*].name}{" "}{.spec.containers[*].name}'
+      changed_when: false
+      ignore_errors: true
+      register: grafana_pod_containers
+    - name: get grafana containers' logs
+      command: kubectl logs --namespace=telemetry {{ grafana_pod_name.stdout }} {{ item }}
+      changed_when: false
+      with_items: "{{ grafana_pod_containers.stdout.split(' ') }}"
+    - name: end the playbook
+      fail:
+        msg: "wait for grafana failed"
 
   - name: remove temporary directory
     file:

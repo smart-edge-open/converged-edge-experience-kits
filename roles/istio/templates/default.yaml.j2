@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: openness-istiocontrolplane
+spec:
+  profile: {{ istio_deployment_profile }}
+  addonComponents:
+    grafana:
+      enabled: false
+    prometheus:
+      enabled: false
+    kiali:
+      enabled: true
+  meshConfig:
+    enablePrometheusMerge: false
+  values:
+    kiali:
+      dashboard:
+        grafanaURL:
+        grafanaInClusterURL: "http://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:32000"
+      prometheusNamespace: telemetry
+      prometheusAddr: "http://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:30000"

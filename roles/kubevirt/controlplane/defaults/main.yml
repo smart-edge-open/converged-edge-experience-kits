@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_kubevirt_operator_url:  "https://github.com/kubevirt/kubevirt/releases/download/v0.26.0/kubevirt-operator.yaml"
+_kubevirt_cr_url:        "https://github.com/kubevirt/kubevirt/releases/download/v0.26.0/kubevirt-cr.yaml"
+
+_cdi_operator_url:       "https://github.com/kubevirt/containerized-data-importer/releases/download/v1.13.0/cdi-operator.yaml"
+_cdi_cr_url:             "https://github.com/kubevirt/containerized-data-importer/releases/download/v1.13.0/cdi-cr.yaml"
+
+_virtctl_name:           "kubectl-virt"
+_virtctl_dir:            "/usr/bin"
+_virtctl_url:            "https://github.com/kubevirt/kubectl-virt-plugin/releases/download/v0.32.0/virtctl-linux-amd64.tar.gz"
+_virtctl_tar:            "virtctl-linux-amd64.tar.gz"
+
+_storage_class:          "local-volume"

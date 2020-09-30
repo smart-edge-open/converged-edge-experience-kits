@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: root CA creation
+  block:
+  - name: create directory for root CA
+    file:
+      name: "{{ _certs_dest }}/CA"
+      state: directory
+  - name: create root CA
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh openness {{ _certs_dest }}/CA"
+  - name: set CA private key mode
+    file:
+      path: "{{ _certs_dest }}/CA/key.pem"
+      mode: '0600'
+
+- name: create root CA secret
+  block:
+  - name: check if root CA secret exists
+    command: kubectl get secret root-ca --namespace=openness
+    ignore_errors: yes
+    register: get_secret_rootca
+  - name: create secret with root CA
+    shell: >
+      kubectl create secret generic root-ca
+      --from-file={{ _certs_dest }}/CA/key.pem
+      --from-file={{ _certs_dest }}/CA/cert.pem
+      --namespace=openness
+    when: get_secret_rootca.rc == 1
+
+- name: create certificate generator secret
+  block:
+  - name: check if certificate generator secret exists
+    command: kubectl get secret certgen --namespace=openness
+    ignore_errors: yes
+    register: get_secret_certgen
+  - name: create secret with certificate generator
+    shell: >
+      kubectl create secret generic certgen
+      --from-file={{ _git_repo_dest }}/network-edge/tls_pair.sh
+      --from-file={{ _git_repo_dest }}/network-edge/entrypoint_tls.sh
+      --namespace=openness
+    when: get_secret_certgen.rc == 1
+
+- name: certificate for EdgeDNS CLI
+  block:
+  - name: create directory for Interface Service client certificate
+    file:
+      name: "{{ _certs_dest }}/client/edgedns"
+      state: directory
+  - name: create EdgeDNS client certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh edgedns.openness {{ _certs_dest }}/client/edgedns {{ _certs_dest }}/CA"
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _certs_dest }}/CA/cert.pem"
+      dest: "{{ _certs_dest }}/client/edgedns/root.pem"
+      state: link
+  - name: set CA private key mode
+    file:
+      path: "{{ _certs_dest }}/client/edgedns/key.pem"
+      mode: '0600'
+
+- name: certificates for EAA
+  block:
+  - name: create directory for EAA and EAA CA certificate
+    file:
+      name: "{{ _certs_dest }}/eaa/CA"
+      state: directory
+  - name: create EAA root CA certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh ca.eaa.openness {{ _certs_dest }}/eaa/CA"
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _certs_dest }}/eaa/CA/cert.pem"
+      dest: "{{ _certs_dest }}/eaa/root.pem"
+      state: link
+  - name: create EAA certificate signed by EAA root CA certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh eaa.openness {{ _certs_dest }}/eaa {{ _certs_dest }}/eaa/CA"

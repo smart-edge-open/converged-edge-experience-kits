@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+# The CMK chart directory on Controller (should be the same as in roles/cmk/controlplane/defaults/main.yml)
+_cmk_chart_dir: "{{ ne_helm_charts_default_dir }}/cpu-manager-for-kubernetes"
+_cmk_tag: "v1.4.1"

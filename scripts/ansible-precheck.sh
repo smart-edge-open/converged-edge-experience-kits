@@ -1,13 +1,15 @@
+#!/bin/sh
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019 Intel Corporation
 
+PYTHON3_MINIMAL_SUPPORTED_VERSION=368
 
 if ! id -u 1>/dev/null; then
   echo "ERROR: Script requires root permissions"
   exit 1
 fi
 
-if [ ${0##*/} == ${BASH_SOURCE[0]##*/} ]; then
+if [ "${0##*/}" = "${BASH_SOURCE[0]##*/}" ]; then
     echo "ERROR: This script cannot be executed directly"
     exit 1
 fi
@@ -37,4 +39,25 @@ if ! python -c 'import netaddr' 2>/dev/null; then
     exit 1
   fi
   echo "netaddr successfully installed"
+fi
+
+if ! command -v python3 1>/dev/null; then
+  echo "Python3 not installed..."
+  yum updateinfo
+  if ! yum -y install python3; then
+    echo "ERROR: Could not install python3 package."
+    exit 1
+  fi
+  echo "Python3 successfully instaled"
+else
+  INSTALL=$(python3 -c "import sys; print( $PYTHON3_MINIMAL_SUPPORTED_VERSION > int('%d%d%d' % sys.version_info[:3]))")
+  if [ "$INSTALL" = "True" ]; then
+    yum updateinfo
+    echo "Installing the latest version of python3 package."
+    if ! yum -y install python3; then
+      echo "ERROR: Could not install python3 package."
+      exit 1
+    fi
+    echo "Python3 successfully installed."
+  fi
 fi

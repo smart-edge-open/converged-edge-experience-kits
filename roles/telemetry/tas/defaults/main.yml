@@ -9,6 +9,9 @@ _tas_repo:
 
 _prometheus_svc_url: "https://prometheus:9099/"
 
+_tas_svc_domain: "tas-service.telemetry.svc.cluster.local"
+_tas_svc_url: "https://tas-service.telemetry.svc.cluster.local:9001/"
+
 _descheduler_deployment_files:
   - descheduler_rbac.yaml
   - descheduler_policy.yaml

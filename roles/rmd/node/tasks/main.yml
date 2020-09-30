@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+#
+# ---
+
+- name: set the mountpoint for resctrl
+  mount:
+    path: /sys/fs/resctrl
+    src: resctrl
+    fstype: resctrl
+    state: mounted
+
+- name: clone RMD repository
+  git:
+    repo: "{{ _rmd_repo }}"
+    dest: "{{ _rmd_src_dir }}"
+    version: "{{ _rmd_tag }}"
+    update: no
+
+- name: build the RMD daemon
+  command: make docker
+  args:
+    chdir: "{{ _rmd_src_dir }}"
+  changed_when: false
+
+- name: clone the RMD operator
+  git:
+    repo: "{{ _rmd_operator_repo }}"
+    dest: "{{ _rmd_operator_dir }}"
+    version: "{{ _rmd_operator_tag }}"
+    update: no
+
+- name: build the RMD operator
+  shell: source /etc/profile && make
+  args:
+    chdir: "{{ _rmd_operator_dir }}"
+  changed_when: false

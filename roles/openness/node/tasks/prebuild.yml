@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+- include_tasks: prebuild/copy_configs_to_appliance.yml
+- include_tasks: prebuild/kafka_certs.yml

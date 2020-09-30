@@ -32,6 +32,12 @@
   changed_when: true
   ignore_errors: yes
 
+- name: delete persistent volume claims
+  command: "kubectl delete pvc {{ item }}-claim -n telemetry"
+  with_items: "{{ _pv_names }}"
+  changed_when: true
+  ignore_errors: yes
+
 - name: delete definitions of persistent volumes
   command: "kubectl delete pv {{ item }} -n telemetry"
   with_items: "{{ _pv_names }}"

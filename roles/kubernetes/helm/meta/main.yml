@@ -4,4 +4,4 @@
 ---
 
 dependencies:
-- kubernetes/master
+- kubernetes/controlplane

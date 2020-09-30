@@ -14,7 +14,7 @@ Copyright (c) 2020 Intel Corporation
 
 ## Setup
 
-1. Install porter according to <https://porter.sh/install>
+1. Install porter(v0.26.3-beta.1) according to <https://porter.sh/install>
 2. Enter `openness-experience-kits/cnab` directory
 3. Extract `tenant id`, `application id` and `application token` from the created azure application
 4. Run `porter credentials generate` and fill with the appropriate values from the previous step

@@ -19,7 +19,7 @@
   block:
   - name: apply meta CNI - multus
     include_role:
-      name: kubernetes/cni/multus/master
+      name: kubernetes/cni/multus/controlplane
     when: "'controller_group' in group_names"
 
   - name: apply remaining CNIs
@@ -36,6 +36,6 @@
 
   - name: apply meta CNI - multus
     include_role:
-      name: kubernetes/cni/multus/worker
+      name: kubernetes/cni/multus/node
     when: "'edgenode_group' in group_names"
   when: kubernetes_cnis|length > 1

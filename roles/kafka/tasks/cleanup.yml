@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove EAA Kafka User
+  command: kubectl delete kafkauser {{ kafka_eaa_user }} -n kafka
+  changed_when: true
+  ignore_errors: true
+
+- name: remove Kafka Cluser
+  command: kubectl delete kafka {{ kafka_cluster }} -n kafka
+  changed_when: true
+  ignore_errors: true
+
+- name: remove Strimzi Operator
+  command: helm uninstall strimzi -n kafka
+  changed_when: true
+  ignore_errors: true
+
+- name: delete persistent volume claims
+  command: "kubectl delete pvc data-{{ kafka_cluster }}-{{ item }}-0 -n kafka"
+  changed_when: true
+  ignore_errors: true
+  with_items:
+    - kafka
+    - zookeeper
+
+- name: delete persistent volumes
+  command: "kubectl delete pv {{ item }}"
+  with_items: "{{ _kafka_pv_names }}"
+  changed_when: true
+  ignore_errors: true
+
+- name: delete directory for Kafka persistent volumes
+  file:
+    path: "{{ _kafka_pv_dir }}"
+    state: absent

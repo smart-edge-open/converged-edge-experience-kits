@@ -34,12 +34,11 @@ proxy_noproxy: ""
 os_remove_yum_plugins: true
 
 ##################################################
-##### Common settings for Network Edge & On Premises
+##### Network Edge
 
-### OpenNESS Git Repositories
-# Following variables specify branch/SHA/tag to be checked out for Edge Controller and Edge Node repositories
-controller_repository_branch: openness-20.06.01
-edgenode_repository_branch: openness-20.06.01
+### OpenNESS Git Repository
+# Following variable specify branch/SHA/tag to be checked out for the source repository
+git_repo_branch: openness-20.09
 
 # If True, the repository will be deleted and cloned again
 # If False, repository will be left as it is and any changes won't be overwritten.
@@ -63,12 +62,14 @@ ntp_servers: []
 number_of_retries: 10
 retry_delay: 5
 
+# - allowed_number_of_k8s_retries - configures how many Kubernetes failures are allowed
+allowed_number_of_k8s_retries: 10
+
 ## PTP synchronization between nodes
 ptp_sync_enable: False
 
-
-##################################################
-##### Network Edge
+## Istio no_proxy settings
+istio_noproxy: "istio-sidecar-injector.istio-system.svc"
 
 ### Network Edge's Kubernetes CNIs
 # List of requested CNIs to be used in Network Edge mode
@@ -143,6 +144,10 @@ kubevirt_pv_vm_max_num: 64
 # Kubernetes device plugins
 k8s_device_plugins_enable: false
 
+# Kubernetes Dashboard
+kubernetes_dashboard_enable: false
+disable_dashboard_tls: false
+
 ### BIOSFW
 # Enable BIOSFW feature (requires SYSCFG package provided by user)
 ne_biosfw_enable: false
@@ -196,54 +201,10 @@ telemetry_flavor: common
 ## Network Edge RMD
 rmd_operator_enable: False
 
-##################################################
-##### On Premises
+## Docker images cache directory, all images with .tar* suffix will be preloaded during docker setup
+docker_images_dir: "/etc/openness/images-cache"
 
-### Controller settings
-# Password for Controller's database
-mysql_root_password: "pass"
-# Password for Controller UI/REST API
-cce_admin_password: "pass"
-# Log level for Edge Controller
-cce_log_level: "debug"
-
-### On Premises dataplane
-# Dataplane to be used for On-Premises mode
-# Available dataplanes:
-# - nts
-# - ovncni
-onprem_dataplane: "nts"
-
-### NTS DPDK settings
-# Amount of hugepages to use on 1st NUMA node (in MB)
-docker_nts_mem_mb_s0: "2048"
-# Amount of hugepages to use on 2nd NUMA node (in MB)
-docker_nts_mem_mb_s1: "0"
-
-### OVNCNI DPDK settings
-# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
-ovncni_dpdk_socket_mem: "1024,0"
-# Core bitmask for datapath packet processing. 0x4 selects core 2
-ovncni_dpdk_pmd_cpu_mask: "0x4"
-# Core bitmask for DPDK initialization. 0x2 selects core 1
-ovncni_dpdk_lcore_mask: "0x2"
-# Memory limit for OVNCNI's OVS container
-ovncni_dpdk_resource_limits: 1G
-
-### On-Premises InterApp-Communication
-# WARNING: Only for deployment with NTS dataplane
-onprem_iac_enable: false
-# Core bitmask for DPDK initialization.
-iac_ovs_cores_hex: "0x10"
-# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
-iac_ovs_socket_mem: "1024,0"
-
-### HTTP server on the Edge Controller
-# IP address that should be used instead of Controller's IP from inventory
-ip_address: ""
-
-## On-Premises HDDL
-onprem_hddl_enable: False
-
-## On-Premises Node Feature Discovery (NFD)
-onprem_nfd_enable: True
+## Kafka variables
+kafka_cluster: cluster
+kafka_eaa_user: eaa-kafka
+kafka_secret_timeout_min: 60

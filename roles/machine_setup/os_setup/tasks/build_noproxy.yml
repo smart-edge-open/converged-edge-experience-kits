@@ -32,6 +32,11 @@
     _base_noproxy: "{{ _base_noproxy + ',' + flannel_cidr }}"
   when: '"flannel" in kubernetes_cnis'
 
+- name: Adding istio_noproxy to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + istio_noproxy }}"
+  when: ne_istio_enable is defined and ne_istio_enable
+
 - name: Adding base noproxy setting to user defined ones
   set_fact:
       proxy_noproxy: "{{ proxy_noproxy + ',' + _base_noproxy }}"

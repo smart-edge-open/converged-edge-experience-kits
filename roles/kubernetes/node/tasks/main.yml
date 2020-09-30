@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: customize kubelet for topology manager
+  include_tasks: customize_kubelet.yml
+
+- name: get worker node name
+  block:
+  - name: hostname
+    command: hostname
+    register: hostname_output
+
+  - name: set k8s worker node name
+    set_fact:
+      k8s_worker_node_name: "{{ hostname_output.stdout |lower }}"
+
+- name: check if already in cluster
+  command: kubectl get node {{ k8s_worker_node_name }}
+  register: get_node
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+  changed_when: false
+
+- name: join the cluster
+  block:
+  # If playbook failed because kubeadm join failed, then most probably /etc/kubernetes was created
+  # Next execution of the playbook will also fail, because /etc/kubernetes exists
+  # So, since the node is no part of cluster, let's try to delete /etc/kubernetes just in case
+  - name: try to remove /etc/kubernetes
+    file:
+      path: /etc/kubernetes
+      state: absent
+  - name: obtain the join command
+    command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
+    register: join_command
+    delegate_to: "{{ groups['controller_group'][0] }}"
+  - name: join the cluster
+    command: "{{ join_command.stdout }} --v=2"
+  when: get_node.rc == 1
+
+- name: label node as a worker
+  command: kubectl label node {{ k8s_worker_node_name }} node-role.kubernetes.io/worker=worker --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: join VCA node
+  include_tasks: vca_node_join.yml
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+    vca_node_name: "{{ inventory_hostname }}-vca{{ vca_idx }}"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']

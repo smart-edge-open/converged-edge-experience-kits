@@ -25,4 +25,4 @@ k8s_device_plugins_enable: true
 ne_nfd_enable: true
 
 # Deploy Video Analytics services 
-video_analytics_services_enable: true
+video_analytics_services_enable: false

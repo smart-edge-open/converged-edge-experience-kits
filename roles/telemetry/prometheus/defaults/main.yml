@@ -5,8 +5,7 @@
 
 _pv_dir: /opt/prometheus
 _pv_names:
-  - prometheus-volume-1
-  - prometheus-volume-2
+  - prometheus-volume
 
 _prometheus_chart_dir: "{{ ne_helm_charts_default_dir }}/prometheus"
 _prometheus_chart_commit: "98d951ea63065349fa8a31f552376207fb6115e6"

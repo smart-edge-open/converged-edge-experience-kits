@@ -5,9 +5,21 @@
 - hosts: controller_group
   tasks:
   # following roles are not cleaned up directly, they're cleaned when Kubernetes cluster is reset
-  # - nfd/network_edge
+  # - nfd
   # - multus
-  # - sriov/master
+  # - sriov/controlplane
+
+  - name: video analytics services cleanup
+    include_tasks: ./roles/video_analytics_services/tasks/cleanup.yml
+    when: video_analytics_services_enable | default(False)
+
+  - name: istio cleanup
+    block:
+    - name: load istio variables
+      include_vars: ./roles/istio/defaults/main.yml
+    - name: cleanup istio
+      include_tasks: ./roles/istio/tasks/cleanup.yml
+    when: ne_istio_enable | default(False)
 
   - name: grafana cleanup
     include_tasks: ./roles/telemetry/grafana/tasks/cleanup.yml
@@ -16,9 +28,11 @@
   - name: pcm cleanup
     block:
     - name: load pcm variables
-      include_vars: ./roles/telemetry/pcm/master/defaults/main.yml
+      include_vars: ./roles/telemetry/pcm/controlplane/defaults/main.yml
+    - name: load grafana variables
+      include_vars: ./roles/telemetry/grafana/defaults/main.yml
     - name: cleanup pcm
-      include_tasks: ./roles/telemetry/pcm/master/tasks/cleanup.yml
+      include_tasks: ./roles/telemetry/pcm/controlplane/tasks/cleanup.yml
     when: telemetry_pcm_enable | default(False)
 
   - name: ptp sychronization cleanup
@@ -32,69 +46,73 @@
   - name: OPAE FPGA cleanup
     block:
     - name: load fpga variables
-      include_vars: ./roles/opae_fpga/master/defaults/main.yml
+      include_vars: ./roles/opae_fpga/controlplane/defaults/main.yml
     - name: cleanup fpga
-      include_tasks: ./roles/opae_fpga/master/tasks/cleanup.yml
+      include_tasks: ./roles/opae_fpga/controlplane/tasks/cleanup.yml
     when: ne_opae_fpga_enable | default(False)
 
   - name: uninstall hddl
-    include_tasks: ./roles/hddl/network_edge/master/tasks/cleanup.yml
+    include_tasks: ./roles/hddl/network_edge/controlplane/tasks/cleanup.yml
     when: ne_hddl_enable | default(False)
 
   - name: load kubevirt variables
-    include_vars: ./roles/kubevirt/master/defaults/main.yml
+    include_vars: ./roles/kubevirt/controlplane/defaults/main.yml
 
   - name: cleanup multus-cni
-    include_tasks: ./roles/kubernetes/cni/multus/master/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/cni/multus/controlplane/tasks/cleanup.yml
 
   - name: cleanup kubevirt
-    include_tasks: ./roles/kubevirt/master/tasks/cleanup.yml
+    include_tasks: ./roles/kubevirt/controlplane/tasks/cleanup.yml
 
   - name: CPU Manager for Kubernetes cleanup
     block:
     - name: load cmk variables
-      include_vars: ./roles/cmk/master/defaults/main.yml
+      include_vars: ./roles/cmk/controlplane/defaults/main.yml
     - name: cleanup cmk
-      include_tasks: ./roles/cmk/master/tasks/cleanup.yml
+      include_tasks: ./roles/cmk/controlplane/tasks/cleanup.yml
     when: ne_cmk_enable | default(False)
 
   - name: load biosfw variables
-    include_vars: ./roles/biosfw/master/defaults/main.yml
+    include_vars: ./roles/biosfw/controlplane/defaults/main.yml
 
   - name: cleanup biosfw
-    include_tasks: ./roles/biosfw/master/tasks/cleanup.yml
+    include_tasks: ./roles/biosfw/controlplane/tasks/cleanup.yml
 
   - name: Node Feature Discovery cleanup
     block:
     - name: load nfd variables
-      include_vars: ./roles/nfd/network_edge/defaults/main.yml
+      include_vars: ./roles/nfd/defaults/main.yml
     - name: cleanup nfd
-      include_tasks: ./roles/nfd/network_edge/tasks/cleanup.yml
+      include_tasks: ./roles/nfd/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
 
   - name: load docker_registry variables
-    include_vars: ./roles/docker_registry/master/defaults/main.yml
+    include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
 
   - name: cleanup docker_registry
-    include_tasks: ./roles/docker_registry/master/tasks/cleanup.yml
+    include_tasks: ./roles/docker_registry/controlplane/tasks/cleanup.yml
 
   - name: load network edge variables
-    include_vars: ./roles/openness/network_edge/master/defaults/main.yml
+    include_vars: ./roles/openness/controlplane/defaults/main.yml
 
   - name: cleanup network edge
-    include_tasks: ./roles/openness/network_edge/master/tasks/cleanup.yml
+    include_tasks: ./roles/openness/controlplane/tasks/cleanup.yml
 
   - name: cleanup prometheus
     include_tasks: ./roles/telemetry/prometheus/tasks/cleanup.yml
 
   - name: cleanup otel collector
-    include_tasks: ./roles/telemetry/opentelemetry/master/tasks/cleanup.yml
+    include_tasks: ./roles/telemetry/opentelemetry/controlplane/tasks/cleanup.yml
 
   - name: cleanup TAS
     include_tasks: ./roles/telemetry/tas/tasks/cleanup.yml
 
   - name: cleanup cAdvisor
-    include_tasks: ./roles/telemetry/cadvisor/master/tasks/cleanup.yml
+    include_tasks: ./roles/telemetry/cadvisor/controlplane/tasks/cleanup.yml
+
+  - name: kubernetes dashboard cleanup
+    include_tasks: ./roles/kubernetes/dashboard/tasks/cleanup.yml
+    when: kubernetes_dashboard_enable | default(False)
 
   - name: cleanup telemetry certificates
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
@@ -103,9 +121,11 @@
     include_tasks: ./roles/fpga_cfg/tasks/cleanup.yml
     when: fpga_sriov_userspace_enable | default(False)
 
-  - name: video analytics services cleanup
-    include_tasks: ./roles/video_analytics_services/tasks/cleanup.yml
-    when: video_analytics_services_enable | default(False)
+  - name: load Kafka variables
+    include_vars: ./roles/kafka/defaults/main.yml
+
+  - name: Kafka Cluster cleanup
+    include_tasks: ./roles/kafka/tasks/cleanup.yml
 
   - name: helm cleanup
     block:
@@ -133,7 +153,7 @@
       include_tasks: ./roles/kubernetes/helm/tasks/cleanup.yml
 
   - name: cleanup kubernetes
-    include_tasks: ./roles/kubernetes/master/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/controlplane/tasks/cleanup.yml
 
   - name: load kubernetes variables
     include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -171,7 +191,7 @@
 - hosts: edgenode_group
   serial: 1
   tasks:
-    # biosfw/worker - no clean up, because build image is delete when running docker's prune.yml
+    # biosfw/node - no clean up, because build image is delete when running docker's prune.yml
 
     - name: ptp sychronization cleanup
       block:
@@ -182,35 +202,35 @@
       when: ptp_sync_enable | default(False)
 
     - name: load kubevirt variables
-      include_vars: ./roles/kubevirt/worker/defaults/main.yml
+      include_vars: ./roles/kubevirt/node/defaults/main.yml
 
     - name: cleanup kubevirt
-      include_tasks: ./roles/kubevirt/worker/tasks/cleanup.yml
+      include_tasks: ./roles/kubevirt/node/tasks/cleanup.yml
 
     - name: load cmk variables
-      include_vars: ./roles/cmk/worker/defaults/main.yml
+      include_vars: ./roles/cmk/node/defaults/main.yml
 
     - name: cleanup cmk
-      include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
+      include_tasks: ./roles/cmk/node/tasks/cleanup.yml
 
     - name: uninstall hddl
-      include_tasks: ./roles/hddl/network_edge/worker/tasks/cleanup.yml
+      include_tasks: ./roles/hddl/network_edge/node/tasks/cleanup.yml
       when: ne_hddl_enable | default(False)
 
     - name: load network edge variables
-      include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+      include_vars: ./roles/openness/node/defaults/main.yml
 
     - name: cleanup network edge
-      include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
+      include_tasks: ./roles/openness/node/tasks/cleanup.yml
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
 
     - name: load kubernetes variables
-      include_vars: ./roles/kubernetes/worker/defaults/main.yml
+      include_vars: ./roles/kubernetes/node/defaults/main.yml
 
     - name: cleanup kubernetes
-      include_tasks: ./roles/kubernetes/worker/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -219,16 +239,16 @@
       include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
 
     - name: load fpga variables
-      include_vars: ./roles/opae_fpga/worker/defaults/main.yml
+      include_vars: ./roles/opae_fpga/node/defaults/main.yml
 
     - name: cleanup fpga
-      include_tasks: ./roles/opae_fpga/worker/tasks/cleanup.yml
+      include_tasks: ./roles/opae_fpga/node/tasks/cleanup.yml
 
     - name: cleanup otel collector
-      include_tasks: ./roles/telemetry/opentelemetry/worker/tasks/cleanup.yml
+      include_tasks: ./roles/telemetry/opentelemetry/node/tasks/cleanup.yml
 
     - name: cleanup cAdvisor certificates
-      include_tasks: ./roles/telemetry/cadvisor/worker/tasks/cleanup.yml
+      include_tasks: ./roles/telemetry/cadvisor/node/tasks/cleanup.yml
 
     - name: load docker variables
       include_vars: ./roles/docker/defaults/main.yml
@@ -252,34 +272,34 @@
       include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
     - name: load docker_registry variables
-      include_vars: ./roles/docker_registry/master/defaults/main.yml
+      include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
 
     - name: cleanup docker_registry certificate
-      include_tasks: ./roles/docker_registry/worker/tasks/cleanup.yml
+      include_tasks: ./roles/docker_registry/node/tasks/cleanup.yml
 
 - hosts: edgenode_vca_group
   serial: 1
   tasks:
     - name: load cmk variables
-      include_vars: ./roles/cmk/worker/defaults/main.yml
+      include_vars: ./roles/cmk/node/defaults/main.yml
 
     - name: cleanup cmk
-      include_tasks: ./roles/cmk/worker/tasks/cleanup.yml
+      include_tasks: ./roles/cmk/node/tasks/cleanup.yml
 
     - name: load network edge variables
-      include_vars: ./roles/openness/network_edge/worker/defaults/main.yml
+      include_vars: ./roles/openness/node/defaults/main.yml
 
     - name: cleanup network edge
-      include_tasks: ./roles/openness/network_edge/worker/tasks/cleanup.yml
+      include_tasks: ./roles/openness/node/tasks/cleanup.yml
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
 
     - name: load kubernetes variables
-      include_vars: ./roles/kubernetes/worker/defaults/main.yml
+      include_vars: ./roles/kubernetes/node/defaults/main.yml
 
     - name: cleanup kubernetes
-      include_tasks: ./roles/kubernetes/worker/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -288,10 +308,10 @@
       include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
 
     - name: cleanup otel collector
-      include_tasks: ./roles/telemetry/opentelemetry/worker/tasks/cleanup.yml
+      include_tasks: ./roles/telemetry/opentelemetry/node/tasks/cleanup.yml
 
     - name: cleanup cAdvisor certificates
-      include_tasks: ./roles/telemetry/cadvisor/worker/tasks/cleanup.yml
+      include_tasks: ./roles/telemetry/cadvisor/node/tasks/cleanup.yml
 
     - name: load docker variables
       include_vars: ./roles/docker/defaults/main.yml
@@ -315,7 +335,7 @@
       include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
     - name: load docker_registry variables
-      include_vars: ./roles/docker_registry/master/defaults/main.yml
+      include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
 
     - name: cleanup docker_registry certificate
-      include_tasks: ./roles/docker_registry/worker/tasks/cleanup.yml
+      include_tasks: ./roles/docker_registry/node/tasks/cleanup.yml

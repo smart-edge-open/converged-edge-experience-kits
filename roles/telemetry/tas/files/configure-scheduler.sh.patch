@@ -1,0 +1,8 @@
+--- configure-scheduler.sh	2020-07-07 15:01:41.280000000 +0200
++++ configure-scheduler_new.sh	2020-07-07 15:01:27.786000000 +0200
+@@ -26,3 +26,5 @@
+ sed -e "/spec/a\\
+   dnsPolicy: ClusterFirstWithHostNet" $MANIFEST_FILE -i
+ 
++perl -i -p0e "s/(name: NO_PROXY\n.*)/\1,$1/gm" $MANIFEST_FILE
++perl -i -p0e "s/(name: no_proxy\n.*)/\1,$1/gm" $MANIFEST_FILE

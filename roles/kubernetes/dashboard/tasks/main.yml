@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: check if Kubernetes Dashboard release already exists
+  command: helm status kubernetes-dashboard --namespace "{{ _dashboard_namespace }}"
+  ignore_errors: yes
+  register: get_release_dashboard
+  changed_when: false
+
+- name: install Kubernetes Dashboard
+  block:
+  - name: open port for Kubernetes Dashboard
+    ignore_errors: yes
+    firewalld:
+      port: "{{ _dashboard_port }}/tcp"
+      permanent: yes
+      state: enabled
+      immediate: yes
+
+  - name: create Kubernetes Dashboard directories
+    file:
+      name: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ _dashboard_chart_dir }}"
+      - "{{ _dashboard_chart_dir }}/templates"
+    changed_when: true
+
+  - name: download Kubernetes Dashboard chart
+    get_url:
+      url: "{{ _dashboard_chart_url }}/{{ item }}"
+      dest: "{{ _dashboard_chart_dir }}/{{ item }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _dashboard_chart_files }}"
+
+  - name: template values.yml to chart dir
+    template:
+      src: values.yml.j2
+      dest: "{{ _dashboard_chart_dir }}/custom-values.yml"
+
+  - name: copy clusterrole to templates dir
+    copy:
+      src: "{{ item }}"
+      dest: "{{ _dashboard_chart_dir }}/templates"
+    with_items:
+      - clusterrole.yml
+      - clusterrolebinding.yml
+
+  - name: download helm chart dependencies
+    command: helm dependency update
+    args:
+      chdir: "{{ _dashboard_chart_dir }}"
+
+  - name: install Kubernetes Dashboard
+    command: helm install kubernetes-dashboard --namespace "{{ _dashboard_namespace }}" -f "{{ _dashboard_chart_dir }}"/custom-values.yml \
+              "{{ _dashboard_chart_dir }}"
+  when: get_release_dashboard.rc != 0

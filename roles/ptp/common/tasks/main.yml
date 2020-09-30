@@ -76,13 +76,13 @@
     copy:
       src: "{{ _linuxptp_git_repo.download_dir }}/configs/default.cfg"
       dest: "{{ _linuxptp_git_repo.download_dir }}/configs/default_slave.cfg"
-      remote_src: "{{ _if_remote_src }}"
-    delegate_to: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+      remote_src: true
+    delegate_to: "{{ ansible_hostname }}"
 
   - name: Apply patch to config
     patch:
       src: "{{ _config_slave_patch }}"
-      basedir:  "{{ _linuxptp_git_repo.download_dir }}"
+      basedir: "{{ _linuxptp_git_repo.download_dir }}"
       strip: 0
   when:
     (inventory_hostname in groups['ptp_master'] or

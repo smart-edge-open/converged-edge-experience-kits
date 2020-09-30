@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: delete certificate from node
+  file:
+    path: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
+    state: absent
+  ignore_errors: yes
+
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: delete certificate from VCA node
+  command: "ssh {{ vca_node_ip }} 'rm -rf /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}'"
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']

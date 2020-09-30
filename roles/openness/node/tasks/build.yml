@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: create temporary custom .openness_gitconfig
+  include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+
+- block:
+  - name: download modules for eaa
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/eaa"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: download modules for edgednssvr
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/edgednssvr"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: build binaries and images
+    shell: source /etc/profile && make networkedge
+    args:
+      chdir: "{{ _git_repo_dest }}"
+  - name: download modules for interfaceservice
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/interfaceservice"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: "'kubeovn' in kubernetes_cnis"
+  - name: build interface service image for kube-ovn
+    shell: source /etc/profile && make interfaceservice
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: "'kubeovn' in kubernetes_cnis"
+  always:
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+
+# since these pods are part of openness' DaemonSet will be recreated after deletion
+# this step is for pods to use newly created docker images from previous block
+- name: recreate openness pods
+  shell: >
+    kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+  changed_when: true

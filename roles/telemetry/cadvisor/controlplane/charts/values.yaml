@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+#Common values
+namespace: telemetry
+pullPolicy: IfNotPresent
+component: cadvisor
+
+#cAdvisor Values
+cadvisor:
+  image: k8s.gcr.io/cadvisor:v0.36.0
+  name: cadvisor
+  resources:
+    requests:
+      cpu: "0.1"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+  disabledMetrics: "percpu,diskIO,tcp,udp,disk,sched"
+  storeContainerLabels: false
+  maxHousekeepingInterval: "30s"
+
+#Proxy Values
+proxy:
+  metricsCadvisorPort: 9105
+  internalCadvisorPort: 9106
+  serverName: cadvisor
+  name: cadvisor-proxy
+  certsDest: /root/certs/cadvisor/
+  image: nginx:alpine
+  pathToNginxCfg: /etc/nginx/nginx.conf
+  configMap: cadvisor-proxy-config
+
+#Certs Values
+certs:
+  image: emberstack/openssl:latest
+  name: openssl

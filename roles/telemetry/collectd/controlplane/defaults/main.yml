@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+_collectd_chart_dir: "{{ ne_helm_charts_default_dir }}/collectd"
+_opae_local_path_stp: "./opae_fpga/n3000-1-3-5-beta-rte-setup.zip"
+_opae_local_path_cfg: "./opae_fpga/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip"
+_collectd_local_path: "Dockerfile"
+_collectd_patch_path: "fpga_telemetry_plugin.patch"
+_collectd_rdt_patch_path: "rdt_gcc_version.patch"
+_collectd_check_module_script_path: "check_if_modules_loaded.sh"
+_collectd_install_path: "/opt/collectd_opae"
+_collectd_image:
+  name: "collectd_fpga_plugin"
+  tag: "0.1.0"

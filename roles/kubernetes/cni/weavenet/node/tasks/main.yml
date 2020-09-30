@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: permit WeaveNet ports in firewall
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+  - 6783/tcp
+  - 6783/udp
+  - 6784/udp
+
+- name: patch node's Pod CIDR
+  command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"{{ weavenet_cidr }}" }}'
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true

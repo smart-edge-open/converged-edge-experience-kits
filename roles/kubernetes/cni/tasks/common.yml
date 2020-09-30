@@ -17,21 +17,21 @@
       cni_dir: "{{ cni_dir_matches.files[0].path }}"
 
 - name: create list of available CNIs roles
-  # it creates an array with CNI roles, e.g.: [ 'kubeovn/master', 'kubeovn/worker', 'calico' ]
-  # it is used later to call only roles that exists (skip worker role if it doesn't exist)
+  # it creates an array with CNI roles, e.g.: [ 'kubeovn/controlplane', 'kubeovn/node', 'calico' ]
+  # it is used later to call only roles that exists (skip node role if it doesn't exist)
   set_fact:
     available_cni_roles: "{{ available_cni_roles|default([]) + [item.path] }}"
   with_filetree: "{{ cni_dir }}"
   when:
   - item.state == 'directory'
-  - (item.path.endswith('master')) or (item.path.endswith('worker'))
+  - (item.path.endswith('controlplane')) or (item.path.endswith('node'))
   tags:
   - skip_ansible_lint
 
 - name: set role postfix
   set_fact:
-    role_postfix: master
+    role_postfix: controlplane
 - name: change role postfix for worker
   set_fact:
-    role_postfix: worker
+    role_postfix: node
   when: inventory_hostname not in groups['controller_group']

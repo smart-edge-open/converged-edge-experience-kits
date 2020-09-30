@@ -1,0 +1,169 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Install KubeVirt
+  block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: kubevirt-operator
+    register: tmp_dir
+  - name: download KV Operator
+    get_url:
+      url: "{{ _kubevirt_operator_url }}"
+      dest: "{{ tmp_dir.path }}/virt-operator.yaml"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: template kustomization.yml to tmp directory
+    template:
+      src: kustomization.yml.j2
+      dest: "{{ tmp_dir.path }}/kustomization.yml"
+    with_items:
+      - virt
+  - name: copy CMK toleration patch to tmp directory
+    copy:
+      src: add_cmk_toleration.yml
+      dest: "{{ tmp_dir.path }}/"
+  - name: KV Operator Install
+    shell: kubectl kustomize . | kubectl apply -f -
+    args:
+      chdir: "{{ tmp_dir.path }}"
+  - name: KV Controller Install
+    command: kubectl apply -f "{{ _kubevirt_cr_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+
+- name: virtctl install
+  block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: virtctl
+    register: tmp_dir
+  - name: download virtctl repo
+    get_url:
+      url: "{{ _virtctl_url }}"
+      dest: "{{ tmp_dir.path }}/{{ _virtctl_tar }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: Unarchive virtctl
+    unarchive:
+      src: "{{ tmp_dir.path }}/{{ _virtctl_tar }}"
+      dest: "{{ tmp_dir.path }}"
+      remote_src: yes
+  - name: Install virt
+    copy:
+      src: "{{ tmp_dir.path }}/virtctl/virtctl-linux-amd64"
+      dest: "{{ _virtctl_dir }}/{{ _virtctl_name }}"
+      remote_src: yes
+      mode: '0755'
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+
+- name: install CDI
+  block:
+  - name: create temporary directory
+    tempfile:
+      state: directory
+      suffix: cdi-operator
+    register: tmp_dir
+  - name: download CDI Operator
+    get_url:
+      url: "{{ _cdi_operator_url }}"
+      dest: "{{ tmp_dir.path }}/"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: template kustomization.yml to tmp directory
+    template:
+      src: kustomization.yml.j2
+      dest: "{{ tmp_dir.path }}/kustomization.yml"
+    with_items:
+      - cdi
+  - name: copy CMK toleration patch to tmp directory
+    copy:
+      src: add_cmk_toleration.yml
+      dest: "{{ tmp_dir.path }}/"
+  - name: KV Operator Install
+    shell: kubectl kustomize . | kubectl apply -f -
+    args:
+      chdir: "{{ tmp_dir.path }}"
+  - name: CDI Operator Install
+    command: kubectl apply -f "{{ _cdi_operator_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: CDI Controller Install
+    command: kubectl apply -f "{{ _cdi_cr_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: remove temporary directory
+    file:
+      path: "{{ tmp_dir.path }}"
+      state: absent
+    when: tmp_dir.path is defined
+
+- name: label CDI namespace
+  command: kubectl label namespace/cdi ns=cdi --overwrite=true
+  changed_when: true
+
+- name: create temp directory for KubeVirt related yaml
+  tempfile:
+    state: directory
+    suffix: -kubevirt
+  register: kv_dir
+
+- name: copy traffic rule file for CDI
+  copy:
+    src: cdiNetworkPolicy.yaml
+    dest: "{{ kv_dir.path }}/cdiNetworkPolicy.yaml"
+
+- name: copy Local Volume Storage Class
+  copy:
+    src: localStorageClass.yaml
+    dest: "{{ kv_dir.path }}/localStorageClass.yaml"
+
+- name: check if CDI traffic rule exists
+  command: kubectl get networkpolicy cdi-upload-proxy-policy
+  ignore_errors: yes
+  register: cdi_exist
+  changed_when: false
+
+- name: set CDI traffic rule
+  command: kubectl create -f cdiNetworkPolicy.yaml
+  args:
+    chdir: "{{ kv_dir.path }}"
+  changed_when: true
+  when: cdi_exist.rc != 0
+
+- name: check if LVSC exists
+  command: kubectl get sc local-storage
+  ignore_errors: yes
+  register: lvsc_exist
+  changed_when: false
+
+- name: create Local Volume Storage Class
+  command: kubectl create -f localStorageClass.yaml
+  args:
+    chdir: "{{ kv_dir.path }}"
+  when: _storage_class == "local-volume" and lvsc_exist.rc != 0

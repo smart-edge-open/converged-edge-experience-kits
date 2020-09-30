@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include Kubernetes Dashboard variables
+  include_vars: ../defaults/main.yml
+
+- name: remove Kubernetes Dashboard release if exist
+  block:
+  - name: check if Kubernetes Dashboard release exists
+    command: "helm status kubernetes-dashboard --namespace {{ _dashboard_namespace }}"
+    ignore_errors: yes
+    register: get_release_dashboard
+  - name: remove Kubernetes Dashboard release
+    command: "helm uninstall kubernetes-dashboard --namespace {{ _dashboard_namespace }}"
+    when: get_release_dashboard.rc == 0
+    changed_when: true
+
+- name: close port for Kubernetes Dashboard
+  ignore_errors: yes
+  firewalld:
+    port: "{{ _dashboard_port }}/tcp"
+    permanent: yes
+    state: disabled
+    immediate: yes
+
+- name: delete chart dir
+  file:
+    path: "{{ _dashboard_chart_dir }}"
+    state: absent

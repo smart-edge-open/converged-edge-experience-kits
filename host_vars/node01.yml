@@ -10,8 +10,6 @@ sriov:
   network_name: []
   vm_vf_ports: 0
 
-ovs_ports: []
-
 # ptp_port keeps the host's interface(s) connected to:
 # - a PTP MASTER node, in this case it should keep only one interface name, e.g.:
 #   ptp_port: enp134s0f1

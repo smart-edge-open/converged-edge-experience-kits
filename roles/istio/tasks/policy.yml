@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create Istio PeerAuthentication policy file
+  template:
+    src: authentication.yaml.j2
+    dest: "{{ _istio_main_dir }}/authentication.yaml"
+
+- name: enforce mutual TLS for Istio traffic
+  command: "kubectl apply -f {{ _istio_main_dir }}/authentication.yaml"
+  changed_when: true

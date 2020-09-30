@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "{{ template "kubernetes-dashboard.fullname" . }}-openness"
+  labels:
+{{ include "kubernetes-dashboard.labels" . | indent 4 }}
+rules:
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - roles
+      - clusterroles
+      - rolebindings
+      - clusterrolebindings
+
+  - apiGroups:
+      - storage.k8s.io
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - volumeattachments
+      - storageclasses
+
+  - apiGroups:
+      - networking.k8s.io
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - networkpolicies
+
+  - apiGroups:
+      - ""
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - pods
+      - pods/status
+      - pods/log
+      - nodes
+      - services
+      - endpoints
+      - events
+      - namespaces
+      - namespaces/status
+      - bindings
+      - configmaps
+      - persistentvolumes
+      - persistentvolumeclaims
+      - serviceaccounts
+      - replicationcontrollers
+      - replicationcontrollers/scale
+      - replicationcontrollers/status
+      - resourcequotas
+      - resourcequotas/status
+      - limitranges
+
+  - apiGroups:
+      - apps
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - daemonsets
+      - statefulsets
+      - replicasets
+      - replicasets/scale
+      - deployments
+      - deployments/scale
+
+  - apiGroups:
+      - autoscaling
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - horizontalpodautoscalers
+
+  - apiGroups:
+    - policy
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - poddisruptionbudgets
+
+  - apiGroups:
+      - extensions
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - daemonsets
+      - replicasets
+      - replicasets/scale
+      - deployments
+      - deployments/scale
+      - replicationcontrollers/scale
+      - networkpolicies
+      - ingresses
+
+  - apiGroups:
+    - batch
+    verbs:
+      - list
+      - get
+      - watch
+    resources:
+      - jobs
+      - cronjobs

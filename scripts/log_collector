@@ -1,0 +1,349 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+"""
+Log-Collector is a tool to collect all requested artifacts i.e.: log files, \
+commands output reports/results, binary files, etc. \
+This tool allows a user to single handed collect all information needed for \
+developers or testers to analyze discovered or reported bugs as well as helps \
+automated tests gather all required data for further analysis. \
+"""
+import argparse
+import glob
+import json
+import logging
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+
+
+def parse_options(args):
+    """
+    Function parses passed command-line options.
+
+    Parameters:
+    args (list): Runtime arguments.
+
+    Returns:
+    Namespace: Returning argparse namespace object with run-time arguments value.
+    """
+    parser = argparse.ArgumentParser(description="")
+
+    parser.add_argument("-c",
+                        "--config",
+                        dest="config_file",
+                        metavar="FILE",
+                        action="store",
+                        default="log_collector.json",
+                        help="""JSON configuration file. \
+                                By default: %(default)s.""")
+
+    parser.add_argument("-v",
+                        "--verbose",
+                        action="store",
+                        dest="verbose",
+                        metavar="LEVEL",
+                        default="all",
+                        choices=["all", "error"],
+                        help="""Collecting artifacts level: [all, error]. \
+                                all: Collects all possible artifacts from \
+                                whole machines. error: Collects only error log \
+                                artifacts from whole machines. \
+                                By Default: %(default)s""")
+
+    parser.add_argument("-o",
+                        "--out",
+                        action="store",
+                        dest="out",
+                        metavar="TAR.GZ FILE",
+                        default="Result.tar.gz",
+                        help="""Output directory name or tar.gz file name. \
+                                It will create it and store all collected \
+                                artifacts. By default: %(default)s""")
+
+    parser.add_argument("-f",
+                        "--force",
+                        action="store_true",
+                        dest="force",
+                        default=False,
+                        help="""When used forces overwritting existing \
+                                archive and directories.""")
+
+    parser.add_argument("-t",
+                        "--tmp-dir",
+                        action="store",
+                        dest="tmp_dir",
+                        metavar="PATH",
+                        default=".",
+                        help="""Temporary directory name to use. It will be \
+                                created to collect artifacts before \
+                                packing into archive. By default: \
+                                %(default)s""")
+
+    parser.add_argument("-l",
+                        "--log_level",
+                        action="store",
+                        dest="log_level",
+                        metavar="LOGGING LEVEL",
+                        default="DEBUG",
+                        choices=["DEBUG", "INFO",
+                                 "WARNING", "ERROR", "CRITICAL", "NONE"],
+                        help="""Console output logger level setting.\
+                                Choose one of: DEBUG, INFO, WARNING, ERROR, \
+                                CRITICAL, NONE. By default: %(default)s""")
+
+    return parser.parse_args(args)
+
+
+def read_config_json(path):
+    """
+    Function reads configuration JSON file.
+
+    Parameters:
+    path (string): Path to read from.
+
+    Returns:
+    dict: Returning configuration dictionary on success, None otherwise.
+    """
+    logging.info("Reading json configuration file: %s", path)
+    try:
+        with open(path, "r") as f:
+            config = json.load(f)
+            return config
+    except FileNotFoundError as e:
+        logging.error("Configuration file missing. Error: %s", e)
+    except PermissionError as e:
+        logging.error("Can't access configuration file. Error: %s", e)
+    logging.debug("Reading json configuration file finished.")
+    return None
+
+
+def run_command(command, file_name):
+    """
+    Function runs command and save its result to file.
+
+    Parameters:
+    command(string): Command to run.
+    file_name(string): Path to save results.
+    """
+    logging.debug("Saving command: %s to file: %s ", command, file_name)
+    with open(file_name, "w") as f:
+        subprocess.run(command,
+                       shell=True,
+                       stdout=f,
+                       stderr=subprocess.STDOUT,
+                       check=False,
+                       universal_newlines=True)
+    logging.debug("Running command finished.")
+
+
+def make_targz(archive_name, src):
+    """
+    Function creates tar.gz archive.
+
+    Parameters:
+    archive_name (string): Output archive name.
+    src (string): Directory path that will be archived.
+    """
+    logging.info("Creating %s started.", archive_name)
+    with tarfile.open(archive_name, "w:gz", dereference=True) as tar:
+        try:
+            tar.add(src, arcname=archive_name)
+        except OSError as e:
+            logging.error(
+                "Adding artifacts to the archive %s failed with error: %s",
+                archive_name, e)
+    logging.info("Creating %s succeeded.", archive_name)
+
+
+def prepare_directories_tree(options, tmp_dir, sub_dirs):
+    """
+    Function prepares directories tree.
+
+    Parameters:
+    options (Namespace): Options Namespace object with run-time commands.
+    tmp_dir (string): Temporary directory path to store collected artufacts.
+    sub_dirs (list): Sub-directories created in root directory.
+
+    Returns:
+    (int): Operation performange exit code. 0 on success, -1 otherwise.
+    """
+    logging.info("Prepering directories tree to collect artifacts started.")
+    if options.force is False and os.path.isfile(options.out):
+        logging.error("Output archive directory already exists. use --force "
+                      "to overwrite. See --help for more details.")
+        return -1
+
+    try:
+        for sub in sub_dirs:
+            os.makedirs(os.path.join(tmp_dir, sub))
+    except OSError as e:
+        logging.error("Creating directory tree failed with error: %s", e)
+        return -1
+
+    logging.debug("Prepering directories tree to collect artifacts finished.")
+    return 0
+
+
+def collect_pods_logs(file_name, com):
+    """
+    Function collects PODs logs into logs files.
+
+    Parameters:
+    file_name (string): sub-directory prefix path.
+    com (string): command to run.
+    """
+    logging.debug("Collecting pods logs started.")
+    pods = json.loads(
+        subprocess.run("kubectl get pods -A -o wide -o json",
+                       shell=True,
+                       check=False,
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT).stdout.decode("utf-8"))
+
+    for pod in pods["items"]:
+        command = re.sub("<POD>", pod["metadata"]["name"], com)
+        command = re.sub("<NAMESPACE>", pod["metadata"]["namespace"], command)
+        path = re.sub("<POD>", "_".join(pod["metadata"]["name"].split("-")),
+                      file_name)
+        run_command(command, path)
+    logging.debug("Collecting pods logs finished.")
+
+
+def collect_journalctl_services_logs(file_name, com):
+    """
+    Function collects journalctl tool services logs files.
+
+    Parameters:
+    prefix (string): sub-directory prefix path.
+    com (string): command to run.
+    """
+    logging.debug("Collecting journalctl services logs started.")
+    output = subprocess.run(
+        "systemctl --no-page list-unit-files --type=service --no-legend",
+        shell=True,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT).stdout.decode("utf-8")
+    services = [x.split(" ", 1)[0] for x in output.splitlines()][:-1]
+    for s in services:
+        logging.debug("Collecting service logs for: %s", s)
+        command = re.sub("<SERVICE>", s, com)
+        s = s.replace(".", "_").replace("-", "_").replace("@", "_")
+        path = re.sub("<SERVICE>", s, file_name)
+        run_command(command, path)
+    logging.debug("Collecting journalctl services logs finished.")
+
+
+def collect_command_artifacts(root_dir, config):
+    """
+    Function collects configured commands running log files.
+
+    Parameters:
+    root_dir (string): Archive root directory path
+    config (dict): JSON tool configuration.
+    """
+    logging.info("Collecting command artifacts started.")
+    for sub_dir in config.keys():
+        logging.debug("Collecting command artifacts for: %s", sub_dir)
+        for com in config[sub_dir]["commands"]:
+            prefix = os.path.join(root_dir, sub_dir)
+            file_name = os.path.join(prefix, com["file_name"])
+            if "<POD>" in com["command"] or "<NAMESPACE>" in com["command"]:
+                # Need to handle PODS/NAMESPACE case
+                collect_pods_logs(file_name, com["command"])
+            elif "<SERVICE>" in com["command"]:
+                # Need to handle journalctl SERVICEs logs
+                collect_journalctl_services_logs(file_name, com["command"])
+            else:
+                run_command(com["command"], file_name)
+    logging.debug("Collecting command artifacts finished.")
+
+
+def collect_path_artifacts(root_dir, config):
+    """
+    Function collects configured path logs and directories.
+
+    Parameters:
+    root_dir (string): Archive root directory path
+    config (dict): JSON tool configuration.
+    """
+    logging.info("Collecting path artifacts started.")
+    for sub_dir in config.keys():
+        logging.debug("Collecting path artifacts for: %s", sub_dir)
+        prefix = os.path.join(root_dir, sub_dir)
+        for item in config[sub_dir]["paths"]:
+            if os.path.isdir(item["path"]):
+                collect_directory(item, prefix)
+            elif "*" in item["path"]:
+                output = glob.glob(item["path"])
+                for i in output:
+                    os.symlink(i, os.path.join(prefix, os.path.basename(i)))
+            else:
+                os.symlink(item["path"], os.path.join(prefix,
+                                                      item["file_name"]))
+
+    logging.debug("Collecting path artifacts finished.")
+
+
+def collect_directory(src, path):
+    """
+    Function collects directories as packed archives.
+
+    Parameters:
+    src (dict): Source directory info dictionary.
+    path (string): Archive directory path.
+    """
+    logging.debug("Collecting directory %s started.", src["path"])
+    with tarfile.open(os.path.join(path, src["file_name"]),
+                      "w:gz",
+                      dereference=True) as tar:
+        try:
+            tar.add(src["path"], arcname=src["path"])
+        except OSError as e:
+            logging.debug("Adding file %s failed with error: %s", 
+                              src["file_name"], e)
+    logging.debug("Collecting directory finished.")
+
+
+def main(options):
+    """
+    Function main fir the script.
+
+    Parameters:
+    options (string): script run-time parameters.
+
+    Returns:
+    int: Operation performance exit code. 0 on success, -1 otherwise.
+    """
+    if options.log_level != "NONE":
+        stream_logger = logging.StreamHandler(sys.stdout)
+        stream_logger.setLevel(options.log_level)
+        logging.getLogger().addHandler(stream_logger)
+
+    logging.info("Starting %s", os.path.basename(sys.argv[0]))
+    logging.debug("Reading configuration file: %s", options.config_file)
+    config = read_config_json(options.config_file)
+    if config is None:
+        return -1
+    tmp_dir = tempfile.TemporaryDirectory(dir=options.tmp_dir).name
+    if prepare_directories_tree(options, tmp_dir, config.keys()) != 0:
+        return -1
+    collect_command_artifacts(tmp_dir, config)
+    collect_path_artifacts(tmp_dir, config)
+    make_targz(options.out, tmp_dir)
+    shutil.rmtree(tmp_dir)
+    return 0
+
+
+if __name__ == "__main__":
+    logging.basicConfig(filename="log_collector.log",
+                        filemode="w",
+                        format='%(levelname)s: %(message)s')
+    logging.getLogger().setLevel(logging.DEBUG)
+    sys.exit(main(parse_options(sys.argv[1:])))

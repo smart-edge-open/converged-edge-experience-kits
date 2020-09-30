@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2020 Intel Corporation
-
----
-- name: delete WeaveNet via the addon
-  command: "kubectl delete -f {{ _weavenet_yaml }}"
-  changed_when: true
-  ignore_errors: yes

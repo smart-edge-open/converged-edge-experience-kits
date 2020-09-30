@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: certificate for Interface Service
+  block:
+  - name: create directory for Interface Service client certificate
+    file:
+      name: "{{ _certs_dest }}/client/interfaceservice"
+      state: directory
+  - name: create Interface Service client certificate
+    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh interfaceservice.openness {{ _certs_dest }}/client/interfaceservice {{ _certs_dest }}/CA"
+  - name: create symbolic link to root's cert
+    file:
+      src: "{{ _certs_dest }}/CA/cert.pem"
+      dest: "{{ _certs_dest }}/client/interfaceservice/root.pem"
+      state: link
+  - name: set CA private key mode
+    file:
+      path: "{{ _certs_dest }}/client/interfaceservice/key.pem"
+      mode: '0600'
+
+- name: add interface service for kube-ovn
+  command: kubectl apply -f {{ _kubeovn_openness_yaml }}
+  changed_when: true
+
+- name: build and copy InterfaceService CLI
+  block:
+  - name: create temporary custom .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
+
+  - name: download modules for interface service cli
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/interfaceservicecli"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+
+  - name: build interface service cli
+    shell: source /etc/profile && go build -o dist/interfaceservicecli ./cmd/interfaceservicecli
+    args:
+      chdir: "{{ _git_repo_dest }}"
+      creates: "{{ _git_repo_dest }}/dist/interfaceservicecli"
+
+  - name: copy interface service cli
+    copy:
+      src: "{{ item }}"
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: '0755'
+    with_items:
+    - "{{ _git_repo_dest }}/dist/interfaceservicecli"
+    - "{{ _git_repo_dest }}/network-edge/kube-ovn/kubectl-interfaceservice"
+
+  always:
+  - name: remove .openness_gitconfig
+    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
