@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-LoadPlugin intel_rdt
+# Known issue: intel_rdt plugin can conflict with RMD. Should be used exclusively.
+# LoadPlugin intel_rdt
 
 <Plugin intel_rdt>
   Interval 1
