@@ -6,15 +6,9 @@
 - name: customize kubelet for topology manager
   include_tasks: customize_kubelet.yml
 
-- name: get worker node name
-  block:
-  - name: hostname
-    command: hostname
-    register: hostname_output
-
-  - name: set k8s worker node name
-    set_fact:
-      k8s_worker_node_name: "{{ hostname_output.stdout |lower }}"
+- name: set k8s worker node name
+  set_fact:
+    k8s_worker_node_name: "{{ ansible_nodename | lower }}"
 
 - name: check if already in cluster
   command: kubectl get node {{ k8s_worker_node_name }}

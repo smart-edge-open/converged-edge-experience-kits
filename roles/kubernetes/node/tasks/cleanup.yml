@@ -18,10 +18,14 @@
   with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']
 
+- name: set k8s worker node name
+  set_fact:
+    k8s_worker_node_name: "{{ ansible_nodename | lower }}"
+
 - name: remove the node from the cluster
   block:
   - name: "[k8s master] drain node"
-    command: kubectl drain {{ k8s_worker_node_name }} --ignore-daemonsets --timeout=60s
+    command: kubectl drain {{ k8s_worker_node_name }} --ignore-daemonsets --delete-local-data --timeout=60s
     delegate_to: "{{ groups['controller_group'][0] }}"
     ignore_errors: yes
     changed_when: true

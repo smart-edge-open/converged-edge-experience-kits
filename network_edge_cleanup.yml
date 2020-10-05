@@ -191,7 +191,13 @@
 - hosts: edgenode_group
   serial: 1
   tasks:
-    # biosfw/node - no clean up, because build image is delete when running docker's prune.yml
+    # biosfw/node - no clean up, because build image is deleted when running docker's prune.yml
+
+    - name: load kubernetes variables
+      include_vars: ./roles/kubernetes/node/defaults/main.yml
+
+    - name: cleanup kubernetes
+      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: ptp sychronization cleanup
       block:
@@ -225,12 +231,6 @@
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
-
-    - name: load kubernetes variables
-      include_vars: ./roles/kubernetes/node/defaults/main.yml
-
-    - name: cleanup kubernetes
-      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -280,6 +280,12 @@
 - hosts: edgenode_vca_group
   serial: 1
   tasks:
+    - name: load kubernetes variables
+      include_vars: ./roles/kubernetes/node/defaults/main.yml
+
+    - name: cleanup kubernetes
+      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
+
     - name: load cmk variables
       include_vars: ./roles/cmk/node/defaults/main.yml
 
@@ -294,12 +300,6 @@
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
-
-    - name: load kubernetes variables
-      include_vars: ./roles/kubernetes/node/defaults/main.yml
-
-    - name: cleanup kubernetes
-      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
