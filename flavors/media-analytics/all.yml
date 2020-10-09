@@ -10,9 +10,6 @@ kubevirt_enable: false
 # Network Edge Processor Counter Monitor (PCM)
 telemetry_pcm_enable: false
 
-# Kubernetes device plugins
-k8s_device_plugins_enable: true
-
 ## Network Edge Node Feature Discovery (NFD)
 ne_nfd_enable: true
 
