@@ -40,3 +40,13 @@ replicas: 1
 
 # enable Istio service mesh integration
 istioEnabled: {{ ne_istio_enable }}
+
+# proxy settings for vas_gateways
+{% if proxy_enable | d(false) %}
+proxySettings:
+  enabled: true
+  http: {{ proxy_http }}
+  https: {{ proxy_https }}
+  ftp: {{ proxy_ftp }}
+  noproxy: {{ proxy_noproxy }}
+{% endif %}
