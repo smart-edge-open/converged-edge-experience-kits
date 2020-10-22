@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: load docker-registry variables
   include_vars: ../../controlplane/defaults/main.yml
 
@@ -14,7 +13,7 @@
 - name: generate client key and csr file
   command: "{{ item }}"
   with_items:
-    - openssl11 req -new -sha256 -nodes -out client.csr -newkey rsa:2048 -keyout client.key -subj "/CN={{ cert_cn }}"
+    - openssl req -new -sha256 -nodes -out client.csr -newkey rsa:2048 -keyout client.key -subj "/CN={{ cert_cn }}"
   args:
     chdir: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
   changed_when: true
@@ -41,7 +40,7 @@
 - name: generate client.cert from client.csr , root CA and key file
   command: "{{ item }}"
   with_items:
-    - openssl11 x509 -req -in client.csr -CA ../ca.crt -CAkey ../ca.key -days 1000 -out client.cert -CAcreateserial
+    - openssl x509 -req -in client.csr -CA ../ca.crt -CAkey ../ca.key -days 1000 -out client.cert -CAcreateserial
   args:
     chdir: "{{ _registry_location }}/{{ cert_cn }}/"
   delegate_to: "{{ _registry_host }}"

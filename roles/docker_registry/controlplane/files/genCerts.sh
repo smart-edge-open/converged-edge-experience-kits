@@ -16,9 +16,6 @@ echo "Generate Docker registry certificate"
 root_cn_name="docker-registry"
 server_cn_name=$1
 
-shopt -s expand_aliases
-alias openssl=openssl11
-
 if ! openssl version | awk '$2 ~ /(^0\.)|(^1\.(0\.|1\.0))/ { exit 1 }'; then
    echo "Not supported openssl:"
    openssl version
@@ -45,4 +42,3 @@ openssl req -new -sha256 -nodes -out client.csr -newkey rsa:2048 -keyout client.
 echo "Generate client.cert for  Master Node  from root ca.key and ca.crt"
 
 openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.cert -days 1000
-
