@@ -23,6 +23,10 @@ DEFAULT_VALUES = {
 class ActionModule(ansible.plugins.action.ActionBase):
     """Ansible plugin wrapping the ansible yum module to make package
        installation more network error resistant"""
+
+    task_vars = None
+    module_args = None
+
     def get_variable(self, arg):
         """get_variable will find value for provided argument arg may be 'retries' or 'delay'"""
         def_val = DEFAULT_VALUES.get(arg)
