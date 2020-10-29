@@ -54,7 +54,7 @@
     - name: create temporary directory
       tempfile:
         state: directory
-        prefix: kafka
+        prefix: kafka-
       register: tmp_dir
 
     - name: create directories for persistent volumes

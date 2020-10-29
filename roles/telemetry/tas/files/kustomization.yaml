@@ -11,3 +11,17 @@ resources:
   - tas-deployment.yaml
   - tas-rbac-accounts.yaml
   - tas-policy-crd.yaml
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: telemetry-aware-scheduling
+    path: add_cmk_toleration.yml
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: telemetry-aware-scheduling
+    path: use_local_docker_registry.yml

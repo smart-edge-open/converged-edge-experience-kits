@@ -7,6 +7,10 @@
   include_vars:
     file: ../../certs/defaults/main.yml
 
+- name: include Docker Registry vars
+  include_vars:
+    file: ../../../docker_registry/controlplane/defaults/main.yml
+
 - name: create temporary directory
   tempfile:
     state: directory
@@ -172,10 +176,36 @@
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
 
-  - name: copy kustomization.yaml to TAS directory
+  - name: push TAS images to docker registry
+    docker_image:
+      name: "{{ item }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ item }}"
+      push: yes
+      source: local
+    with_items:
+      - tas-extender
+      - tas-controller
+
+  - name: remove local TAS images
+    docker_image:
+      state: absent
+      name: "{{ item }}"
+    with_items:
+      - tas-extender
+      - tas-controller
+
+  - name: copy kustomization files to TAS directory
     copy:
-      src: kustomization.yaml
-      dest:  "{{ tmp_dir.path }}/tas-repo/deploy/kustomization.yaml"
+      src: "{{ item }}"
+      dest:  "{{ tmp_dir.path }}/tas-repo/deploy/"
+    with_items:
+      - kustomization.yaml
+      - add_cmk_toleration.yml
+
+  - name: copy Docker Registry customization file to controller
+    template:
+      src: "use_local_docker_registry.yml.j2"
+      dest: "{{ tmp_dir.path }}/tas-repo/deploy/use_local_docker_registry.yml"
 
   - name: apply TAS
     shell: >

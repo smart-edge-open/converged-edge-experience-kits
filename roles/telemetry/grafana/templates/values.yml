@@ -8,9 +8,12 @@ nodeSelector: {"node-role.kubernetes.io/master":""}
 dashboardsDir: "{{ _grafana_dashboards_conf }}"
 
 tolerations:
- - key: "node-role.kubernetes.io/master"
-   operator: "Exists"
-   effect: "NoSchedule"
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+    effect: "NoSchedule"
+  - key: cmk
+    operator: Exists
+    effect: NoSchedule
 
 service:
   type: NodePort
