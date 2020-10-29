@@ -15,6 +15,10 @@
     enablerepo: ius-archive
     skip_broken: yes
 
+- name: upgrade python2-pip version
+  command: "python2 -m pip install --upgrade pip=={{ _pip_version }}"
+  changed_when: true
+
 - name: install base OpenSSL from sources
   block:
     - name: OpenSSL create temp dir
