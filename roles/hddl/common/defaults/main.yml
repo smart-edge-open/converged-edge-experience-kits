@@ -1,6 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2020 Intel Corporation
-
----
-_hddl_kernel_devel: 3.10.0-957.el7.x86_64
-_hddl_kernel_devel_url: http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-{{ _hddl_kernel_devel }}.rpm

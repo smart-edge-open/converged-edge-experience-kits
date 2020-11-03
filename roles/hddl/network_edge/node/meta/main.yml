@@ -4,5 +4,4 @@
 ---
 
 dependencies:
-- hddl/common
 - hddl/network_edge/common
