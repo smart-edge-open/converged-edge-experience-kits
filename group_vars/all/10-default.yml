@@ -38,7 +38,7 @@ os_remove_yum_plugins: true
 
 ### OpenNESS Git Repository
 # Following variable specify branch/SHA/tag to be checked out for the source repository
-git_repo_branch: master
+git_repo_branch: openness-20.09.01
 
 # If True, the repository will be deleted and cloned again
 # If False, repository will be left as it is and any changes won't be overwritten.
