@@ -15,6 +15,10 @@
         name: "{{ _nfd_image_name }}"
         tag: "{{ _nfd_tag }}"
         source: pull
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
 
     - name: tag NFD image and push to docker registry
       docker_image:
