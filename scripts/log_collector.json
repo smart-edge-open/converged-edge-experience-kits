@@ -113,7 +113,7 @@
                 "file_name": "kubectl_<POD>.log"
             },
             {
-                "command": "kubectl describe <POD> -n <NAMESPACE>",
+                "command": "kubectl describe pod <POD> -n <NAMESPACE>",
                 "file_name": "kubectl_describe_<POD>.log"
             }
         ],
