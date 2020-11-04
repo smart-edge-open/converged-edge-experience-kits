@@ -153,7 +153,8 @@
   - name: configure Kubernetes Scheduler Extender
     command: "bash configure-scheduler.sh {{ _tas_svc_domain }}"
     register: configure_scheduler_result
-    failed_when: "configure_scheduler_result.rc != 0 or 'error:' in configure_scheduler_result.stderr"
+    failed_when: "configure_scheduler_result.rc != 0 or
+                  ('error:' in configure_scheduler_result.stderr and 'already exists' not in configure_scheduler_result.stderr)"
     changed_when: true
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration"
