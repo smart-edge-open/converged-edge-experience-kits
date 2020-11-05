@@ -54,15 +54,15 @@
   include_tasks: proxy.yml
   when: proxy_enable|bool
 
-- name: set cgroups driver to systemd
+- name: set cgroups driver to systemd and configure docker registries
   block:
     - name: make sure /etc/docker/ exists
       file:
         path: /etc/docker/
         state: directory
-    - name: set cgroups driver to systemd
-      copy:
-        src: daemon.json
+    - name: Generate daemon.json
+      template:
+        src: daemon.json.j2
         dest: /etc/docker/daemon.json
       notify:
         - enable and start docker service

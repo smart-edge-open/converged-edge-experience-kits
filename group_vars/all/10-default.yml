@@ -201,6 +201,16 @@ rmd_operator_enable: False
 ## Docker images cache directory, all images with .tar* suffix will be preloaded during docker setup
 docker_images_dir: "/etc/openness/images-cache"
 
+## Docker registry mirrors
+## https://docs.docker.com/registry/recipes/mirror/
+# docker_registry_mirrors:
+#   - "https://docker-mirror.example.local"
+
+## Docker insecure registries
+## https://docs.docker.com/registry/insecure/
+# docker_insecure_registries:
+#   - "docker-insecure-mirror.example.local:5000"
+
 ## Kafka variables
 kafka_cluster: cluster
 kafka_eaa_user: eaa-kafka

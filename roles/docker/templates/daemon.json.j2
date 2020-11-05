@@ -1,0 +1,25 @@
+{
+  "exec-opts": [
+    "native.cgroupdriver=systemd"
+  ],
+  
+{% if docker_registry_mirrors is defined and docker_registry_mirrors %}
+  "registry-mirrors": {{ docker_registry_mirrors | to_json }},
+{% endif %}
+{% if docker_insecure_registries is defined and docker_insecure_registries %}
+  "insecure-registries": {{ docker_insecure_registries | to_json}},
+{% endif %}
+
+  "default-ulimits": {
+    "nofile": {
+      "Name": "nofile",
+      "Hard": 65535,
+      "Soft": 65535
+    },
+    "nproc": {
+      "Name": "nproc",
+      "Hard": 4096,
+      "Soft": 4096
+    }
+  }
+}
