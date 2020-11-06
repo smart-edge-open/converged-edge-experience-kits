@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: open calico firewall rules
   ignore_errors: yes
   firewalld:
@@ -10,6 +9,29 @@
     permanent: yes
     state: enabled
     immediate: yes
+
+# Starting with calico v3.16 the CNI is adding an accept rule at the end of FORWARD chain in filter table:
+# "Connections to services without endpoints are now properly rejected in iptables dataplane mode.
+#  The fix required moving the iptables ACCEPT rule to the end of the filter FORWARD chain;
+#  if you have your own rules in that chain then please check that they do not drop or reject pod traffic before it reaches the ACCEPT rule.
+#  felix #2424 (@caseydavenport)" ~ https://docs.projectcalico.org/release-notes/
+# This is not acceptable as prior to that the firewall adds REJECT all rule:
+#   Chain FORWARD (policy ACCEPT)
+#   target     prot opt source               destination
+#   ...
+#   DROP       all  --  anywhere             anywhere             ctstate INVALID
+#   REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
+#   ACCEPT     all  --  anywhere             anywhere             /* cali:S93hcgKJrXEqnTfs */ /* Policy explicitly accepted packet. */ mark match 0x10000/0x10000
+# The workaround is to add a direct accept rule that is the same as the one created by calico.
+# By default the value created by https://github.com/projectcalico/felix/blob/29a934e2af1d6670d0c85cae7a844cef8eb4df93/dataplane/driver.go#L98
+# is always 0x10000 as the default value of allowedMarkBits/configParams.IptablesMarkMask is 0xffff0000 and it is the first bit available
+- name: add firewall rules for calico
+  command: "{{ item }}"
+  with_items:
+    - firewall-cmd --direct --permanent --add-rule ipv4 filter FORWARD 0 -m mark --mark 0x10000/0x10000 -m comment --comment "OpenNESS-Calico" -j ACCEPT
+    - firewall-cmd --reload
+  ignore_errors: yes
+  changed_when: true
 
 - name: add NetworkManager config - ignore calico's interfaces
   copy:
@@ -38,8 +60,8 @@
     src: "{{ item }}"
     dest: "{{ tmp_dir.path }}"
   with_items:
-  - kustomization.yml
-  - customize_calico_container.yml
+    - kustomization.yml
+    - customize_calico_container.yml
 
 - name: Overwrite kustomization_ebpf.yml for ebpf
   copy:
@@ -52,37 +74,37 @@
     src: "{{ item }}.j2"
     dest: "{{ tmp_dir.path }}/{{ item }}"
   with_items:
-  - customize_calico_conf.yml
-  - change_cidr.yml
+    - customize_calico_conf.yml
+    - change_cidr.yml
 
 - name: Add Kubernetes service host to the calico configmap
   block:
-  - name: get the endpoint IP
-    shell: kubectl  get endpoints | grep kuber | awk 'BEGIN { FS = "[ ]+" } { print $2}' | awk -F ":" '{print $1}'
-    args:
-      warn: false
-    register: endpoint_ip
-  - name: get the endpoint Port
-    shell: kubectl  get endpoints | grep kuber | awk 'BEGIN { FS = "[ ]+" } { print $2}' | awk -F ":" '{print $2}'
-    args:
-      warn: false
-    register: endpoint_port
-  - name: replace host line
-    lineinfile:
-      dest: "{{ tmp_dir.path }}/calico.yml"
-      regexp: '^  kubernetes_service_host: (.*)$'
-      line: '  kubernetes_service_host: "{{ endpoint_ip.stdout }}"'
-      backrefs: yes
-  - name: replace port line
-    lineinfile:
-      dest: "{{ tmp_dir.path }}/calico.yml"
-      regexp: '^  kubernetes_service_port: (.*)$'
-      line: '  kubernetes_service_port: "{{ endpoint_port.stdout }}"'
-      backrefs: yes
-  - name: disable kube-proxy
-    shell: kubectl patch ds -n kube-system kube-proxy -p '{"spec":{"template":{"spec":{"nodeSelector":{"non-calico":"true"}}}}}'
-    args:
-      warn: false
+    - name: get the endpoint IP
+      shell: kubectl  get endpoints | grep kuber | awk 'BEGIN { FS = "[ ]+" } { print $2}' | awk -F ":" '{print $1}'
+      args:
+        warn: false
+      register: endpoint_ip
+    - name: get the endpoint Port
+      shell: kubectl  get endpoints | grep kuber | awk 'BEGIN { FS = "[ ]+" } { print $2}' | awk -F ":" '{print $2}'
+      args:
+        warn: false
+      register: endpoint_port
+    - name: replace host line
+      lineinfile:
+        dest: "{{ tmp_dir.path }}/calico.yml"
+        regexp: "^  kubernetes_service_host: (.*)$"
+        line: '  kubernetes_service_host: "{{ endpoint_ip.stdout }}"'
+        backrefs: yes
+    - name: replace port line
+      lineinfile:
+        dest: "{{ tmp_dir.path }}/calico.yml"
+        regexp: "^  kubernetes_service_port: (.*)$"
+        line: '  kubernetes_service_port: "{{ endpoint_port.stdout }}"'
+        backrefs: yes
+    - name: disable kube-proxy
+      shell: kubectl patch ds -n kube-system kube-proxy -p '{"spec":{"template":{"spec":{"nodeSelector":{"non-calico":"true"}}}}}'
+      args:
+        warn: false
   when: calico_ebpf_enabled
 
 - name: apply calico.yml with change
@@ -95,13 +117,13 @@
 
 - name: apply NetworkAttachmentDefinition
   block:
-  - name: copy NetworkAttachmentDefinition to remote from template
-    template:
-      src: calico_net_attach_def.yml.j2
-      dest: "{{ tmp_dir.path }}/calico_net_attach_def.yml"
-  - name: apply Calico's NetworkAttachmentDefinition
-    command: kubectl apply -f {{ tmp_dir.path }}/calico_net_attach_def.yml
+    - name: copy NetworkAttachmentDefinition to remote from template
+      template:
+        src: calico_net_attach_def.yml.j2
+        dest: "{{ tmp_dir.path }}/calico_net_attach_def.yml"
+    - name: apply Calico's NetworkAttachmentDefinition
+      command: kubectl apply -f {{ tmp_dir.path }}/calico_net_attach_def.yml
   when:
-  - apply_netdef is defined
-  - apply_netdef
-  - not ( calico_ebpf_enabled )
+    - apply_netdef is defined
+    - apply_netdef
+    - not ( calico_ebpf_enabled )

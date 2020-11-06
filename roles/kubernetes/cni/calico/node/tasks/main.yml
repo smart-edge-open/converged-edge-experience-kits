@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: open calico firewall rules
   ignore_errors: yes
   firewalld:
@@ -10,3 +9,26 @@
     permanent: yes
     state: enabled
     immediate: yes
+
+# Starting with calico v3.16 the CNI is adding an accept rule at the end of FORWARD chain in filter table:
+# "Connections to services without endpoints are now properly rejected in iptables dataplane mode.
+#  The fix required moving the iptables ACCEPT rule to the end of the filter FORWARD chain;
+#  if you have your own rules in that chain then please check that they do not drop or reject pod traffic before it reaches the ACCEPT rule.
+#  felix #2424 (@caseydavenport)" ~ https://docs.projectcalico.org/release-notes/
+# This is not acceptable as prior to that the firewall adds REJECT all rule:
+#   Chain FORWARD (policy ACCEPT)
+#   target     prot opt source               destination
+#   ...
+#   DROP       all  --  anywhere             anywhere             ctstate INVALID
+#   REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
+#   ACCEPT     all  --  anywhere             anywhere             /* cali:S93hcgKJrXEqnTfs */ /* Policy explicitly accepted packet. */ mark match 0x10000/0x10000
+# The workaround is to add a direct accept rule that is the same as the one created by calico.
+# By default the value created by https://github.com/projectcalico/felix/blob/29a934e2af1d6670d0c85cae7a844cef8eb4df93/dataplane/driver.go#L98
+# is always 0x10000 as the default value of allowedMarkBits/configParams.IptablesMarkMask is 0xffff0000 and it is the first bit available
+- name: add firewall rule for calico
+  command: "{{ item }}"
+  with_items:
+    - firewall-cmd --direct --permanent --add-rule ipv4 filter FORWARD 0 -m mark --mark 0x10000/0x10000 -m comment --comment "OpenNESS-Calico" -j ACCEPT
+    - firewall-cmd --reload
+  ignore_errors: yes
+  changed_when: true
