@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+## Kernel configuration
+# Skip kernel configuration
+# If true, kernel will not be installed.
+# If false, package composed from variables kernel_package and kernel_version will be installed together with it's devel
+kernel_skip: true
+
+## Tuned configuration
+# Skip tuned configuration
+# If true, tuned will not be configured
+# If false, tuned_packages will be installed, tuned_profile will be applied with tuned_vars
+tuned_skip: true
+
+# Default grub parameters
+default_grub_params: ""
