@@ -37,7 +37,7 @@ kernel_dependencies_packages: []
 # - disabled (commented), or
 # - skipped for specific host (`customize_kernel_skip` variable)
 # Default value is valid for Centos 7.8-2003. Variable must be updated accordingly if using other version.
-dpdk_kernel_devel: ""
+dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
 
 ## ebpf
 # URL or package name providing `kernel-ml and kernel-ml-devel` package when role `custom_kernel` is:
