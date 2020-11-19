@@ -19,7 +19,7 @@ istio_deployment_profile: "default"
 # Istio is deployed to "default" namespace in the cluster
 istio_deployment_namespace: "default"
 
-# Kiali 
+# Kiali
 istio_kiali_username: "admin"
-istio_kiali_password: "admin"
+istio_kiali_password: "{{ lookup('password', '/dev/null length=16') }}"
 istio_kiali_nodeport: 30001
