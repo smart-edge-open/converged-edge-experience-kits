@@ -33,7 +33,7 @@ additional_grub_params: ""
 tuned_skip: false   # use this variable to skip tuned profile configuration for host
 tuned_packages:
 - tuned-2.11.0-8.el7
-- http://linuxsoft.cern.ch/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+- http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
 tuned_profile: realtime
 tuned_vars: |
   isolated_cores=2-3
