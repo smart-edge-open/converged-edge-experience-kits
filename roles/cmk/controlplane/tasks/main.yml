@@ -45,7 +45,7 @@
   - name: tag the CMK image and push to local registry
     docker_image:
       name: cmk
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/cmk"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/cmk"
       tag: "{{ _cmk_tag }}"
       push: yes
       source: local

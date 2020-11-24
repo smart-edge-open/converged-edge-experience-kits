@@ -87,6 +87,8 @@
   command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}.rpm" # noqa 303
   with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
+  args:
+    warn: false
 
 - name: configure VCA kernel to be the default at boot
   shell: grubby --set-default /boot/vmlinuz-3.10.0-*.VCA+

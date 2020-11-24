@@ -7,9 +7,9 @@
   include_vars:
     file: ../../certs/defaults/main.yml
 
-- name: include Docker Registry vars
+- name: include Harbor Registry vars
   include_vars:
-    file: ../../../docker_registry/controlplane/defaults/main.yml
+    file: ../../../harbor_registry/controlplane/defaults/main.yml
 
 - name: create temporary directory
   tempfile:
@@ -177,10 +177,10 @@
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
 
-  - name: push TAS images to docker registry
+  - name: push TAS images to Harbor registry
     docker_image:
       name: "{{ item }}"
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ item }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ item }}"
       push: yes
       source: local
     with_items:
@@ -203,7 +203,7 @@
       - kustomization.yaml
       - add_cmk_toleration.yml
 
-  - name: copy Docker Registry customization file to controller
+  - name: copy Harbor Registry customization file to controller
     template:
       src: "use_local_docker_registry.yml.j2"
       dest: "{{ tmp_dir.path }}/tas-repo/deploy/use_local_docker_registry.yml"

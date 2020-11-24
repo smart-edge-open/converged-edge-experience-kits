@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+#!/bin/bash
+
+REGISTRY={{ _registry_ip_address }}:{{ _registry_port }}/intel
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+BIN_PATH=${EMCOBUILDROOT}/bin
+TAG=latest
+
+push_to_registry() {
+    M_IMAGE=$1
+    M_TAG=$2
+    docker login {{ _registry_ip_address }}:{{ _registry_port }} 
+    echo "Pushing ${M_IMAGE} to ${REGISTRY}/${M_IMAGE}:${M_TAG}..."
+    docker tag ${M_IMAGE}:latest ${REGISTRY}/${M_IMAGE}:${M_TAG}
+    docker push ${REGISTRY}/${M_IMAGE}:${M_TAG}
+}
+
+push_to_registry emco-clm ${TAG}
+push_to_registry emco-ncm ${TAG}
+push_to_registry emco-orch ${TAG}
+push_to_registry emco-ovn ${TAG}
+push_to_registry emco-rsync ${TAG}
+push_to_registry emco-dcm ${TAG}
+
+

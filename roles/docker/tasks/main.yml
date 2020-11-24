@@ -87,6 +87,8 @@
 - name: restart auditd
   command: service auditd restart # noqa 303
   changed_when: true
+  args:
+    warn: false
 
 - name: setup docker bash completion
   block:

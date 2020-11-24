@@ -17,8 +17,8 @@ frameworks:
   - {{ item.name }}
 {% endfor %}
 
-# registry specifies the docker registry in use
-registry: {{ _registry_ip_address }}:{{ _registry_port }}
+# registry specifies the Harbor registry in use
+registry: {{ _registry_ip_address }}:{{ _registry_port }}/intel
 
 # servingImage video analytics serving image
 servingImage: {{ _va_serving.image }}

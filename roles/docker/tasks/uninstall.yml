@@ -10,6 +10,8 @@
 - name: Restart auditd
   command: service auditd restart # noqa 303
   changed_when: true
+  args:
+    warn: false
 
 - name: disable docker service
   systemd:

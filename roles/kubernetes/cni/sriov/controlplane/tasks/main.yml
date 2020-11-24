@@ -35,13 +35,21 @@
     until: result is succeeded
     delay: "{{ retry_delay }}"
 
+  - name: login harbor registry firstly
+    shell: docker login "{{ _registry_ip_address }}:{{ _registry_port }}" -uadmin -p"{{ harborAdminPassword }}"
+    register: result
+    retries: 60
+    delay: 15
+    until: result is succeeded
+    ignore_errors: yes
+
   - name: build CNI image
     docker_image:
       build:
         path: "{{ _sriov_cni.download_dir }}"
         use_config_proxy: yes
         pull: yes
-      name: "{{ _registry_ip_address }}:{{ _registry_port }}/sriov-cni"
+      name: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/sriov-cni"
       push: yes
       source: build
     register: result
@@ -62,7 +70,7 @@
   - name: tag and push device plugin image to local registry
     docker_image:
       name: nfvpe/sriov-device-plugin
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/sriov-device-plugin"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/sriov-device-plugin"
       push: yes
       source: local
 
@@ -91,7 +99,7 @@
       helm install sriov-release {{ ne_helm_charts_default_dir }}/sriov --set registry_ip={{ _registry_ip_address }}
       --set registry_port={{ _registry_port }} --set sriov_kubevirt_enable={{ sriov_kubevirt_enable }}
       --set fpga_sriov_userspace_enable={{ fpga_sriov_userspace_enable }}
-      --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/sriov-device-plugin
+      --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/intel/sriov-device-plugin
       --set image.tag=latest
     changed_when: true
   when: get_release_sriov.rc != 0

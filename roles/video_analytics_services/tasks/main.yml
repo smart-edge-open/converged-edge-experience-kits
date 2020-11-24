@@ -26,7 +26,7 @@
     ignore_errors: yes
     when: (vas_helm_chart.stdout | length == 0) and (vas_helm_release.stdout | length > 0)
 
-- name: build, tag and push the video analytics serving images to docker registry
+- name: build, tag and push the video analytics serving images to Harbor registry
   block:
   - name: build VAS image
     shell: "source /etc/profile && ./build.sh --base {{ item.image }} --framework {{ item.name }}"
@@ -41,7 +41,7 @@
   - name: tag the VAS image
     docker_image:
       name: "{{ _va_serving.image }}-{{ item.name }}"
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _va_serving.image }}-{{ item.name }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ _va_serving.image }}-{{ item.name }}"
       tag: "{{ _va_serving.tag }}"
       push: yes
       source: local
@@ -49,7 +49,7 @@
     with_items: "{{ _frameworks }}"
   when: vas_helm_chart.stdout | length == 0
 
-- name: build, tag and push the video analytics serving images to docker registry
+- name: build, tag and push the video analytics serving images to Harbor registry
   block:
   - name: build VAS sidecar image
     shell: source /etc/profile && make {{ _vas_sidecar.name }}
@@ -64,10 +64,10 @@
         path: "{{ _git_repo_dest }}/{{ _vas_sidecar.name }}"
         use_config_proxy: yes
         pull: yes
-  - name: tag VAS sidecar image and push to docker registry
+  - name: tag VAS sidecar image and push to Harbor registry
     docker_image:
       name: "{{ _vas_sidecar.image }}"
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/{{ _vas_sidecar.image }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ _vas_sidecar.image }}"
       tag: "{{ _vas_sidecar.tag }}"
       push: yes
       source: local

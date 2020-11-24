@@ -5,7 +5,7 @@
 
 - op: replace
   path: /spec/template/spec/containers/0/image
-  value: {{ _registry_ip_address }}:{{ _registry_port }}/tas-controller:latest
+  value: {{ _registry_ip_address }}:{{ _registry_port }}/intel/tas-controller:latest
 - op: replace
   path: /spec/template/spec/containers/1/image
-  value: {{ _registry_ip_address }}:{{ _registry_port }}/tas-extender:latest
+  value: {{ _registry_ip_address }}:{{ _registry_port }}/intel/tas-extender:latest

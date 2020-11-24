@@ -29,4 +29,3 @@
     command: "helm install otel-collector --namespace telemetry {{ _otel_collector_chart_dir }}"
     changed_when: true
   when: get_release_collector.rc != 0
-

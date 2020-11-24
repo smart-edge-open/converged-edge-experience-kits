@@ -86,11 +86,11 @@
       include_tasks: ./roles/nfd/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
 
-  - name: load docker_registry variables
-    include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
+  - name: load harbor_registry variables
+    include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
 
-  - name: cleanup docker_registry
-    include_tasks: ./roles/docker_registry/controlplane/tasks/cleanup.yml
+  - name: cleanup harbor_registry
+    include_tasks: ./roles/harbor_registry/controlplane/tasks/cleanup.yml
 
   - name: load network edge variables
     include_vars: ./roles/openness/controlplane/defaults/main.yml
@@ -271,11 +271,11 @@
     - name: cleanup git
       include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
-    - name: load docker_registry variables
-      include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
+    - name: load harbor_registry variables
+      include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
 
-    - name: cleanup docker_registry certificate
-      include_tasks: ./roles/docker_registry/node/tasks/cleanup.yml
+    - name: cleanup harbor_registry certificate
+      include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml
 
 - hosts: edgenode_vca_group
   serial: 1
@@ -334,8 +334,8 @@
     - name: cleanup git
       include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
-    - name: load docker_registry variables
-      include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
+    - name: load harbor_registry variables
+      include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
 
-    - name: cleanup docker_registry certificate
-      include_tasks: ./roles/docker_registry/node/tasks/cleanup.yml
+    - name: cleanup harbor_registry certificate
+      include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml

@@ -63,6 +63,9 @@ filter="${1:-}"
 
 if [[ "${filter}" == s* ]]; then
     playbook="single_node_network_edge.yml"
+elif [[ "${flavor}" == central_orchestrator ]]; then
+    playbook="network_edge_orchestrator.yml"
+    limit=$(get_limit "c")
 else
     playbook="network_edge.yml"
     limit=$(get_limit "${filter}")

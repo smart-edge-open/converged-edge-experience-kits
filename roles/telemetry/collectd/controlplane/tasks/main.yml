@@ -3,8 +3,8 @@
 
 ---
 
-- name: include docker registry vars
-  include_vars: ../../../docker_registry/controlplane/defaults/main.yml
+- name: include Harbor registry vars
+  include_vars: ../../../harbor_registry/controlplane/defaults/main.yml
 
 - name: check if collectd already exists
   command: helm status collectd -n telemetry

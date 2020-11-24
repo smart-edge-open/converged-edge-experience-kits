@@ -5,9 +5,9 @@ Copyright (c) 2020 Intel Corporation
 
 Chart {{ .Chart.Name }} was successfully installed
 
-SR-IOV CNI and SR-IOV device plugin images were saved in local docker registry
-Image name: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/sriov-cni:{{ .Values.image_tag }}
-Image name: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/sriov-device-plugin:latest
+SR-IOV CNI and SR-IOV device plugin images were saved in local Harbor registry
+Image name: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/intel/sriov-cni:{{ .Values.image_tag }}
+Image name: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/intel/sriov-device-plugin:latest
 
 Your release is named {{ .Release.Name }}.
 

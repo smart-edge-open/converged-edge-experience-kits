@@ -5,8 +5,8 @@ Copyright (c) 2020 Intel Corporation
 
 Chart {{ .Chart.Name }} was successfully installed
 
-Multus image was saved in local docker registry
-Image name: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/multus:{{ .Values.image_tag }}
+Multus image was saved in local Harobr registry
+Image name: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/intel/multus:{{ .Values.image_tag }}
 
 Your release is named {{ .Release.Name }}.
 

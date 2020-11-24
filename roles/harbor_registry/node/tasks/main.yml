@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: load docker-registry variables
+  include_vars: ../../controlplane/defaults/main.yml
+
+- name: create directory for copying certificate
+  file:
+    path: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}
+    state: directory
+    mode: '0755'
+
+- name: get ca.crt from registry
+  shell: |
+    set -o pipefail && echo -n | openssl s_client -showcerts \
+    -connect {{ _registry_ip_address }}:{{ _registry_port }} 2>/dev/null | sed -ne \
+    '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > harbor.crt
+  args:
+    chdir: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
+  changed_when: false
+
+- name: login harbor registry firstly
+  command: docker login "{{ _registry_ip_address }}:{{ _registry_port }}" -uadmin -p{{ harborAdminPassword }}
+  register: result
+  until: result is succeeded
+  retries: 60
+  delay: 10
+  ignore_errors: yes
+  changed_when: false
+
+- name: check whether the intel project is created
+  shell: |
+    curl --noproxy "*" -X GET \
+    "https://{{ _registry_ip_address }}:{{ _registry_port }}/api/{{ harbor_api_version }}/projects?name=intel&public=true" \
+    -H "accept: application/json" \
+    -k --cacert /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/harbor.crt \
+    -u "admin:{{ harborAdminPassword }}"
+  register: intel_proj_is_created
+  until: intel_proj_is_created is succeeded
+  retries: 5
+  delay: 5
+  args:
+    warn: false
+  changed_when: false
+
+- name: create a new harbor project named intel
+  shell: |
+    curl --noproxy "*" -X POST \
+    "https://{{ _registry_ip_address }}:{{ _registry_port }}/api/{{ harbor_api_version }}/projects" \
+    -H "accept: application/json" -H "Content-Type: application/json" \
+    -d "{ \"project_name\": \"intel\", \"metadata\": { \"public\": \"true\" }, \"public\": true}" \
+    -k --cacert "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/harbor.crt" \
+    -u "admin:{{ harborAdminPassword }}"
+  register: create_result
+  until: create_result.rc == 0
+  when: intel_proj_is_created.stdout == '[]'
+  args:
+    warn: false
+
+# copy cert to VCA nodes
+- name: get number of VCA nodes
+  shell: set -o pipefail && vcactl status | grep Card | wc -l
+  register: num_vca
+  changed_when: true
+  when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: create Harbor registry certs for VCA node(s)
+  include_tasks: node_cert.yml
+  vars:
+    vca_node_ip: "172.32.{{ vca_idx }}.1"
+    cert_cn: "{{ ansible_hostname }}-vca{{ vca_idx }}"
+  loop_control:
+    loop_var: vca_idx
+  with_sequence: count="{{ num_vca.stdout | int }}"
+  when: inventory_hostname in groups['edgenode_vca_group']

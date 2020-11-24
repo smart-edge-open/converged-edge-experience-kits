@@ -1,0 +1,375 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+# Resources to create EMCO v2 Microservices
+---
+#Etcd Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: etcd
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      containers:
+      - image: bitnami/etcd:3
+        imagePullPolicy: IfNotPresent
+        name: etcd
+        env:
+          - name: "ALLOW_NONE_AUTHENTICATION"
+            value: "yes"
+        ports:
+        - containerPort: 2379
+        - containerPort: 2380
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+
+---
+#Mongo Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mongo
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      containers:
+      - image: mongo
+        imagePullPolicy: IfNotPresent
+        name: mongo
+        ports:
+        - containerPort: 27017
+---
+
+# Orchestrator Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orchestrator
+  template:
+    metadata:
+      labels:
+        app: orchestrator
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      containers:
+        - name: orchestrator
+          image: {{ .Values.registryPrefix }}emco-orch:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: rsync,{{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: rsync,{{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./orchestrator"]
+          workingDir: /opt/emco/orchestrator
+          ports:
+          - containerPort: 9015
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/orchestrator/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: orchestrator
+            items:
+            - key: config.json
+              path: config.json
+---
+
+# NCM Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ncm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ncm
+  template:
+    metadata:
+      labels:
+        app: ncm
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      containers:
+        - name: ncm
+          image: {{ .Values.registryPrefix }}emco-ncm:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./ncm"]
+          workingDir: /opt/emco/ncm
+          ports:
+          - containerPort: 9081
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/ncm/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: ncm
+            items:
+            - key: config.json
+              path: config.json
+
+---
+
+# RSYNC Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rsync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rsync
+  template:
+    metadata:
+      labels:
+        app: rsync
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      containers:
+        - name: rsync
+          image: {{ .Values.registryPrefix }}emco-rsync:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./rsync"]
+          workingDir: /opt/emco/rsync
+          ports:
+          - containerPort: 9031
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/rsync/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: rsync
+            items:
+            - key: config.json
+              path: config.json
+
+---
+# Ovnaction Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ovnaction
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ovnaction
+  template:
+    metadata:
+      labels:
+        app: ovnaction
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master 
+      containers:
+        - name: ovnaction
+          image: {{ .Values.registryPrefix }}emco-ovn:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./ovnaction"]
+          workingDir: /opt/emco/ovnaction
+          ports:
+          - containerPort: 9053
+          - containerPort: 9051
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/ovnaction/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: ovnaction
+            items:
+            - key: config.json
+              path: config.json
+
+---
+# Clm Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clm
+  template:
+    metadata:
+      labels:
+        app: clm
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      containers:
+        - name: clm
+          image: {{ .Values.registryPrefix }}emco-clm:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./clm"]
+          workingDir: /opt/emco/clm
+          ports:
+          - containerPort: 9061
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/clm/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: clm
+            items:
+            - key: config.json
+              path: config.json
+
+---
+# DCM Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dcm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dcm
+  template:
+    metadata:
+      labels:
+        app: dcm
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      containers:
+        - name: dcm
+          image: {{ .Values.registryPrefix }}emco-dcm:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./dcm"]
+          workingDir: /opt/emco/dcm
+          ports:
+          - containerPort: 9077
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/dcm/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: dcm
+            items:
+            - key: config.json
+              path: config.json

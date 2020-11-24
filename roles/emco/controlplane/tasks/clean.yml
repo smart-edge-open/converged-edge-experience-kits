@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: helm install emco
+  command: helm uninstall emco-app -n emco
+  args:
+    chdir: /opt/emco/deployments/helm/emcoCI/
+  changed_when: false
+  ignore_errors: yes

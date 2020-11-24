@@ -37,8 +37,8 @@
 - hosts: controller_group
   roles:
     - role: kubernetes/controlplane
-    - role: docker_registry/controlplane
     - role: kubernetes/helm
+    - role: harbor_registry/controlplane
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
       when: k8s_device_plugins_enable | default(False)
@@ -89,7 +89,7 @@
     - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
     - role: kubernetes/node
-    - role: docker_registry/node
+    - role: harbor_registry/node
     - role: kubernetes/cni
     - role: telemetry/collectd/node
     - role: telemetry/cadvisor/node
@@ -132,7 +132,7 @@
     - role: machine_setup/conditional_reboot
     - role: machine_setup/vca_node_setup
     - role: kubernetes/node
-    - role: docker_registry/node
+    - role: harbor_registry/node
     - role: kubernetes/cni
     - role: telemetry/collectd/node
     - role: telemetry/cadvisor/node
