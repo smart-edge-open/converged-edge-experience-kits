@@ -10,7 +10,7 @@ pullPolicy: IfNotPresent
 nodeName: destinationHost #changeMe
 configFileName: fpga_bbdev.cfg
 #Defining 5G or LTE configuration (FPGA_5GNR, FPGA_LTE)
-networkType: FPGA_5GNR 
+networkType: FPGA_5GNR
 restartPolicy: Never
 
 #Enable or disable PF programming (0 = VF programming 1 = PF programming)
@@ -19,7 +19,7 @@ pf_mode_en: 0
 dbandwidth: 3
 #Downlink load balance
 dload_balance: 128
-#Default queue VF number for config of Downlink, total of 32 queues 
+#Default queue VF number for config of Downlink, total of 32 queues
 dvfQueues:
   vf0: 16
   vf1: 16

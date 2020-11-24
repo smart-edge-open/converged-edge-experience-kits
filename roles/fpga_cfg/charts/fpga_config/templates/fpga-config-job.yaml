@@ -16,7 +16,7 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.pullPolicy }}
         command: [ "sudo", "/bin/bash", "-c", "--" ]
-        args: [ "./config_bbdev {{ .Values.networkType }} -c /home/fpga-config/fpga/fpga_bbdev.cfg" ]
+        args: [ "./pf_bb_config {{ .Values.networkType }} -c /home/fpga-config/fpga/fpga_bbdev.cfg" ]
         volumeMounts:
         - name: class
           mountPath: /sys/devices

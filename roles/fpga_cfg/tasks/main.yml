@@ -2,16 +2,8 @@
 # Copyright (c) 2020 Intel Corporation
 ---
 
-- name: check local bbdev_config_service_directory
-  stat:
-    path: "{{ _fpga_config_local_path }}"
-  connection: local
-  register: syscfg_local_file
-
-- name: file not present
-  debug:
-    msg: "{{ _fpga_config_local_path }} does not exists, FPGA Config utility won't be set up on the node"
-  when: not syscfg_local_file.stat.exists
+- name: include docker registry vars
+  include_vars: ../../docker_registry/controlplane/defaults/main.yml
 
 - name: set up FPGA Config utility on the node and template Helm charts
   block:
@@ -20,11 +12,6 @@
       state: directory
       suffix: -fpga-cfg
     register: tmp_dir
-
-  - name: copy local FPGA Config utility to remote
-    copy:
-      src: "{{ _fpga_config_local_path }}"
-      dest: "{{ tmp_dir.path }}"
 
   - name: copy Docker file to remote
     copy:
@@ -68,5 +55,3 @@
       src: "values.yaml.j2"
       dest: "{{ ne_helm_charts_default_dir }}/fpga_config/values.yaml"
       force: yes
-  when: syscfg_local_file.stat.exists
-

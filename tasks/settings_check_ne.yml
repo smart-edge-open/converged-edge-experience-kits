@@ -27,23 +27,3 @@
         It is expected in: {{ playbook_dir }}/{{ defaults._syscfg_local_path | replace('./', '') }}
     when: not biosfw_syscfg_package_stat.stat.exists
   when: ne_biosfw_enable | default(False)
-
-- name: fpga_cfg - verify precondition
-  block:
-  - name: load fpga_cfg vars
-    include_vars:
-      file: ../roles/fpga_cfg/defaults/main.yml
-      name: defaults
-  - name: check if local bbdev config exists
-    stat:
-      path: "{{ defaults._fpga_config_local_path }}"
-    delegate_to: localhost
-    register: sriov_fpga_config_package_stat
-  - name: log if file not present
-    debug:
-      msg: |
-        FPGA SRIOV enabled, but FPGA CONFIG is not present.
-        Expected path: {{ playbook_dir }}/{{ defaults._fpga_config_local_path | replace('./', '') }}
-        This is non-fatal warning, continuing...
-    when: not sriov_fpga_config_package_stat.stat.exists
-  when: fpga_sriov_userspace_enable | default(False)
