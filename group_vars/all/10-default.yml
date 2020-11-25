@@ -30,6 +30,9 @@ proxy_yum: "{{ proxy_http }}"
 # No proxy setting contains addresses and networks that should not be accessed using proxy (e.g. local network, Kubernetes CNI networks)
 proxy_noproxy: ""
 
+# Proxy for be used by GIT HTTP - required if GIT HTTP via proxy
+git_http_proxy: "{{ proxy_http }}"
+
 # Disable YUM plugins (e.g. Fastest Mirror)
 os_remove_yum_plugins: true
 

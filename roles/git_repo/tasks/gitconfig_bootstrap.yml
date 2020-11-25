@@ -17,6 +17,13 @@
     modification_time: preserve
     access_time: preserve
 
+- name: configure git http proxy
+  git_config:
+    name: http.proxy
+    scope: global
+    value: "{{ git_http_proxy }}"
+  when: proxy_enable|bool and git_http_proxy
+
 - name: add include to .gitconfig
   blockinfile:
     path: /root/.gitconfig
