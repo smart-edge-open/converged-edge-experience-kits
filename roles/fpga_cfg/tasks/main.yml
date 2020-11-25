@@ -3,7 +3,7 @@
 ---
 
 - name: include docker registry vars
-  include_vars: ../../docker_registry/controlplane/defaults/main.yml
+  include_vars: ../../harbor_registry/controlplane/defaults/main.yml
 
 - name: set up FPGA Config utility on the node and template Helm charts
   block:
