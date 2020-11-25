@@ -15,27 +15,27 @@
   vars:
     cni_weight: 10
 
-- name: wait for harbor registry to ready
+- name: wait for harbor registry to ready -- normally take about 30 minutes for slow network
   block:
     - name: check the status of harbor Deployment
       shell: kubectl get deploy -n harbor | grep 0/1 | wc -l
       register: harbor_deploy
       retries: 100
-      delay: 10
+      delay: 36
       until: harbor_deploy.stdout | int == 0
       changed_when: False
     - name: check the status of harbor StatefulSet
       shell: kubectl get sts -n harbor | grep 0/1 | wc -l
       register: harbor_sts
       retries: 100
-      delay: 10
+      delay: 36
       until: harbor_sts.stdout | int == 0
       changed_when: False
     - name: check the status of harbor Pods
       shell: kubectl get pods -n harbor | grep -v Running | wc -l
       register: harbor_pods
       retries: 100
-      delay: 10
+      delay: 36
       until: harbor_pods.stdout | int == 1
       changed_when: False
   delegate_to: "{{ groups['controller_group'][0] }}"
