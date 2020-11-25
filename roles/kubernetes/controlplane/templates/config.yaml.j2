@@ -12,8 +12,7 @@ topologyManagerPolicy: {{ topology_manager.policy }}
 {% endif %}
 {% if cpu is defined and cpu.policy is defined and cpu.policy == 'static' %}
 cpuManagerPolicy: {{ cpu.policy }}
-kubeReserved:
-  cpu: "{{ cpu.reserved_cpus }}"
+reservedSystemCPUs: {{ cpu.reserved_cpus }}
 {% endif %}
 {% endif %} 
 ---

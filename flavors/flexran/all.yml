@@ -44,8 +44,8 @@ ne_biosfw_enable: true
 cpu:
   # CPU policy - possible values: none (disabled), static (default)
   policy: "static"
-  # Reserved CPUs
-  reserved_cpus: 1
+  # Reserved CPUs for K8s and OS daemons - list of reserved CPUs - adjust according to CPU model, HT enabled/disabled and Single Node enabled/disabled
+  reserved_cpus: "0,24"
 
 # Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
 topology_manager:

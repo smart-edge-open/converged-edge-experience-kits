@@ -5,7 +5,7 @@
 # CPUs to be isolated (for RT procesess)
 # NOTE: If used for single node deployment please make sure that two cores are available to OS and K8s
 cpu_isol: "1-23,25-47"
-# CPUs not to be isolate (for non-RT processes) - minimum of two OS cores necessary for controller
+# CPUs not to be isolate (for non-RT processes) - minimum of two OS cores necessary for controller - adjust according to CPU model, HT enabled/disabled
 cpu_os: "0,24"
 
 ## Kernel configuration

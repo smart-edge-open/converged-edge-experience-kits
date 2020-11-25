@@ -38,8 +38,7 @@
     marker: "# {mark} OpenNESS configuration - CPU Manager"
     block: |
       cpuManagerPolicy: {{ cpu.policy }}
-      kubeReserved:
-        cpu: "{{ cpu.reserved_cpus }}"
+      reservedSystemCPUs: {{ cpu.reserved_cpus }}
     state: "{{ 'present' if cpu.policy == 'static' else 'absent' }}"
   notify:
     - enable and restart kubelet

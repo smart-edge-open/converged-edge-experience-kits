@@ -4,7 +4,7 @@
 ## Custom FlexRAN flavor configuration
 # CPUs to be isolated (for RT procesess)
 cpu_isol: "2-23,26-47"
-# CPUs not to be isolate (for non-RT processes) - minimum of two OS cores necessary for controller
+# CPUs not to be isolated (for non-RT processes) - minimum of two OS cores necessary for controller - adjust according to CPU model, HT enabled/disabled
 cpu_os: "0-1,24-25"
 
 ## Kernel configuration
