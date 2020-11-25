@@ -14,7 +14,10 @@ kubernetes_cnis:
 telemetry_pcm_enable: false
 
 ## Network Edge HDDL
-#ne_hddl_enable: false
+ne_hddl_enable: false
+
+## Network Edge Node Feature Discovery (NFD)
+ne_nfd_enable: false
 
 ## Istio Service Mesh
 ne_istio_enable: false
