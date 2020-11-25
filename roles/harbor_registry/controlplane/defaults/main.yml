@@ -19,9 +19,9 @@ _git_repo_dest_harbor: "/opt/harbor"
 _disk_dest_harbor: "/opt/disks"
 
 harborAdminPassword: Harbor12345
-harbor_db_storage: 5Gi
-harbor_trivy_storage: 5Gi
-harbor_registry_storage: 5Gi
-harbor_jobservice_storage: 5Gi
-harbor_chartmuseum_storage: 5Gi
-harbor_redis_storage: 5Gi
+harbor_db_storage: 1Gi
+harbor_trivy_storage: 1Gi
+harbor_registry_storage: 15Gi
+harbor_jobservice_storage: 1Gi
+harbor_chartmuseum_storage: 1Gi
+harbor_redis_storage: 1Gi
