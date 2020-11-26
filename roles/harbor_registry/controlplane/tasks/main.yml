@@ -30,7 +30,7 @@
   changed_when: false
 - debug:
     msg:
-    - "HugePages enable: {{ hugepages_total.stdout | int | boolean }}"
+    - "HugePages enable: {{ hugepages_total.stdout | int > 0 }}"
     - "Hugepagesize: {{ hugepage_size.stdout }}"
 
 - name: copy harbor helm chart values.j2 replace default values.yml
