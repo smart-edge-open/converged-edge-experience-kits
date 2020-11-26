@@ -50,8 +50,8 @@
     - role: machine_setup/os_setup
     - role: git_repo
     - role: kubernetes/controlplane
-    - role: harbor_registry/controlplane
     - role: kubernetes/helm
+    - role: harbor_registry/controlplane
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
       when: k8s_device_plugins_enable | default(False)
