@@ -31,7 +31,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: kube-sriov-cni
-        image: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/sriov-cni
+        image: {{ .Values.registry_ip }}:{{ .Values.registry_port }}/intel/sriov-cni
         securityContext:
           privileged: true
         resources:

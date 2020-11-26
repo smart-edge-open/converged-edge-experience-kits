@@ -73,5 +73,5 @@
   command: helm install harbor-app -f values.yaml . -n harbor
   args:
     chdir: "{{ _git_repo_dest_harbor }}"
-  ignore_errors: yes
+  ignore_errors: no
   changed_when: true
