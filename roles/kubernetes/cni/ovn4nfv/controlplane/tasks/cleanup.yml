@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove ovs/ovn related files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: "{{ _ovn4nfv_cleanup_paths }}"
+- name: remove patch utility
+  yum:
+    name: patch
+    state: absent
+
+- name: close firewall ports
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: disabled
+    immediate: yes
+  with_items:
+  - 6641/tcp
+  - 6642/tcp
+  - 6081/udp

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+resources:
+- ovn4nfv-k8s-plugin.yml
+
+patchesStrategicMerge:
+- customize_ovn4nfv_container.yml

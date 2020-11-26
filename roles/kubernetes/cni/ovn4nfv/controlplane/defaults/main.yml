@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+ovn_control_plane_cpu_request: 500m
+ovn_control_plane_memory_request: 300Mi
+ovn_controller_cpu_request: 200m
+ovn_controller_memory_request: 300Mi
+ovn_controller_cpu_limit: 1000m
+ovn_controller_memory_limit: 800Mi
+ovn4nfv_cni_cpu_request: 100m
+ovn4nfv_cni_memory_request: 50Mi
+ovn4nfv_cni_cpu_limit: 100m
+ovn4nfv_cni_memory_limit: 50Mi
+nfn_agent_cpu_request: 100m
+nfn_agent_memory_request: 50Mi
+nfn_agent_cpu_limit: 100m
+nfn_agent_memory_limit: 50Mi
+
+_ovn4nfv_cleanup_paths:
+- /var/run/openvswitch
+- /etc/origin/openvswitch/
+- /etc/openvswitch
+- /etc/cni/net.d/ovn4nfv-k8s.d/
+
+ovn4nfv_img: "docker.io/integratedcloudnative/ovn4nfv-k8s-plugin"
+ovn4nfv_img_ver: "centos-v2.2.0"
+
+ovn_daemon_img: "docker.io/integratedcloudnative/ovn-images"
+ovn_daemon_img_ver: "centos-v2.2.0"
+

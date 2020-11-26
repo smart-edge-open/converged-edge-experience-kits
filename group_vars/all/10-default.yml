@@ -85,6 +85,7 @@ istio_noproxy: "istio-sidecar-injector.istio-system.svc"
 # - calico
 # - sriov (note: cannot be main or standalone)
 # - userspace (note: cannot be main or standalone)
+# - ovn4nfv
 # NOTE - For VCAC-A setup, use `weavenet` CNI
 kubernetes_cnis:
   - kubeovn
@@ -100,6 +101,9 @@ weavenet_cidr: "10.32.0.0/12"
 
 # Kubeovn's CIDR (will be included automatically to noproxy when kubeovn is included in kubernetes_cnis)
 kubeovn_cidr: "10.16.0.0/16,100.64.0.0/16,10.96.0.0/12"
+
+# ovn4nfv's CIDR (will be included automatically to noproxy when kubeovn is included in kubernetes_cnis)
+ovn4nfv_cidr: "10.233.64.0/18"
 
 ## Kube-ovn with OVS-DPDK
 # Enable kube-ovn with OVS-DPDK

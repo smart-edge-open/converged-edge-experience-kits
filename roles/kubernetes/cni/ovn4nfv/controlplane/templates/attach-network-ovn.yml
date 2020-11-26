@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: ovn-networkobj
+spec:
+  config: '{
+     "cniVersion": "0.3.1",
+     "name": "ovn4nfv-k8s-plugin",
+     "type": "ovn4nfvk8s-cni"
+  }'
