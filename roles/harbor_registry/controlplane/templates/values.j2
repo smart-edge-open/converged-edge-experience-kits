@@ -739,7 +739,8 @@ database:
       limits:
         memory: 2Gi
         cpu: 4
-        hugepages-2Mi: {% if hugepages_total.stdout | int > 0 %}0{% else %}0{% endif %}{{ '\n' }}
+        hugepages-2Mi: {% if hugepages_total.stdout | int > 0 and hugepage_size.stdout == '2048' %}300Mi{% else %}0{% endif %}  
+        hugepages-1Gi: {% if hugepages_total.stdout | int > 0 and hugepage_size.stdout == '1048576' %}1Gi{% else %}0{% endif %}  
     nodeSelector: {}
     tolerations: 
     - effect: NoSchedule

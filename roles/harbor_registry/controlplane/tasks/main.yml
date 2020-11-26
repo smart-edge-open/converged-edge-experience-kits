@@ -19,12 +19,19 @@
     update: no
   register: result
 
+- name: check hugepage size
+  shell: set -o pipefail && grep Hugepagesize /proc/meminfo | awk '{print $2}'
+  register: hugepage_size
+  changed_when: false
+
 - name: check whether Hugepages is enabled
   shell: set -o pipefail && grep HugePages_Total /proc/meminfo | awk '{print $2}'
   register: hugepages_total
   changed_when: false
 - debug:
-    msg: "HugePages: {{ hugepages_total.stdout | bool }}"
+    msg:
+    - "HugePages enable: {{ hugepages_total.stdout | int | boolean }}"
+    - "Hugepagesize: {{ hugepage_size.stdout }}"
 
 - name: copy harbor helm chart values.j2 replace default values.yml
   template:

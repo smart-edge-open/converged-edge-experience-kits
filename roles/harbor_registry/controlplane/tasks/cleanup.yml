@@ -10,12 +10,14 @@
   retries: 3
   delay: 5
   changed_when: false
+  ignore_errors: true
 
 - name: delete harbor PV and PVC
   command: kubectl delete -f disks.yaml
   args:
     chdir: "{{ _git_repo_dest_harbor }}"
   changed_when: false
+  ignore_errors: true
 
 - name: delete harbor data
   file:
