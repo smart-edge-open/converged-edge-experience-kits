@@ -43,7 +43,7 @@
   file:
     path: "{{ _disk_dest_harbor }}/{{ item }}"
     state: directory
-    mode: '0755'
+    mode: '0700'
   changed_when: true
   with_items:
     - harbor-disk1
