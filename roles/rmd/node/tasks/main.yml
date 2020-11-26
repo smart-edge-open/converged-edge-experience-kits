@@ -23,6 +23,18 @@
     chdir: "{{ _rmd_src_dir }}"
   changed_when: false
 
+- name: clone the PQOS repository
+  git:
+    repo: "{{ _pqos_repo }}"
+    dest: "{{ _pqos_dir }}"
+    version: master
+
+- name: build and install the PQOS utility and library
+  command: make install
+  args:
+    chdir: "{{ _pqos_dir }}"
+  changed_when: false
+
 - name: clone the RMD operator
   git:
     repo: "{{ _rmd_operator_repo }}"
