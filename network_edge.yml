@@ -46,6 +46,7 @@
       when: kubernetes_dashboard_enable | default(False)
 
     - role: kafka
+      when: eaa_enable | default(True)
 
     - role: openness/controlplane
     - role: kubevirt/controlplane

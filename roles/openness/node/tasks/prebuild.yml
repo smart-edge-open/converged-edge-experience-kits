@@ -5,3 +5,4 @@
 
 - include_tasks: prebuild/copy_configs_to_appliance.yml
 - include_tasks: prebuild/kafka_certs.yml
+  when: eaa_enable

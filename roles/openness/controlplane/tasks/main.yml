@@ -46,6 +46,22 @@
   with_items: "{{ _openness_yamls }}"
   changed_when: true
 
+- name: delete eaa definitions
+  command: kubectl delete {{ item }} eaa -n openness
+  changed_when: true
+  when: not eaa_enable
+  with_items:
+    - deployment
+    - service
+
+- name: delete edgedns definitions
+  command: kubectl delete {{ item }} edgedns -n openness
+  changed_when: true
+  when: not dns_enable
+  with_items:
+    - daemonset
+    - service
+
 - name: copy logrotate config
   copy:
     src: logrotate_openness
@@ -54,6 +70,7 @@
 
 - name: build CLIs
   include_tasks: build_cli.yml
+  when: dns_enable
 
 - name: deploy interface service for kube-ovn
   include_tasks: kube-ovn.yml

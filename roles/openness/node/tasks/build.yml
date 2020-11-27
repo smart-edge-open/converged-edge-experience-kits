@@ -15,6 +15,7 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
+    when: eaa_enable
   - name: download modules for edgednssvr
     shell: source /etc/profile && go mod download
     args:
@@ -23,10 +24,17 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
+    when: dns_enable
   - name: build binaries and images
-    shell: source /etc/profile && make networkedge
+    shell: source /etc/profile && make eaa
     args:
       chdir: "{{ _git_repo_dest }}"
+    when: eaa_enable
+  - name: build binaries and images
+    shell: source /etc/profile && make edgednssvr
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: dns_enable
   - name: download modules for interfaceservice
     shell: source /etc/profile && go mod download
     args:

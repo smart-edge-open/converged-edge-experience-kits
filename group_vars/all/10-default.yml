@@ -205,6 +205,12 @@ telemetry_flavor: common
 ## Network Edge RMD
 rmd_operator_enable: False
 
+## Edge DNS
+dns_enable: True
+
+## EAA Service
+eaa_enable: True
+
 ## Docker images cache directory, all images with .tar* suffix will be preloaded during docker setup
 docker_images_dir: "/etc/openness/images-cache"
 
