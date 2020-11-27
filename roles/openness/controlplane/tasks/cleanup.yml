@@ -3,15 +3,9 @@
 
 ---
 
-- name: get worker node name
-  block:
-  - name: hostname
-    command: hostname
-    register: hostname_output
-
-  - name: set k8s worker node name
-    set_fact:
-      k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
+- name: set k8s worker node name
+  set_fact:
+    k8s_worker_node_name: "{{ ansible_nodename | lower }}"
 
 - name: remove openness definitions
   command: kubectl delete -f {{ item }}

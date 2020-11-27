@@ -54,14 +54,9 @@
   args:
     chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/script"
 
-- name: set hddl worker node name
-  block:
-  - name: get hostname
-    command: hostname
-    register: hddlhostname_output
-  - name: set hddlhostname
-    set_fact:
-      hddl_worker_node_name: "{{ hddlhostname_output.stdout |lower }}"
+- name: set hddlhostname
+  set_fact:
+    hddl_worker_node_name: "{{ ansible_nodename | lower }}"
 
 - name: label hddl worker node with hddl-zone=yes
   command: kubectl label node {{ hddl_worker_node_name }} hddl-zone=yes --overwrite
