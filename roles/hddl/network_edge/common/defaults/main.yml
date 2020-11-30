@@ -6,3 +6,9 @@ _hddldaemon_container:
   url: "https://github.com/OpenVisualCloud/Dockerfiles"
   download_dir : "/opt/ovc_dockerfiles"
   commit: "49badeed92421e392c3fa0aaf261d0e9f1dec9b3"
+
+_openvino:
+  url: "http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz"
+  download_dir: "/tmp/openvino_download"
+  install_dir: "/opt/intel/openvino_2020.2.120"
+  version: "2020.2.120"
