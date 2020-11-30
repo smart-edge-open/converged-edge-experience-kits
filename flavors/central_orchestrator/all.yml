@@ -27,7 +27,7 @@ proxy_noproxy: ""
 
 always_clean_repository: false
 
-ntp_enable: true
+ntp_enable: false
 
 ntp_servers: [""]
 
