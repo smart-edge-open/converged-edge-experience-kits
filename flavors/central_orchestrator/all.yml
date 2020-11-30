@@ -9,27 +9,6 @@ kubevirt_enable: false
 
 ## Network Edge Processor Counter Monitor (PCM)
 telemetry_pcm_enable: false
-git_repo_token: ""
-
-### Proxy settings
-# Setup proxy on the machine - required if the Internet is accessible via proxy
-proxy_enable: true
-# Clear previous proxy settings
-proxy_remove_old: true
-# Proxy URLs to be used for HTTP, HTTPS and FTP
-proxy_http: ""
-proxy_https: ""
-proxy_ftp: ""
-# Proxy to be used by YUM (/etc/yum.conf)
-proxy_yum: ""
-# No proxy setting contains addresses and networks that should not be accessed using proxy (e.g. local network, Kubernetes CNI networks)
-proxy_noproxy: ""
-
-always_clean_repository: false
-
-ntp_enable: false
-
-ntp_servers: [""]
 
 kubernetes_cnis:
   - kubeovn
