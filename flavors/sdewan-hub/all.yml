@@ -19,6 +19,19 @@ ne_hddl_enable: false
 ## Network Edge Node Feature Discovery (NFD)
 ne_nfd_enable: false
 
+## EAA Service
+eaa_enable: False
+
+## Edge DNS
+dns_enable: False
+
+## CPU settings
+cpu:
+  # CPU policy - possible values: none (disabled), static (default)
+  policy: "static"
+  # Reserved CPUs for K8s and OS daemons - list of reserved CPUs
+  reserved_cpus: "0,1"
+
 ## Istio Service Mesh
 ne_istio_enable: false
 
