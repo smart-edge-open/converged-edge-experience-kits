@@ -4,7 +4,7 @@
 ---
 
 - name: wait until primary CNI is up on the node
-  shell: set -o pipefail && ls /etc/cni/net.d | grep -P '10-|00-(?!multus)'
+  shell: set -o pipefail && ls /etc/cni/net.d | grep -P '01-|10-|00-(?!multus)'
   register: result
   until: not result.failed
   retries: 30

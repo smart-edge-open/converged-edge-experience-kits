@@ -3,102 +3,24 @@
 
 ---
 
-- name: build OVS-DPDK images
-  block:
-    - name: checking if dpdk version fulfils requirements
-      fail:
-        msg: The ovs dpdk patches are created for version v1.0.1. Please rebase then in case of version change.
-      when: _kubeovn_version != "v1.0.1"
+- name: create ovs/ovn scripts
+  shell:
+    cmd: |
+      cat <<'EOF' > "{{ _kubeovn_scripts_dest }}/{{ item }}"
+      #!/bin/bash
+      ovsCont=$(docker ps | grep kube-ovn | grep ovs-ovn | grep -v pause | awk '{print $1}')
+      docker exec $ovsCont {{ item }} $@
+      EOF
+  with_items: "{{ _kubeovn_scripts }}"
+  changed_when: true
 
-    - name: Creates kubeovn tmp directory
-      file:
-        path: "{{ _kubeovn_destdir }}"
-        state: directory
+- name: change permissions of ovn/ovs scripts
+  file:
+    path: "{{ _kubeovn_scripts_dest }}/{{ item }}"
+    mode: 0755
+  with_items: "{{ _kubeovn_scripts }}"
 
-    - name: download kubeovn files
-      get_url:
-        url: "{{ item }}"
-        dest: "{{ _kubeovn_destdir }}"
-      register: result
-      retries: "{{ number_of_retries }}"
-      until: result is succeeded
-      delay: "{{ retry_delay }}"
-      with_items: "{{ _kubeovn_download_files }}"
-
-    - name: copy Dockerfile
-      copy:
-        src: "{{ _kubeovn_destdir }}/Dockerfile.node"
-        dest: "{{ _kubeovn_destdir }}/Dockerfile.dpdk"
-        mode: preserve
-        remote_src: yes
-
-    - name: install patch utility
-      yum:
-        name: patch
-        state: present
-
-    - name: apply patch for Dockerfile.dpdk
-      patch:
-        src: "dockerfile_dpdk_v1.0.1.patch"
-        dest: "{{ _kubeovn_destdir }}/Dockerfile.dpdk"
-        basedir: "{{ _kubeovn_destdir }}"
-
-    - name: copy start script
-      copy:
-        src: "{{ _kubeovn_destdir }}/start-ovs.sh"
-        dest: "{{ _kubeovn_destdir }}/start-ovs-dpdk.sh"
-        mode: preserve
-        remote_src: yes
-
-    - name: create temp dir
-      tempfile:
-        state: directory
-        suffix: -ovs-dpdk
-      register: tmp_dir
-
-    - name: create patch file from template
-      template:
-        src: "{{ _ovs_dpdk_patch_file }}.j2"
-        dest: "{{ tmp_dir.path }}/{{ _ovs_dpdk_patch_file }}"
-
-    - name: apply patch for start-ovs-dpdk.sh
-      patch:
-        src: "{{ tmp_dir.path }}/{{ _ovs_dpdk_patch_file }}"
-        dest: "{{ _kubeovn_destdir }}/start-ovs-dpdk.sh"
-        basedir: "{{ _kubeovn_destdir }}"
-        remote_src: yes
-
-    - name: remove temporary directory
-      file:
-        path: "{{ tmp_dir.path }}"
-        state: absent
-
-    - name: copy files needed to build an image to dpdk folder
-      copy:
-        src: "{{ _kubeovn_destdir }}/{{ item }}"
-        dest: "{{ _dpdk_install_dir }}"
-        mode: preserve
-        remote_src: yes
-      with_items: "{{ _kubeovn_dockerimage_files_to_cp }}"
-
-    - name: copy .dockerignore
-      copy:
-        src: .dockerignore
-        dest: "{{ _dpdk_install_dir }}/.dockerignore"
-
-    - name: build OVS-DPDK image (this may take some time...)
-      docker_image:
-        name: ovs-dpdk
-        source: build
-        build:
-          path: "{{ _dpdk_install_dir }}"
-          dockerfile: Dockerfile.dpdk
-          pull: yes
-          use_config_proxy: yes
-
-    - name: Clean ovs files
-      file:
-        state: absent
-        path: "{{ _dpdk_install_dir }}/{{ item }}"
-      with_items: "{{ _kubeovn_dockerimage_files_to_cp }}"
-  when: kubeovn_dpdk
+- name: prepare ovs config
+  template:
+    src: config.cfg.j2
+    dest: "/opt/ovs-config/config.cfg"

@@ -3,32 +3,6 @@
 
 ---
 
-- name: check if packages installed in proper version
-  shell: rpm -q openvswitch | grep {{ _ovn_version.main }}-{{ _ovn_version.subversion }} | wc -l # noqa 306
-  args:
-    warn: false
-  register: rpm_grep
-  changed_when: false
-
-- name: (re)install ovs if needed
-  block:
-  - name: remove old packages
-    yum:
-      name: "{{ _ovs_packages_to_remove }}"
-      state: absent
-  - name: installing OVS tool dependencies
-    yum:
-      name: "{{ _ovs_dependencies_yum }}"
-  - name: installing OVS tool
-    command: yum install -y {{ _ovs_package_url }}
-    args:
-      warn: false
-    register: result
-    retries: "{{ number_of_retries }}"
-    until: result is succeeded
-    delay: "{{ retry_delay }}"
-  when: "'1' not in rpm_grep.stdout"
-
 - name: open kube-ovn firewall rules
   ignore_errors: yes
   firewalld:
@@ -59,7 +33,7 @@
 
   - name: waiting for OVS DB socket
     wait_for:
-      path: /var/run/openvswitch/db.sock
+      path: /run/openvswitch/db.sock #/var/run/openvswitch/db.sock
       timeout: 300
   rescue:
   - name: events of ovs-ovn pod
