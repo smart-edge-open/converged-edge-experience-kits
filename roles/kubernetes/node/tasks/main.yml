@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: customize kubelet for topology manager
   include_tasks: customize_kubelet.yml
 
@@ -19,19 +18,21 @@
 
 - name: join the cluster
   block:
-  # If playbook failed because kubeadm join failed, then most probably /etc/kubernetes was created
-  # Next execution of the playbook will also fail, because /etc/kubernetes exists
-  # So, since the node is no part of cluster, let's try to delete /etc/kubernetes just in case
-  - name: try to remove /etc/kubernetes
-    file:
-      path: /etc/kubernetes
-      state: absent
-  - name: obtain the join command
-    command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
-    register: join_command
-    delegate_to: "{{ groups['controller_group'][0] }}"
-  - name: join the cluster
-    command: "{{ join_command.stdout }} --v=2"
+    # If playbook failed because kubeadm join failed, then most probably /etc/kubernetes was created
+    # Next execution of the playbook will also fail, because /etc/kubernetes exists
+    # So, since the node is no part of cluster, let's try to delete /etc/kubernetes just in case
+    - name: try to remove /etc/kubernetes
+      file:
+        path: /etc/kubernetes
+        state: absent
+      become: yes
+    - name: obtain the join command
+      command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
+      register: join_command
+      delegate_to: "{{ groups['controller_group'][0] }}"
+    - name: join the cluster
+      command: "{{ join_command.stdout }} --v=2"
+      become: yes
   when: get_node.rc == 1
 
 - name: label node as a worker
@@ -44,6 +45,7 @@
   register: num_vca
   changed_when: true
   when: inventory_hostname in groups['edgenode_vca_group']
+  become: yes
 
 - name: join VCA node
   include_tasks: vca_node_join.yml

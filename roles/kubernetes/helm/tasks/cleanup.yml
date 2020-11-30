@@ -6,3 +6,4 @@
   file:
     path: "{{ _helm_binary_path }}"
     state: absent
+  become: yes

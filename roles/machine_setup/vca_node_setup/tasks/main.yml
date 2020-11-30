@@ -7,6 +7,7 @@
   shell: set -o pipefail && vcactl status | grep Card | wc -l
   changed_when: true
   register: num_vca
+  become: yes
 
 - debug: msg="Detected {{ num_vca.stdout | int }} VCAC-A cards"
 
@@ -27,6 +28,7 @@
   args:
     chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
     creates: "{{ _vca_vcad_image }}"
+  become: yes
 
 - name: copy vcad image for multiple VCA cards
   copy:
@@ -37,6 +39,7 @@
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
+  become: yes
 
 - name: copy vca init scripts
   copy:
@@ -56,6 +59,7 @@
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
+  become: yes
 
 - name: load VCAC-A vcad image
   command: "vcactl blockio open {{ vca_idx | int - 1 }} 0 vcablk0 RW {{ vca_idx | int - 1 }}{{ _vca_vcad_image }}"
@@ -65,6 +69,7 @@
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
+  become: yes
 
 - name: configure VCAC-A node hostname
   command: "vcactl config {{ vca_idx | int - 1 }} 0 node-name {{ inventory_hostname }}-vca{{ vca_idx }}"
@@ -72,6 +77,7 @@
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
+  become: yes
 
 - name: set VCAC-A init script at system boot
   lineinfile:
@@ -80,18 +86,21 @@
     line: '{{ _vca_dest }}/init_vca.sh'
     insertafter: EOF
     mode: u+x,g+x,o+x
+  become: yes
 
 - name: initialize VCAC-A
   command: "{{ _vca_dest }}/init_vca.sh"
   register: init_vca
   failed_when: init_vca.rc != 0
   changed_when: init_vca.rc == 0
+  become: yes
 
 - name: update firewall settings for VCAC-A
   command: "{{ _vca_dest }}/setup_firewall.sh"
   register: setup_firewall
   failed_when: setup_firewall.rc != 0
   changed_when: setup_firewall.rc == 0
+  become: yes
 
 - debug: msg="{{ init_vca.stdout }}"
 

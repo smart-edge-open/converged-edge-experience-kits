@@ -4,20 +4,25 @@
 ---
 - debug:
     msg: "Installing the following packages: {{ os_yum_base_packages }}"
+
 - name: install IUS repository
   yum:
     name: https://repo.ius.io/ius-release-el7.rpm
     state: present
+  become: yes
+
 - name: install base OS rpm packages
   yum:
     name: "{{ os_yum_base_packages }}"
     state: present
     enablerepo: ius-archive
     skip_broken: yes
+  become: yes
 
 - name: upgrade python2-pip version
   command: "python2 -m pip install --upgrade pip=={{ _pip_version }}"
   changed_when: true
+  become: yes
 
 - name: install base OpenSSL from sources
   block:
@@ -27,7 +32,7 @@
         suffix: -OpenSSL
       register: tmp_dir
 
-    - name: OpenSSL download {{ _openssl_url }}
+    - name: OpenSSL download from {{ _openssl_url }}
       get_url:
         url: "{{ _openssl_url }}"
         dest: "{{ tmp_dir.path }}"
@@ -48,6 +53,7 @@
         ./config &&
         make -j `nproc` > /dev/null &&
         make install > /dev/null
+      become: yes
       args:
         chdir: "{{ tmp_dir.path }}/{{ _openssl_package_name }}"
 
@@ -55,9 +61,11 @@
       copy:
         dest: "/etc/ld.so.conf.d/localuser.conf"
         content: "/usr/local/lib64"
+      become: yes
 
     - name: OpenSSL reload ld configs
       command: "ldconfig -v"
+      become: yes
 
     - name: OpenSSL remove temporary directory
       file:

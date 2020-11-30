@@ -11,16 +11,19 @@
         regexp: '^{{ vca_node_ip }}'
         state: absent
       ignore_errors: yes
+      become: yes
 
     - name: establish password-less access from host to VCAC-A node
       shell: |
         ssh-keygen -q -N '' -C "$HOSTNAME" -f ~/.ssh/id_rsa <<< y > /dev/null
         sshpass -p "{{ _vca_img_pswd }}" ssh-copy-id -o StrictHostKeyChecking=no root@"{{ vca_node_ip }}"
       changed_when: true
+      become: yes
 
     - name: remove resolv.conf soft link file (../run/systemd/resolve/stub-resolv.conf) on VCA node
       command: "ssh {{ vca_node_ip }} rm -f /etc/resolv.conf"
       changed_when: true
+      become: yes
 
     - name: copy resolv & env files to VCAC-A node
       command: "scp /etc/{{ item }} {{ vca_node_ip }}:/etc/"
@@ -28,6 +31,7 @@
         - resolv.conf
         - environment
       changed_when: true
+      become: yes
 
     - name: install timezone on VCA node
       shell: |
@@ -40,6 +44,7 @@
       retries: "{{ number_of_retries }}"
       until: result is succeeded
       delay: "{{ retry_delay }}"
+      become: yes
 
 # Start configuration on vca-node.
 # Because vca-node is behind NAT and not in the ansible inventory, need below mitigation for the configuration.
@@ -53,22 +58,29 @@
       with_items:
         - install_docker.sh
         - install_kubernetes.sh
+      become: yes
     - name: scp install scripts to VCA node
       command: "scp {{ _vca_dest }}/{{ item }} {{ vca_node_ip }}:/root/"
       with_items:
         - install_docker.sh
         - install_kubernetes.sh
+      become: yes
     - name: create `docker.service.d` folder
       command: "ssh {{ vca_node_ip }} mkdir -p /etc/systemd/system/docker.service.d/"
+      become: yes
     - name: scp proxy to node
       command: "scp /etc/systemd/system/docker.service.d/http-proxy.conf {{ vca_node_ip }}:/root/"
+      become: yes
     - name: create `.docker` folder
       command: "ssh {{ vca_node_ip }} mkdir -p /root/.docker/"
+      become: yes
     - name: scp config to node
-      command: "scp /root/.docker/config.json {{ vca_node_ip }}:/root/.docker/config.json"
+      command: "scp {{ ansible_env.HOME }}/.docker/config.json {{ vca_node_ip }}:/root/.docker/config.json"
+      become: yes
     - name: install docker & kubernetes on VCA node
       command: "ssh {{ vca_node_ip }} ./{{ item }}"
       with_items:
         - install_docker.sh
         - install_kubernetes.sh
       changed_when: true
+      become: yes

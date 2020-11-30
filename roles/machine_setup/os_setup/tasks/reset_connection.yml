@@ -2,4 +2,5 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-_telemetry_certs_dest: "{{ openness_dir }}/certs/telemetry"
+  - name: reset connection
+    meta: reset_connection

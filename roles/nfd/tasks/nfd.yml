@@ -81,6 +81,8 @@
           yum:
             name: patch
             state: present
+          become: yes
+
         - name: apply CMK worker patch
           patch:
             src: worker.yml.patch

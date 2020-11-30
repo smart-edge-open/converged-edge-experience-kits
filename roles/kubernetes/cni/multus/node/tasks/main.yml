@@ -27,6 +27,7 @@
   # shell is required due to glob (*)
   shell: rename --verbose '.old' '' /etc/cni/net.d/*
   changed_when: true
+  become: yes
 
 - name: delete Multus pod to recreate 00-multus.conf
   command: kubectl delete pod -n kube-system {{ nodes_multus_pod.stdout }}

@@ -66,7 +66,7 @@ os_yum_base_packages:
 docker_images: []
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git
-_git_repo_dest: /opt/edgenode
+_git_repo_dest: "{{ openness_dir }}/edgenode"
 
 ## Network Edge Helm Charts Storage Default Directory
-ne_helm_charts_default_dir: /opt/openness-helm-charts/
+ne_helm_charts_default_dir: "{{ openness_dir }}/helm-charts"

@@ -2,9 +2,9 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Remove yum.conf proxy settings
   lineinfile:
     dest: /etc/yum.conf
     regexp: "^proxy=.*"
     state: absent
+  become: yes

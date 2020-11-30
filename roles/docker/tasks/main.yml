@@ -9,6 +9,7 @@
     baseurl: "{{ _docker_repository_url }}"
     gpgkey: "{{ _docker_repository_key }}"
     gpgcheck: yes
+  become: yes
   register: result
   retries: "{{ number_of_retries }}"
   until: result is succeeded
@@ -20,10 +21,33 @@
     warn: false
   changed_when: true
 
+- name: add group "docker"
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: add group "{{ openness_user_group }}"
+  group:
+    name: "{{ openness_user_group }}"
+    state: present
+  become: yes
+
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: "docker,{{ openness_user_group }}"
+    append: yes
+  become: yes
+
+- name: reset connection
+  meta: reset_connection
+
 - name: install Docker CE
   yum:
     name: "{{ _docker_packages }}"
     state: present
+  become: yes
   notify:
     - enable and start docker service
 
@@ -41,6 +65,7 @@
       retries: "{{ number_of_retries }}"
       until: result is succeeded
       delay: "{{ retry_delay }}"
+      become: yes
     - name: install docker-compose
       pip:
         name: "{{ _docker_compose_package }}"
@@ -49,6 +74,7 @@
       retries: "{{ number_of_retries }}"
       until: result is succeeded
       delay: "{{ retry_delay }}"
+      become: yes
 
 - name: set up proxy
   include_tasks: proxy.yml
@@ -66,6 +92,7 @@
         dest: /etc/docker/daemon.json
       notify:
         - enable and start docker service
+  become: yes
 
 - name: restart services if needed
   meta: flush_handlers
@@ -81,11 +108,13 @@
     path: /etc/audit/rules.d/docker.rules
     line: "-w {{ item.item }} -k docker"
     create: yes
+  become: yes
   when: item.stat.exists
   with_items: "{{ stats.results }}"
 
 - name: restart auditd
   command: service auditd restart # noqa 303
+  become: yes
   changed_when: true
   args:
     warn: false
@@ -96,11 +125,12 @@
       get_url:
         url: "{{ _docker_completion_url }}"
         dest: "/etc/bash_completion.d"
+      become: yes
     - name: download Docker Compose bash completion
       get_url:
         url: "{{ _docker_compose_completion_url }}"
         dest: "/etc/bash_completion.d"
-
+      become: yes
 - name: create the directory for docker images
   file:
     path: "{{ docker_images_dir }}"

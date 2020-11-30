@@ -8,6 +8,14 @@
         msg: "Using git token for repository checkout"
       when: git_repo_token|length > 0
 
+    - name: make sure openness directory exists
+      file:
+        path: "{{ openness_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      become: yes
+
     - name: checkout clean repository
       git:
         repo: "{{ git_repo_url }}"
@@ -26,5 +34,5 @@
 
     - name: update controller repo path
       set_fact:
-        _git_repo_dest: /opt/edgenode/edgecontroller
+        _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
       when: "'controller_group' in group_names"

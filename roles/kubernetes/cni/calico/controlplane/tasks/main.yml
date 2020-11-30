@@ -9,6 +9,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 # Starting with calico v3.16 the CNI is adding an accept rule at the end of FORWARD chain in filter table:
 # "Connections to services without endpoints are now properly rejected in iptables dataplane mode.
@@ -32,6 +33,7 @@
     - firewall-cmd --reload
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 - name: add NetworkManager config - ignore calico's interfaces
   copy:
@@ -39,6 +41,7 @@
     content: |
       [keyfile]
       unmanaged-devices=interface-name:cali*;interface-name:tunl*
+  become: yes
 
 - name: create temp dir
   tempfile:

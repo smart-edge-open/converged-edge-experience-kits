@@ -70,6 +70,7 @@
       dest: "{{ _virtctl_dir }}/{{ _virtctl_name }}"
       remote_src: yes
       mode: '0755'
+    become: yes
   - name: remove temporary directory
     file:
       path: "{{ tmp_dir.path }}"

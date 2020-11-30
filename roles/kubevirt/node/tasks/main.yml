@@ -8,3 +8,4 @@
     path: "{{ kubevirt_default_pv_dir }}{{ kubevirt_default_pv_vol_name }}{{ item }}"
     state: directory
   with_sequence: start=0 end="{{ kubevirt_pv_vm_max_num }}"
+  become: yes

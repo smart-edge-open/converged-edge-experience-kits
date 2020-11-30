@@ -11,6 +11,7 @@
   until: grep_vpu_metrics.rc == 0
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: true
+  become: yes
 
 - name: deploy vca policy that uses this vpu metrics
   block:
@@ -18,12 +19,15 @@
       file:
         path: "{{ _vca_hddl_vputaspolicy_yaml_dir }}"
         state: directory
+      become: yes
     - name: copy vca policy files
       copy:
         src: "vca-tas-policy.yaml"
         dest: "{{ _vca_hddl_vputaspolicy_yaml_dir }}/"
+      become: yes
     - name: deploy the vca policy
       command: kubectl apply -f "{{ _vca_hddl_vputaspolicy_yaml_dir }}/vca-tas-policy.yaml"
       changed_when: true
+      become: yes
   delegate_to: "{{ groups['controller_group'][0] }}"
   run_once: true

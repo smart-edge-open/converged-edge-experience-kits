@@ -11,18 +11,21 @@
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
+  become: yes
 
 - name: install kernel dependencies - URLs
   yum:
     name: "{{ kernel_dependencies_urls | join(',') }}"
     state: present
     allow_downgrade: yes
+  become: yes
 
 - name: install kernel dependencies - packages
   yum:
     name: "{{ kernel_dependencies_packages | join(',') }}"
     state: present
     allow_downgrade: yes
+  become: yes
 
 - name: get current CMDLINE
   command: cat /proc/cmdline
@@ -36,10 +39,12 @@
         name: "{{ kernel_package }}-{{ kernel_version }},{{ kernel_devel_package }}-{{ kernel_version }}"
         state: present
         disable_excludes: all
+      become: yes
 
     - name: set kernel as default
       command: grubby --set-default /boot/vmlinuz-{{ kernel_version }}
       changed_when: true
+      become: yes
 
     # role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
     - name: request reboot (will be performed by `conditional_reboot` role) non calico-ebpf
@@ -55,12 +60,14 @@
       args:
         warn: false
       register: temp_out
+      become: yes
 
     - name: get mainline kernel version for calico-ebpf
       shell: yum list available --disablerepo='*' --enablerepo=elrepo-kernel | grep -m 1 "kernel-ml" | awk '{ print $2".x86_64"}'
       args:
         warn: false
       register: ebpf_kernel_version
+      become: yes
 
     - name: set kernel as default
       command: grubby --set-default /boot/vmlinuz-{{ ebpf_kernel_version.stdout }}

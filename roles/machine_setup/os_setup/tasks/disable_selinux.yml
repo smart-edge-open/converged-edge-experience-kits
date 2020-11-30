@@ -2,13 +2,14 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Set SELinux to permissive mode (till next reboot) (1/2)
   command: setenforce 0
   ignore_errors: true
   changed_when: false
+  become: yes
 
 - name: Set SELinux to permissive mode permanently (2/2)
   selinux:
     policy: targeted
     state: permissive
+  become: yes

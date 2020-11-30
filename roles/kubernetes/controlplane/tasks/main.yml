@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: check if cluster exists
   command: kubectl cluster-info
   ignore_errors: yes
@@ -11,33 +10,44 @@
 
 - name: initialize cluster
   block:
-  - name: create kubeadm init config from template
-    template:
-      src: config.yaml.j2
-      dest: /tmp/config.yaml
-      owner: root
-      group: root
-      mode: 0600
-  - name: initialize cluster
-    command: kubeadm init --config /tmp/config.yaml
-  - name: copy cluster admin config
-    block:
-    - name: create /root/.kube dir
-      file:
-        path: /root/.kube
-        state: directory
-        mode: 0755
-        owner: root
-        group: root
-    - name: copy kubernetes admin.conf to /root/.kube/config
-      copy:
-        src: /etc/kubernetes/admin.conf
-        dest: /root/.kube/config
-        owner: root
-        group: root
-        mode: 0664
-        remote_src: yes
-    - name: remove the taint to be able to schedule Pods on the control-plane node
-      command: kubectl taint nodes --all node-role.kubernetes.io/master-
-      when: single_node_deployment | default(false)
+    - name: create kubeadm init config from template
+      template:
+        src: config.yaml.j2
+        dest: /tmp/config.yaml
+        mode: 0600
+      become: yes
+    - name: initialize cluster
+      command: kubeadm init --config /tmp/config.yaml
+      become: yes
+    - name: copy cluster admin config(user)
+      block:
+        - name: create .kube dir
+          file:
+            path: .kube
+            state: directory
+            mode: 0755
+        - name: copy kubernetes admin.conf to .kube/config
+          copy:
+            src: /etc/kubernetes/admin.conf
+            dest: .kube/config
+            mode: 0664
+            remote_src: yes
+          become: yes
+        - name: remove the taint to be able to schedule Pods on the control-plane node
+          command: kubectl taint nodes --all node-role.kubernetes.io/master-
+          when: single_node_deployment | default(false)
+    - name: copy cluster admin config(root)
+      block:
+        - name: create .kube dir
+          file:
+            path: /root/.kube
+            state: directory
+            mode: 0755
+        - name: copy kubernetes admin.conf to /root/.kube/config
+          copy:
+            src: /etc/kubernetes/admin.conf
+            dest: /root/.kube/config
+            mode: 0664
+            remote_src: yes
+      become: yes
   when: cluster_info.rc == 1

@@ -2,8 +2,7 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
-_pv_dir: /opt/prometheus
+_pv_dir: "{{ openness_dir }}/pv/prometheus"
 _pv_names:
   - prometheus-volume
 

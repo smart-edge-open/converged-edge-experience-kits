@@ -12,6 +12,7 @@
 - name: reset kubeadm
   command: kubeadm reset --force
   when: kubeadm_exec.rc == 0
+  become: yes
 
 - name: remove kubeconfig
   file:

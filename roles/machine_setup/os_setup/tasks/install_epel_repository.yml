@@ -2,8 +2,8 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: install EPEL package
   yum:
     name: epel-release
     state: present
+  become: yes

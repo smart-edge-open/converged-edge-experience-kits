@@ -12,6 +12,7 @@
     masked: no
     state: stopped
     daemon_reload: yes
+  become: yes
   ignore_errors: yes
 
 - name: install ntp daemon
@@ -19,6 +20,7 @@
     name: ntp
     state: present
     skip_broken: yes
+  become: yes
 
 - name: set custom ntp servers
   block:
@@ -27,6 +29,7 @@
         dest: /etc/ntp.conf
         regexp: "^server.*"
         state: absent
+      become: yes
     - name: prepare values
       set_fact:
         servers_prepared: "{{ ntp_servers | map('regex_replace', '(.*)', 'server \\1 iburst') | join('\n') }}"
@@ -36,6 +39,7 @@
         block: |
           {{ servers_prepared }}
         insertafter: "Please consider joining the pool.*"
+      become: yes
   when: (ntp_servers | length) > 0
 
 - name: update time, enable ntpd service and set hardware clock
@@ -47,11 +51,14 @@
         masked: no
         state: stopped
         daemon_reload: yes
+      become: yes
     - name: kill all ntpd processes
       command: killall ntpd
+      become: yes
       ignore_errors: yes
     - name: update time
       command: ntpd -gq
+      become: yes
     - name: enable and start ntpd service
       systemd:
         name: ntpd
@@ -59,9 +66,12 @@
         masked: no
         state: restarted
         daemon_reload: yes
+      become: yes
     - name: set hardware clock
       command: hwclock -w
+      become: yes
     - name: create ntp time set flag
       file:
         path: "{{ _ntp_time_set }}"
         state: touch
+      become: yes

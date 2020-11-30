@@ -13,6 +13,7 @@
 - include_tasks: proxy_yum_add.yml
 - include_tasks: proxy_os_env_remove.yml
 - include_tasks: proxy_os_env_add.yml
+- include_tasks: reset_connection.yml
 - include_tasks: add_udev_kvm_system_rule.yml
 - include_tasks: enable_ipv4_forwarding.yml
 - include_tasks: reload_udev.yml
@@ -22,6 +23,5 @@
 - include_tasks: remove_yum_excludes.yml
 - include_tasks: add_yum_excludes.yml
 - include_tasks: install_epel_repository.yml
-
 
 - include_tasks: install_base_os_packages.yml

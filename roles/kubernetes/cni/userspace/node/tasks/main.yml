@@ -10,3 +10,4 @@
     line: "OVS_SOCKDIR=/var/run/openvswitch/"
   notify:
   - enable and restart kubelet
+  become: yes

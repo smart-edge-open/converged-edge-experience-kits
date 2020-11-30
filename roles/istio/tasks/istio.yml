@@ -24,6 +24,7 @@
     state: present
     dest: /etc/profile
     line: export PATH="${PATH}:{{ _istio_dest_dir }}/bin"
+  become: yes
 
 - name: deploy istio
   block:

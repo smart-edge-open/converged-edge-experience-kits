@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Remove proxy from /etc/environment
   lineinfile:
     dest: /etc/environment
@@ -18,3 +17,4 @@
     - no_proxy
     - NO_PROXY
   when: proxy_remove_old
+  become: yes

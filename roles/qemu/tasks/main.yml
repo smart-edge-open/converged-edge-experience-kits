@@ -9,6 +9,7 @@
   changed_when: false
   args:
     warn: false
+  become: yes
 
 - name: check if already installed
   stat:
@@ -30,6 +31,7 @@
   file:
     path: "{{ _qemu_install_dir }}"
     state: directory
+  become: yes
 
 - name: extract archive
   unarchive:
@@ -38,17 +40,20 @@
     extra_opts: "--strip-components=1"
     remote_src: yes
     creates: "{{ _qemu_install_dir }}/README"
+  become: yes
 
 - name: install zlib-devel package
   yum:
     name: "zlib-devel"
     state: present
+  become: yes
 
 - name: configure
   command: ./configure --target-list={{ _qemu_targets }} --enable-kvm
   args:
     chdir: "{{ _qemu_install_dir }}"
   changed_when: true
+  become: yes
 
 - name: detect amount of cores
   command: nproc
@@ -61,3 +66,4 @@
     target: install
   environment:
     "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
+  become: yes

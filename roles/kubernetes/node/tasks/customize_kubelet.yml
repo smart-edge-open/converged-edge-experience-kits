@@ -7,6 +7,7 @@
     path: "{{ _kubernetes_env_file }}"
     regexp: "^KUBELET_EXTRA_ARGS="
     line: "KUBELET_EXTRA_ARGS=--config /usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
+  become: yes
   notify:
     - enable and restart kubelet
 
@@ -29,6 +30,7 @@
       featureGates:
         TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
       podPidsLimit: 2048
+  become: yes
   notify:
     - enable and restart kubelet
 
@@ -40,6 +42,7 @@
       cpuManagerPolicy: {{ cpu.policy }}
       reservedSystemCPUs: {{ cpu.reserved_cpus }}
     state: "{{ 'present' if cpu.policy == 'static' else 'absent' }}"
+  become: yes
   notify:
     - enable and restart kubelet
 
@@ -50,6 +53,7 @@
     block: |
       topologyManagerPolicy: {{ topology_manager.policy }}
     state: "{{ 'absent' if topology_manager.policy == 'none' else 'present' }}"
+  become: yes
   notify:
     - enable and restart kubelet
 

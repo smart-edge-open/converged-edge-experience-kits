@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Adding proxy to /etc/environment
   block:
     - name: http -> /etc/environment
@@ -60,3 +59,4 @@
         state: present
         line: "NO_PROXY={{ proxy_noproxy }}"
       when: proxy_enable|bool and proxy_noproxy
+  become: yes

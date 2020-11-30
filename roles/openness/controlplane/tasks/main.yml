@@ -2,44 +2,46 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-- name: make sure /etc/openness, /etc/openness/certs and /etc/openness/configs exist
+- name: make sure openness, openness/certs and openness/configs exist
   file:
     path: "{{ item }}"
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ openness_user_group }}"
   with_items:
-  - /etc/openness
-  - "{{ _certs_dest }}"
-  - "{{ _configs_dest }}"
+    - "{{ openness_dir }}"
+    - "{{ _certs_dest }}"
+    - "{{ _configs_dest }}"
+  become: yes
 
 - name: create openness namespace if needed
   block:
-  - name: check if openness namespace exists
-    command: kubectl get ns openness
-    ignore_errors: yes
-    register: get_ns_openness
-  - name: create openness namespace
-    command: kubectl create namespace openness
-    when: get_ns_openness.rc == 1
+    - name: check if openness namespace exists
+      command: kubectl get ns openness
+      ignore_errors: yes
+      register: get_ns_openness
+    - name: create openness namespace
+      command: kubectl create namespace openness
+      when: get_ns_openness.rc == 1
 
 - name: generate certs of openness components
   include_tasks: certs.yml
 
 - name: create EAA tls secret
   block:
-  - name: check if EAA tls secret exists
-    command: kubectl get secret eaa-tls --namespace=openness
-    ignore_errors: yes
-    register: get_secret_eaa
-  - name: create secret with EAA certs
-    shell: >
-      kubectl create secret generic eaa-tls
-      --from-file=rootCA.key={{ _certs_dest }}/eaa/CA/key.pem
-      --from-file=rootCA.pem={{ _certs_dest }}/eaa/CA/cert.pem
-      --from-file=server.key={{ _certs_dest }}/eaa/key.pem
-      --from-file=server.pem={{ _certs_dest }}/eaa/cert.pem
-      --namespace=openness
-    when: get_secret_eaa.rc == 1
+    - name: check if EAA tls secret exists
+      command: kubectl get secret eaa-tls --namespace=openness
+      ignore_errors: yes
+      register: get_secret_eaa
+    - name: create secret with EAA certs
+      shell: >
+        kubectl create secret generic eaa-tls
+        --from-file=rootCA.key={{ _certs_dest }}/eaa/CA/key.pem
+        --from-file=rootCA.pem={{ _certs_dest }}/eaa/CA/cert.pem
+        --from-file=server.key={{ _certs_dest }}/eaa/key.pem
+        --from-file=server.pem={{ _certs_dest }}/eaa/cert.pem
+        --namespace=openness
+      when: get_secret_eaa.rc == 1
 
 - name: apply openness definitions
   command: kubectl apply -f {{ item }}
@@ -67,6 +69,7 @@
     src: logrotate_openness
     dest: /etc/logrotate.d/openness
     remote_src: no
+  become: yes
 
 - name: build CLIs
   include_tasks: build_cli.yml

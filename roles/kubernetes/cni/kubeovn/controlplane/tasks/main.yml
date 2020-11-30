@@ -69,16 +69,16 @@
 - name: create temp crd_local.yml
   template:
     src: crd_local.yml.j2
-    dest: "{{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+    dest: "{{ openness_dir }}/crd_local.yml"
 
 - name: apply CRD defining local subnet
-  command: "kubectl apply -f {{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+  command: "kubectl apply -f {{ openness_dir }}/crd_local.yml"
   changed_when: true
   when: groups['edgenode_group'] | length > 0
 
 - name: remove temp crd_local.yml
   file:
-    path: "{{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+    path: "{{ openness_dir }}/crd_local.yml"
     state: absent
 
 - name: wait for OVS & OVN databases
@@ -129,6 +129,7 @@
 - name: add local-ovs-phy port to local switch
   command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
   register: result
+  become: yes
   until: not result.failed
   retries: 20
   delay: 30
@@ -141,6 +142,7 @@
     ovn-nbctl lsp-set-addresses "{{ item }}"-ovs-phy unknown
     ovn-nbctl lsp-set-type "{{ item }}"-ovs-phy localnet
     ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
+  become: yes
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
   when: groups['edgenode_group'] | length > 0
@@ -150,6 +152,7 @@
     ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
   register: result
+  become: yes
   until: not result.failed
   retries: 5
   delay: 60

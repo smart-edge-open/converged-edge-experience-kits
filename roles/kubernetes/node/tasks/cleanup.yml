@@ -42,3 +42,4 @@
   - name: reset kubeadm on the node
     command: kubeadm reset --force
     when: kubeadm_exec.rc == 0
+    become: yes

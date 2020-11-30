@@ -2,7 +2,6 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
-
 - name: create http-proxy.conf for kubelet service
   block:
     - name: create kubelet system config directory
@@ -14,4 +13,5 @@
         src: http-proxy.conf.j2
         dest: /usr/lib/systemd/system/kubelet.service.d/http-proxy.conf
       notify:
-      - enable and restart kubelet
+        - enable and restart kubelet
+  become: yes

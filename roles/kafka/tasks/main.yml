@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: check if Strimzi release already exists
   command: helm status strimzi -n kafka
   ignore_errors: yes
@@ -43,7 +42,6 @@
       changed_when: true
   when: get_release_strimzi.rc != 0
 
-
 - name: Kafka Cluster
   block:
     - name: create directory for Kafka persistent volume
@@ -78,7 +76,7 @@
     - name: copy Kafka cluster definition
       template:
         src: kafka-cluster.yml
-        dest:  "{{ tmp_dir.path }}"
+        dest: "{{ tmp_dir.path }}"
 
     - name: apply definition of Kafka cluster definition
       command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/kafka-cluster.yml"
@@ -87,7 +85,7 @@
     - name: copy EAA Kafka user definition
       template:
         src: eaa-user.yml
-        dest:  "{{ tmp_dir.path }}"
+        dest: "{{ tmp_dir.path }}"
 
     - name: apply definition of EAA Kafka user definition
       command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/eaa-user.yml"

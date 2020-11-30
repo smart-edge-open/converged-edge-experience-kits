@@ -76,7 +76,7 @@ def main():
 
     try:
         subprocess.run(
-            "scp -C %s scripts/log_collector scripts/log_collector.json root@%s:~"
+            "scp -C %s scripts/log_collector scripts/log_collector.json %s:~"
             % (file_name, host),
             shell=True,
             check=True)

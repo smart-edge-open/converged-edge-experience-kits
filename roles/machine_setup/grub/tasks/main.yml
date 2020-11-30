@@ -2,39 +2,40 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: detect path to GRUB config
   block:
-  - name: set GRUB config path (BIOS)
-    set_fact:
-      grub_file_path: /boot/grub2/grub.cfg
+    - name: set GRUB config path (BIOS)
+      set_fact:
+        grub_file_path: /boot/grub2/grub.cfg
 
-  - name: check if host is using EFI
-    stat:
-      path: /sys/firmware/efi
-    register: efi_sys_dir
+    - name: check if host is using EFI
+      stat:
+        path: /sys/firmware/efi
+      register: efi_sys_dir
 
-  - name: change GRUB config path (EFI)
-    set_fact:
-      grub_file_path: /boot/efi/EFI/centos/grub.cfg
-    when:
-    - efi_sys_dir.stat.exists
-    - efi_sys_dir.stat.isdir
+    - name: change GRUB config path (EFI)
+      set_fact:
+        grub_file_path: /boot/efi/EFI/centos/grub.cfg
+      when:
+        - efi_sys_dir.stat.exists
+        - efi_sys_dir.stat.isdir
 
-  - name: print grub.cfg path
-    debug:
-      msg: "grub.cfg file path: {{ grub_file_path }}"
+    - name: print grub.cfg path
+      debug:
+        msg: "grub.cfg file path: {{ grub_file_path }}"
 
 - name: set GRUB_CMDLINE_LINUX_DEFAULT variable
   lineinfile:
     path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
     line: 'GRUB_CMDLINE_LINUX_DEFAULT=" {{ additional_grub_params }} {{ default_grub_params }}"'
     insertafter: EOF
+  become: yes
 
 - name: regenerate grub.cfg
   command: grub2-mkconfig -o {{ grub_file_path }}
   changed_when: true
+  become: yes
 
 - name: get current CMDLINE
   command: cat /proc/cmdline

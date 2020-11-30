@@ -14,3 +14,4 @@
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
+  become: yes

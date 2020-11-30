@@ -9,23 +9,29 @@
   file:
     path: "/home/docker"
     state: directory
+  become: yes
 
 - name: edit docker configuration to use new directory
   replace:
     path: /usr/lib/systemd/system/docker.service
     regexp: 'dockerd -H'
     replace: 'dockerd --graph /home/docker -H'
+  become: yes
 
 - name: restart docker service
   systemd:
     name: docker
     state: restarted
     daemon_reload: yes
+  become: yes
 
 - name: create VCA directory
   file:
     path: "{{ _vca_dest }}"
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ openness_user_group }}"
+  become: yes
 
 - name: download VCA image
   unarchive:
@@ -71,6 +77,7 @@
     name:
       - gdisk
       - mtools
+  become: yes
 
 - name: get current kernel
   command: uname -r
@@ -82,11 +89,13 @@
   ignore_errors: yes
   with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
+  become: yes
 
 - name: install VCA kernel packages, driver and utility
   command: "rpm -ivh {{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Host/build/host_packages/{{ item }}.rpm" # noqa 303
   with_items: "{{ _vca_rpm_files }}"
   when: "'VCA' not in installed_kernel.stdout"
+  become: yes
   args:
     warn: false
 
@@ -94,8 +103,11 @@
   shell: grubby --set-default /boot/vmlinuz-3.10.0-*.VCA+
   changed_when: true
   when: "'VCA' not in installed_kernel.stdout"
+  become: yes
 
 - name: request reboot if VCA kernel is newly installed
   set_fact:
     perform_reboot: "{{ perform_reboot|default([]) + [ 'vca' ] }}"
   when: "'VCA' not in installed_kernel.stdout"
+  become: yes
+

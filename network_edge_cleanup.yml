@@ -186,7 +186,7 @@
     yum:
       name: git*
       state: absent
-
+    become: yes
 
 - hosts: edgenode_group
   serial: 1

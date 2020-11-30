@@ -2,13 +2,13 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: disable kubelet service
   systemd:
     name: kubelet
     enabled: no
     state: stopped
   ignore_errors: yes
+  become: yes
 
 - name: close firewall ports
   ignore_errors: yes
@@ -21,6 +21,7 @@
     - 6443/tcp
     - 2379-2380/tcp
     - 10250-10252/tcp
+  become: yes
 
 - name: remove k8s sysctl rules
   block:
@@ -30,21 +31,25 @@
         state: absent
     - name: refresh sysctl
       command: sysctl --system
+  become: yes
 
 - name: remove proxy for service
   file:
     name: /usr/lib/systemd/system/kubelet.service.d/http-proxy.conf
     state: absent
+  become: yes
 
 - name: uninstall packages
   yum:
     name: "{{ _kubernetes_packages_to_remove }}"
     state: absent
+  become: yes
 
 - name: remove repository
   yum_repository:
     name: kubernetes
     state: absent
+  become: yes
 
 - name: clear yum cache
   command: yum clean metadata
@@ -56,3 +61,5 @@
   file:
     name: /etc/cni/net.d
     state: absent
+  become: yes
+

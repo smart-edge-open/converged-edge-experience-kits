@@ -86,4 +86,4 @@ _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kerne
 docker_images: []
 
 git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgenode.git
-_git_repo_dest: /opt/edgenode
+_git_repo_dest: "{{ openness_dir }}/edgenode"

@@ -2,17 +2,16 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
-
 - name: create temporary custom gitconfig
   copy:
-    dest: /root/.openness_gitconfig
+    dest: "{{ openness_dir }}/.openness_gitconfig"
     content: |
       [url "https://{{ git_repo_token }}@github.com/"]
         insteadOf = https://github.com/
 
 - name: create .gitconfig if needed
   file:
-    path: /root/.gitconfig
+    path: "{{ ansible_env.HOME }}/.gitconfig"
     state: touch
     modification_time: preserve
     access_time: preserve
@@ -26,7 +25,7 @@
 
 - name: add include to .gitconfig
   blockinfile:
-    path: /root/.gitconfig
+    path: "{{ ansible_env.HOME }}/.gitconfig"
     block: |
       [include]
-        path = /root/.openness_gitconfig
+        path = "{{ openness_dir }}/.openness_gitconfig"

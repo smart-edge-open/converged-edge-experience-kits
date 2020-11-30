@@ -2,14 +2,14 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
-
 - name: remove generated files
   file:
     path: "{{ item }}"
     state: absent
   with_items:
-  - /etc/openness
+  - "{{ openness_dir }}"
   - /etc/logrotate.d/edgenode
+  become: yes
 
 # built executables are removed during git_repo's role cleanup
 # built Docker images are removed during docker's role cleanup

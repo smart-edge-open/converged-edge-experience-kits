@@ -2,10 +2,10 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Disable SWAP (current session) (1/2)
   command: swapoff -a
   changed_when: true
+  become: yes
 
 - name: Disable SWAP (in /etc/fstab) (2/2)
   replace:
@@ -13,3 +13,4 @@
     # Cannot use \b or \s to delimit 'swap' word, since they would match newlines
     regexp: '^([^#\n]*[ \t]swap[ \t].*)$'
     replace: '# \1'
+  become: yes

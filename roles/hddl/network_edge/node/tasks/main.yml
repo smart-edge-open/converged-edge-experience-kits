@@ -95,6 +95,7 @@
   file:
     path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04"
     state: absent
+  become: yes
 
 - name: create openness ubuntu 18.04 directory for hddldaemon
   block:
@@ -102,20 +103,26 @@
       file:
         path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04"
         state: directory
+      become: yes
+
     - name: create 2nd level folder
       file:
         path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics"
         state: directory
+      become: yes
+
     - name: create 3rd level folder
       file:
         path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon"
         state: directory
+      become: yes
 
 - name: copy files from ubuntu for hddldaemon
   copy:
     src: "{{ _hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/analytics/hddldaemon"
     dest: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics"
     remote_src: yes
+  become: yes
 
 - name: create kustomization files from templates
   template:
@@ -127,12 +134,14 @@
   - run_hddl.sh
   - shell.sh
   - Dockerfile
+  become: yes
 
 - name: build hddlaaemon container image
   command: ./build.sh
   args:
     chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon"
   changed_when: true
+  #become: yes
 
 - name: create hddldaemonSet
   command: "kubectl apply -f setup_hddl_daemonset.yaml"

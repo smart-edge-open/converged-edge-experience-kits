@@ -54,7 +54,7 @@
          emptyDir: {}
 +      - name: tls-config
 +        hostPath:
-+          path: /etc/openness/certs/telemetry/tas-adapter
++          path: "/opt/openness/certs/telemetry/tas-adapter"
 +      - name: ca
 +        secret:
 +          secretName: root-ca

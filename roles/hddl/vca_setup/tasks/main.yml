@@ -8,6 +8,7 @@
   shell: set -o pipefail && vcactl status | grep Card | wc -l
   register: num_vca
   changed_when: true
+  become: yes
 
 - name: clean up vpu metrics and hddl daemon for each vca node.
   include_tasks: cleanup_vcanode.yml

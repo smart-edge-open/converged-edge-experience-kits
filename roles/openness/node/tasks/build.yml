@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: create temporary custom .openness_gitconfig
   include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
 
@@ -50,8 +49,8 @@
       chdir: "{{ _git_repo_dest }}"
     when: "'kubeovn' in kubernetes_cnis"
   always:
-  - name: remove .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+    - name: remove .openness_gitconfig
+      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
 # since these pods are part of openness' DaemonSet will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block

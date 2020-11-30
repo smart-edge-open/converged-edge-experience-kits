@@ -12,6 +12,7 @@
   with_items:
   - "{{ _hddldaemon_container.download_dir }}"
   ignore_errors: yes
+  become: yes
 
 - name: check Docker container hddldaemon is running
   shell: docker ps -a | grep ov_hddl

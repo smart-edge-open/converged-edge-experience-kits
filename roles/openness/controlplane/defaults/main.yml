@@ -2,12 +2,11 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-_certs_dest: /etc/openness/certs
-_configs_dest: /etc/openness/configs
+_certs_dest: "{{ openness_dir }}/certs"
+_configs_dest: "{{ openness_dir }}/configs"
 
 _openness_yamls:
-- "{{ _git_repo_dest }}/network-edge/openness.yaml"
-- "{{ _git_repo_dest }}/network-edge/default_network_policy.yaml"
+  - "{{ _git_repo_dest }}/network-edge/openness.yaml"
+  - "{{ _git_repo_dest }}/network-edge/default_network_policy.yaml"
 
 _kubeovn_openness_yaml: "{{ _git_repo_dest }}/network-edge/kube-ovn/interfaceservice.yaml"

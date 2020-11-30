@@ -2,8 +2,7 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
-_kafka_pv_dir: /opt/kafka
+_kafka_pv_dir: "{{ openness_dir }}/pv/kafka"
 _kafka_pv_names:
   - kafka-volume
   - zookeeper-volume
