@@ -18,7 +18,6 @@
         path: "{{ openness_dir }}"
         state: directory
         owner: "{{ ansible_user }}"
-        group: "{{ openness_user_group }}"
       become: yes
 
     - name: checkout clean repository
