@@ -29,6 +29,16 @@ metadata:
   name: analytics-{{ $framework }}-{{ $platform }}
   {{- end }}
   namespace: default
+  {{- if eq $.Values.multiInstances true }}
+  labels:
+    {{- if eq $platform "xeon" }}
+    app: analytics-{{ $framework }}
+    service: analytics-{{ $framework }}
+    {{- else }}
+    app: analytics-{{ $framework }}-{{ $platform }}
+    service: analytics-{{ $framework }}-{{ $platform }}
+    {{- end }}
+  {{- end }}
 spec:
   clusterIP: None
   selector:
@@ -42,14 +52,38 @@ spec:
       port: {{ $.Values.servingPort }}
       targetPort: {{ $.Values.servingPort }}
 ---
+{{- range $instance := $.Values.instances }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  {{- if eq $.Values.multiInstances true }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}-{{ $instance.name }}
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}
+  {{- end }}
+  {{- else }}
   {{- if eq $platform "xeon" }}
   name: analytics-{{ $framework }}
   {{- else }}
   name: analytics-{{ $framework }}-{{ $platform }}
   {{- end }}
+  {{- end }}
+  labels:
+    {{- if eq $.Values.multiInstances true }}
+    {{- if eq $platform "xeon" }}
+    app: analytics-{{ $framework }}-{{ $instance.name }}
+    {{- else }}
+    app: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}
+    {{- end }}
+    version: {{ $instance.name }}
+    {{- else }}
+    {{- if eq $platform "xeon" }}
+    app: analytics-{{ $framework }}
+    {{- else }}
+    app: analytics-{{ $framework }}-{{ $platform }}
+    {{- end }}
+    {{- end }}
   namespace: default
 spec:
   replicas: {{ $.Values.replicas }}
@@ -60,6 +94,9 @@ spec:
       {{- else }}
       app: va-serving-{{ $framework }}-{{ $platform }}
       {{- end }}
+      {{- if eq $.Values.multiInstances true }}
+      version: {{ $instance.name }}
+      {{- end }}
   template:
     metadata:
       labels:
@@ -67,6 +104,9 @@ spec:
         app: va-serving-{{ $framework }}
         {{- else }}
         app: va-serving-{{ $framework }}-{{ $platform }}
+        {{- end }}
+        {{- if eq $.Values.multiInstances true }}
+        version: {{ $instance.name }}
         {{- end }}
     spec:
       containers:
@@ -105,5 +145,6 @@ spec:
           - name: FRAMEWORK
             value: {{ $framework }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}

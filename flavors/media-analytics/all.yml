@@ -15,6 +15,7 @@ ne_nfd_enable: true
 
 # Deploy Video Analytics services
 video_analytics_services_enable: true
+video_analytics_services_multiinstances: false
 
 # Istio Service Mesh
 ne_istio_enable: false

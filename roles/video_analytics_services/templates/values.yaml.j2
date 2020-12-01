@@ -40,6 +40,19 @@ replicas: 1
 
 # enable Istio service mesh integration
 istioEnabled: {{ ne_istio_enable }}
+multiInstances: {{ video_analytics_services_multiinstances }}
+{% if ne_istio_enable == true %}
+{% if video_analytics_services_multiinstances == true %}
+instances:
+{% for item in _instances %}
+  - name: {{ item.name }}
+    weight: {{ item.weight }}
+{% endfor %}
+{% else %}
+instances:
+  - default
+{% endif %}
+{% endif %}
 
 # proxy settings for vas_gateways
 {% if proxy_enable | d(false) %}
