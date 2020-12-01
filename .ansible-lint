@@ -17,3 +17,5 @@ exclude_paths:
   - roles/telemetry/opentelemetry/controlplane/charts
   - roles/fpga_cfg/charts
   - cnab
+  - roles/ptp/common/tasks
+
