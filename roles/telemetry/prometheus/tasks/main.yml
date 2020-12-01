@@ -54,6 +54,7 @@
   - name: add default Helm repository
     command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
     changed_when: true
+    when: not offline_enable
 
   - name: create Prometheus chart template directory
     file:
@@ -63,6 +64,11 @@
       - "{{ _prometheus_chart_dir }}"
       - "{{ _prometheus_chart_dir }}/templates"
     changed_when: true
+
+  - name: reset _prometheus_chart_url when offline mode
+    set_fact:
+      _prometheus_chart_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/prometheus"
+    when: offline_enable
 
   - name: download Prometheus chart
     get_url:

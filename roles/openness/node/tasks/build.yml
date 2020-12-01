@@ -48,6 +48,7 @@
     args:
       chdir: "{{ _git_repo_dest }}"
     when: "'kubeovn' in kubernetes_cnis"
+  when: not offline_enable
   always:
     - name: remove .openness_gitconfig
       include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml

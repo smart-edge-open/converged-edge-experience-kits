@@ -211,6 +211,9 @@ telemetry_flavor: common
 ## Network Edge RMD
 rmd_operator_enable: False
 
+## Offline Mode support
+offline_enable: False
+
 ## Edge DNS
 dns_enable: True
 

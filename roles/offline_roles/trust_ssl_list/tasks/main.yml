@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Copy crt file to nodes
+  copy:
+    src: "/tmp/localhost.crt"
+    dest: "/tmp/localhost.crt"
+
+- name: Check if the ssl certificate exists in the local trust list
+  shell: >
+    cat /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' \
+    | sed 's/END CERTIFICATE//g' | grep "$(cat /tmp/localhost.crt | sed 's/-//g')"
+  register: ssl_exists
+  ignore_errors: yes
+  changed_when: false
+
+- name: Add ssl certificate into local trust list'
+  shell:
+    cat /tmp/localhost.crt >> /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+  when: ssl_exists.rc != 0

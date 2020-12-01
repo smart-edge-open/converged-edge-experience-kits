@@ -56,6 +56,10 @@ tuned_packages:
   - tuned-2.11.0-8.el7
   - http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
 
+offline_tuned_packages:
+  - tuned-2.11.0-8.el7
+  - tuned-profiles-realtime-2.11.0-8.el7
+
 # Profile to be applied
 tuned_profile: realtime
 # Variables applied with the profile

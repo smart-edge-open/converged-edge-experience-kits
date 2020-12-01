@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Check if local offline package exists
+  stat:
+    path: "{{ role_path }}/files/{{ _offline_package_name }}"
+  connection: local
+  register: offline_package
+
+- name: Check if checksum file exists
+  stat:
+    path: "{{ role_path }}/files/{{ _offline_checksum_name }}"
+  connection: local
+  register: offline_checksum
+
+- name: Files not found
+  fail:
+    msg: "{{ _offline_package_name }} or/and {{ _offline_checksum_name }} does not exists, Offline Package will not be installed"
+  when:
+    - not offline_package.stat.exists or
+      not offline_checksum.stat.exists
+
+- name: Move and unpack Offline Package to CTRL
+  block:
+  - name: Create directory for offline package
+    file:
+      path: "{{ _offline_package_path }}"
+      state: directory
+
+  - name: Copy Offline Package
+    copy:
+      src: "{{ _offline_package_name }}"
+      dest: "{{ _offline_package_path }}"
+
+  - name: Copy Offline Package checksum hash number
+    copy:
+      src: "{{ _offline_checksum_name }}"
+      dest: "{{ _offline_package_path }}"
+
+  - name: Get expected checksum hash value
+    slurp:
+      src: "{{ _offline_package_path }}/{{ _offline_checksum_name }}"
+    register: expected_checksum
+  - name: Retrive Checksum of file
+    stat:
+      path: "{{ _offline_package_path }}/{{ _offline_package_name }}"
+      checksum_algorithm: md5
+      get_checksum: yes
+    register: file_checksum
+  - name: Compare the expected checksum vs checksum of file.
+    assert:
+      that:
+      - file_checksum.stat.checksum  ==  expected_checksum.content | b64decode | replace('\n', '')
+      fail_msg: "Checksum of the Offline Package does not match hash value provided"
+      success_msg: "Checksum match"
+    register: result
+    failed_when:
+      - result.evaluated_to is defined
+      - not result.evaluated_to
+  - name: Unarchive a file on the remote machine
+    unarchive:
+      src: "{{ _offline_package_path }}/{{ _offline_package_name }}"
+      dest: "{{ _offline_package_path }}"
+      remote_src: yes
+  - name: Remove packed package
+    file:
+      path: "{{ _offline_package_path }}/{{ item }}"
+      state: absent
+    with_items:
+      - "{{ _offline_package_name }}"
+      - "{{ _offline_checksum_name }}"
+  when:
+    - offline_package.stat.exists
+    - offline_checksum.stat.exists

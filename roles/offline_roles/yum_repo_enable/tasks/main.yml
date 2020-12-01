@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Delete existing repositories
+  block:
+  - name: Find repos
+    find:
+      paths: "{{ _repos_path }}"
+    register: repos_found
+
+  - name: Delete repos
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ repos_found.files }}"
+
+- name: Create repofile
+  block:
+  - name: Copy sample repo file
+    copy:
+      src: local.repo
+      dest: "{{ _repos_path }}/local.repo"
+
+  - name: Replace IP of local repo
+    replace:
+      path: "{{ _repos_path }}/local.repo"
+      regexp: 'controller_IP_addr'
+      replace: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"

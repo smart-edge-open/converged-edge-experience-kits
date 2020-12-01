@@ -22,6 +22,14 @@
       name: "{{ _multus_image_name }}"
       tag: "{{ _multus_image_tag }}"
       source: pull
+    when: not offline_enable
+
+  - name: Check if the image already exists
+    shell: >
+      docker images | grep "{{ _multus_image_name }}" | grep "{{ _multus_image_tag }}"
+    register: result
+    failed_when: result.rc != 0
+    when: offline_enable
 
   - name: tag multus image and push to Harbor registry
     docker_image:
@@ -36,6 +44,7 @@
       state: absent
       name: "{{ _multus_image_name }}"
       tag: "{{ _multus_image_tag }}"
+    when: not offline_enable
 
   - name: copy multus-cni chart
     copy:

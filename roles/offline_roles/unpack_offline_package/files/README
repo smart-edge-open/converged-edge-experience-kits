@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+opcdownloads.tar.gz containing pre-downloaded dependencies and checksum.txt containing the md5sum hash number will be present in this directory

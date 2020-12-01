@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+[local_cluster]
+name=RHEL Apache
+baseurl=https://controller_IP_addr
+enabled=1
+gpgcheck=0
+proxy=_none_

@@ -9,3 +9,6 @@ _golang_download_checksum: "f0d26ff572c72c9823ae752d3c81819a81a60c753201f51f8963
 _golang_download_name: "go{{ _golang_version }}.linux-amd64.tar.gz"
 _golang_download_url: "https://dl.google.com/go/{{ _golang_download_name }}"
 _golang_download_dest: "/tmp/{{ _golang_download_name }}"
+
+_offline_gomod_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/gomod.tar.gz"
+_offline_gomod_dest: "~/go/pkg/"

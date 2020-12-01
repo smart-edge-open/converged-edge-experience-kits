@@ -2,6 +2,55 @@
 # Copyright (c) 2020 Intel Corporation
 ---
 
+- name: Check if not offline
+  block:
+  - name: check local bbdev_config_service_directory
+    stat:
+      path: "{{ _fpga_config_local_path }}"
+    connection: local
+    register: syscfg_local_file
+
+  - name: file not present
+    debug:
+      msg: "{{ _fpga_config_local_path }} does not exists, FPGA Config utility won't be set up on the node"
+    when: not syscfg_local_file.stat.exists
+  when: not offline_enable
+
+- name: set up FPGA Config utility on the node and template Helm charts
+  block:
+  - name: Build if not offline
+    block:
+    - name: create temp dir
+      tempfile:
+        state: directory
+        suffix: -fpga-cfg
+      register: tmp_dir
+
+    - name: copy local FPGA Config utility to remote
+      copy:
+        src: "{{ _fpga_config_local_path }}"
+        dest: "{{ tmp_dir.path }}"
+
+    - name: copy Docker file to remote
+      copy:
+        src: Dockerfile
+        dest: "{{ tmp_dir.path }}/Dockerfile"
+
+    - name: build FPGA Config utility image
+      docker_image:
+        name: "{{ _fpga_config.image }}"
+        tag: "{{ _fpga_config.tag }}"
+        source: build
+        build:
+          path: "{{ tmp_dir.path }}"
+          use_config_proxy: yes
+          pull: yes
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+    when: not offline_enable
+
 - name: include docker registry vars
   include_vars: ../../harbor_registry/controlplane/defaults/main.yml
 
@@ -55,3 +104,5 @@
       src: "values.yaml.j2"
       dest: "{{ ne_helm_charts_default_dir }}/fpga_config/values.yaml"
       force: yes
+  when: syscfg_local_file.stat.exists | default(False) or offline_enable
+

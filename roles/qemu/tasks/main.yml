@@ -16,6 +16,11 @@
     path: "{{ _qemu_install_dir }}"
   register: qemu_dest_dir
 
+- name: chech if offline
+  set_fact:
+    _qemu_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/qemu-4.0.0.tar.xz"
+  when: offline_enable
+
 - name: download archive
   get_url:
     url: "{{ _qemu_download_url }}"

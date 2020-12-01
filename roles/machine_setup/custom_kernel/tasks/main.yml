@@ -6,11 +6,23 @@
 - name: setup repository
   include_tasks: setup_repository.yml
 
+- name: include tuned variables if not defined
+  include_vars: ../configure_tuned/defaults/main.yml
+  when: tuned_packages is not defined
+
 - name: install kernel dependencies - tuned
   yum:
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
+  when: not offline_enable
+
+- name: install kernel dependencies - tuned
+  yum:
+    name: "{{ offline_tuned_packages | join(',') }}"
+    state: present
+    allow_downgrade: yes
+  when: offline_enable
   become: yes
 
 - name: install kernel dependencies - URLs

@@ -2,6 +2,7 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+
 # Common platform setup playbook
 - hosts: controller_group:edgenode_group
   any_errors_fatal: true
@@ -15,13 +16,21 @@
       include_tasks: ./tasks/print_vars.yml
 
   roles:
+    - role: offline_roles/unpack_offline_package
+      when: "offline_enable | default(False) and 'controller_group' in group_names"
+    - role: offline_roles/local_fileshare_server
+      when: "offline_enable | default(False) and 'controller_group' in group_names"
+    - role: offline_roles/trust_ssl_list
+      when: "offline_enable | default(False) and 'edgenode_group' in group_names"
+    - role: offline_roles/yum_repo_enable
+      when: offline_enable | default(False)
     - role: machine_setup/os_setup
     - role: time/ntp
       when: ntp_enable | default(False)
     - role: time/verify
       when: "'edgenode_group' in group_names"
     - role: machine_setup/custom_kernel
-      when: not (kernel_skip | default(True))
+      when: "not (kernel_skip | default(True)) and 'edgenode_group' in group_names"
     - role: machine_setup/grub
 
     - role: machine_setup/configure_tuned
@@ -29,6 +38,7 @@
     - role: machine_setup/conditional_reboot
 
     - role: git_repo
+
     - role: golang
     - role: docker
 
@@ -84,7 +94,7 @@
 - hosts: edgenode_group
   roles:
     - role: rmd/node
-      when: rmd_operator_enable | default(False)
+      when: "rmd_operator_enable | default(False) and not offline_enable"
 
     - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)

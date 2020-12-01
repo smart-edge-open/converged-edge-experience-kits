@@ -51,6 +51,11 @@
     path: "{{ _dpdk_install_dir }}"
   register: dpdk_dest_dir
 
+- name: Check if offline
+  set_fact:
+    _dpdk_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/dpdk-18.11.6.tar.xz"
+  when: offline_enable
+
 - name: download
   get_url:
     url: "{{ _dpdk_download_url }}"

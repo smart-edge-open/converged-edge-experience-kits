@@ -67,3 +67,6 @@ telemetry_grafana_enable: True
 ###RMD
 rmd_operator_enable: True
 
+##Path to offline download
+_offline_package_path: "/opt/opcdownloads"
+

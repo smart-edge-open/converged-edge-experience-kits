@@ -8,6 +8,11 @@
         msg: "Using git token for repository checkout"
       when: git_repo_token|length > 0
 
+    - name: Set Git Repo URL
+      set_fact:
+        git_repo_url: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:{{ _offline_package_path }}/github/edgenode/"
+      when: offline_enable
+
     - name: make sure openness directory exists
       file:
         path: "{{ openness_dir }}"
@@ -21,6 +26,7 @@
         repo: "{{ git_repo_url }}"
         dest: "{{ _git_repo_dest }}"
         version: "{{ git_repo_branch }}"
+        accept_hostkey: yes
         force: yes
       when: always_clean_repository
 
@@ -29,6 +35,7 @@
         repo: "{{ git_repo_url }}"
         dest: "{{ _git_repo_dest }}"
         version: "{{ git_repo_branch }}"
+        accept_hostkey: yes
         update: no
       when: not always_clean_repository
 

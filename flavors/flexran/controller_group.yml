@@ -16,6 +16,12 @@ kernel_skip: false
 # Version of the kernel.
 kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
 
+## Tuned configuration
+## Skip tuned configuration
+## If true, tuned will not be configured
+## If false, tuned_packages will be installed, tuned_profile will be applied with tuned_vars
+tuned_skip: true
+
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
 hugepage_size: "1G"

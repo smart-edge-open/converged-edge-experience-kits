@@ -10,17 +10,38 @@
     name: https://repo.ius.io/ius-release-el7.rpm
     state: present
   become: yes
+  when: not offline_enable
+
+- name: Check if offline mode
+  block:
+  - name: Check if offline mode
+    set_fact:
+      local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
+--trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+      _openssl_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _openssl_package_name }}.tar.gz"
+
+  - name: Add the iptables rule
+    iptables:
+      chain: INPUT
+      jump: ACCEPT
+      ctstate: NEW
+      protocol: tcp
+      destination_port: 443
+      action: insert
+      rule_num: 2
+    when: "'controller_group' in group_names"
+  when: offline_enable
 
 - name: install base OS rpm packages
   yum:
     name: "{{ os_yum_base_packages }}"
     state: present
-    enablerepo: ius-archive
+    enablerepo: "{{ omit if offline_enable else 'ius-archive' }}"
     skip_broken: yes
   become: yes
 
 - name: upgrade python2-pip version
-  command: "python2 -m pip install --upgrade pip=={{ _pip_version }}"
+  command: "python2 -m pip install {{ local_pip }} --upgrade pip=={{ _pip_version }}"
   changed_when: true
   become: yes
 

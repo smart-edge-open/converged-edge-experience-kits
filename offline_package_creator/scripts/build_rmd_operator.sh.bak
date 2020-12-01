@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+cd /root/
+git config --global http.proxy $http_proxy
+git clone https://github.com/intel/intel-cmt-cat.git
+cd intel-cmt-cat
+make && make install 
+
+cd /opt/app
+make build

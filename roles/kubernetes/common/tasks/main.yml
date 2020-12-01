@@ -16,6 +16,7 @@
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
+  when: not offline_enable
 
 - name: install packages
   yum:

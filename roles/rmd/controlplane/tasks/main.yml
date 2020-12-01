@@ -3,6 +3,11 @@
 #
 # ---
 
+- name: Check if offline
+  set_fact:
+    _rmd_operator_repo: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:{{ _offline_package_path }}/github/rmd-operator/"
+  when: offline_enable
+
 - name: clone the RMD operator
   git:
     repo: "{{ _rmd_operator_repo }}"

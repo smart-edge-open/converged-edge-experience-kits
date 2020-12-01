@@ -58,4 +58,4 @@
       become: yes
 
   when:
-    - kernel_repo_url is defined and kernel_repo_url|length > 0 # url to repository file not be empty
+  - kernel_repo_url is defined and kernel_repo_url|length > 0 and not offline_enable # url to repository file not be empty

@@ -9,6 +9,11 @@
   register: get_release_harbor
   changed_when: false
 
+- name: Set Git Repo URL
+  set_fact:
+    _git_repo_harbor: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:{{ _offline_package_path }}/github/harbor-helm/"
+  when: offline_enable
+
 - name: harbor installation
   block:
   - name: create directory for copying certificate

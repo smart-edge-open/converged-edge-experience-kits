@@ -18,7 +18,8 @@
 
 - name: download TAS repo
   git:
-    repo: "{{ _tas_repo.url }}"
+    repo: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] + ':' + _offline_package_path + \
+           '/github/telemetry-aware-scheduling' if offline_enable else _tas_repo.url }}"
     dest: "{{ tmp_dir.path }}/tas-repo"
     clone: yes
     update: no
@@ -173,12 +174,14 @@
     shell: source /etc/profile && make build
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
+    when: not offline_enable
 
   - name: build TAS docker image
     shell: source /etc/profile && make image
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
     become: yes
+    when: not offline_enable
 
   - name: push TAS images to Harbor registry
     docker_image:
@@ -197,6 +200,7 @@
     with_items:
       - tas-extender
       - tas-controller
+    when: not offline_enable
 
   - name: copy kustomization files to TAS directory
     copy:
