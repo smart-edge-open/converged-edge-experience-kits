@@ -175,7 +175,7 @@ cpu:
   # CPU policy - possible values: none (disabled), static (default)
   policy: "static"
   # Reserved CPUs for K8s and OS daemons - list of reserved CPUs
-  reserved_cpus: "0,24"
+  reserved_cpus: "0,1"
 
 # Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
 topology_manager:
