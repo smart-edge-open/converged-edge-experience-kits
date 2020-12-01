@@ -1,0 +1,20 @@
+diff --git a/install.sh b/install.sh
+index c342667..5d12651 100644
+--- a/install.sh
++++ b/install.sh
+@@ -709,11 +709,11 @@ spec:
+           resources:
+             requests:
+               cpu: 500m
+-              memory: 2Gi
++              memory: {{ kubeovn_dpdk_resources_requests }}
+             limits:
+               cpu: 1000m
+-              memory: 2Gi
+-              hugepages-1Gi: 1Gi
++              memory: {{ kubeovn_dpdk_resources_limits }}
++              hugepages-{{ kubeovn_dpdk_hugepage_size }}: {{ kubeovn_dpdk_hugepages }}
+       nodeSelector:
+         kubernetes.io/os: "linux"
+       volumes:
+

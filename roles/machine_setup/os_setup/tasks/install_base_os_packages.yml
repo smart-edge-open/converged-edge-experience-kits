@@ -12,6 +12,11 @@
   become: yes
   when: not offline_enable
 
+- name: Set empty local_pip var
+  set_fact:
+    local_pip: ""
+  when: not offline_enable
+
 - name: Check if offline mode
   block:
   - name: Check if offline mode

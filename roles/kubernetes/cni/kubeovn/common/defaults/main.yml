@@ -8,3 +8,5 @@ _kubeovn_scripts:
 - ovn-nbctl
 
 _kubeovn_scripts_dest: /usr/local/bin
+
+_kubeovn_ovs_config_path: /opt/ovs-config

@@ -35,10 +35,13 @@ _kubeovn_download_files:
 _kubeovn_dockerimage_files_to_cp:
 - install.sh
 
+_kubeovn_install_patch_file: patch_to_set_hugepages_install.patch
+
 kubeovn_dpdk: true
 kubeovn_dpdk_socket_mem: "1024,0"
 kubeovn_dpdk_pmd_cpu_mask: "0x4"
 kubeovn_dpdk_lcore_mask: "0x2"
+
 kubeovn_dpdk_hugepage_size: "2Mi"
 kubeovn_dpdk_hugepages: "1Gi"
 kubeovn_dpdk_resources_requests: "1Gi"

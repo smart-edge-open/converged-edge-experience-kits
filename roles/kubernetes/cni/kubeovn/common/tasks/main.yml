@@ -20,7 +20,12 @@
     mode: 0755
   with_items: "{{ _kubeovn_scripts }}"
 
+- name: create a directory for ovs config
+  file:
+    path: "{{ _kubeovn_ovs_config_path }}"
+    state: directory
+
 - name: prepare ovs config
   template:
     src: config.cfg.j2
-    dest: "/opt/ovs-config/config.cfg"
+    dest: "{{ _kubeovn_ovs_config_path }}/config.cfg"

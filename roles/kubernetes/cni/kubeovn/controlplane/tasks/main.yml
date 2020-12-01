@@ -43,6 +43,18 @@
         regexp: "kubeovn/kube-ovn-dpdk:\\$DPDK_VERSION-\\$VERSION"
         replace: "kubeovn/kube-ovn-dpdk:$DPDK_VERSION-v1.5.2"
 
+    - name: create hugepage patch file from template
+      template:
+        src: "{{ _kubeovn_install_patch_file }}.j2"
+        dest: "{{ _kubeovn_destdir }}/{{ _kubeovn_install_patch_file }}"
+
+    - name: apply hugepage patch for install.sh
+      patch:
+        src: "{{ _kubeovn_destdir }}/{{ _kubeovn_install_patch_file }}"
+        dest: "{{ _kubeovn_destdir }}/install.sh"
+        basedir: "{{ _kubeovn_destdir }}"
+        remote_src: yes
+
     - name: install kube-ovn with DPDK support
       command: bash install.sh --with-dpdk=19.11
       args:
