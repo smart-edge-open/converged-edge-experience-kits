@@ -23,6 +23,12 @@
   with_items:
     - certgen
     - root-ca
+    - ca-certrequester
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove Certificate Requester secret
+  command: kubectl delete secret ca-certrequester
   ignore_errors: yes
   changed_when: true
 

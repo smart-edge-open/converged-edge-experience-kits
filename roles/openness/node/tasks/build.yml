@@ -53,12 +53,48 @@
     - name: remove .openness_gitconfig
       include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
-# since these pods are part of openness' DaemonSet will be recreated after deletion
+# since these pods are part of openness' Deployment will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
+- name: recreate EAA pod
+  shell: >
+    set -o pipefail && kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa' )
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: eaa_recreated
+  ignore_errors: yes
+  changed_when: true
+
+# EAA sends a CSR from an init container - we should automatically approve it
+- name: approve EAA CSR
+  shell: >
+    set -o pipefail && kubectl certificate approve eaa && kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} | grep -E 'eaa' | grep -E 'Running'
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  when: eaa_recreated.rc == 0
+
 - name: recreate openness pods
   shell: >
     kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'edgedns|interfaceservice|certsigner' )
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
+  changed_when: true
+
+# OpenNESS pods send a CSR from an init container - we should automatically approve it
+- name: approve openness CSRs
+  shell: >
+    set -o pipefail && kubectl certificate approve {{ item }}-{{ node_name }} && kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item }}' | grep -E 'Running'
+  with_items:
+  - edgedns
+  - interfaceservice
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
   changed_when: true
