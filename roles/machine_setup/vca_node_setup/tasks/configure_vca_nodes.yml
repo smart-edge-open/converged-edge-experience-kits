@@ -71,6 +71,18 @@
     - name: scp proxy to node
       command: "scp /etc/systemd/system/docker.service.d/http-proxy.conf {{ vca_node_ip }}:/root/"
       become: yes
+    - name: get line of server
+      command: "grep -v localhost /etc/hosts"
+      register: ser_line
+    - name: append server line to /etc/hosts
+      command: "ssh {{ vca_node_ip }} echo '{{ ser_line.stdout }}' >> /etc/hosts"
+      become: yes
+    - name: create `/etc/docker/` folder
+      command: "ssh {{ vca_node_ip }} mkdir -p /etc/docker/"
+      become: yes
+    - name: scp daemon.json to node
+      command: "scp /etc/docker/daemon.json {{ vca_node_ip }}:/etc/docker/"
+      become: yes
     - name: create `.docker` folder
       command: "ssh {{ vca_node_ip }} mkdir -p /root/.docker/"
       become: yes
