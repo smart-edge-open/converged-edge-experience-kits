@@ -24,6 +24,24 @@
     until: result is succeeded
     delay: "{{ retry_delay }}"
     when: dns_enable
+  - name: download modules for certsigner
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/certsigner"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: eaa_enable or dns_enable
+  - name: download modules for certrequester
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/certrequester"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: eaa_enable or dns_enable
   - name: build binaries and images
     shell: source /etc/profile && make eaa
     args:
@@ -48,6 +66,16 @@
     args:
       chdir: "{{ _git_repo_dest }}"
     when: "'kubeovn' in kubernetes_cnis"
+  - name: build binaries and images for certsigner
+    shell: source /etc/profile && make certsigner
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: eaa_enable or dns_enable
+  - name: build binaries and images for certrequester
+    shell: source /etc/profile && make certrequester
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: eaa_enable or dns_enable
   when: not offline_enable
   always:
     - name: remove .openness_gitconfig
