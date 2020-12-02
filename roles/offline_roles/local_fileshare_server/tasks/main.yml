@@ -20,6 +20,12 @@
       msg: "package name is: {{ item }}"
     with_items: "{{ _httpd_packages }}"
 
+  - name: Install yum plugin
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ _yum_localinstall_plugin }}"
+
   - name: Install HTTP server and ssl mod packages
     yum:
       name: "{{ item }}"

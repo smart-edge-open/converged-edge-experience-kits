@@ -1814,7 +1814,7 @@ other-files:
   - name: dpdk
     url: http://fast.dpdk.org/rel/dpdk-18.11.6.tar.xz
   - name: golang
-    url: https://dl.google.com/go/go1.14.9.linux-amd64.tar.gz
+    url: https://dl.google.com/go/go1.15.5.linux-amd64.tar.gz
   #- name: OpenVino
   #  url: http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz
   - name: ovs
