@@ -115,11 +115,7 @@ Environment=\"NO_PROXY=localhost,127.0.0.1\"" | sudo tee "${DOCKER_PROXY}"
   # Add user into docker group
   sudo_cmd usermod -aG docker "$USER"
   sudo_cmd systemctl daemon-reload
-  sudo_cmd systemctl restart docker
-  if [ $? -ne 0 ];then
-    echo "Error, docker start failed"
-    exit
-  fi
+  sudo_cmd systemctl restart docker || opc::log::error "Error at precheck.sh:$LINENO" "systemctl restart docker"
   sudo_cmd systemctl enable docker
 fi
 # check $USER authority

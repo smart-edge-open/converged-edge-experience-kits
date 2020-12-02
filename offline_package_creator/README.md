@@ -1,6 +1,7 @@
+```text
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
-
+```
 # Machine describe
 OS: CentOS Linux release 7.8.2003 (Core)
 
@@ -19,11 +20,13 @@ To configure first and the configuration file is located in "scripts/initrc"
 | Option | Values | Description |
 | ------ | ------ | ----------- |
 | BUILD_BIOSFW | enable\|disable | Enable build the image of 'biosfw' (default: disable), if enable it, you should set the value of 'DIR_OF_BIOSFW_ZIP' |
+| BUILD_OPAE | enable\|disable | Enable build the image of 'opae' (default: disable), if enable it, you should set the value of 'DIR_OF_OPAE_ZIP' |
 | BUILD_FPGA_CONFIG | enable\|disable | Enable build the image of 'fpga_config' (default: disable), if enable it, you should set the value of 'DIR_BBDEV_CONFIG' |
 | BUILD_COLLECTD_FPGA | enable\|disable | Enable build the image of 'collectd_fpga_plugin' (default: disable), if enable it, you should set the value of 'DIR_OF_FPGA_ZIP' |
 
 ```sh
-bash offline_package_creator.sh all
+cp ../roles/telemetry/collectd/controlplane/files/* ./file/collectd
+bash offline_package_creator.sh $sudo_password all
 ```
 Maybe the machine will be restarted twice!
 The one is for making docker user effective, another is for updating the kernel.

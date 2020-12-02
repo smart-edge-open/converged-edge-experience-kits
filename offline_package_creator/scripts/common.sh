@@ -18,27 +18,39 @@ urlDic=(
 [other]='http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/' \
 )
 
+progressfilt() {
+  local flag=false c count cr=$'\r' nl=$'\n'
+  set +e
+  while IFS='' read -d '' -rn 1 c
+  do
+    if $flag;then
+      printf '%c' "$c"
+    else
+      if [[ "$c" != "$cr" && "$c" != "$nl" ]];then
+        count=0
+      else
+        (( count++ ))
+        if ((count > 1));then
+          flag=true
+        fi
+      fi
+    fi
+  done
+  set -e
+}
+
 # Downoad package from network
 do_download() {
   local i=0
   longName=$(echo "$1" | rev | cut -d '/' -f 1 | rev)
   if [ -e "${RPM_DOWNLOAD_PATH}"/"$longName" ];then
-      return
+    return
   fi
-  while [ $i -lt 3 ]
-  do
-    wget -e http_proxy="${HTTP_PROXY}" -e https_proxy="${HTTP_PROXY}" -P "${RPM_DOWNLOAD_PATH}" "$1"
-    if [ $? -eq 0 ];then
-      break
-    fi
-    i=$(( i + 1 ))
-    sleep 1
-  done
-  if [[ $i -ge 3 && $2 -eq 0 ]];then
+  wget --progress=bar:force -e http_proxy="${HTTP_PROXY}" -e https_proxy="${HTTP_PROXY}" \
+    -P "${RPM_DOWNLOAD_PATH}" "$1" 2>&1 | progressfilt || \
+  if [[ "$2" -eq 0 ]];then
     echo "Wget Error"
     exit
-  else
-    return $?
   fi
 }
 
@@ -54,10 +66,9 @@ do_try_download() {
 
   for url in "${urlDic[@]}"
   do
-    wget -e http_proxy="${HTTP_PROXY}" -e https_proxy="${HTTP_PROXY}" -P "${RPM_DOWNLOAD_PATH}" "${url}${rname}.${arch}.rpm"
-    if [ $? -eq 0 ];then
-      return 0
-    fi
+    wget --progress=bar:force -e http_proxy="${HTTP_PROXY}" -e https_proxy="${HTTP_PROXY}" -P \
+      "${RPM_DOWNLOAD_PATH}" "${url}${rname}.${arch}.rpm" 2>&1 | progressfilt || continue
+    return
   done
 
   if [[ "$ignore" -eq 0 ]];then
@@ -71,10 +82,11 @@ do_try_find_key() {
   for key in "${!urlDic[@]}"
   do
     if [[ "$1" == "$key" ]];then
-      return 0
+      echo 0
+      return
     fi
   done
-  return 1
+  echo 1
 }
 
 # Remove the '@' if it exists
@@ -100,6 +112,7 @@ do_broken_row() {
   local version
   local rname
   local columns
+  local ret
   local name=$1
   local arch=$2
 
@@ -116,8 +129,8 @@ do_broken_row() {
     version=$(echo "${oneLine[@]}" | awk '{print $2}' | cut -d ':' -f 2)
     rname="${name}-${version}"
   fi
-  do_try_find_key "$type"
-  if [[ $? -eq 0 ]];then
+  ret=$(do_try_find_key "$type")
+  if [[ "$ret" -eq 0 ]];then
     do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$4"
   else
     do_try_download "$rname" "$arch" "$4"
@@ -131,6 +144,7 @@ do_row() {
   local version
   local rname
   local type
+  local ret
   local name=$1
   local arch=$2
 
@@ -142,11 +156,11 @@ do_row() {
      || "$type" == "ius-archive" ]];then
     do_download "${urlDic[$type]}${name:0:1}/${rname}.${arch}.rpm" "$3"
   else
-    do_try_find_key "$type"
-    if [ $? -eq 0 ];then
+    ret=$(do_try_find_key "$type")
+    if [[ "$ret" == "0" ]];then
       if [[ "$type" == "updates" ]];then
         do_download "${urlDic[base]}${rname}.${arch}.rpm" 1 \
-        || do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$3"
+        || do_download "${urlDic[updates]}${rname}.${arch}.rpm" "$3"
       else
         do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$3"
       fi
@@ -236,6 +250,15 @@ opc::log::status() {
   done
 }
 
+opc::check::exist() {
+  local ret
+
+  ret=0
+  echo "$1" | grep -q "$2" || ret=1
+
+  echo "$ret"
+}
+
 readonly OPC_DOWNLOAD_PATH="$OPC_BASE_DIR/opcdownloads"
 readonly RPM_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/rpms"
 readonly CODE_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/github"
@@ -256,18 +279,20 @@ opc::dir::create() {
 # Download the rpms from internet
 opc::download::rpm() {
   local url
+  local ret
   local shortName
 
   sudo_cmd yum clean all
   sudo_cmd yum makecache fast
   sudo_cmd yum list --enablerepo=ius-archive > /tmp/list.log
-  for list in $1;do
+  for list in $1
+  do
     url=$(echo "$list" | cut -d ',' -f 2)
     longName=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     shortName=$(echo "$longName" | sed 's/-[0-9]/ /' | awk '{print $1}')
     echo "------> $shortName"
-    echo "$longName" | grep -q "noarch"
-    if [ $? -eq 0 ];then
+    ret=$(opc::check::exist "$longName" "noarch")
+    if [[ "$ret" -eq 0 ]];then
       do_rpm_main "$shortName" "noarch"
     else
       do_rpm_main "$shortName" "x86_64"
@@ -338,18 +363,23 @@ opc::download::github() {
   local url
   local flag
   local value
+  local ret
   local pwd=$PWD
 
-  cd "$CODE_DOWNLOAD_PATH"
-  for list in $1;do
+  # make the directory to be clean
+  cd "$CODE_DOWNLOAD_PATH" && sudo_cmd rm ./* -rf
+  for list in $1
+  do
     name=$(echo "$list" | cut -d ',' -f 1)
     url=$(echo "$list" | cut -d ',' -f 2)
     flag=$(echo "$list" | cut -d ',' -f 3)
     value=$(echo "$list" | cut -d ',' -f 4)
-    set +e
     # otcshare git repo need a token
-    echo "$url" | grep -q 'otcshare'
-    if [[ $? -eq 0 && ! -z "$GITHUB_TOKEN" ]];then
+    ret=$(opc::check::exist "$url" "otcshare")
+    if [[ "$ret" -eq 0 ]];then
+      if [ -z "$GITHUB_TOKEN" ];then
+        opc::log::error "Cannot download otcshare code!"
+      fi
       part1=$(echo "$url" | cut -d ':' -f 1)
       part2=$(echo "$url" | cut -d ':' -f 2)
       part2="${part2:2}"
@@ -373,7 +403,6 @@ opc::download::github() {
           && git clone $url && cd $name && git reset --hard $value"
       fi
     fi
-    set -e
   done
   sudo_cmd chown -R "$USER":"$USER" "${CODE_DOWNLOAD_PATH}"
   cd "${pwd}"
@@ -397,7 +426,8 @@ opc::download::gomodules() {
   local name
   local pwd="$PWD"
 
-  for list in $1;do
+  for list in $1
+  do
     name=$(echo "$list" | cut -d ',' -f 1)
     cd "${CODE_DOWNLOAD_PATH}"/"$name"
     if [[ ! -e "go.mod" ]];then
@@ -441,12 +471,13 @@ opc::download::pippackage() {
   local url
   local name
 
-  for list in $1;do
+  for list in $1
+  do
     url=$(echo "$list" | cut -d ',' -f 2)
     name=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     if [[ ! -e "$PIP_DOWNLOAD_PATH/$name" ]];then
-      wget -e https_proxy="${HTTP_PROXY}" -e http_proxy="${HTTP_PROXY}" \
-              https://files.pythonhosted.org/packages/"$url" -P "$PIP_DOWNLOAD_PATH" \
+      wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" -e http_proxy="${HTTP_PROXY}" \
+        -P "$PIP_DOWNLOAD_PATH" https://files.pythonhosted.org/packages/"$url" 2>&1 | progressfilt \
       || opc::log::error "Wget https://files.pythonhosted.org/packages/$url"
     fi
   done
@@ -457,12 +488,13 @@ opc::download::yamls() {
   local url
   local name
 
-  for list in $1;do
+  for list in $1
+  do
     url=$(echo "$list" | cut -d ',' -f 2)
     name=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     if [ ! -e "$YAML_DOWNLOAD_PATH"/"$name" ];then
-      wget -e https_proxy="${HTTP_PROXY}" \
-           -e http_proxy="${HTTP_PROXY}" "$url" -P "${YAML_DOWNLOAD_PATH}" \
+      wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" \
+           -e http_proxy="${HTTP_PROXY}" -P "${YAML_DOWNLOAD_PATH}" "$url" 2>&1 | progressfilt \
       || opc::log::error "Wget $url"
     fi
   done
@@ -475,7 +507,8 @@ opc::download::images() {
   local name
   local image
 
-  for list in $1;do
+  for list in $1
+  do
     name=$(echo "$list" | cut -d ',' -f 1)
     image=$(echo "$list" | cut -d ',' -f 2)
     docker pull "$image" || exit
@@ -761,12 +794,13 @@ opc::download::others() {
   local url
   local name
 
-  for list in $1;do
+  for list in $1
+  do
     url=$(echo "$list" | cut -d ',' -f 2)
     name=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     if [[ ! -e "$OTHER_DOWNLOAD_PATH"/"$name" ]];then
-      wget -e https_proxy="${HTTP_PROXY}" \
-           -e http_proxy="${HTTP_PROXY}" "$url" -P "$OTHER_DOWNLOAD_PATH" \
+      wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" \
+           -e http_proxy="${HTTP_PROXY}" "$url" -P "$OTHER_DOWNLOAD_PATH" 2>&1 | progressfilt \
       || opc::log::error "Wget $url"
     fi
   done
@@ -777,7 +811,8 @@ opc::download::charts() {
   local tmp_file
   local short_name
 
-  for list in $1;do
+  for list in $1
+  do
     OLD_IFS="$IFS"
     IFS=','
     array=($list)
@@ -792,8 +827,8 @@ opc::download::charts() {
         mkdir -p "$tmp_dir"
       fi
       if [[ ! -e "${tmp_dir}"/"${short_name}" ]];then
-        wget -e https_proxy="${HTTP_PROXY}" -e http_proxy="${HTTP_PROXY}" \
-                https://raw.githubusercontent.com/"$tmp_file" -P "$tmp_dir" \
+        wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" -e http_proxy="${HTTP_PROXY}" \
+          https://raw.githubusercontent.com/"$tmp_file" -P "$tmp_dir" 2>&1 | progressfilt \
         || opc::log::error "wget https://raw.githubusercontent.com/$tmp_file"
       fi
     done

@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
 # Download rpms
 rpms_download() {
   download_rpm_list=$(python3 scripts/parse_yml.py rpm-packages) 

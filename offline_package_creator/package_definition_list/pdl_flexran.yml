@@ -25,7 +25,7 @@ github-repos:
   - name: rmd-operator
     url: https://github.com/intel/rmd-operator
     flag: tag
-    value: v0.1.1
+    value: v0.2
   - name: telemetry-aware-scheduling
     url: https://github.com/intel/telemetry-aware-scheduling.git
     flag: commit
@@ -1815,8 +1815,8 @@ other-files:
     url: http://fast.dpdk.org/rel/dpdk-18.11.6.tar.xz
   - name: golang
     url: https://dl.google.com/go/go1.14.9.linux-amd64.tar.gz
-  - name: OpenVino
-    url: http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz
+  #- name: OpenVino
+  #  url: http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz
   - name: ovs
     url: https://www.openvswitch.org/releases/openvswitch-2.11.1.tar.gz
   - name: kube-ovn-cleanup-script
