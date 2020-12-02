@@ -21,7 +21,6 @@
     - role: git_repo
     - role: golang
     - role: docker
-    - role: dependency_build
 
 # Playbook for emco cluster deployment
 - hosts: controller_group
