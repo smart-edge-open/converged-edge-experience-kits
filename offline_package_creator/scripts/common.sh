@@ -649,10 +649,9 @@ build::intel_rmd_operator() {
     -v "${GOMODULE_DOWNLOAD_PATH}":/go/pkg \
     -e http_proxy="$GIT_PROXY" \
     golang:1.14.9 bash /root/build_rmd_operator.sh
-  set +e
-  docker build -t intel-rmd-node-agent -f build/Dockerfile.nodeagent .
-  docker build -t intel-rmd-operator   -f build/Dockerfile  .
-  set -e
+
+  docker build --build-arg https_proxy="${GIT_PROXY}" -t intel-rmd-node-agent -f build/Dockerfile.nodeagent .
+  docker build --build-arg https_proxy="${GIT_PROXY}" -t intel-rmd-operator   -f build/Dockerfile  .
   docker save intel-rmd-node-agent:latest > "${IMAGE_DOWNLOAD_PATH}"/intel-rmd-node-agent.tar.gz
   docker save intel-rmd-operator:latest > "${IMAGE_DOWNLOAD_PATH}"/intel-rmd-operator.tar.gz
 }
@@ -693,7 +692,7 @@ opc::update_kernel() {
 }
 
 build::collectd_fpga_plugin() {
-  local kernel_version
+  local kernel_version collectd_dir
 
   kernel_version=$(uname -r)
   if [[ "$BUILD_COLLECTD_FPGA" == "enable" && ! -z "${DIR_OF_FPGA_ZIP}" ]];then
@@ -704,13 +703,15 @@ build::collectd_fpga_plugin() {
         opc::update_kernel
       fi
     else
-      cp "$DIR_OF_FPGA_ZIP"/n3000-1-3-5-beta-rte-setup.zip "$OPC_BASE_DIR"/file/collectd
-      cp "$DIR_OF_FPGA_ZIP"/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip "$OPC_BASE_DIR"/file/collectd
+      collectd_dir=$(mktemp -d)
+      cp -f "$OPC_BASE_DIR"/../roles/telemetry/collectd/controlplane/files/* "$collectd_dir"
+      cp "$DIR_OF_FPGA_ZIP"/n3000-1-3-5-beta-rte-setup.zip "$collectd_dir"
+      cp "$DIR_OF_FPGA_ZIP"/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip "$collectd_dir"
       set +e
       docker build --build-arg http_proxy="${HTTP_PROXY}" \
         --build-arg https_proxy="${HTTP_PROXY}" \
-        -t collectd_fpga_plugin:0.1.0 "$OPC_BASE_DIR"/file/collectd
-      rm -f "${OPC_BASE_DIR}"/file/collectd/n3000-1-3-5* -f
+        -t collectd_fpga_plugin:0.1.0 "$collectd_dir"
+      rm -f "$collectd_dir" -rf
       docker save collectd_fpga_plugin:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/collectd_fpga_plugin.tar.gz
       set -e
     fi

@@ -94,6 +94,7 @@ zip_and_move() {
   local nline
   local tmpDir
 
+  cd "$OPC_BASE_DIR"
   # remove an existing package
   if [ -e opcdownloads.tar.gz ];then
     rm -f opcdownloads.tar.gz
@@ -119,6 +120,7 @@ zip_and_move() {
   done < file/precheck/precheck_requirements.txt
   tar czvf prepackages.tar.gz -C "${tmpDir}" ./
   rm -rf "${tmpDir}"
+  mv -f opcdownloads.tar.gz checksum.txt prepackages.tar.gz ../roles/offline_roles/unpack_offline_package/files
 }
 
 usage() {
@@ -136,7 +138,7 @@ usage() {
   echo -e "	""\033[33mimages\033[0m       download docker images only"
   echo -e "	""\033[33mbuild\033[0m        build docker images"
   echo -e "	""             common,interfaceservice,biosfw,tas,sriov_cni,sriov_network,fpga_cfg,rmd,collectd_fpga;all(default)"
-  echo -e "	""             like: \033[33m$0 build common\033[0m"
+  echo -e "	""             like: \033[33m$0 \${sudo_password} build common\033[0m"
   echo -e "	""\033[33mcharts\033[0m       download charts file only"
   echo -e "	""\033[33mothers\033[0m       download other file only"
   echo -e "	""\033[33mzip\033[0m          zip the directory of opcdownloads and mv it to a target directory"
@@ -156,9 +158,7 @@ main() {
   PASSWD=$1
   echo "$PASSWD" | sudo -S ls /root > /dev/null || exit
 
-declare OPC_BASE_DIR
 OPC_BASE_DIR=$(dirname "$(readlink -f "$0")")
-export OPC_BASE_DIR
 
 source scripts/initrc
 source scripts/common.sh
