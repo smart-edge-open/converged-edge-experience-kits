@@ -7,6 +7,15 @@
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
+  when: not offline_enable | default(False)
+  become: yes
+
+- name: install tuned packages - offline mode
+  yum:
+    name: "{{ offline_tuned_packages | join(',') }}"
+    state: present
+    allow_downgrade: yes
+  when: offline_enable | default(False)
   become: yes
 
 - name: setup isolated cores

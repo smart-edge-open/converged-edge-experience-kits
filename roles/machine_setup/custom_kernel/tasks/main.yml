@@ -15,14 +15,15 @@
     name: "{{ tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: not offline_enable
+  when: not offline_enable | default(False)
+  become: yes
 
 - name: install kernel dependencies - tuned
   yum:
     name: "{{ offline_tuned_packages | join(',') }}"
     state: present
     allow_downgrade: yes
-  when: offline_enable
+  when: offline_enable | default(False)
   become: yes
 
 - name: install kernel dependencies - URLs

@@ -23,12 +23,6 @@ kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
 # If false, tuned_packages will be installed, tuned_profile will be applied with tuned_vars
 tuned_skip: true
 
-tuned_repo_addr: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] if offline_enable else 'linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages' }}"
-
-tuned_packages:
-  - "http://{{ tuned_repo_addr }}/tuned-2.11.0-8.el7.noarch.rpm"
-  - "http://{{ tuned_repo_addr }}/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm"
-
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
 hugepage_size: "1G"
