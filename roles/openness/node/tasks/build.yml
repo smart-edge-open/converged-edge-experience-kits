@@ -100,18 +100,6 @@
   ignore_errors: yes
   changed_when: true
 
-# EDGEDNS send a CSR from an init container - we should automatically approve it
-- name: approve openness CSRs
-  shell: >
-    set -o pipefail && kubectl certificate approve edgedns-{{ node_name }} && kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} | grep -E 'edgedns' | grep -E 'Running'
-  delegate_to: "{{ groups['controller_group'][0] }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  changed_when: true
-
 # OpenNESS pods send a CSR from an init container - we should automatically approve it
 - name: approve openness CSRs
   shell: >
