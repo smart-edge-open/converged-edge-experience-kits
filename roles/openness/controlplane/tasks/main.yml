@@ -27,6 +27,9 @@
 - name: generate certs of openness components
   include_tasks: certs.yml
 
+- name: common openness facts
+  include_tasks: ../../common/tasks/main.yml
+
 - name: create Certificate Requester CA secret
   block:
   - name: check if Certificate Requester CA secret exists
@@ -72,6 +75,11 @@
   with_items:
     - daemonset
     - service
+
+- name: delete certsigner definition
+  command: kubectl delete deployment certsigner -n openness
+  changed_when: true
+  when: not cert_enabled
 
 - name: copy logrotate config
   copy:

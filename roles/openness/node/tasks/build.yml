@@ -32,7 +32,7 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
-    when: eaa_enable or dns_enable
+    when: cert_enabled
   - name: download modules for certrequester
     shell: source /etc/profile && go mod download
     args:
@@ -41,7 +41,7 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
-    when: eaa_enable or dns_enable
+    when: cert_enabled
   - name: build binaries and images
     shell: source /etc/profile && make eaa
     args:
@@ -70,12 +70,12 @@
     shell: source /etc/profile && make certsigner
     args:
       chdir: "{{ _git_repo_dest }}"
-    when: eaa_enable or dns_enable
+    when: cert_enabled
   - name: build binaries and images for certrequester
     shell: source /etc/profile && make certrequester
     args:
       chdir: "{{ _git_repo_dest }}"
-    when: eaa_enable or dns_enable
+    when: cert_enabled
   when: not offline_enable
   always:
     - name: remove .openness_gitconfig
@@ -83,43 +83,33 @@
 
 # since these pods are part of openness' Deployment will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
-- name: recreate EAA pod
-  shell: >
-    set -o pipefail && kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa' )
-  delegate_to: "{{ groups['controller_group'][0] }}"
-  register: eaa_recreated
-  ignore_errors: yes
-  changed_when: true
-
-# EAA sends a CSR from an init container - we should automatically approve it
-- name: approve EAA CSR
-  shell: >
-    set -o pipefail && kubectl certificate approve eaa && kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} | grep -E 'eaa' | grep -E 'Running'
-  delegate_to: "{{ groups['controller_group'][0] }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  when: eaa_recreated.rc == 0
-
 - name: recreate openness pods
   shell: >
     kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'edgedns|interfaceservice|certsigner' )
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'edgedns|interfaceservice|certsigner|eaa' )
   delegate_to: "{{ groups['controller_group'][0] }}"
+  ignore_errors: yes
+  changed_when: true
+
+- name: check if EAA is running on a node
+  shell: >
+    set -o pipefail && kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa'
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: eaa_present
   ignore_errors: yes
   changed_when: true
 
 # OpenNESS pods send a CSR from an init container - we should automatically approve it
 - name: approve openness CSRs
   shell: >
-    set -o pipefail && kubectl certificate approve {{ item }}-{{ node_name }} && kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item }}' | grep -E 'Running'
+    set -o pipefail && kubectl certificate approve {{ item.svc }} && kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item.svc }}' | grep -E 'Running'
+  when: "item.when"
   with_items:
-  - edgedns
-  - interfaceservice
+    - { svc: "edgedns-{{ node_name }}", when: "{{ dns_enable }}"}
+    - { svc: "interfaceservice-{{ node_name }}", when: "{{ 'kubeovn' in kubernetes_cnis }}"}
+    - { svc: "eaa", when: "{{ eaa_present.rc == 0 }}"}
   delegate_to: "{{ groups['controller_group'][0] }}"
   register: result
   retries: "{{ number_of_retries }}"
