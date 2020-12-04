@@ -1812,7 +1812,7 @@ other-files:
   - name: docker-compose-completion-bash
     url: https://raw.githubusercontent.com/docker/compose/1.24.1/contrib/completion/bash/docker-compose
   - name: dpdk
-    url: http://fast.dpdk.org/rel/dpdk-18.11.6.tar.xz
+    url: http://fast.dpdk.org/rel/dpdk-19.11.1.tar.xz
   - name: golang
     url: https://dl.google.com/go/go1.15.5.linux-amd64.tar.gz
   #- name: OpenVino

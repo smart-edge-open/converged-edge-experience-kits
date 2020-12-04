@@ -53,7 +53,7 @@
 
 - name: Check if offline
   set_fact:
-    _dpdk_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/dpdk-18.11.6.tar.xz"
+    _dpdk_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _dpdk_name }}.tar.xz"
   when: offline_enable
 
 - name: download

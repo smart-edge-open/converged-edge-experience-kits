@@ -344,6 +344,7 @@ repo_gpgcheck = 1" | sudo tee /etc/yum.repos.d/kubernetes.repo
 
   # Rename
   files=$(ls "$tmp_dir") 
+  set +e
   for f in $files
   do
     new_name=$(echo "$f" | grep -o -E '\-[k|c][u|r].*' | sed 's/^-//')
@@ -353,6 +354,7 @@ repo_gpgcheck = 1" | sudo tee /etc/yum.repos.d/kubernetes.repo
       mv "${tmp_dir}/$f" "${tmp_dir}/${new_name}"
     fi
   done
+  set -e
   cp -n "${tmp_dir}"/* "${RPM_DOWNLOAD_PATH}"
   rm -rf "${tmp_dir}"
 }
@@ -637,7 +639,7 @@ build::tas() {
 
 build::rmd() {
   cd "${CODE_DOWNLOAD_PATH}"/rmd
-  docker build --build-arg http_proxy="${HTTP_PROXY}" -t rmd ./
+  docker build --build-arg https_proxy="$GIT_PROXY" --build-arg http_proxy="$HTTP_PROXY" -t rmd ./
   docker save rmd:latest > "${IMAGE_DOWNLOAD_PATH}"/rmd.tar.gz
 }
 
