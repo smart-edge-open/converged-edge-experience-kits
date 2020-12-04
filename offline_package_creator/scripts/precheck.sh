@@ -112,13 +112,13 @@ echo "[Service]
 Environment=\"HTTP_PROXY=${HTTP_PROXY}\"
 Environment=\"HTTPS_PROXY=${HTTP_PROXY}\"
 Environment=\"NO_PROXY=localhost,127.0.0.1\"" | sudo tee "${DOCKER_PROXY}"
-  # Add user into docker group
-  sudo_cmd usermod -aG docker "$USER"
-  sudo_cmd systemctl daemon-reload
-  sudo_cmd systemctl restart docker || opc::log::error "Error at precheck.sh:$LINENO" "systemctl restart docker"
-  sudo_cmd systemctl enable docker
 fi
+
+# Add user into docker group
+sudo_cmd usermod -aG docker "$USER"
+sudo_cmd systemctl daemon-reload
+sudo systemctl is-active docker || sudo_cmd systemctl restart docker || opc::log::error "Error at precheck.sh:$LINENO" "systemctl restart docker"
+sudo_cmd systemctl enable docker
+
 # check $USER authority
 docker images > /dev/null 2>&1 || restart_dep
-# Check docker daemon
-sudo_cmd systemctl is-active docker || sudo_cmd systemctl start docker

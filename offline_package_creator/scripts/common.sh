@@ -159,8 +159,8 @@ do_row() {
     ret=$(do_try_find_key "$type")
     if [[ "$ret" == "0" ]];then
       if [[ "$type" == "updates" ]];then
-        do_download "${urlDic[base]}${rname}.${arch}.rpm" 1 \
-        || do_download "${urlDic[updates]}${rname}.${arch}.rpm" "$3"
+        do_download "${urlDic[base]}${rname}.${arch}.rpm" 1
+        do_download "${urlDic[updates]}${rname}.${arch}.rpm" "$3"
       else
         do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$3"
       fi
