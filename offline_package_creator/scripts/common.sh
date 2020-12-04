@@ -549,8 +549,12 @@ build::common_services() {
     && make common-services SKIP_DOCKER_IMAGES=1"
     docker build --build-arg http_proxy="${HTTP_PROXY}" -t eaa:1.0 dist/eaa
     docker build --build-arg http_proxy="${HTTP_PROXY}" -t edgednssvr:1.0 dist/edgednssvr
+    docker build --build-arg http_proxy="${HTTP_PROXY}" -t certsigner:1.0 dist/certsigner
+    docker build --build-arg http_proxy="${HTTP_PROXY}" -t certrequester:1.0 dist/certrequester
     docker save eaa:1.0 > "$IMAGE_DOWNLOAD_PATH"/eaa.tar.gz
     docker save edgednssvr:1.0 > "$IMAGE_DOWNLOAD_PATH"/edgednssvr.tar.gz
+    docker save certsigner:1.0 > "$IMAGE_DOWNLOAD_PATH"/certsigner.tar.gz
+    docker save certrequester:1.0 > "$IMAGE_DOWNLOAD_PATH"/certrequester.tar.gz
 }
 
 build::interfaceservice() {

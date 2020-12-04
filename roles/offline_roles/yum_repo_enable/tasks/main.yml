@@ -3,18 +3,21 @@
 
 ---
 
-- name: Delete existing repositories
+- name: Rename existing repositories
   block:
-  - name: Find repos
+  - name: Find repo files
     find:
       paths: "{{ _repos_path }}"
+      file_type: file
+      use_regex: yes
+      patterns: '^.+\.repo$'
     register: repos_found
+    become: yes
 
-  - name: Delete repos
-    file:
-      path: "{{ item.path }}"
-      state: absent
+  - name: Rename origin repos
+    command: "mv {{ item.path }} {{ item.path }}.bak"
     with_items: "{{ repos_found.files }}"
+    become: yes
 
 - name: Create repofile
   block:
@@ -22,9 +25,11 @@
     copy:
       src: local.repo
       dest: "{{ _repos_path }}/local.repo"
+    become: yes
 
   - name: Replace IP of local repo
     replace:
       path: "{{ _repos_path }}/local.repo"
       regexp: 'controller_IP_addr'
       replace: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+    become: yes

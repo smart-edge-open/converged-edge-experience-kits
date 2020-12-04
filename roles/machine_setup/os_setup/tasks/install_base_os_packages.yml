@@ -22,20 +22,8 @@
   - name: Check if offline mode
     set_fact:
       local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
---trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+                  --trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
       _openssl_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _openssl_package_name }}.tar.gz"
-
-  - name: Add the iptables rule
-    iptables:
-      chain: INPUT
-      jump: ACCEPT
-      ctstate: NEW
-      protocol: tcp
-      destination_port: 443
-      action: insert
-      rule_num: 2
-    when: "'controller_group' in group_names"
-  when: offline_enable
 
 - name: install base OS rpm packages
   yum:

@@ -11,15 +11,6 @@
     immediate: yes
   become: yes
 
-- name: open calico firewall rules
-  ignore_errors: yes
-  firewalld:
-    port: 443/tcp
-    permanent: yes
-    state: enabled
-    immediate: yes
-  when: offline_enable
-
 # Starting with calico v3.16 the CNI is adding an accept rule at the end of FORWARD chain in filter table:
 # "Connections to services without endpoints are now properly rejected in iptables dataplane mode.
 #  The fix required moving the iptables ACCEPT rule to the end of the filter FORWARD chain;

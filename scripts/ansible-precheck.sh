@@ -25,7 +25,7 @@ if grep "offline_enable" "${TOP_PATH}/group_vars/all/10-default.yml" | grep -qE 
   cp "${TOP_PATH}/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz" "${tmpDir}"
 
   cd "${tmpDir}" && tar xzvf "${tmpDir}/prepackages.tar.gz"
-  yum localinstall -y "${tmpDir}/*"
+  yum localinstall -y "${tmpDir}"/*
   rm -rf "${tmpDir}"
   cd "${TOP_PATH}"
 fi

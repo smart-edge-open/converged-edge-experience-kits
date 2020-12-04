@@ -2,3 +2,10 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+
+- name: Remove the OPC download packages
+  file:
+    path: "{{ _offline_package_path }}"
+    state: absent
+  ignore_errors: yes
+  become: yes

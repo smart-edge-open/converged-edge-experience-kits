@@ -25,22 +25,26 @@
       name: "{{ item }}"
       state: present
     with_items: "{{ _yum_localinstall_plugin }}"
+    become: yes
 
   - name: Install HTTP server and ssl mod packages
     yum:
       name: "{{ item }}"
       state: present
     with_items: "{{ _httpd_packages }}"
+    become: yes
 
   - name: Start HTTP server
     systemd:
       name: httpd
       state: started
+    become: yes
 
   - name: Enable HTTP server
     systemd:
       name: httpd
       enabled: yes
+    become: yes
 
   - name: Configure HTTP server
     block:
@@ -49,11 +53,13 @@
           path: /etc/httpd/conf/httpd.conf
           regexp: 'Options Indexes FollowSymLinks'
           replace: 'Options All Indexes FollowSymLinks'
+        become: yes
 
       - name: Delete welcome page
         file:
           path: /etc/httpd/conf.d/welcome.conf
           state: absent
+        become: yes
 
       - name: Create template directory for installing ssl
         tempfile:
@@ -78,6 +84,7 @@
         with_items:
           - "localhost.key"
           - "localhost.crt"
+        become: yes
 
       - name: Check if the ssl certificate exists in the local trust list
         shell: >
@@ -86,39 +93,46 @@
         ignore_errors: yes
         register: ssl_exists
         changed_when: false
+        become: yes
 
       - name: Copy the target crt file into the path for httpd
         shell: |
           cp -f {{ ssl_dir.path }}/localhost.key /etc/pki/tls/private/localhost.key
           cp -f {{ ssl_dir.path }}/localhost.crt /etc/pki/tls/certs/localhost.crt
         when: ssl_exists.rc != 0
+        become: yes
 
       - name: Add the certificate into local trust list
         shell: >
             cat {{ ssl_dir.path }}/localhost.crt >> /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
         when: ssl_exists.rc != 0
+        become: yes
 
       - name: Restart HTTP server
         command: systemctl restart httpd
         changed_when: true
+        become: yes
 
       - name: fetch the crt file back to ansible host
         fetch:
           src: "/etc/pki/tls/certs/localhost.crt"
           dest: "/tmp/"
           flat: yes
+        become: yes
 
   - name: Copy RPMs from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_yum_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+      become: yes
 
   - name: Copy PIP packages from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_pip_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+      become: yes
 
   - name: Create a list of Docker images
     block:
@@ -193,6 +207,7 @@
       state: enabled
       immediate: yes
     with_items:
-      - 80/tcp
+      - 443/tcp
+    become: yes
 
   when: offline_package_exists.stat.exists

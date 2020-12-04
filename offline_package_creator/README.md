@@ -26,7 +26,7 @@ To configure first and the configuration file is located in "scripts/initrc"
 
 ```sh
 cp ../roles/telemetry/collectd/controlplane/files/* ./file/collectd
-bash offline_package_creator.sh $sudo_password all
+bash offline_package_creator.sh all
 ```
 Maybe the machine will be restarted twice!
 The one is for making docker user effective, another is for updating the kernel.

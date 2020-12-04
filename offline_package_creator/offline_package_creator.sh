@@ -68,7 +68,7 @@ images_download() {
 
 # Build private images
 images_build() {
-  opc::build::images "${1}"
+  opc::build::images "$1"
 }
 
 # Download other files
@@ -120,7 +120,7 @@ zip_and_move() {
   done < file/precheck/precheck_requirements.txt
   tar czvf prepackages.tar.gz -C "${tmpDir}" ./
   rm -rf "${tmpDir}"
-  mv -f opcdownloads.tar.gz checksum.txt prepackages.tar.gz ../roles/offline_roles/unpack_offline_package/files
+  sudo_cmd mv -f opcdownloads.tar.gz checksum.txt prepackages.tar.gz ../roles/offline_roles/unpack_offline_package/files
 }
 
 usage() {
@@ -151,11 +151,12 @@ main() {
     exit
   fi
 
-  if [[ $# -lt 2 || "$1" == "help" ]];then
+  if [[ $# -lt 1 || "$1" == "help" ]];then
     usage
     exit
   fi
-  PASSWD=$1
+
+  read -p "Please Input sudo password:" -s PASSWD
   echo "$PASSWD" | sudo -S ls /root > /dev/null || exit
 
 OPC_BASE_DIR=$(dirname "$(readlink -f "$0")")
@@ -164,7 +165,7 @@ source scripts/initrc
 source scripts/common.sh
 source scripts/precheck.sh
 
-  case $2 in
+  case $1 in
     rpm)
       rpms_download
       exit
@@ -193,10 +194,10 @@ source scripts/precheck.sh
     build)
       code_download
       go_modules_download
-      if [ $# -lt 3 ];then
+      if [ $# -lt 2 ];then
         images_build all
       else
-        images_build "$3"
+        images_build "$2"
       fi
       exit
     ;;
