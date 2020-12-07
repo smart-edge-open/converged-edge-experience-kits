@@ -20,10 +20,6 @@
         owner: "{{ ansible_user }}"
       become: yes
 
-    - name: Make sure git repo address
-      set_fact:
-        _git_repo_dest: "/opt/edgenode"
-
     - name: checkout clean repository
       git:
         repo: "{{ git_repo_url }}"
