@@ -125,14 +125,14 @@
       src: "{{ _offline_package_yum_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
-      become: yes
+    become: yes
 
   - name: Copy PIP packages from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_pip_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
-      become: yes
+    become: yes
 
   - name: Create a list of Docker images
     block:

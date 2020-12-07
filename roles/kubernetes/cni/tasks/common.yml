@@ -6,7 +6,7 @@
 - block:
   - name: find cni dir
     find:
-      paths: .
+      paths: ./roles
       patterns: "cni"
       recurse: yes
       file_type: directory

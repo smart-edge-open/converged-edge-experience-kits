@@ -28,7 +28,7 @@
    docker_container:
      name: "{{ item }}"
      state: absent
-   with_items: "{{ docker_names }}"
+   with_items: "{{ docker_names.stdout.split('\n') }}"
    ignore_errors: yes
    become: yes
 
