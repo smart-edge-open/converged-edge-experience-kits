@@ -188,6 +188,10 @@
       state: absent
     become: yes
 
+  - name: rmd controller cleanup
+    include_tasks: ./roles/rmd/common/tasks/cleanup.yml
+    when: rmd_operator_enable | default(False)
+
 - hosts: edgenode_group
   serial: 1
   tasks:
@@ -276,6 +280,10 @@
 
     - name: cleanup harbor_registry certificate
       include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml
+
+    - name: rmd node cleanup
+      include_tasks: ./roles/rmd/common/tasks/cleanup.yml
+      when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_vca_group
   serial: 1

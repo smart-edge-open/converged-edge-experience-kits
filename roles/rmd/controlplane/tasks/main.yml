@@ -52,8 +52,8 @@
 - name: copy the network policy to /tmp
   copy:
     src: rmdNetworkPolicy.yaml
-    dest: "/tmp"
+    dest: "{{ _rmd_main_dir }}"
 
 - name: create the network policy
-  command: kubectl create -f /tmp/rmdNetworkPolicy.yaml
+  command: kubectl create -f {{ _rmd_main_dir }}/rmdNetworkPolicy.yaml
   when: netpolicy_installed.rc == 1
