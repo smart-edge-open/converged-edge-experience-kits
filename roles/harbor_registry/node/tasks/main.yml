@@ -17,6 +17,10 @@
     set -o pipefail && echo -n | openssl s_client -showcerts \
     -connect {{ _registry_ip_address }}:{{ _registry_port }} 2>/dev/null | sed -ne \
     '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > harbor.crt
+  retries: 10
+  delay: 10
+  register: result
+  until: result.rc == 0
   args:
     chdir: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
   changed_when: false
