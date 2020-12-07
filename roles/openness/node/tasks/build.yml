@@ -104,12 +104,12 @@
 - name: approve openness CSRs
   shell: >
     set -o pipefail && kubectl certificate approve {{ item.svc }} && kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item.svc }}' | grep -E 'Running'
+    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item.pod }}' | grep -E 'Running'
   when: "item.when"
   with_items:
-    - { svc: "edgedns-{{ node_name }}", when: "{{ dns_enable }}"}
-    - { svc: "interfaceservice-{{ node_name }}", when: "{{ 'kubeovn' in kubernetes_cnis }}"}
-    - { svc: "eaa", when: "{{ eaa_present.rc == 0 }}"}
+    - { svc: "edgedns-{{ node_name }}", pod: "edgedns", when: "{{ dns_enable }}"}
+    - { svc: "interfaceservice-{{ node_name }}", pod: "interfaceservice", when: "{{ 'kubeovn' in kubernetes_cnis }}"}
+    - { svc: "eaa", pod: "eaa", when: "{{ eaa_present.rc == 0 }}"}
   delegate_to: "{{ groups['controller_group'][0] }}"
   register: result
   retries: "{{ number_of_retries }}"
