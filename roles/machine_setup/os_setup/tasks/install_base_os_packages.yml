@@ -18,12 +18,11 @@
   when: not offline_enable
 
 - name: Check if offline mode
-  block:
-  - name: Check if offline mode
-    set_fact:
-      local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
-                  --trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
-      _openssl_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _openssl_package_name }}.tar.gz"
+  set_fact:
+    local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
+                --trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+    _openssl_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _openssl_package_name }}.tar.gz"
+  when: offline_enable
 
 - name: install base OS rpm packages
   yum:
