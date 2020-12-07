@@ -14,7 +14,12 @@
 
 - name: get ca.crt from registry
   shell: |
-    set -o pipefail && echo -n | openssl s_client -showcerts \
+    set -o pipefail && \
+    http_proxy= \
+    HTTP_PROXY= \
+    https_proxy= \
+    HTTPS_PROXY= \
+    echo -n | openssl s_client -showcerts \
     -connect {{ _registry_ip_address }}:{{ _registry_port }} 2>/dev/null | sed -ne \
     '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > harbor.crt
   retries: 10
