@@ -14,3 +14,10 @@ _available_kubernetes_cnis:
 - calico
 - userspace
 - ovn4nfv
+
+_cni_normal_path:
+- .
+
+_cni_offline_path:
+- ./roles
+- ./oek/roles
