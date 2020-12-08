@@ -17,4 +17,21 @@ index c342667..5d12651 100644
        nodeSelector:
          kubernetes.io/os: "linux"
        volumes:
+@@ -1848,7 +1848,16 @@ echo "-------------------------------"
+ echo ""
 
+ echo "[Step 6] Run network diagnose"
+-kubectl ko diagnose all
++
++retries=0
++while [[ $retries -lt {{ number_of_retries }} ]]; do
++  if kubectl ko diagnose all; then
++    break;
++ fi
++
++  retries=$((retries + 1))
++  sleep {{ retry_delay }}
++done
+
+ echo "-------------------------------"
+ echo ""

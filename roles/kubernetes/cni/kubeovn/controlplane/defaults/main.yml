@@ -35,7 +35,7 @@ _kubeovn_download_files:
 _kubeovn_dockerimage_files_to_cp:
 - install.sh
 
-_kubeovn_install_patch_file: patch_to_set_hugepages_install.patch
+_kubeovn_install_patch_file: install.patch
 
 kubeovn_dpdk: true
 kubeovn_dpdk_socket_mem: "1024,0"
