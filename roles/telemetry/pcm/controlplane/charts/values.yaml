@@ -12,6 +12,7 @@ pcm:
   replicas: 1
   name: pcm
   app: pcm
+  pullPolicy: Always
 
 #Proxy Values
 proxy:

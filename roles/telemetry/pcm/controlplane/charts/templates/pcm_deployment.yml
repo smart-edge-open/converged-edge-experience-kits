@@ -57,6 +57,7 @@ spec:
             - containerPort: {{.Values.proxy.metricsPcmPort}}
         - name: {{.Values.pcm.name}}
           image: {{.Values.pcm.image}}
+          imagePullPolicy: {{.Values.pcm.pullPolicy}}
           resources: {}
           securityContext:
             privileged: true
