@@ -36,7 +36,7 @@ BUILD_BIOSFW=disable
 DIR_OF_BIOSFW_ZIP=""
 
 # location of bbdev_config_service_directory
-BUILD_FPGA_CONFIG=disable
+BUILD_BB_CONFIG=disable
 DIR_BBDEV_CONFIG=""
 
 # location of the zip packages for collectd-fpga

@@ -79,7 +79,7 @@
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
     # - role: telemetry/cadvisor/controlplane
 
-    - role: fpga_cfg
+    - role: bb_config
       when: fpga_sriov_userspace_enable | default(False)
     - role: kubevirt/controlplane
       when: kubevirt_enable | default(True)

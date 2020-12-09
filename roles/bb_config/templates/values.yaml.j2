@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+image:
+  repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ _bb_config.image }}"
+  tag: {{ _bb_config.tag }}
+pullPolicy: IfNotPresent
+nodeName: destinationHost #changeMe
+restartPolicy: Never
+
+# Device type. Possible values: 'FPGA' (default), 'ACC100'
+device: FPGA
+
+fpgaConfig:
+  configFileName: fpga_bbdev.cfg
+  #Defining 5G or LTE configuration (FPGA_5GNR, FPGA_LTE)
+  networkType: FPGA_5GNR
+  #Enable or disable PF programming (0 = VF programming 1 = PF programming)
+  pf_mode_en: 0
+  #Downlink bandwidth
+  dbandwidth: 3
+  #Downlink load balance
+  dload_balance: 128
+  #Default queue VF number for config of Downlink, total of 32 queues
+  dvfQueues:
+    vf0: 16
+    vf1: 16
+    vf2: 0
+    vf3: 0
+    vf4: 0
+    vf5: 0
+    vf6: 0
+    vf7: 0
+  #Uplink bandwidth
+  ubandwidth: 3
+  #Uplink load balance
+  uload_balance: 128
+  #Default queue VF number for config of Uplink, total of 32 queues
+  uvfQueues:
+    vf0: 16
+    vf1: 16
+    vf2: 0
+    vf3: 0
+    vf4: 0
+    vf5: 0
+    vf6: 0
+    vf7: 0
+  #FLR timeout value
+  flr_time_out: 610
+
+acc100Config:
+  configFileName: acc100_bbdev.cfg
+  networkType: ACC100
+  #Enable or disable PF programming (0 = VF programming 1 = PF programming)
+  pf_mode_en: 0
+  num_vf_bundles: 16
+  max_queue_size: 1024
+  queues4G:
+    ul:
+      num_qgroups: 0
+      num_aqs_per_groups: 16
+      aq_depth_log2: 4
+    dl:
+      num_qgroups: 0
+      num_aqs_per_groups: 16
+      aq_depth_log2: 4
+  queues5G:
+    ul:
+      num_qgroups: 4
+      num_aqs_per_groups: 16
+      aq_depth_log2: 4
+    dl:
+      num_qgroups: 4
+      num_aqs_per_groups: 16
+      aq_depth_log2: 4

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+{{- if (eq .Values.device "FPGA") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}"
+{{- with .Values.fpgaConfig }}
+data:
+  "{{ .configFileName }}": |
+    [MODE]
+    pf_mode_en = {{ .pf_mode_en }}
+
+    [UL]
+    bandwidth = {{ .dbandwidth }}
+    load_balance = {{ .dload_balance }}
+    vfqmap = {{ .dvfQueues.vf0 }},{{ .dvfQueues.vf1 }},{{ .dvfQueues.vf2 }},{{ .dvfQueues.vf3 }},{{ .dvfQueues.vf4 }},{{ .dvfQueues.vf5 }},{{ .dvfQueues.vf6 }},{{ .dvfQueues.vf7 }}
+
+    [DL]
+    bandwidth = {{ .ubandwidth }}
+    load_balance = {{ .uload_balance }}
+    vfqmap = {{ .uvfQueues.vf0 }},{{ .uvfQueues.vf1 }},{{ .uvfQueues.vf2 }},{{ .uvfQueues.vf3 }},{{ .uvfQueues.vf4 }},{{ .uvfQueues.vf5 }},{{ .uvfQueues.vf6 }},{{ .uvfQueues.vf7 }}
+
+    [FLR]
+    flr_time_out = {{ .flr_time_out }}
+{{- end}}
+{{- end }}

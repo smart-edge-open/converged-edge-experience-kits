@@ -343,7 +343,7 @@ repo_gpgcheck = 1" | sudo tee /etc/yum.repos.d/kubernetes.repo
   sudo_cmd yumdownloader kubectl-1.19.3-0 --resolve --destdir="$tmp_dir"
 
   # Rename
-  files=$(ls "$tmp_dir") 
+  files=$(ls "$tmp_dir")
   set +e
   for f in $files
   do
@@ -620,11 +620,11 @@ build::biosfw() {
   fi
 }
 
-build::fpga_cfg() {
-  if [[ "${BUILD_FPGA_CONFIG}" == "enable" ]];then
+build::bb_config() {
+  if [[ "${BUILD_BB_CONFIG}" == "enable" ]];then
     docker build --build-arg http_proxy="${GIT_PROXY}" --build-arg https_proxy="${GIT_PROXY}" -t \
-      fpga-config-utility:0.1.0 -f "${OPC_BASE_DIR}"/file/fpga_cfg/Dockerfile "${DIR_BBDEV_CONFIG}"
-    docker save fpga-config-utility:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/fpga-config-utility.tar.gz
+      bb-config-utility:0.1.0 -f "${OPC_BASE_DIR}"/file/bb_config/Dockerfile "${DIR_BBDEV_CONFIG}"
+    docker save bb-config-utility:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/bb-config-utility.tar.gz
   fi
 }
 
@@ -732,7 +732,7 @@ build::help() {
   echo -e "fpga_opae              fpga-opae-pacn3000 image"
   echo -e "sriov_network          sriov_network_device_plugin image"
   echo -e "biosfw                 biosfw image"
-  echo -e "fpga_cfg               fpga-config-utility image"
+  echo -e "bb_config              bb-config-utility image"
   echo -e "tas                    tas-controller image"
   echo -e "rmd                    intel-rmd-operator image"
   echo -e "rmd_operator           intel-rmd-operator image"
@@ -762,8 +762,8 @@ opc::build::images() {
     biosfw)
       build::biosfw
     ;;
-    fpga_cfg)
-      build::fpga_cfg
+    bb_config)
+      build::bb_config
     ;;
     tas)
       build::tas
@@ -787,7 +787,7 @@ opc::build::images() {
       build::sriov_cni
       build::sriov_network
       build::biosfw
-      build::fpga_cfg
+      build::bb_config
       build::tas
       build::rmd
       build::intel_rmd_operator

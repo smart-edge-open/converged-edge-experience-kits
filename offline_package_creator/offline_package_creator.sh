@@ -9,7 +9,7 @@ set -o pipefail
 
 # Download rpms
 rpms_download() {
-  download_rpm_list=$(python3 scripts/parse_yml.py rpm-packages) 
+  download_rpm_list=$(python3 scripts/parse_yml.py rpm-packages)
   if [[ -z ${download_rpm_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -23,7 +23,7 @@ k8s_cmd() {
 
 # Download github code
 code_download() {
-  download_github_repo_list=$(python3 scripts/parse_yml.py github-repos) 
+  download_github_repo_list=$(python3 scripts/parse_yml.py github-repos)
   if [[ -z ${download_github_repo_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -32,7 +32,7 @@ code_download() {
 
 # Download go modules
 go_modules_download() {
-  download_go_modules_list=$(python3 scripts/parse_yml.py go-modules) 
+  download_go_modules_list=$(python3 scripts/parse_yml.py go-modules)
   if [[ -z ${download_go_modules_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -41,7 +41,7 @@ go_modules_download() {
 
 # Download pip packages
 pip_packages_download() {
-  download_pip_list=$(python3 scripts/parse_yml.py pip-packages) 
+  download_pip_list=$(python3 scripts/parse_yml.py pip-packages)
   if [[ -z ${download_pip_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -50,7 +50,7 @@ pip_packages_download() {
 
 # Download yaml files
 yaml_download() {
-  download_yaml_list=$(python3 scripts/parse_yml.py yaml-files) 
+  download_yaml_list=$(python3 scripts/parse_yml.py yaml-files)
   if [[ -z ${download_yaml_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -59,7 +59,7 @@ yaml_download() {
 
 # Download docker images
 images_download() {
-  download_image_list=$(python3 scripts/parse_yml.py docker-images) 
+  download_image_list=$(python3 scripts/parse_yml.py docker-images)
   if [[ -z ${download_image_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -73,7 +73,7 @@ images_build() {
 
 # Download other files
 others_download() {
-  download_other_list=$(python3 scripts/parse_yml.py other-files) 
+  download_other_list=$(python3 scripts/parse_yml.py other-files)
   if [[ -z ${download_other_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -82,7 +82,7 @@ others_download() {
 
 # Download charts
 charts_download() {
-  download_chart_list=$(python3 scripts/parse_yml.py charts-files) 
+  download_chart_list=$(python3 scripts/parse_yml.py charts-files)
   if [[ -z ${download_chart_list} ]];then
     opc::log::error "ERROR: Can not parse the data yaml file"
   fi
@@ -137,7 +137,7 @@ usage() {
   echo -e "	""\033[33myaml\033[0m         download yaml fils only"
   echo -e "	""\033[33mimages\033[0m       download docker images only"
   echo -e "	""\033[33mbuild\033[0m        build docker images"
-  echo -e "	""             common,interfaceservice,biosfw,tas,sriov_cni,sriov_network,fpga_cfg,rmd,collectd_fpga;all(default)"
+  echo -e "	""             common,interfaceservice,biosfw,tas,sriov_cni,sriov_network,bb_config,rmd,collectd_fpga;all(default)"
   echo -e "	""             like: \033[33m$0 \${sudo_password} build common\033[0m"
   echo -e "	""\033[33mcharts\033[0m       download charts file only"
   echo -e "	""\033[33mothers\033[0m       download other file only"

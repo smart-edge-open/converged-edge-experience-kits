@@ -22,7 +22,7 @@ FROM centos:7.8.2003
 
 RUN yum install -y sudo
 
-ARG username=fpga_config
+ARG username=bb_config
 ARG user_dir=/home/$username
 
 RUN useradd -d $user_dir -m -s /bin/bash $username

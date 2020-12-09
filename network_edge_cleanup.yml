@@ -118,7 +118,7 @@
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
 
   - name: FPGA config cleanup
-    include_tasks: ./roles/fpga_cfg/tasks/cleanup.yml
+    include_tasks: ./roles/bb_config/tasks/cleanup.yml
     when: fpga_sriov_userspace_enable | default(False)
 
   - name: load Kafka variables
