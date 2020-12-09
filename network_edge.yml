@@ -94,7 +94,7 @@
 - hosts: edgenode_group
   roles:
     - role: rmd/node
-      when: "rmd_operator_enable | default(False) and not offline_enable"
+      when: "rmd_operator_enable | default(False)"
 
     - role: opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
