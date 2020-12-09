@@ -73,6 +73,7 @@
       become: yes
     - name: get line of server
       command: "grep -v localhost /etc/hosts"
+      ignore_errors: yes
       register: ser_line
     - name: append server line to /etc/hosts
       command: "ssh {{ vca_node_ip }} echo '{{ ser_line.stdout }}' >> /etc/hosts"
