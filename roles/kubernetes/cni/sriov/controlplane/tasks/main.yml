@@ -124,6 +124,7 @@
       helm install sriov-release {{ ne_helm_charts_default_dir }}/sriov --set registry_ip={{ _registry_ip_address }}
       --set registry_port={{ _registry_port }} --set sriov_kubevirt_enable={{ sriov_kubevirt_enable }}
       --set fpga_sriov_userspace_enable={{ fpga_sriov_userspace_enable }}
+      --set acc100_sriov_userspace_enable={{ acc100_sriov_userspace_enable }}
       --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/intel/sriov-device-plugin
       --set image.tag=latest
     changed_when: true

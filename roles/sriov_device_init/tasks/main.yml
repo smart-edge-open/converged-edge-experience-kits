@@ -19,48 +19,161 @@
 - block:
   - name: check if FPGA SRIOV device is connected and get PCI address of devices
     shell: lspci -D | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
-    register: pci_address
+    register: fpga_pci_address
+    when: fpga_userspace_vf.enabled | default (False)
 
-  - name: bind FPGA SRIOV PF to IGB UIO
-    shell: echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
+  - block:
+    - name: Check if ACC PF already initialized
+      shell: "cat {{ acc100_init_log_file }} | awk '/Tests Passed : /{print $5;exit;}'"
+      ignore_errors: yes
+      register: init_result
 
-  - name: enable PF FPGA bind to IGB_UIO on boot
+    - name: check if ACC100 SRIOV device is connected and get PCI address of devices
+      shell: lspci -D | grep {{ acc100_userspace_vf.pf_device_id }} | awk '{print $1;}'
+      register: acc100_pci_address
+
+    - block:
+      - name: bind ACC100 PFs to userspace driver
+        shell: >
+               echo "{{ acc100_userspace_vf.vf_driver }}" > $(realpath /sys/bus/pci/devices/{{ item }}/driver_override) &&
+               echo "{{ item }}" > /sys/bus/pci/drivers_probe
+        with_items:
+          - "{{ acc100_pci_address.stdout_lines }}"
+
+      - name: add binding ACC100 PFs to userspace driver on boot
+        lineinfile:
+          state: present
+          dest: /etc/rc.d/rc.local
+          line: "echo \"{{ acc100_userspace_vf.vf_driver }}\" > $(realpath /sys/bus/pci/devices/{{ item }}/driver_override) && \
+                echo \"{{ item }}\" > /sys/bus/pci/drivers_probe"
+        with_items:
+          - "{{ acc100_pci_address.stdout_lines }}"
+
+      - name: delete acc100 init log if it exists
+        file:
+          state: absent
+          path: "{{ acc100_init_log_file }}"
+
+      - name: clean acc100 init log on boot if it exists
+        lineinfile:
+          state: present
+          dest: /etc/rc.d/rc.local
+          line: "{{ item }}"
+        with_items:
+          - cat /dev/null > "{{ acc100_init_log_file }}"
+
+      - name: run init app for ACC100 PF
+        shell: >
+               cd "{{ _acc100_dpdk_init_dir }}" &&
+               ./test-bbdev.py --testapp-path ../../build/app/dpdk-test-bbdev -e="-w{{ item }} " -i -c validation -v test_vectors/ldpc_dec_v7813.data |
+               tee -a "{{ acc100_init_log_file }}"
+        with_items:
+          - "{{ acc100_pci_address.stdout_lines }}"
+
+      - name: add running init app for ACC100 PF on boot
+        lineinfile:
+          state: present
+          dest: /etc/rc.d/rc.local
+          line: "{{ _acc100_dpdk_init_dir }}/test-bbdev.py --testapp-path\
+                 {{ _acc100_dpdk_init_dir }}/../../build/app/dpdk-test-bbdev -e=\"-w{{ item }} \" -i -c \
+                 validation -v {{ _acc100_dpdk_init_dir }}/test_vectors/ldpc_dec_v7813.data >> {{ acc100_init_log_file }}"
+        with_items:
+          - "{{ acc100_pci_address.stdout_lines }}"
+
+      - name: unbind ACC100 PFs from userspace driver
+        shell: >
+               echo "{{ item }}" > $(realpath /sys/bus/pci/devices/{{ item }}/driver/unbind) &&
+               echo "" >  $(realpath /sys/bus/pci/devices/{{ item }}/driver_override)
+        with_items:
+          - "{{ acc100_pci_address.stdout_lines }}"
+
+      - name: unbind ACC100 PFs from userspace driver on boot
+        lineinfile:
+          state: present
+          dest: /etc/rc.d/rc.local
+          line: "echo \"{{ item }}\" > $(realpath /sys/bus/pci/devices/{{ item }}/driver/unbind) && echo \"\" > \
+          $(realpath /sys/bus/pci/devices/{{ item }}/driver_override)"
+        with_items:
+          - "{{ acc100_pci_address.stdout_lines }}"
+      when: init_result.stdout != "1"
+    when: acc100_userspace_vf.enabled | default (False)
+
+  - name: bind FPGA and/or ACC100 SRIOV PF to IGB UIO
+    shell: echo "{{ item.id }}" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id
+    when: "item.when"
+    with_items:
+      - { id: "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}", when: "{{ fpga_userspace_vf.enabled }}" }
+      - { id: "{{ acc100_userspace_vf.vendor_id }} {{ acc100_userspace_vf.pf_device_id }}", when: "{{ acc100_userspace_vf.enabled }}" }
+
+  - name: enable PF FPGA and/or AC100 bind to IGB_UIO on boot
     lineinfile:
       state: present
       dest: /etc/rc.d/rc.local
-      line: "{{ item }}"
+      line: "{{ item.id }}"
+    when: "item.when"
     with_items:
-      - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}\" | sudo tee /sys/bus/pci/drivers/igb_uio/new_id"
-    args:
-  - name: create SRIOV VFs
+      - { id: "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.pf_device_id }}\" | \
+          sudo tee /sys/bus/pci/drivers/igb_uio/new_id", when: "{{ fpga_userspace_vf.enabled }}" }
+      - { id: "echo \"{{ acc100_userspace_vf.vendor_id }} {{ acc100_userspace_vf.pf_device_id }}\" | \
+          sudo tee /sys/bus/pci/drivers/igb_uio/new_id", when: "{{ acc100_userspace_vf.enabled }}" }
+
+  - name: create FPGA SRIOV VFs
     shell: >
       echo 0 | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs &&
       echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs
     with_items:
-      - "{{ pci_address.stdout_lines }}"
+      - "{{ fpga_pci_address.stdout_lines }}"
+    when: "{{ fpga_userspace_vf.enabled }}"
 
-  - name: enable creation of SRIOV VFs on boot
+  - name: create ACC100 SRIOV VFs
+    shell: >
+      echo 0 | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs &&
+      echo {{ acc100_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs
+    with_items:
+      - "{{ acc100_pci_address.stdout_lines }}"
+    when: "{{ acc100_userspace_vf.enabled }}"
+
+  - name: enable creation of FPGA SRIOV VFs on boot
     lineinfile:
       state: present
       dest: /etc/rc.d/rc.local
       line: "echo {{ fpga_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs"
     with_items:
-      - "{{ pci_address.stdout_lines }}"
+      - "{{ fpga_pci_address.stdout_lines }}"
+    when: "{{ fpga_userspace_vf.enabled }}"
 
-  - name: bind FPGA SRIOV VFs to userspace driver
-    shell: >
-      echo "{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}" |
-      sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id
-
-  - name: enable VFs binding to userspace driver on boot
+  - name: enable creation of ACC100 SRIOV VFs on boot
     lineinfile:
       state: present
       dest: /etc/rc.d/rc.local
-      line: "{{ item }}"
+      line: "echo {{ acc100_userspace_vf.vf_number }} | sudo tee /sys/bus/pci/devices/{{ item }}/max_vfs"
     with_items:
-      - "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" |
-        sudo tee /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id"
-  when: fpga_userspace_vf.enabled
+      - "{{ acc100_pci_address.stdout_lines }}"
+    when: "{{ acc100_userspace_vf.enabled }}"
+
+  - name: bind FPGA and/or ACC100 SRIOV VFs to userspace driver
+    shell: >
+           echo "{{ item.id }}" |
+           sudo tee /sys/bus/pci/drivers/{{ item.driver }}/new_id
+    when: "item.when"
+    with_items:
+      - { id: "{{ fpga_userspace_vf.vendor_id }} \
+        {{ fpga_userspace_vf.vf_device_id }}", driver: "{{ fpga_userspace_vf.vf_driver }}", when: "{{ fpga_userspace_vf.enabled }}" }
+      - { id: "{{ acc100_userspace_vf.vendor_id }} \
+        {{ acc100_userspace_vf.vf_device_id }}", driver: "{{ acc100_userspace_vf.vf_driver }}", when: "{{ acc100_userspace_vf.enabled }}" }
+
+  - name: enable FPGA and/or ACC100 VFs binding to userspace driver on boot
+    lineinfile:
+      state: present
+      dest: /etc/rc.d/rc.local
+      line: "{{ item.id }}"
+    when: "item.when"
+    with_items:
+      - { id: "echo \"{{ fpga_userspace_vf.vendor_id }} {{ fpga_userspace_vf.vf_device_id }}\" | sudo tee \
+         /sys/bus/pci/drivers/{{ fpga_userspace_vf.vf_driver }}/new_id", when: "{{ fpga_userspace_vf.enabled }}" }
+      - { id: "echo \"{{ acc100_userspace_vf.vendor_id }} {{ acc100_userspace_vf.vf_device_id }}\" | sudo tee \
+         /sys/bus/pci/drivers/{{ acc100_userspace_vf.vf_driver }}/new_id", when: "{{ acc100_userspace_vf.enabled }}" }
+  when: fpga_userspace_vf.enabled or acc100_userspace_vf.enabled
 
 - name: get SR-IOV ethernet interfaces from /etc/rc.d/rc.local
   # ignore missing pipefail - we don't want to fail when grep does not find a line - we can continue with no lines

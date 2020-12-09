@@ -169,8 +169,11 @@
 
 - name: unload vfio
   modprobe:
-    name: vfio
+    name: "{{ item }}"
     state: absent
+  with_items:
+  - "vfio-pci"
+  - "vfio"
   ignore_errors: yes
   become: yes
 
@@ -192,6 +195,10 @@
 
 - name: load vfio module
   modprobe:
-    name: vfio
+    name: "{{ item }}"
     state: present
+  with_items:
+  - "vfio-pci"
+  - "vfio"
+  ignore_errors: yes
   become: yes

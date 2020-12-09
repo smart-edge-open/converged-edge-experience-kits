@@ -5,3 +5,5 @@
 
 dependencies:
 - role: dpdk
+- role: init_app_acc100
+  when: acc100_userspace_vf.enabled | default (False)
