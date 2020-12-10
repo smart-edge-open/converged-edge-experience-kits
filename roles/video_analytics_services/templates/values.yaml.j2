@@ -41,8 +41,7 @@ replicas: 1
 # enable Istio service mesh integration
 istioEnabled: {{ ne_istio_enable }}
 multiInstances: {{ video_analytics_services_multiinstances }}
-{% if ne_istio_enable == true %}
-{% if video_analytics_services_multiinstances == true %}
+{% if  ne_istio_enable == true and video_analytics_services_multiinstances == true %}
 instances:
 {% for item in _instances %}
   - name: {{ item.name }}
@@ -51,7 +50,6 @@ instances:
 {% else %}
 instances:
   - default
-{% endif %}
 {% endif %}
 
 # proxy settings for vas_gateways
