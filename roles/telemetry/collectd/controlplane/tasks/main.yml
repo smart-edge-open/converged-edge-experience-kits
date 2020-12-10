@@ -29,11 +29,6 @@
           name: "{{ _collectd_install_path }}"
           state: directory
 
-      - name: copy opae_cfg to build folder
-        copy:
-          src: "{{ _opae_local_path_cfg }}"
-          dest: "{{ _collectd_install_path }}"
-
       - name: copy opae_stp to build folder
         copy:
           src: "{{ _opae_local_path_stp }}"

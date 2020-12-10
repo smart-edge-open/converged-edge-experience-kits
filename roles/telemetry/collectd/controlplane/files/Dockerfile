@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-FROM centos:7.6.1810
+FROM centos:7.8.2003
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
@@ -52,28 +52,23 @@ RUN ./configure --enable-intel_pmu --enable-intel_rdt --enable-ipmi --enable-ovs
 RUN make
 RUN make -j install
 
-#copy packages
+#copy package
 WORKDIR /root
 
-COPY n3000-1-3-5-beta-rte-setup.zip .
-COPY n3000-1-3-5-beta-cfg-2x2x25g-setup.zip .
+COPY OPAE_SDK_1.3.7-5_el7.zip .
 
-#unzip packages
-RUN unzip n3000-1-3-5-beta-rte-setup.zip
-RUN unzip n3000-1-3-5-beta-cfg-2x2x25g-setup.zip
-
-#make scripts executable
-RUN chmod +x n3000-1.3.5-beta-rte-setup.sh
-RUN chmod +x n3000-1.3.5-beta-cfg-2x2x25G-setup.sh
+#unzip package
+RUN unzip OPAE_SDK_1.3.7-5_el7.zip
 
 #install OPAE packages
-RUN echo "proxy=$http_proxy/" | tee -a /etc/yum.conf
+RUN echo "proxy=$http_proxy" | tee -a /etc/yum.conf
 RUN yum clean expire-cache
-RUN ./n3000-1.3.5-beta-rte-setup.sh -y --owner root
-RUN source /root/intelrtestack/bin/init_env.sh
-
-#install PAC N3000 configuration
-RUN ./n3000-1.3.5-beta-cfg-*-setup.sh -y
+RUN bash -c 'cd OPAE/installation_packages && yum localinstall -y \
+    opae.admin-1.0.3-2.el7.noarch.rpm \
+    opae-libs-1.3.7-5.el7.x86_64.rpm opae-tools-1.3.7-5.el7.x86_64.rpm \
+    opae-tools-extra-1.3.7-5.el7.x86_64.rpm \
+    opae-intel-fpga-driver-2.0.1-10.x86_64.rpm \
+    opae-devel-1.3.7-5.el7.x86_64.rpm'
 
 #copy module check script
 COPY check_if_modules_loaded.sh .
