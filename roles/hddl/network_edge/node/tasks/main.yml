@@ -58,6 +58,16 @@
   - name: use kernel-devel-uname-r
     set_fact:
       kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
+  - name: use kernel-devel from provided URL/package
+    set_fact:
+      kernel_devel_to_install: "{{ hddl_kernel_devel }}"
+    when:
+      - hddl_kernel_devel is defined
+      - hddl_kernel_devel|length > 0
+  - name: fail if kernel-devel version is not correct
+    fail:
+      msg: "kernel-devel version({{ kernel_devel_to_install }}) does not match the current kernel({{ unamer.stdout }})"
+    when: "unamer.stdout not in kernel_devel_to_install"
 
   - name: install kernel-devel package
     yum:
@@ -65,6 +75,7 @@
       state: present
       disable_excludes: all
       allow_downgrade: yes
+    become: yes
   # install kernel-devel package if:
   # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
   # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
