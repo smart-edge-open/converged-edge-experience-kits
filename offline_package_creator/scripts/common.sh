@@ -711,8 +711,7 @@ build::collectd_fpga_plugin() {
     else
       collectd_dir=$(mktemp -d)
       cp -f "$OPC_BASE_DIR"/../roles/telemetry/collectd/controlplane/files/* "$collectd_dir"
-      cp "$DIR_OF_FPGA_ZIP"/n3000-1-3-5-beta-rte-setup.zip "$collectd_dir"
-      cp "$DIR_OF_FPGA_ZIP"/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip "$collectd_dir"
+      cp "$DIR_OF_FPGA_ZIP"/OPAE_SDK_1.3.7-5_el7.zip "$collectd_dir"
       set +e
       docker build --build-arg http_proxy="${HTTP_PROXY}" \
         --build-arg https_proxy="${HTTP_PROXY}" \
