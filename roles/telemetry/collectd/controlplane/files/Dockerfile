@@ -20,7 +20,7 @@ RUN ln -s /usr/src/kernels/$(uname -r) /lib/modules/$(uname -r)/build
 
 #install PMU collectd dependencies
 WORKDIR /root
-RUN git clone https://github.com/andikleen/pmu-tools.git
+RUN git clone --depth 1 https://github.com/andikleen/pmu-tools.git
 
 WORKDIR /root/pmu-tools/jevents
 RUN make
@@ -29,7 +29,7 @@ RUN make install
 #install RDT collectd dependencies
 WORKDIR /root
 COPY rdt_gcc_version.patch .
-RUN git clone https://github.com/01org/intel-cmt-cat.git
+RUN git clone --depth 1 https://github.com/01org/intel-cmt-cat.git
 
 WORKDIR /root/intel-cmt-cat
 RUN patch -p1 -i ../rdt_gcc_version.patch
@@ -40,7 +40,7 @@ WORKDIR /root/collectd_plugin
 COPY fpga_telemetry_plugin.patch .
 
 #clone the collectd repostitory
-RUN git clone --branch collectd-5.11.0 https://github.com/collectd/collectd.git
+RUN git clone --depth 1 --branch collectd-5.11.0 https://github.com/collectd/collectd.git
 
 #Apply FPGA Plugin patch
 WORKDIR /root/collectd_plugin/collectd
