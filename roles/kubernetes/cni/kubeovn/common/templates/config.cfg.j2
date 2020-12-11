@@ -6,3 +6,4 @@ dpdk-init="{{ kubeovn_dpdk }}"
 pmd-cpu-mask="{{ kubeovn_dpdk_pmd_cpu_mask }}"
 dpdk-lcore-mask="{{ kubeovn_dpdk_lcore_mask }}"
 dpdk-hugepage-dir=/dev/hugepages
+dpdk-extra="--iova-mode=pa"

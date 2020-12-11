@@ -3,6 +3,11 @@
 
 ---
 
+- name: include dpdk role
+  include_role:
+    name: dpdk
+  when: kubeovn_dpdk
+
 - name: open kube-ovn firewall rules
   ignore_errors: yes
   firewalld:

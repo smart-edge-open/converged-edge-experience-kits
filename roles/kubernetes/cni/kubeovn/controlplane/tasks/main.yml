@@ -2,6 +2,11 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+- name: include dpdk role
+  include_role:
+    name: dpdk
+  when: kubeovn_dpdk and single_node_deployment | default(false)
+
 - name: open kube-ovn firewall rules
   ignore_errors: yes
   firewalld:
