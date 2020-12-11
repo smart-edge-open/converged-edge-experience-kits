@@ -34,6 +34,10 @@
 
 - name: upgrade python2-pip version
   command: "python2 -m pip install {{ local_pip }} --upgrade pip=={{ _pip_version }}"
+  register: result
+  retries: 3
+  delay: 10
+  until: result is succeeded
   changed_when: true
   become: yes
 
