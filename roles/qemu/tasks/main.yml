@@ -21,31 +21,9 @@
     _qemu_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/qemu-4.0.0.tar.xz"
   when: offline_enable
 
-- name: download archive
-  get_url:
-    url: "{{ _qemu_download_url }}"
-    dest: "{{ _qemu_download_dest }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
+- include_tasks: download_and_unpack.yml
   when:
   - not qemu_dest_dir.stat.exists
-
-- name: ensure install dir exists
-  file:
-    path: "{{ _qemu_install_dir }}"
-    state: directory
-  become: yes
-
-- name: extract archive
-  unarchive:
-    src: "{{ _qemu_download_dest }}"
-    dest: "{{ _qemu_install_dir }}"
-    extra_opts: "--strip-components=1"
-    remote_src: yes
-    creates: "{{ _qemu_install_dir }}/README"
-  become: yes
 
 - name: install zlib-devel package
   yum:

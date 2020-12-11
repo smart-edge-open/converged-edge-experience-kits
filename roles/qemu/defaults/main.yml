@@ -10,3 +10,6 @@ _qemu_name: "qemu-{{ _qemu_version }}"
 _qemu_download_url: "https://download.qemu.org/{{ _qemu_name }}.tar.xz"
 _qemu_download_dest: "/tmp/{{ _qemu_name }}.tar.xz"
 _qemu_install_dir: "/opt/{{ _qemu_name }}"
+
+_qemu_download_retries: 20
+_qemu_download_interval: 30
