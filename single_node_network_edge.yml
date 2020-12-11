@@ -115,5 +115,5 @@
       when: ne_cmk_enable | default(False)
     - role: hddl/network_edge/node
       when: ne_hddl_enable | default(False)
-    - role: ptp/common
+    - role: ptp/node
       when: ptp_sync_enable | default(False)
