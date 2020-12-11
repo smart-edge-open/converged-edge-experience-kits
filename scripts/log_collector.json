@@ -82,10 +82,6 @@
             {
                 "path": "/etc/selinux/config",
                 "file_name": "selinux_config.log"
-            },
-            {
-                "path": "/opt/openness",
-                "file_name": "etc_openness.tar.gz"
             }
         ]
     },
