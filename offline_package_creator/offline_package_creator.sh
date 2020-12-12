@@ -137,7 +137,7 @@ usage() {
   echo -e "	""\033[33myaml\033[0m         download yaml fils only"
   echo -e "	""\033[33mimages\033[0m       download docker images only"
   echo -e "	""\033[33mbuild\033[0m        build docker images"
-  echo -e "	""             common,interfaceservice,biosfw,tas,sriov_cni,sriov_network,bb_config,rmd,collectd_fpga;all(default)"
+  echo -e "	""             cli,common,interfaceservice,biosfw,tas,sriov_cni,sriov_network,bb_config,rmd,collectd_fpga;all(default)"
   echo -e "	""             like: \033[33m$0 \${sudo_password} build common\033[0m"
   echo -e "	""\033[33mcharts\033[0m       download charts file only"
   echo -e "	""\033[33mothers\033[0m       download other file only"

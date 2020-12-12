@@ -68,11 +68,6 @@ if [[ "$BUILD_BIOSFW" == "enable" && -z "$DIR_OF_BIOSFW_ZIP" ]];then
 Open scripts/initrc and configure"
 fi
 
-if [[ "$BUILD_BB_CONFIG" == "enable" && -z "$DIR_BBDEV_CONFIG" ]];then
-  opc::log::error "ERROR:  DIR_BBDEV_CONFIG should not be NULL.
-Open scripts/initrc and configure"
-fi
-
 if [[ "$BUILD_COLLECTD_FPGA" == "enable" && -z "$DIR_OF_FPGA_ZIP" ]];then
   opc::log::error "ERROR:  DIR_OF_FPGA_ZIP should not be NULL.
 Open scripts/initrc and configure"

@@ -160,7 +160,7 @@ do_row() {
     if [[ "$ret" == "0" ]];then
       if [[ "$type" == "updates" ]];then
         do_download "${urlDic[base]}${rname}.${arch}.rpm" 1
-        do_download "${urlDic[updates]}${rname}.${arch}.rpm" "$3"
+        do_download "${urlDic[updates]}${rname}.${arch}.rpm" 1
       else
         do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$3"
       fi
@@ -539,6 +539,15 @@ opc::download::images() {
   fi
 }
 
+build::cli() {
+  cd "$CODE_DOWNLOAD_PATH"/edgenode/edgecontroller
+  docker run --rm -ti \
+    -v "$GOMODULE_DOWNLOAD_PATH":/go/pkg \
+    -v "$PWD":/opt/app \
+    -w /opt/app golang:1.14.9 \
+    go build -o dist/edgednscli ./cmd/edgednscli
+}
+
 build::common_services() {
   cd "$CODE_DOWNLOAD_PATH"/edgenode
   docker run --rm -ti \
@@ -621,11 +630,9 @@ build::biosfw() {
 }
 
 build::bb_config() {
-  if [[ "${BUILD_BB_CONFIG}" == "enable" ]];then
-    docker build --build-arg http_proxy="${GIT_PROXY}" --build-arg https_proxy="${GIT_PROXY}" -t \
-      bb-config-utility:0.1.0 -f "${OPC_BASE_DIR}"/file/bb_config/Dockerfile "${DIR_BBDEV_CONFIG}"
-    docker save bb-config-utility:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/bb-config-utility.tar.gz
-  fi
+  docker build --build-arg http_proxy="${HTTP_PROXY}" --build-arg https_proxy="${HTTP_PROXY}" -t \
+    bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/bb_config/files
+  docker save bb-config-utility:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/bb-config-utility.tar.gz
 }
 
 build::tas() {
@@ -726,6 +733,7 @@ build::collectd_fpga_plugin() {
 build::help() {
   echo "$0 sudo_password build options"
   echo -e "options:"
+  echo -e "cli                    EdgeDns CLI"
   echo -e "common                 eaa image"
   echo -e "interfaceservice       interfaceservice image"
   echo -e "fpga_opae              fpga-opae-pacn3000 image"
@@ -743,6 +751,9 @@ opc::build::images() {
 
   pwd="$PWD"
   case $@ in
+    cli)
+      build::cli
+    ;;
     common)
       build::common_services
     ;;
@@ -780,6 +791,7 @@ opc::build::images() {
       build::help
     ;;
     all)
+      build::cli
       build::common_services
       build::interfaceservice
       build::fpga-opae-pacn3000

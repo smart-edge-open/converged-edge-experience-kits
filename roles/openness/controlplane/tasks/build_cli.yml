@@ -17,10 +17,12 @@
           retries: "{{ number_of_retries }}"
           until: result is succeeded
           delay: "{{ retry_delay }}"
+          when: not offline_enable
         - name: build EdgeDNS cli
           shell: source /etc/profile && go build -o dist/edgednscli ./cmd/edgednscli
           args:
             chdir: "{{ _git_repo_dest }}"
+          when: not offline_enable
         - name: copy EdgeDNS cli
           copy:
             src: "{{ item }}"
@@ -28,7 +30,7 @@
             remote_src: yes
             mode: "0755"
           with_items:
-            - "{{ _git_repo_dest }}/dist/edgednscli"
+            - "{{ _git_repo_dest if not offline_enable else _opcdownload_edgenode_dest }}/dist/edgednscli"
             - "{{ _git_repo_dest }}/network-edge/kubectl-edgedns"
           become: yes
 
