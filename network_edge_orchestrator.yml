@@ -18,7 +18,7 @@
     - role: machine_setup/os_setup
     - role: time/ntp
       when: ntp_enable | default(False)
-    - role: git_repo
+    - role: git_repo_for_emco
     - role: golang
     - role: docker
 

@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+- name: Remove old repository folder
+  file:
+    path: "{{ _git_repo_dest }}"
+    state: absent
+
+- name: clean git http proxy
+  git_config:
+    name: http.proxy
+    scope: global
+    state: absent
+  when: proxy_enable|bool and git_http_proxy

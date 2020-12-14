@@ -4,8 +4,8 @@
 - name: load harbor-registry variables
   include_vars: ../../../harbor_registry/controlplane/defaults/main.yml
 
-- name: setup gitconfig
-  include_tasks:  ../../../git_repo/tasks/gitconfig_bootstrap.yml
+# - name: setup gitconfig
+#   include_tasks:  ../../../git_repo/tasks/gitconfig_bootstrap.yml
 
 - name: create directory for emco repo
   file:
