@@ -124,7 +124,7 @@ zip_and_move() {
 }
 
 usage() {
-  echo -e "\033[33mUsage: Use it under ordinary users, not root\033[0m"
+  echo -e "\033[33mUsage: Use this script as ordinary user, not root\033[0m"
   echo "$0 sudo_password options"
   echo -e "options:"
   echo -e "	""\033[33mhelp\033[0m         show help"
@@ -138,7 +138,7 @@ usage() {
   echo -e "	""\033[33mimages\033[0m       download docker images only"
   echo -e "	""\033[33mbuild\033[0m        build docker images"
   echo -e "	""             cli,common,interfaceservice,biosfw,tas,sriov_cni,sriov_network,bb_config,rmd,collectd_fpga;all(default)"
-  echo -e "	""             like: \033[33m$0 \${sudo_password} build common\033[0m"
+  echo -e "	""             like: \033[33m$0 build common\033[0m"
   echo -e "	""\033[33mcharts\033[0m       download charts file only"
   echo -e "	""\033[33mothers\033[0m       download other file only"
   echo -e "	""\033[33mzip\033[0m          zip the directory of opcdownloads and mv it to a target directory"
