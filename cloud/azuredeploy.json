@@ -1,0 +1,241 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "opennessRepository": {
+      "type": "string",
+      "defaultValue": "https://github.com/open-ness/openness-experience-kits",
+      "allowedValues": [
+        "https://github.com/open-ness/openness-experience-kits"
+      ],
+      "metadata": {
+        "description": "(Required) OpenNESS experience kit repository url"
+      }
+    },
+    "flavor": {
+      "type": "string",
+      "defaultValue": "minimal",
+      "allowedValues": [
+        "minimal"
+      ],
+      "metadata": {
+        "description": "(Required) OpenNESS experience kit flavor (must include kernel_skip=true)"
+      }
+    },
+    "sshIdentity": {
+      "type": "string",
+      "defaultValue": "** REQUIRED ** Public SSH Key required in ssh-rsa format",
+      "metadata": {
+        "description": "(Required) Public key used to login to the VMs after installation"
+      }
+    },
+    "vmssSize": {
+      "type": "int",
+      "defaultValue": "2",
+      "allowedValues":[1,2,3,4,5,6,7,8],
+      "metadata": {
+        "description": "Number of VMs to provision (1-8 tested). One VM will result in a single cluster deployment"
+      }
+    },
+    "vmUsername": {
+      "type": "string",
+      "defaultValue": "oekuser",
+      "metadata": {
+        "description": "(Required) VM username"
+      }
+    },
+    "vmFlavor": {
+      "type": "string",
+      "defaultValue": "Standard_B8ms",
+      "allowedValues": [
+        "Standard_B8ms",
+        "Standard_D8_v3",
+        "Standard_B4ms",
+        "Standard_B16ms",
+        "Standard_D8s_v4",
+        "Standard_D4_v2",
+        "Standard_D4_v3",
+        "Standard_D16_v3",
+        "Standard_D4_v4",
+        "Standard_D8_v4",
+        "Standard_D16_v4"
+      ],
+      "metadata": {
+        "description": "VM size"
+      }
+    },
+    "vmDiskSize": {
+      "type": "int",
+      "defaultValue": 128,
+      "allowedValues": [64,128,256,512,1024],
+      "metadata": {
+        "description": "VM OS disk size[GiB]"
+      }
+    },
+    "vmImage": {
+      "type": "string",
+      "defaultValue": "OpenLogic:CentOS-LVM:7-LVM:7.8.2020062400",
+      "allowedValues": [
+        "OpenLogic:CentOS-LVM:7-LVM:7.8.2020062400"
+      ],
+      "metadata": {
+        "description": "VM base image"
+      }
+    },
+    "vmssName": {
+      "type": "string",
+      "defaultValue": "oek-vmss",
+      "metadata": {
+        "description": "Azure vm scale set name"
+      }
+    }
+  },
+  "variables": {
+    "vmDomainName": "[concat('oek-', uniqueString(resourceGroup().id, deployment().name))]",
+    "identityName": "[concat('deployOpenNESS-', uniqueString(resourceGroup().id, deployment().name))]",
+    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+    "roleDefinitionName": "[guid(variables('identityName'), variables('roleDefinitionId'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-06-01",
+      "name": "pid-30a79496-4d9b-4a3f-8955-2af56c2d8446",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "[variables('identityName')]",
+      "apiVersion": "2018-11-30",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[variables('roleDefinitionName')]",
+      "dependsOn": [
+        "[variables('identityName')]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('roleDefinitionId')]",
+        "principalId": "[reference(variables('identityName')).principalId]",
+        "scope": "[resourceGroup().id]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2019-10-01-preview",
+      "name": "setupOpenNESS",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('roleDefinitionName')]"
+      ],
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {}
+        }
+      },
+      "properties": {
+        "environmentVariables": [
+          {
+            "name": "GIT_REPO",
+            "value": "[parameters('opennessRepository')]"
+          },
+          {
+            "name": "GIT_TOKEN",
+            "value": ""
+          },
+          {
+            "name": "OEK_VARS",
+            "value": ""
+          },
+          {
+            "name": "OEK_FLAVOR",
+            "value": "[parameters('Flavor')]"
+          },
+          {
+            "name": "ANSIBLE_USER",
+            "value": "root"
+          },
+          {
+            "name": "ANSIBLE_LIMITS",
+            "value": ""
+          },
+          {
+            "name": "SSH_IDENTITY",
+            "value": "[parameters('sshIdentity')]"
+          },
+          {
+            "name": "AZ_VM_COUNT",
+            "value": "[parameters('vmssSize')]"
+          },
+          {
+            "name": "AZ_VM_USERNAME",
+            "value": "[parameters('vmUsername')]"
+          },
+          {
+            "name": "AZ_VM_DISK_SIZE",
+            "value": "[parameters('vmDiskSize')]"
+          },
+          {
+            "name": "AZ_VM_FLAVOR",
+            "value": "[parameters('vmFlavor')]"
+          },
+          {
+            "name": "AZ_VM_IMAGE",
+            "value": "[parameters('vmImage')]"
+          },
+          {
+            "name": "AZ_RESOURCE_GROUP",
+            "value": "[resourceGroup().name]"
+          },
+          {
+            "name": "AZ_VMSS",
+            "value": "[parameters('vmssName')]"
+          },
+          {
+            "name": "AZ_VMDOMAIN",
+            "value": "[variables('vmDomainName')]"
+          }
+        ],
+        "azCliVersion": "2.9.1",
+        "scriptContent": "set -xe; pip install --upgrade pip > /dev/null; pip install ansible==2.9.10 > /dev/null; az login --identity -u \"${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}\"; az vmss create --resource-group=\"${AZ_RESOURCE_GROUP}\" --name=\"${AZ_VMSS}\" --image=\"${AZ_VM_IMAGE}\" --vm-sku=\"${AZ_VM_FLAVOR}\" --os-disk-size-gb=\"${AZ_VM_DISK_SIZE}\" --instance-count=\"${AZ_VM_COUNT}\" --public-ip-per-vm --generate-ssh-keys --vm-domain-name=\"${AZ_VMDOMAIN}\" --admin-username=\"${AZ_VM_USERNAME}\" --load-balancer=\"\" --disable-overprovision;cd /root; cp ${AZ_SCRIPTS_PATH_INPUT_DIRECTORY}/install.sh .; cp ${AZ_SCRIPTS_PATH_INPUT_DIRECTORY}/oek_setup.py .; ./install.sh 2>&1| tee install.log $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/install.log; cp ~/oek/inventory.ini $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY; SUMMARY=`tail -6 /root/install.log | sed 's/[*]//g'` ; IP=`awk '/ctrl/{match($0,/[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+/); ip = substr($0,RSTART,RLENGTH); print ip}' $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/inventory.ini` ; scp /root/install.log $AZ_VM_USERNAME@$IP:openness-install.log ; scp /root/oek/inventory.ini $AZ_VM_USERNAME@$IP:inventory.ini; echo -e \"Access Controller Node: ssh $AZ_VM_USERNAME@$IP\\nInteract with Kubernetes using 'kubectl' as root user\\n$SUMMARY \" | jq -Rs '{Result: split(\"\n\")}' > $AZ_SCRIPTS_OUTPUT_PATH ",
+          "supportingScriptUris": [
+          "https://raw.githubusercontent.com/open-ness/openness-experience-kits/master/cloud/install.sh",
+          "https://raw.githubusercontent.com/open-ness/openness-experience-kits/master/cloud/oek_setup.py"
+        ],
+        "cleanupPreference": "OnSuccess",
+        "retentionInterval": "PT26H",
+        "timeout": "PT4H"
+      }
+    }
+  ],
+   "outputs": {
+        "result": {
+            "type": "object",
+            "value": "[reference('setupOpenNESS').outputs]"
+        },
+        "VMUserName": {
+            "type": "string",
+            "value": "[parameters('vmUsername')]"
+        },
+        "ResourceGroup": {
+            "type": "string",
+            "value": "[resourceGroup().name]"
+        },
+        "VMSSname": {
+            "type": "string",
+            "value": "[parameters('vmssName')]"
+            }
+        }
+}

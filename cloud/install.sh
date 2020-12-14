@@ -35,7 +35,7 @@ do
 
     echo "Configuring ${host}"
     # Allow for root login, required by OEK scripts
-    ssh "${AZ_VM_USERNAME}@${host}" sudo cp -r .ssh /root/.ssh
+    ssh "${AZ_VM_USERNAME}@${host}" sudo cp -r .ssh/ /root/
     ssh "${AZ_VM_USERNAME}@${host}" sudo systemctl enable --now firewalld
     ssh "${AZ_VM_USERNAME}@${host}" 'sudo sed  -i "/localhost/s/\$/ $(hostname)/" /etc/hosts'
     ssh "${AZ_VM_USERNAME}@${host}" sudo yum install -y cloud-utils-growpart
@@ -44,6 +44,7 @@ do
     ssh "${AZ_VM_USERNAME}@${host}" sudo pvresize /dev/sda2
     ssh "${AZ_VM_USERNAME}@${host}" sudo lvextend -l +50%FREE -r /dev/rootvg/varlv
     ssh "${AZ_VM_USERNAME}@${host}" sudo lvextend -l +100%FREE -r /dev/rootvg/optlv
+    ssh "${AZ_VM_USERNAME}@${host}" sudo yum remove -y python2-requests
 done
 
 python3 oek_setup.py "${hosts}" "${args[@]}"
