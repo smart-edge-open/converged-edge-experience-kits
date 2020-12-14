@@ -18,6 +18,7 @@ spec:
     - protocol: TCP
       port: {{ $.Values.servingPort }}
 ---
+
 {{- range $platform := $.Values.platforms }}
 {{- range $framework := $.Values.frameworks }}
 apiVersion: v1
@@ -53,6 +54,108 @@ spec:
       targetPort: {{ $.Values.servingPort }}
 ---
 {{- range $instance := $.Values.instances }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- if eq $.Values.multiInstances true }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}-{{ $instance.name }}
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}
+  {{- end }}
+  {{- else }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}
+  {{- end }}
+  {{- end }}
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  {{- if eq $.Values.multiInstances true }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}-{{ $instance.name }}-csr-requester
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}-csr-requester
+  {{- end }}
+  {{- else }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}-csr-requester
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}-csr-requester
+  {{- end }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csr-requester
+subjects:
+  - kind: ServiceAccount
+    {{- if eq $.Values.multiInstances true }}
+    {{- if eq $platform "xeon" }}
+    name: analytics-{{ $framework }}-{{ $instance.name }}
+    {{- else }}
+    name: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}
+    {{- end }}
+    {{- else }}
+    {{- if eq $platform "xeon" }}
+    name: analytics-{{ $framework }}
+    {{- else }}
+    name: analytics-{{ $framework }}-{{ $platform }}
+    {{- end }}
+    {{- end }}
+    namespace: default
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- if eq $.Values.multiInstances true }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}-{{ $instance.name }}-csr-config
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}-csr-config
+  {{- end }}
+  {{- else }}
+  {{- if eq $platform "xeon" }}
+  name: analytics-{{ $framework }}-csr-config
+  {{- else }}
+  name: analytics-{{ $framework }}-{{ $platform }}-csr-config
+  {{- end }}
+  {{- end }}
+data:
+  certrequest.json: |
+    {
+        "CSR": {
+            {{- if eq $.Values.multiInstances true }}
+            {{- if eq $platform "xeon" }}
+            "Name": "analytics-{{ $framework }}-{{ $instance.name }}",
+            {{- else }}
+            "Name": "analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}","
+            {{- end }}
+            {{- else }}
+            {{- if eq $platform "xeon" }}
+            "Name": "analytics-{{ $framework }}",
+            {{- else }}
+            "Name": "analytics-{{ $framework }}-{{ $platform }}",
+            {{- end }}
+            {{- end }}
+            "Subject": {
+                "CommonName": "default:consumer",
+                "Organization": ["Intel Corporation"]
+            },
+            "DNSSANs": [],
+            "IPSANs": [],
+            "KeyUsages": [
+                "digital signature", "key encipherment", "client auth"
+            ]
+        },
+        "Signer": "openness.org/certsigner",
+        "WaitTimeout": "5m"
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -109,41 +212,125 @@ spec:
         version: {{ $instance.name }}
         {{- end }}
     spec:
+      {{- if eq $.Values.multiInstances true }}
+      {{- if eq $platform "xeon" }}
+      serviceAccountName: analytics-{{ $framework }}-{{ $instance.name }}
+      {{- else }}
+      serviceAccountName: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}
+      {{- end }}
+      {{- else }}
+      {{- if eq $platform "xeon" }}
+      serviceAccountName: analytics-{{ $framework }}
+      {{- else }}
+      serviceAccountName: analytics-{{ $framework }}-{{ $platform }}
+      {{- end }}
+      {{- end }}
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 3000
+      initContainers:
+        - name: alpine
+          image: alpine:3.12.0
+          command: ["/bin/sh"]
+          args: ["-c", "cp /root/ca-certrequester/cert.pem /root/certs/root.pem"]
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          resources:
+            requests:
+              cpu: "0.1"
+            limits:
+              cpu: "0.1"
+              memory: "128Mi"
+          volumeMounts:
+            - name: ca-certrequester
+              mountPath: /root/ca-certrequester
+            - name: certs
+              mountPath: /root/certs
+        - name: certrequester
+          image: certrequester:1.0
+          imagePullPolicy: Never
+          args: ["--cfg", "/home/certrequester/config/certrequest.json"]
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "0.1"
+            limits:
+              cpu: "0.1"
+              memory: "128Mi"
+          volumeMounts:
+            - name: config
+              mountPath: /home/certrequester/config/
+            - name: certs
+              mountPath: /home/certrequester/certs/
       containers:
-      - name: vas-gateway
-        image: {{ $.Values.registry }}/{{ $.Values.servingImage }}-{{ $framework }}:{{ $.Values.servingTag }}
-        imagePullPolicy: IfNotPresent
-        {{- if $.Values.proxySettings.enabled }}
-        env:
-          - name: HTTP_PROXY
-            value: {{ $.Values.proxySettings.http }}
-          - name: http_proxy
-            value: {{ $.Values.proxySettings.http }}
-          - name: HTTPS_PROXY
-            value: {{ $.Values.proxySettings.https }}
-          - name: https_proxy
-            value: {{ $.Values.proxySettings.https }}
-          - name: FTP_PROXY
-            value: {{ $.Values.proxySettings.ftp }}
-          - name: ftp_proxy
-            value: {{ $.Values.proxySettings.ftp }}
-          - name: NO_PROXY
-            value: {{ $.Values.proxySettings.noproxy }}
-          - name: no_proxy
-            value: {{ $.Values.proxySettings.noproxy }}
-        {{- end }}
-      - name: vas-sidecar
-        image: {{ $.Values.registry }}/{{ $.Values.sidecarImage }}:{{ $.Values.sidecarTag }}
-        imagePullPolicy: IfNotPresent
-        env:
-          - name: NAMESPACE
-            value: default
-          - name: VAS_PORT
-            value: "{{ $.Values.servingPort }}"
-          - name: PLATFORM
-            value: {{ $platform }}
-          - name: FRAMEWORK
-            value: {{ $framework }}
+        - name: vas-gateway
+          image: {{ $.Values.registry }}/{{ $.Values.servingImage }}-{{ $framework }}:{{ $.Values.servingTag }}
+          imagePullPolicy: IfNotPresent
+          {{- if $.Values.proxySettings.enabled }}
+          env:
+            - name: HTTP_PROXY
+              value: {{ $.Values.proxySettings.http }}
+            - name: http_proxy
+              value: {{ $.Values.proxySettings.http }}
+            - name: HTTPS_PROXY
+              value: {{ $.Values.proxySettings.https }}
+            - name: https_proxy
+              value: {{ $.Values.proxySettings.https }}
+            - name: FTP_PROXY
+              value: {{ $.Values.proxySettings.ftp }}
+            - name: ftp_proxy
+              value: {{ $.Values.proxySettings.ftp }}
+            - name: NO_PROXY
+              value: {{ $.Values.proxySettings.noproxy }}
+            - name: no_proxy
+              value: {{ $.Values.proxySettings.noproxy }}
+          {{- end }}
+        - name: vas-sidecar
+          image: {{ $.Values.registry }}/{{ $.Values.sidecarImage }}:{{ $.Values.sidecarTag }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NAMESPACE
+              value: default
+            - name: VAS_PORT
+              value: "{{ $.Values.servingPort }}"
+            - name: PLATFORM
+              value: {{ $platform }}
+            - name: FRAMEWORK
+              value: {{ $framework }}
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: certs
+              mountPath: /home/vas/certs/
+      volumes:
+        - name: tmp
+          hostPath:
+            path: /tmp
+            type: Directory
+        - name: config
+          configMap:
+            {{- if eq $.Values.multiInstances true }}
+            {{- if eq $platform "xeon" }}
+            name: analytics-{{ $framework }}-{{ $instance.name }}-csr-config
+            {{- else }}
+            name: analytics-{{ $framework }}-{{ $platform }}-{{ $instance.name }}-csr-config
+            {{- end }}
+            {{- else }}
+            {{- if eq $platform "xeon" }}
+            name: analytics-{{ $framework }}-csr-config
+            {{- else }}
+            name: analytics-{{ $framework }}-{{ $platform }}-csr-config
+            {{- end }}
+            {{- end }}
+        - name: ca-certrequester
+          secret:
+            secretName: ca-certrequester
+        - name: certs
+          emptyDir: {}
 ---
 {{- end }}
 {{- end }}

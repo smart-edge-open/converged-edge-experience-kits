@@ -108,4 +108,11 @@
     register: vas_helm_status
     ignore_errors: yes
     failed_when: "'deployed' not in vas_helm_status.stdout"
+  - name: approve VAS certificate signing requests
+    shell: set -o pipefail && kubectl get csr | grep analytics | grep Pending | awk '{print $1}' | xargs kubectl certificate approve
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    changed_when: true
   when: vas_helm_chart.stdout | length == 0
