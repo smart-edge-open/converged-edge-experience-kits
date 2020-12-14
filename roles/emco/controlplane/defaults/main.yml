@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_emco:
+  repo: https://github.com/otcshare/EMCO
+  commit: main
+  dest: /opt/emco

@@ -271,6 +271,59 @@ spec:
               path: config.json
 
 ---
+# DTC Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dtc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dtc
+  template:
+    metadata:
+      labels:
+        app: dtc
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master 
+      containers:
+        - name: dtc
+          image: {{ .Values.registryPrefix }}emco-dtc:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./dtc"]
+          workingDir: /opt/emco/dtc
+          ports:
+          - containerPort: 9053
+          - containerPort: 9018
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/dtc/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: dtc
+            items:
+            - key: config.json
+              path: config.json
+
+---
 # Clm Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -339,8 +392,8 @@ spec:
         app: dcm
     spec:
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
       containers:
         - name: dcm
           image: {{ .Values.registryPrefix }}emco-dcm:{{ .Values.tag }}
@@ -370,6 +423,59 @@ spec:
         - name: config
           configMap:
             name: dcm
+            items:
+            - key: config.json
+              path: config.json
+
+---
+# GAC Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gac
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gac
+  template:
+    metadata:
+      labels:
+        app: gac
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      containers:
+        - name: gac
+          image: {{ .Values.registryPrefix }}emco-gac:{{ .Values.tag }}
+          imagePullPolicy: Always
+          env:
+          - name: NO_PROXY
+            value: {{ .Values.noProxyHosts }}
+          - name: no_proxy
+            value: {{ .Values.noProxyHosts }}
+          - name: HTTP_PROXY
+            value: {{ .Values.httpProxy }}
+          - name: http_proxy
+            value: {{ .Values.httpProxy }}
+          - name: HTTPS_PROXY
+            value: {{ .Values.httpsProxy }}
+          - name: https_proxy
+            value: {{ .Values.httpsProxy }}
+          command: ["./genericactioncontroller"]
+          workingDir: /opt/emco/gac
+          ports:
+          - containerPort: 9020
+          - containerPort: 9033
+          volumeMounts:
+          - name: config
+            mountPath: /opt/emco/gac/config.json
+            subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: gac
             items:
             - key: config.json
               path: config.json

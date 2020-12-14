@@ -12,3 +12,8 @@ telemetry_pcm_enable: false
 
 kubernetes_cnis:
   - kubeovn
+
+
+## emco
+emco_db_auth_enable: true
+emco_db_password: "{{ lookup('password', '/dev/null length=16') }}"
