@@ -79,3 +79,6 @@ rmd_operator_enable: True
 ##Path to offline download
 _offline_package_path: "/opt/opcdownloads"
 
+offline_tuned_packages:
+  - tuned-2.11.0-8.el7
+  - tuned-profiles-realtime-2.11.0-8.el7
