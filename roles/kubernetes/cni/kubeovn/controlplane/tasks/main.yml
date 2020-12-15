@@ -36,18 +36,6 @@
       delay: "{{ retry_delay }}"
       with_items: "{{ _kubeovn_download_files }}"
 
-    - name: KubeOVN v1.5.1 bug workaround(1/2)
-      replace:
-        path: "{{ _kubeovn_destdir }}/install.sh"
-        regexp: "^VERSION=.+$"
-        replace: 'VERSION="bd4019ddc77a482e41f8addcff2c713ed8fa531e"'
-
-    - name: KubeOVN v1.5.1 bug workaround(2/2)
-      replace:
-        path: "{{ _kubeovn_destdir }}/install.sh"
-        regexp: "kubeovn/kube-ovn-dpdk:\\$DPDK_VERSION-\\$VERSION"
-        replace: "kubeovn/kube-ovn-dpdk:$DPDK_VERSION-v1.5.2"
-
     - name: create patch file for install.sh from template
       template:
         src: "{{ _kubeovn_install_patch_file }}.j2"

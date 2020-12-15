@@ -1,25 +1,25 @@
 diff --git a/install.sh b/install.sh
-index c342667..5d12651 100644
+index 9e05fac8..8bc32b45 100755
 --- a/install.sh
 +++ b/install.sh
-@@ -709,11 +709,11 @@ spec:
+@@ -735,11 +735,11 @@ spec:
            resources:
              requests:
-               cpu: 500m
--              memory: 2Gi
+               cpu: $DPDK_CPU
+-              memory: $DPDK_MEMORY
 +              memory: {{ kubeovn_dpdk_resources_requests }}
              limits:
-               cpu: 1000m
--              memory: 2Gi
+               cpu: $DPDK_CPU
+-              memory: $DPDK_MEMORY
 -              hugepages-1Gi: 1Gi
 +              memory: {{ kubeovn_dpdk_resources_limits }}
 +              hugepages-{{ kubeovn_dpdk_hugepage_size }}: {{ kubeovn_dpdk_hugepages }}
        nodeSelector:
          kubernetes.io/os: "linux"
        volumes:
-@@ -1848,7 +1848,16 @@ echo "-------------------------------"
+@@ -1890,7 +1890,16 @@ echo "-------------------------------"
  echo ""
-
+ 
  echo "[Step 6] Run network diagnose"
 -kubectl ko diagnose all
 +
