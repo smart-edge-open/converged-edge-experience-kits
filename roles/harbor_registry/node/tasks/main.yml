@@ -13,22 +13,16 @@
     mode: '0755'
 
 - name: get ca.crt from registry
-  shell: |
-    set -o pipefail && \
-    http_proxy= \
-    HTTP_PROXY= \
-    https_proxy= \
-    HTTPS_PROXY= \
-    echo -n | openssl s_client -showcerts \
-    -connect {{ _registry_ip_address }}:{{ _registry_port }} 2>/dev/null | sed -ne \
-    '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > harbor.crt
+  get_url:
+    url: https://{{ _registry_ip_address }}:{{ _registry_port }}/api/{{ harbor_api_version }}/systeminfo/getcert
+    dest: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/harbor.crt
+    use_proxy: no
+    validate_certs: no
+    force: yes
   retries: 10
   delay: 10
   register: result
-  until: result.rc == 0
-  args:
-    chdir: "/etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}"
-  changed_when: false
+  until: result is succeeded
 
 - name: login harbor registry firstly
   command: docker login "{{ _registry_ip_address }}:{{ _registry_port }}" -uadmin -p{{ harborAdminPassword }}
