@@ -186,6 +186,7 @@ openness_dir: "/opt/openness"
 
 # OpenNESS users group
 openness_user_group: "openness"
+openness_user_gid: 1001
 
 ## OPAE FPGA
 ne_opae_fpga_enable: False

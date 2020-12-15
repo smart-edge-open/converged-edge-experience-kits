@@ -3,4 +3,5 @@
 
 ---
 _configs_dest: "{{ openness_dir }}/configs"
-_kafka_certs_dest: "{{ openness_dir }}/certs/eaa-kafka"
+_certs_dest: "{{ openness_dir }}/certs"
+_kafka_certs_dest: "{{ _certs_dest }}/eaa-kafka"

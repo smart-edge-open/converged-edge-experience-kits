@@ -32,6 +32,7 @@
 - name: add group "{{ openness_user_group }}"
   group:
     name: "{{ openness_user_group }}"
+    gid: "{{ openness_user_gid }}"
     state: present
   become: yes
 
