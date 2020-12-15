@@ -4,9 +4,6 @@
 ---
 - name: online mode
   block:
-    - name: setup gitconfig
-      include_tasks:  ./gitconfig_bootstrap.yml
-
     - debug:
         msg: "Using git token for repository checkout"
       when: git_repo_token|length > 0
@@ -22,6 +19,9 @@
         state: directory
         owner: "{{ ansible_user }}"
       become: yes
+
+    - name: setup gitconfig
+      include_tasks: ./gitconfig_bootstrap.yml
 
     - name: checkout clean repository
       git:
