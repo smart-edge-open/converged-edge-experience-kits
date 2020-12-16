@@ -1,17 +1,20 @@
 diff --git a/install.sh b/install.sh
-index 9e05fac8..8bc32b45 100755
+index 9e05fac..e1a8093 100755
 --- a/install.sh
 +++ b/install.sh
-@@ -735,11 +735,11 @@ spec:
+@@ -734,12 +734,12 @@ spec:
+             timeoutSeconds: 45
            resources:
              requests:
-               cpu: $DPDK_CPU
+-              cpu: $DPDK_CPU
 -              memory: $DPDK_MEMORY
++              cpu: 1
 +              memory: {{ kubeovn_dpdk_resources_requests }}
              limits:
-               cpu: $DPDK_CPU
+-              cpu: $DPDK_CPU
 -              memory: $DPDK_MEMORY
 -              hugepages-1Gi: 1Gi
++              cpu: 2
 +              memory: {{ kubeovn_dpdk_resources_limits }}
 +              hugepages-{{ kubeovn_dpdk_hugepage_size }}: {{ kubeovn_dpdk_hugepages }}
        nodeSelector:
