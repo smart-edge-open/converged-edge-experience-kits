@@ -83,11 +83,11 @@ You can find OpenNESS existing integrated apps within our [edgeapps repo](https:
 ## Setup
 
 1. Install porter(v0.26.3-beta.1) according to <https://porter.sh/install>
-2. Enter `openness-experience-kits/cnab` directory
+2. Enter `openness-experience-kits/cloud` directory
 3. Extract `tenant id`, `application id` and `application token` from the created azure application
 4. Run `porter credentials generate` and fill with the appropriate values from the previous step
-5. Build the CNAB bundle with `porter build`
-   > To enable a proxy server manually edit `openness-experience-kits/cnab/Dockerfile.tmpl`
+5. Build the Cloud bundle with `porter build`
+   > To enable a proxy server manually edit `openness-experience-kits/cloud/Dockerfile.tmpl`
 6. Create `params.ini` and provide the SSH public key(`~/.ssh/id_rsa.pub`) that will be used to login to the created VMs:
 
    ```ini
