@@ -87,9 +87,10 @@
         become: yes
 
       - name: Check if the ssl certificate exists in the local trust list
-        shell: >
-          cat /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' \
-          | sed 's/END CERTIFICATE//g' | grep "$(cat /etc/pki/tls/certs/localhost.crt | sed 's/-//g')"
+        shell: |
+          tls_str=$(cat /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
+          crt_str=$(cat /etc/pki/tls/certs/localhost.crt | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
+          echo $tls_str | sed 's/[[:space:]]//g' | grep -o "$(echo $crt_str | sed 's/[[:space:]]//g')"
         ignore_errors: yes
         register: ssl_exists
         changed_when: false
