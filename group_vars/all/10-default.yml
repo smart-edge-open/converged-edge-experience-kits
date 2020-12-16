@@ -188,6 +188,9 @@ openness_dir: "/opt/openness"
 openness_user_group: "openness"
 openness_user_gid: 1001
 
+# OpenNESS pods retry variable
+openness_pods_timeout_min: 15
+
 ## OPAE FPGA
 ne_opae_fpga_enable: False
 

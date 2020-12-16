@@ -112,7 +112,7 @@
     - { svc: "eaa", pod: "eaa", when: "{{ eaa_present.rc == 0 }}"}
   delegate_to: "{{ groups['controller_group'][0] }}"
   register: result
-  retries: "{{ number_of_retries }}"
+  retries: "{{ openness_pods_timeout_min }}"
+  delay: 60
   until: result is succeeded
-  delay: "{{ retry_delay }}"
   changed_when: true
