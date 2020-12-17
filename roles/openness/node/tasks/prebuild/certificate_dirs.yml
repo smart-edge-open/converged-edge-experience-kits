@@ -8,7 +8,7 @@
     path: "{{ item.dir }}"
     state: directory
     owner: "{{ item.owner }}"
-    group: "{{ openness_user_gid }}"
+    group: 1001
   with_items:
     - {dir: "{{ _certs_dest }}/eaa", owner: 1005}
     - {dir: "{{ _certs_dest }}/edgedns", owner: 1006}

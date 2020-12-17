@@ -186,7 +186,6 @@ openness_dir: "/opt/openness"
 
 # OpenNESS users group
 openness_user_group: "openness"
-openness_user_gid: 1001
 
 # OpenNESS pods retry variable
 openness_pods_timeout_min: 15
