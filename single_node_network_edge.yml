@@ -80,7 +80,7 @@
     # - role: telemetry/cadvisor/controlplane
 
     - role: bb_config
-      when: fpga_sriov_userspace_enable | default(False)
+      when: fpga_sriov_userspace_enable | default(False) or acc100_sriov_userspace_enable | default(False)
     - role: kubevirt/controlplane
       when: kubevirt_enable | default(True)
     - role: opae_fpga/controlplane
