@@ -60,4 +60,7 @@ proxySettings:
   https: {{ proxy_https }}
   ftp: {{ proxy_ftp }}
   noproxy: {{ proxy_noproxy }}
+{% else %}
+proxySettings:
+  enabled: false
 {% endif %}
