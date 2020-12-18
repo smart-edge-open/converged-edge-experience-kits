@@ -13,3 +13,4 @@
     scope: global
     state: absent
   when: proxy_enable|bool and git_http_proxy
+  ignore_errors: yes
