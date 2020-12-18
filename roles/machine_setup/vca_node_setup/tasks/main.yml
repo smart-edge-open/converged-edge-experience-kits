@@ -11,6 +11,13 @@
 
 - debug: msg="Detected {{ num_vca.stdout | int }} VCAC-A cards"
 
+- name: remove VCA node system image build directory
+  file:
+    path: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
+    state: absent
+  when: force_build_enable|bool
+  become: yes
+
 - name: build system image of VCA node
   command: "./vcad_build.sh -c -o FULL --silent silent.cfg"
   args:

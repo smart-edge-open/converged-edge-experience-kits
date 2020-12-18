@@ -26,3 +26,6 @@ ne_nfd_enable: true
 
 # Deploy Video Analytics services 
 video_analytics_services_enable: false
+
+# VCA system image force build
+force_build_enable: true
