@@ -1,8 +1,15 @@
-diff --git a/install.sh b/install.sh
-index 9e05fac..e1a8093 100755
---- a/install.sh
-+++ b/install.sh
-@@ -734,12 +734,12 @@ spec:
+--- a/install.sh	2020-12-18 10:47:11.987000000 +0100
++++ b/install.sh	2020-12-18 11:03:22.490000000 +0100
+@@ -702,6 +702,8 @@
+             - mountPath: /sys
+               name: host-sys
+               readOnly: true
++            - mountPath: /dev
++              name: host-dev
+             - mountPath: /etc/openvswitch
+               name: host-config-openvswitch
+             - mountPath: /etc/ovn
+@@ -734,12 +736,12 @@
              timeoutSeconds: 45
            resources:
              requests:
@@ -20,7 +27,17 @@ index 9e05fac..e1a8093 100755
        nodeSelector:
          kubernetes.io/os: "linux"
        volumes:
-@@ -1890,7 +1890,16 @@ echo "-------------------------------"
+@@ -755,6 +757,9 @@
+         - name: host-sys
+           hostPath:
+             path: /sys
++        - name: host-dev
++          hostPath:
++            path: /dev
+         - name: host-config-openvswitch
+           hostPath:
+             path: /etc/origin/openvswitch
+@@ -1890,7 +1895,16 @@
  echo ""
  
  echo "[Step 6] Run network diagnose"
@@ -35,6 +52,6 @@ index 9e05fac..e1a8093 100755
 +  retries=$((retries + 1))
 +  sleep {{ retry_delay }}
 +done
-
+ 
  echo "-------------------------------"
  echo ""
