@@ -100,7 +100,7 @@ sudo_cmd() {
   echo $PASSWD | sudo -S $@
 }
 
-# otcshare token
+# open-ness token
 GITHUB_USERNAME="name"
 GITHUB_TOKEN="1111234rr47af7f1130d385f912fcfafdafdaf"
 
@@ -166,7 +166,7 @@ The one is for making new docker user effective, another is for updating the ker
 
 After rebooting, run the command of "./offline_package_creator.sh all".
 
-At the end, the script will download all the files defined in the [pdl_flexran.yml](https://github.com/otcshare/openness-experience-kits/blob/master/offline_package_creator/package_definition_list/pdl_flexran.yml) and build other necessary images, then copy them to a designated directory. Once the script is finished executing, the user should expect three files under the `openness-experience-kits/roles/offline_roles/unpack_offline_package/files` directory:
+At the end, the script will download all the files defined in the [pdl_flexran.yml](https://github.com/open-ness/openness-experience-kits/blob/master/offline_package_creator/package_definition_list/pdl_flexran.yml) and build other necessary images, then copy them to a designated directory. Once the script is finished executing, the user should expect three files under the `openness-experience-kits/roles/offline_roles/unpack_offline_package/files` directory:
 ```shell
 [root@dev offline_package_creator]# ls -l ../roles/offline_roles/unpack_offline_package/files
 total 7888744

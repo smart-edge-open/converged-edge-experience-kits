@@ -26,7 +26,7 @@
 
 #- name: clone emco repo
 #  git:
-#    repo: "https://{{ git_repo_token }}@github.com/otcshare/EMCO.git"
+#    repo: "https://{{ git_repo_token }}@github.com/open-ness/EMCO.git"
 #    dest: "/opt/emco/"
 #    update: no
 #    version: main

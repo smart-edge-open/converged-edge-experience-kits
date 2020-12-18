@@ -19,7 +19,7 @@ sudo_cmd() {
   echo $PASSWD | sudo -S $@
 }
 
-# otcshare token
+# open-ness token
 GITHUB_USERNAME=""
 GITHUB_TOKEN=""
 

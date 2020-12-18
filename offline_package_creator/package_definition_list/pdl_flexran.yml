@@ -7,7 +7,7 @@
 
 github-repos:
   - name: edge-node-repo
-    url: https://github.com/otcshare/edgenode.git
+    url: https://github.com/open-ness/edgenode.git
     flag: tag
     value: master
   - name: sriov-network-device-plugin
@@ -51,7 +51,7 @@ github-repos:
     flag: tag
     value: v1.5.0
   - name: x-epcforedge
-    url: https://github.com/otcshare/x-epcforedge.git
+    url: https://github.com/open-ness/x-epcforedge.git
     flag: tag
     value: master
 
