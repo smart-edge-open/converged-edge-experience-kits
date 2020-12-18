@@ -143,7 +143,7 @@ data:
             {{- end }}
             {{- end }}
             "Subject": {
-                "CommonName": "default:consumer",
+                "CommonName": "default:analytics-{{ $framework }}-{{ $platform }}",
                 "Organization": ["Intel Corporation"]
             },
             "DNSSANs": [],
@@ -250,9 +250,8 @@ spec:
               mountPath: /root/certs
         - name: certrequester
           image: certrequester:1.0
-          imagePullPolicy: Never
           args: ["--cfg", "/home/certrequester/config/certrequest.json"]
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           resources:
             requests:
               cpu: "0.1"
