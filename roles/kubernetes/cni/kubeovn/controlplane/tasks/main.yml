@@ -152,9 +152,9 @@
   with_items: "{{ groups['edgenode_group'] }}"
   when: groups['edgenode_group'] | length > 0
 
-- name: configure OVS
+- name: configure OVS for single node deployment
   shell: |
-    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
+    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ item }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
   register: result
   become: yes
@@ -162,4 +162,5 @@
   retries: 5
   delay: 60
   changed_when: true
+  with_items: "{{ groups['edgenode_group'] }}"
   when: single_node_deployment | default(false)
