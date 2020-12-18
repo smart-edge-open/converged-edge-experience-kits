@@ -6,10 +6,10 @@
 # CNIs are applied in order of definition
 # Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
 # Available CNIs:
-# - kubeovn (note: must be main/primary/first CNI),
+# - kubeovn (note: if the kubeovn CNI is used, then it must be main/primary CNI, i.e. first on the list)
 # - weavenet
 # - flannel
-# - calico
+# - calico (note: note: if the calico CNI is used, then it must be main/primary CNI, i.e. first on the list)
 # - sriov (note: cannot be main or standalone)
 # - userspace (note: cannot be main or standalone)
 # NOTE - For VCAC-A setup, use `weavenet` CNI
