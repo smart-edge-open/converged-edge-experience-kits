@@ -17,11 +17,16 @@
     creates: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build/vcad/INSTALL/"
     chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/scripts"
   ignore_errors: yes
-  register: ret
-  failed_when: >
-    ('ERROR' in ret.stderr) or
-    ('Error' in ret.stderr) or
-    ('error' in ret.stderr)
+  register: vcad_build_ret
+
+- name: check build system image of VCA node result
+  fail:
+    msg: "build system image of VCA node has failed because of errors."
+  when: >
+    (vcad_build_ret.stderr is defined) and
+    (('ERROR' in vcad_build_ret.stderr) or
+     ('Error' in vcad_build_ret.stderr) or
+     ('error' in vcad_build_ret.stderr))
 
 - name: unarchive VCAC-A vcad image
   command: "gzip -d {{ _vca_vcad_image }}.gz"
