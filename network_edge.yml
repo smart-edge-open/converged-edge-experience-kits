@@ -30,9 +30,7 @@
     - role: time/verify
       when: "'edgenode_group' in group_names"
     - role: machine_setup/custom_kernel
-      when:
-        - not (kernel_skip | default(True))
-        - "'edgenode_group' in group_names or (calico_ebpf_enabled | default(False))"
+      when: not (kernel_skip | default(True))
     - role: machine_setup/grub
 
     - role: machine_setup/configure_tuned
