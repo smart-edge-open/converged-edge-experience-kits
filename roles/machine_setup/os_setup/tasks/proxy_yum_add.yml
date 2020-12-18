@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: Add proxy to /etc/yum.conf
   lineinfile:
     path: /etc/yum.conf
@@ -10,3 +9,4 @@
   when:
     - proxy_yum|length > 0
     - proxy_enable | bool
+  become: yes

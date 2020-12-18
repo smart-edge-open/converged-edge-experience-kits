@@ -4,23 +4,25 @@
 ---
 
 - name: print group_vars
-  shell: grep -v -E "^#|^$|^--|git_repo_token" "group_vars/{{ item.path }}" || true
+  shell: set -o pipefail && grep -v -E "^#|^$|^--|git_repo_token" "group_vars/{{ item.path }}" || true
   delegate_to: localhost
-  with_filetree: ./group_vars
+  with_filetree: ../group_vars/  # noqa 104
   changed_when: false
   run_once: true
   when:
   - item.state == 'file' or item.state == 'link'
+  ignore_errors: true
 
 - name: print host_vars
-  shell: grep -v -E "^#|^$|^--" "host_vars/{{ item.path }}" || true
+  shell: set -o pipefail && grep -v -E "^#|^$|^--" "host_vars/{{ item.path }}" || true
   delegate_to: localhost
-  with_filetree: ./host_vars
+  with_filetree: ../host_vars/  # noqa 104
   changed_when: false
   run_once: true
   when:
   - item.state == 'file' or item.state == 'link'
   - "'_example_variables' not in item.path"
+  ignore_errors: true
 
 - name: print vars about environment
   debug:

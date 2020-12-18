@@ -2,10 +2,13 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: include vars telemetry certs role
   include_vars:
     file: ../../certs/defaults/main.yml
+
+- name: include Harbor Registry vars
+  include_vars:
+    file: ../../../harbor_registry/controlplane/defaults/main.yml
 
 - name: create temporary directory
   tempfile:
@@ -15,7 +18,8 @@
 
 - name: download TAS repo
   git:
-    repo: "{{ _tas_repo.url }}"
+    repo: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] + ':' + _offline_package_path + \
+           '/github/telemetry-aware-scheduling' if offline_enable else _tas_repo.url }}"
     dest: "{{ tmp_dir.path }}/tas-repo"
     clone: yes
     update: no
@@ -27,13 +31,13 @@
 
 - name: create telemetry namespace if needed
   block:
-  - name: check if telemetry namespace exists
-    command: kubectl get ns telemetry
-    ignore_errors: yes
-    register: get_ns_telemetry
-  - name: create telemetry namespace
-    command: kubectl create namespace telemetry
-    when: get_ns_telemetry.rc == 1
+    - name: check if telemetry namespace exists
+      command: kubectl get ns telemetry
+      ignore_errors: yes
+      register: get_ns_telemetry
+    - name: create telemetry namespace
+      command: kubectl create namespace telemetry
+      when: get_ns_telemetry.rc == 1
 
 - name: check if Prometheus adapter release already exists
   command: helm status prometheus-adapter
@@ -43,94 +47,95 @@
 
 - name: Prometheus Adapter
   block:
-  - name: create temporary directory
-    tempfile:
-      state: directory
-      suffix: tas-adapter
-    register: adapter_tmp_dir
+    - name: create temporary directory
+      tempfile:
+        state: directory
+        suffix: tas-adapter
+      register: adapter_tmp_dir
 
-  - name: copy adapter-values.yml to tmp directory
-    copy:
-      src: "adapter-values.yml"
-      dest: "{{ adapter_tmp_dir.path }}/adapter-values.yml"
+    - name: copy adapter-values.yml to tmp directory
+      copy:
+        src: "adapter-values.yml"
+        dest: "{{ adapter_tmp_dir.path }}/adapter-values.yml"
 
-  - name: create directory for server certificates
-    file:
-      name: "{{ _telemetry_certs_dest }}/tas"
-      state: directory
+    - name: create directory for server certificates
+      file:
+        name: "{{ _telemetry_certs_dest }}/tas"
+        state: directory
 
-  - name: create symbolic link to root's cert
-    file:
-      src: "{{ _telemetry_certs_dest }}/CA/cert.pem"
-      dest: "{{ _telemetry_certs_dest }}/tas/root.pem"
-      state: link
+    - name: create symbolic link to root's cert
+      file:
+        src: "{{ _telemetry_certs_dest }}/CA/cert.pem"
+        dest: "{{ _telemetry_certs_dest }}/tas/root.pem"
+        state: link
 
-  - name: create server certificate signed by root CA certificate
-    command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh prometheus-adapter {{ _telemetry_certs_dest }}/tas {{ _telemetry_certs_dest }}/CA"
+    - name: create server certificate signed by root CA certificate
+      command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh prometheus-adapter {{ _telemetry_certs_dest }}/tas {{ _telemetry_certs_dest }}/CA"
 
-  - name: delete symbolic link to root's cert
-    file:
-      path: "{{ _telemetry_certs_dest }}/tas/root.pem"
-      state: absent
+    - name: delete symbolic link to root's cert
+      file:
+        path: "{{ _telemetry_certs_dest }}/tas/root.pem"
+        state: absent
 
-  - name: create directory for tas-adapter config
-    file:
-      name: "{{ _telemetry_certs_dest }}/tas-adapter"
-      state: directory
+    - name: create directory for tas-adapter config
+      file:
+        name: "{{ _telemetry_certs_dest }}/tas-adapter"
+        state: directory
 
-  - name: copy tls-config to controller
-    template:
-      src: "tls-config.yml.j2"
-      dest: "{{ _telemetry_certs_dest }}/tas-adapter/tls-config.yml"
+    - name: copy tls-config to controller
+      template:
+        src: "tls-config.yml.j2"
+        dest: "{{ _telemetry_certs_dest }}/tas-adapter/tls-config.yml"
 
-  - name: create cm-adapter-serving-certs kubernetes secret
-    command: >
-      kubectl -n telemetry create secret tls cm-adapter-serving-certs
-      --cert={{ _telemetry_certs_dest }}/tas/cert.pem
-      --key={{ _telemetry_certs_dest }}/tas/key.pem
-    register: create_secret_result
-    failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
-    changed_when: true
+    - name: create cm-adapter-serving-certs kubernetes secret
+      command: >
+        kubectl -n telemetry create secret tls cm-adapter-serving-certs
+        --cert={{ _telemetry_certs_dest }}/tas/cert.pem
+        --key={{ _telemetry_certs_dest }}/tas/key.pem
+      register: create_secret_result
+      failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
+      changed_when: true
 
-  - name: apply deployment patch
-    patch:
-      src: "custom-metrics-apiserver-deployment.yaml.patch"
-      dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-apiserver-deployment.yaml"
+    - name: apply deployment patch
+      patch:
+        src: "custom-metrics-apiserver-deployment.yaml.patch"
+        dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-apiserver-deployment.yaml"
 
-  - name: apply apiservice patch
-    patch:
-      src: "custom-metrics-apiservice.yaml.patch"
-      dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-apiservice.yaml"
+    - name: apply apiservice patch
+      patch:
+        src: "custom-metrics-apiservice.yaml.patch"
+        dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-apiservice.yaml"
 
-  - name: copy Adapter config
-    copy:
-      src: "custom-metrics-config-map.yaml"
-      dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-config-map.yaml"
+    - name: copy Adapter config
+      copy:
+        src: "custom-metrics-config-map.yaml"
+        dest: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates/custom-metrics-config-map.yaml"
 
-  - name: add variable to Helm Chart Values
-    lineinfile:
-      path: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/values.yaml"
-      line: "prometheusServiceUrl: {{ _prometheus_svc_url }}"
+    - name: add variable to Helm Chart Values
+      lineinfile:
+        path: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/values.yaml"
+        line: "prometheusServiceUrl: {{ _prometheus_svc_url }}"
 
-  - name: find backup files
-    find:
-      paths: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates"
-      patterns: "*.orig"
-    register: backup_files
+    - name: find backup files
+      find:
+        paths: "{{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/templates"
+        patterns: "*.orig"
+      register: backup_files
 
-  - name: remove backup files
-    file:
-      path: "{{ item.path }}"
-      state: absent
-    with_items: "{{ backup_files.files }}"
-    changed_when: true
+    - name: remove backup files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ backup_files.files }}"
+      changed_when: true
 
-  - name: install Prometheus Adapter using Helm
-    command: "helm install prometheus-adapter -f {{ adapter_tmp_dir.path }}/adapter-values.yml \
-              {{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/"
-    register: deploy_adapter_result
-    failed_when: "deploy_adapter_result.rc != 0 and 'Error: cannot re-use a name that is still in use' not in deploy_adapter_result.stderr"
-    changed_when: true
+    - name: install Prometheus Adapter using Helm
+      command:
+        "helm install prometheus-adapter -f {{ adapter_tmp_dir.path }}/adapter-values.yml \
+        {{ tmp_dir.path }}/tas-repo/deploy/charts/prometheus_custom_metrics_helm_chart/"
+      register: deploy_adapter_result
+      failed_when: "deploy_adapter_result.rc != 0 and 'Error: cannot re-use a name that is still in use' not in deploy_adapter_result.stderr"
+      changed_when: true
   when: get_release_prometheus_adapter.rc != 0
 
 - name: Kubernetes Scheduler Extender
@@ -149,16 +154,19 @@
   - name: configure Kubernetes Scheduler Extender
     command: "bash configure-scheduler.sh {{ _tas_svc_domain }}"
     register: configure_scheduler_result
-    failed_when: "configure_scheduler_result.rc != 0 or 'error:' in configure_scheduler_result.stderr"
+    failed_when: "configure_scheduler_result.rc != 0 or
+                  ('error:' in configure_scheduler_result.stderr and 'already exists' not in configure_scheduler_result.stderr)"
     changed_when: true
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration"
+    become: yes
 
   - name: create Scheduler Extender secret
     command: kubectl -n telemetry create secret tls extender-secret --cert /etc/kubernetes/pki/ca.crt --key /etc/kubernetes/pki/ca.key
     register: create_secret_result
     failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
     changed_when: true
+    become: yes
 
 - name: Telemetry Aware Scheduling
   block:
@@ -166,16 +174,46 @@
     shell: source /etc/profile && make build
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
+    when: not offline_enable
 
   - name: build TAS docker image
     shell: source /etc/profile && make image
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo"
+    become: yes
+    when: not offline_enable
 
-  - name: copy kustomization.yaml to TAS directory
+  - name: push TAS images to Harbor registry
+    docker_image:
+      name: "{{ item }}"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ item }}"
+      push: yes
+      source: local
+    with_items:
+      - tas-extender
+      - tas-controller
+
+  - name: remove local TAS images
+    docker_image:
+      state: absent
+      name: "{{ item }}"
+    with_items:
+      - tas-extender
+      - tas-controller
+    when: not offline_enable
+
+  - name: copy kustomization files to TAS directory
     copy:
-      src: kustomization.yaml
-      dest:  "{{ tmp_dir.path }}/tas-repo/deploy/kustomization.yaml"
+      src: "{{ item }}"
+      dest:  "{{ tmp_dir.path }}/tas-repo/deploy/"
+    with_items:
+      - kustomization.yaml
+      - add_cmk_toleration.yml
+
+  - name: copy Harbor Registry customization file to controller
+    template:
+      src: "use_local_docker_registry.yml.j2"
+      dest: "{{ tmp_dir.path }}/tas-repo/deploy/use_local_docker_registry.yml"
 
   - name: apply TAS
     shell: >
@@ -187,13 +225,13 @@
 
 - name: Descheduler
   block:
-  - name: copy Descheduler deployment files
-    copy:
-      src: "{{ item }}"
-      dest: "{{ tmp_dir.path }}/"
-    with_items: "{{ _descheduler_deployment_files }}"
+    - name: copy Descheduler deployment files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ tmp_dir.path }}/"
+      with_items: "{{ _descheduler_deployment_files }}"
 
-  - name: deploy Descheduler
-    command: kubectl apply -f "{{ tmp_dir.path }}/{{ item }}"
-    changed_when: true
-    with_items: "{{ _descheduler_deployment_files }}"
+    - name: deploy Descheduler
+      command: kubectl apply -f "{{ tmp_dir.path }}/{{ item }}"
+      changed_when: true
+      with_items: "{{ _descheduler_deployment_files }}"

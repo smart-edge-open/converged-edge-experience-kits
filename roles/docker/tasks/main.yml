@@ -9,23 +9,55 @@
     baseurl: "{{ _docker_repository_url }}"
     gpgkey: "{{ _docker_repository_key }}"
     gpgcheck: yes
+  become: yes
   register: result
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
+  when: not offline_enable
 
 - name: clear yum cache
   command: yum clean all
   args:
     warn: false
   changed_when: true
+  when: not offline_enable
+
+- name: add group "docker"
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: add group "{{ openness_user_group }}"
+  group:
+    name: "{{ openness_user_group }}"
+    state: present
+  become: yes
+
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: "docker,{{ openness_user_group }}"
+    append: yes
+  become: yes
+
+- name: reset connection
+  meta: reset_connection
 
 - name: install Docker CE
   yum:
     name: "{{ _docker_packages }}"
     state: present
+  become: yes
   notify:
     - enable and start docker service
+
+- name: Check if offline mode
+  set_fact:
+    local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
+--trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+  when: offline_enable
 
 - name: install pip dependencies
   block:
@@ -37,27 +69,40 @@
       pip:
         requirements: /tmp/requirements.txt
         state: present
+        extra_args: "{{ local_pip | default(omit) }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      become: yes
     - name: install docker-compose
       pip:
         name: "{{ _docker_compose_package }}"
         state: present
+        extra_args: "{{ local_pip | default(omit) }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      become: yes
 
 - name: set up proxy
   include_tasks: proxy.yml
   when: proxy_enable|bool
 
-- name: set cgroups driver to systemd
+- name: set cgroups driver to systemd and configure docker registries
   block:
     - name: make sure /etc/docker/ exists
       file:
         path: /etc/docker/
         state: directory
-    - name: set cgroups driver to systemd
-      copy:
-        src: daemon.json
+    - name: Generate daemon.json
+      template:
+        src: daemon.json.j2
         dest: /etc/docker/daemon.json
       notify:
         - enable and start docker service
+  become: yes
 
 - name: restart services if needed
   meta: flush_handlers
@@ -73,12 +118,22 @@
     path: /etc/audit/rules.d/docker.rules
     line: "-w {{ item.item }} -k docker"
     create: yes
+  become: yes
   when: item.stat.exists
   with_items: "{{ stats.results }}"
 
 - name: restart auditd
   command: service auditd restart # noqa 303
+  become: yes
   changed_when: true
+  args:
+    warn: false
+
+- name: Check if offline mode
+  set_fact:
+    _docker_completion_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/docker"
+    _docker_compose_completion_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/docker-compose"
+  when: offline_enable
 
 - name: setup docker bash completion
   block:
@@ -86,29 +141,57 @@
       get_url:
         url: "{{ _docker_completion_url }}"
         dest: "/etc/bash_completion.d"
+      become: yes
     - name: download Docker Compose bash completion
       get_url:
         url: "{{ _docker_compose_completion_url }}"
         dest: "/etc/bash_completion.d"
-
+      become: yes
 - name: create the directory for docker images
   file:
     path: "{{ docker_images_dir }}"
     state: directory
 
-- name: download docker images
-  get_url:
-    url: "{{ item }}"
-    dest: "{{ docker_images_dir }}"
-  with_items: "{{ docker_images }}"
+- name: Offline URLs
+  block:
+  - name: create temp directory for docker list
+    file:
+      state: directory
+      path: /tmp/dockerlist
 
-- name: find docker images
-  find:
-    paths: "{{ docker_images_dir }}"
-    patterns: "*.tar*"
-  register: docker_image_files
+  - name: Download list of docker images
+    get_url:
+      url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/docker_images.yml"
+      dest: /tmp/dockerlist
 
-- name: load docker images
-  command: "docker load -i {{ item.path }}"
-  with_items: "{{ docker_image_files.files }}"
-  changed_when: true
+  - name: Read file
+    slurp:
+      src: /tmp/dockerlist/docker_images.yml
+    register: docker_files_encoded
+
+  - name: Decode file
+    set_fact:
+      docker_files: "{{ docker_files_encoded['content'] | b64decode }}"
+
+  - name: Create URLs for packages
+    set_fact:
+      docker_images: "{{ docker_images | default([]) + ['https://' + hostvars[groups['controller_group'][0]]['ansible_host'] + '/' + item] }}"
+    with_items: "{{ docker_files.split('\n') }}"
+
+  - name: download docker images
+    get_url:
+      url: "{{ item }}"
+      dest: "{{ docker_images_dir }}"
+    with_items: "{{ docker_images }}"
+
+  - name: find docker images
+    find:
+      paths: "{{ docker_images_dir }}"
+      patterns: "*.tar*"
+    register: docker_image_files
+
+  - name: load docker images
+    command: "docker load -i {{ item.path }}"
+    with_items: "{{ docker_image_files.files }}"
+    changed_when: true
+  when: offline_enable

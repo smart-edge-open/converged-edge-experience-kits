@@ -7,11 +7,15 @@ server:
   tolerations:
     - effect: NoSchedule
       key: node-role.kubernetes.io/master
+    - effect: NoSchedule
+      key: cmk
+      operator: Exists
   nodeSelector:
     node-role.kubernetes.io/master: ""
   extraInitContainers:
     - name: setup-permissions
       image: busybox
+      imagePullPolicy: IfNotPresent
       securityContext:
         runAsUser: 0
         runAsGroup: 0
@@ -30,7 +34,7 @@ server:
         secretName: root-ca
     - name: proxy-config
       configMap:
-        name: prometheus-proxy-config 
+        name: prometheus-proxy-config
   extraVolumeMounts:
     - name: cert-vol
       mountPath: /opt/prometheus/certs/
@@ -46,7 +50,7 @@ server:
   - name: server-proxy
     image: nginx:alpine
     securityContext:
-      runAsUser: 0 
+      runAsUser: 0
       runAsNonRoot: false
     volumeMounts:
     - name: proxy-config

@@ -3,7 +3,7 @@
 
 ---
 
-_istio_main_dir: "/opt/istio"
+_istio_main_dir: "/opt/openness/istio"
 
 _istio_version: "1.6.8"
 _istio_base_url: "https://istio.io/downloadIstio"

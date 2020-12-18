@@ -6,25 +6,30 @@
   command: "ssh {{ vca_node_ip }} /opt/intel/vcaa/vpu_metric/run.sh stop"
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 - name: docker stop ovhddl
   command: "ssh {{ vca_node_ip }} docker stop ov_hddl"
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 - name: Get running hddl processes
   shell: ssh {{ vca_node_ip }} ps -ef | grep -w hddl | awk '{print $2}'
   register: hddl_processes
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 - name: kill the hddl process
   command: "ssh {{ vca_node_ip }} kill {{ item }}"
   with_items: "{{ hddl_processes.stdout_lines }}"
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 - name: clean hddl files
   command: "ssh {{ vca_node_ip }} rm -f /var/tmp/hddl*.*"
   ignore_errors: yes
   changed_when: true
+  become: yes

@@ -15,5 +15,5 @@ exclude_paths:
   - roles/nfd/files/
   - roles/kubernetes/cni/sriov/controlplane/files
   - roles/telemetry/opentelemetry/controlplane/charts
-  - roles/fpga_cfg/charts
+  - roles/bb_config/charts
   - cloud

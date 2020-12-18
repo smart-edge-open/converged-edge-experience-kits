@@ -3,6 +3,17 @@
 
 ---
 
+- name: Check if offline
+  set_fact:
+    _kubevirt_operator_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/kubevirt-operator.yaml"
+    _kubevirt_cr_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/kubevirt-cr.yaml"
+    _krew_tar_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/krew.tar.gz"
+    _krew_yaml_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/krew.yaml"
+    _cdi_operator_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/cdi-operator.yaml"
+    _cdi_cr_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/cdi-cr.yaml"
+    _virtctl_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/virtctl-linux-amd64.tar.gz"
+  when: offline_enable
+
 - name: Install KubeVirt
   block:
   - name: create temporary directory
@@ -10,7 +21,15 @@
       state: directory
       suffix: kubevirt-operator
     register: tmp_dir
-  - name: download KV Operator
+  - name: Download kubevirt controller
+    get_url:
+      url: "{{ _kubevirt_cr_url }}"
+      dest: "{{ tmp_dir.path }}/kubevirt-cr.yaml"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: Download KV Operator
     get_url:
       url: "{{ _kubevirt_operator_url }}"
       dest: "{{ tmp_dir.path }}/virt-operator.yaml"
@@ -33,7 +52,7 @@
     args:
       chdir: "{{ tmp_dir.path }}"
   - name: KV Controller Install
-    command: kubectl apply -f "{{ _kubevirt_cr_url }}"
+    command: kubectl apply -f "{{ tmp_dir.path }}/kubevirt-cr.yaml"
     register: result
     retries: "{{ number_of_retries }}"
     until: result is succeeded
@@ -70,6 +89,7 @@
       dest: "{{ _virtctl_dir }}/{{ _virtctl_name }}"
       remote_src: yes
       mode: '0755'
+    become: yes
   - name: remove temporary directory
     file:
       path: "{{ tmp_dir.path }}"
@@ -83,10 +103,18 @@
       state: directory
       suffix: cdi-operator
     register: tmp_dir
-  - name: download CDI Operator
+  - name: Download CDI Operator
     get_url:
       url: "{{ _cdi_operator_url }}"
-      dest: "{{ tmp_dir.path }}/"
+      dest: "{{ tmp_dir.path }}/cdi-operator.yaml"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: Download CDI Controller
+    get_url:
+      url: "{{ _cdi_cr_url }}"
+      dest: "{{ tmp_dir.path }}/cdi-cr.yaml"
     register: result
     retries: "{{ number_of_retries }}"
     until: result is succeeded
@@ -106,13 +134,13 @@
     args:
       chdir: "{{ tmp_dir.path }}"
   - name: CDI Operator Install
-    command: kubectl apply -f "{{ _cdi_operator_url }}"
+    command: kubectl apply -f "{{ tmp_dir.path }}/cdi-operator.yaml"
     register: result
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
   - name: CDI Controller Install
-    command: kubectl apply -f "{{ _cdi_cr_url }}"
+    command: kubectl apply -f "{{ tmp_dir.path }}/cdi-cr.yaml"
     register: result
     retries: "{{ number_of_retries }}"
     until: result is succeeded

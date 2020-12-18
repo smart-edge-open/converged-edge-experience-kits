@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: create temporary custom .openness_gitconfig
   include_tasks: ../../../git_repo/tasks/gitconfig_bootstrap.yml
 
@@ -15,6 +14,7 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
+    when: eaa_enable
   - name: download modules for edgednssvr
     shell: source /etc/profile && go mod download
     args:
@@ -23,10 +23,35 @@
     retries: "{{ number_of_retries }}"
     until: result is succeeded
     delay: "{{ retry_delay }}"
+    when: dns_enable
+  - name: download modules for certsigner
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/certsigner"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: cert_enabled
+  - name: download modules for certrequester
+    shell: source /etc/profile && go mod download
+    args:
+      chdir: "{{ _git_repo_dest }}/cmd/certrequester"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    when: cert_enabled
   - name: build binaries and images
-    shell: source /etc/profile && make networkedge
+    shell: source /etc/profile && make eaa
     args:
       chdir: "{{ _git_repo_dest }}"
+    when: eaa_enable
+  - name: build binaries and images
+    shell: source /etc/profile && make edgednssvr
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: dns_enable
   - name: download modules for interfaceservice
     shell: source /etc/profile && go mod download
     args:
@@ -41,16 +66,53 @@
     args:
       chdir: "{{ _git_repo_dest }}"
     when: "'kubeovn' in kubernetes_cnis"
+  - name: build binaries and images for certsigner
+    shell: source /etc/profile && make certsigner
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: cert_enabled
+  - name: build binaries and images for certrequester
+    shell: source /etc/profile && make certrequester
+    args:
+      chdir: "{{ _git_repo_dest }}"
+    when: cert_enabled
+  when: not offline_enable
   always:
-  - name: remove .openness_gitconfig
-    include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
+    - name: remove .openness_gitconfig
+      include_tasks: ../../../git_repo/tasks/gitconfig_remove.yml
 
-# since these pods are part of openness' DaemonSet will be recreated after deletion
+# since these pods are part of openness' Deployment will be recreated after deletion
 # this step is for pods to use newly created docker images from previous block
 - name: recreate openness pods
   shell: >
     kubectl delete --namespace=openness $(kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa|edgedns|interfaceservice' )
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'edgedns|interfaceservice|certsigner|eaa' )
   delegate_to: "{{ groups['controller_group'][0] }}"
   ignore_errors: yes
+  changed_when: true
+
+- name: check if EAA is running on a node
+  shell: >
+    set -o pipefail && kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa'
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: eaa_present
+  ignore_errors: yes
+  changed_when: true
+
+# OpenNESS pods send a CSR from an init container - we should automatically approve it
+- name: approve openness CSRs
+  shell: >
+    set -o pipefail && kubectl certificate approve {{ item.svc }} && kubectl get pods --namespace=openness
+    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item.pod }}' | grep -E 'Running'
+  when: "item.when"
+  with_items:
+    - { svc: "edgedns-{{ node_name }}", pod: "edgedns", when: "{{ dns_enable }}"}
+    - { svc: "interfaceservice-{{ node_name }}", pod: "interfaceservice", when: "{{ 'kubeovn' in kubernetes_cnis }}"}
+    - { svc: "eaa", pod: "eaa", when: "{{ eaa_present.rc == 0 }}"}
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  register: result
+  retries: "{{ openness_pods_timeout_min }}"
+  delay: 60
+  until: result is succeeded
   changed_when: true

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_offline_package_path: "/opt/opcdownloads/"
+
+_offline_package_name: opcdownloads.tar.gz
+
+_offline_checksum_name: checksum.txt

@@ -86,11 +86,11 @@
       include_tasks: ./roles/nfd/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
 
-  - name: load docker_registry variables
-    include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
+  - name: load harbor_registry variables
+    include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
 
-  - name: cleanup docker_registry
-    include_tasks: ./roles/docker_registry/controlplane/tasks/cleanup.yml
+  - name: cleanup harbor_registry
+    include_tasks: ./roles/harbor_registry/controlplane/tasks/cleanup.yml
 
   - name: load network edge variables
     include_vars: ./roles/openness/controlplane/defaults/main.yml
@@ -118,7 +118,7 @@
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
 
   - name: FPGA config cleanup
-    include_tasks: ./roles/fpga_cfg/tasks/cleanup.yml
+    include_tasks: ./roles/bb_config/tasks/cleanup.yml
     when: fpga_sriov_userspace_enable | default(False)
 
   - name: load Kafka variables
@@ -186,12 +186,30 @@
     yum:
       name: git*
       state: absent
+    become: yes
 
+  - name: rmd controller cleanup
+    include_tasks: ./roles/rmd/common/tasks/cleanup.yml
+    when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_group
   serial: 1
   tasks:
-    # biosfw/node - no clean up, because build image is delete when running docker's prune.yml
+    # biosfw/node - no clean up, because build image is deleted when running docker's prune.yml
+
+    - name: cleanup acc100 dpdk init app
+      block:
+      - name: load acc100 dpdk init app variables
+        include_vars: ./roles/init_app_acc100/defaults/main.yml
+      - name: load acc100 dpdk init app
+        include_tasks: ./roles/init_app_acc100/tasks/cleanup.yml
+      when: acc100_userspace_vf.enabled | default(False)
+
+    - name: load kubernetes variables
+      include_vars: ./roles/kubernetes/node/defaults/main.yml
+
+    - name: cleanup kubernetes
+      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: ptp sychronization cleanup
       block:
@@ -225,12 +243,6 @@
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
-
-    - name: load kubernetes variables
-      include_vars: ./roles/kubernetes/node/defaults/main.yml
-
-    - name: cleanup kubernetes
-      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -271,15 +283,25 @@
     - name: cleanup git
       include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
-    - name: load docker_registry variables
-      include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
+    - name: load harbor_registry variables
+      include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
 
-    - name: cleanup docker_registry certificate
-      include_tasks: ./roles/docker_registry/node/tasks/cleanup.yml
+    - name: cleanup harbor_registry certificate
+      include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml
+
+    - name: rmd node cleanup
+      include_tasks: ./roles/rmd/common/tasks/cleanup.yml
+      when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_vca_group
   serial: 1
   tasks:
+    - name: load kubernetes variables
+      include_vars: ./roles/kubernetes/node/defaults/main.yml
+
+    - name: cleanup kubernetes
+      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
+
     - name: load cmk variables
       include_vars: ./roles/cmk/node/defaults/main.yml
 
@@ -294,12 +316,6 @@
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
-
-    - name: load kubernetes variables
-      include_vars: ./roles/kubernetes/node/defaults/main.yml
-
-    - name: cleanup kubernetes
-      include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -334,8 +350,8 @@
     - name: cleanup git
       include_tasks: ./roles/git_repo/tasks/cleanup.yml
 
-    - name: load docker_registry variables
-      include_vars: ./roles/docker_registry/controlplane/defaults/main.yml
+    - name: load harbor_registry variables
+      include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
 
-    - name: cleanup docker_registry certificate
-      include_tasks: ./roles/docker_registry/node/tasks/cleanup.yml
+    - name: cleanup harbor_registry certificate
+      include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml

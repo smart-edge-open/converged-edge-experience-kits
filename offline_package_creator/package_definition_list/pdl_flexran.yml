@@ -1,0 +1,1870 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Absolute list of packages/files/repositories/components expected by OEK to be pre-downloaded and packaged for offline OpenNESS deployment of "flexran" flavor.
+
+### Github repos.
+
+github-repos:
+  - name: edge-node-repo
+    url: https://github.com/open-ness/edgenode.git
+    flag: tag
+    value: master
+  - name: sriov-network-device-plugin
+    url: https://github.com/intel/sriov-network-device-plugin
+    flag: commit
+    value: 4e0302aeb4812844524005686b74175d8b0fc515
+  - name: sriov-cni
+    url: https://github.com/intel/sriov-cni
+    flag: tag
+    value: v2.3
+  - name: rmd
+    url: https://github.com/intel/rmd
+    flag: tag
+    value: v0.3
+  - name: rmd-operator
+    url: https://github.com/intel/rmd-operator
+    flag: tag
+    value: v0.2
+  - name: telemetry-aware-scheduling
+    url: https://github.com/intel/telemetry-aware-scheduling.git
+    flag: commit
+    value: a13708825e854da919c6fdf05d50753113d04831
+  - name: barometer
+    url: https://github.com/opnfv/barometer.git
+    flag: tag
+    value: master
+  - name: CPU-Manager-for-Kubernetes
+    url: https://github.com/intel/CPU-Manager-for-Kubernetes
+    flag: tag
+    value: v1.4.1
+  - name: video-analytics-serving
+    url: https://github.com/intel/video-analytics-serving
+    flag: tag
+    value: v0.3.0-alpha
+  - name: intel-device-plugins-for-kubernetes
+    url: https://github.com/intel/intel-device-plugins-for-kubernetes
+    flag: commit
+    value: 826707420250c0d10f351f8274766101c7ecf58e
+  - name: harbor-helm
+    url: https://github.com/goharbor/harbor-helm.git
+    flag: tag
+    value: v1.5.0
+  - name: x-epcforedge
+    url: https://github.com/open-ness/x-epcforedge.git
+    flag: tag
+    value: master
+
+  #TBA
+
+### Go Modules.
+# go modules are downloaded with the go.mod file
+go-modules:
+  - name: edgenode
+  - name: x-epcforedge
+  - name: rmd-operator
+  - name: telemetry-aware-scheduling
+
+  #TBA
+
+### Pip pakackages
+# due the line is too long, and pass fail while checking by jenkins
+# real URL: https://files.pythonhosted.org/ + url
+pip-packages:
+  - name: tox
+    url: 1d/4e/20c679f8c5948f7c48591fde33d442e716af66a31a88f5791850a75041eb/tox-2.9.1-py2.py3-none-any.whl
+  - name: docopt
+    url: a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz
+  - name: psutil
+    url: 73/93/4f8213fbe66fc20cb904f35e6e04e20b47b85bee39845cc66a0bcf5ccdcb/psutil-5.6.7.tar.gz
+  - name: PyInstaller
+    url: 3c/c9/c3f9bc64eb11eee6a824686deba6129884c8cbdf70e750661773b9865ee0/PyInstaller-3.6.tar.gz
+  - name: kubernetes
+    url: 2a/09/365f4ad63f71c698c76edb3e666852b87a751ee4b6d23222b09952557d17/kubernetes-10.0.0-py2.py3-none-any.whl
+  - name: requests
+    url: 45/1e/0c169c6a5381e241ba7404532c16a21d86ab872c9bed8bdcd4c423954103/requests-2.24.0-py2.py3-none-any.whl
+  - name: urllib3
+    url: df/1c/59cca3abf96f991f2ec3131a4ffe72ae3d9ea1f5894abe8a9c5e3c77cfee/urllib3-1.24.2-py2.py3-none-any.whl
+  - name: pytest
+    url: 38/af/8dcf688d192914928393f931b7b550f2530299bbb08018b2f17efa6aab73/pytest-3.3.2-py2.py3-none-any.whl
+  - name: pytest_cov
+    url: 30/0a/1b009b525526cd3cd9f52f52391b426c5a3597447be811a10bcb1f6b05eb/pytest_cov-2.6.0-py2.py3-none-any.whl
+  - name: coverage
+    url: 51/b1/13609068fff1c8c056f0c4601ad6985cf5c1bbfc529196ab08bd2a57dc39/coverage-4.5.4-cp36-cp36m-manylinux1_x86_64.whl
+  - name: cryptography
+    url: 60/c7/99b33c53cf3f20a97a4c4bfd3ab66dcc93d99da0a97cc9597aa36ae6bb62/cryptography-2.4.2-cp34-abi3-manylinux1_x86_64.whl
+  - name: yamlreader
+    url: 84/4b/3af5480c26b3235dcd0984b9664b48115c2308c8c4f22e7162322be4ec0f/yamlreader-3.0.4.tar.gz
+  - name: pluggy
+    url: ba/65/ded3bc40bbf8d887f262f150fbe1ae6637765b5c9534bd55690ed2c0b0f7/pluggy-0.6.0-py3-none-any.whl
+  - name: packaging
+    url: ad/c2/b500ea05d5f9f361a562f089fc91f77ed3b4783e13a08a3daf82069b1224/packaging-17.1-py2.py3-none-any.whl
+  - name: attrs
+    url: 41/59/cedf87e91ed541be7957c501a92102f9cc6363c623a7666d69d51c78ac5b/attrs-18.1.0-py2.py3-none-any.whl
+  - name: setuptools
+    url: ec/51/f45cea425fd5cb0b0380f5b0f048ebc1da5b417e48d304838c02d6288a1e/setuptools-41.0.1-py2.py3-none-any.whl
+  - name: virtualenv
+    url: 97/f3/c064343ac58d1a54c393a3f66483a29500f644a5918deeb935d28673edd9/virtualenv-20.1.0-py2.py3-none-any.whl
+  - name: py
+    url: 68/0f/41a43535b52a81e4f29e420a151032d26f08b62206840c48d14b70e53376/py-1.9.0-py2.py3-none-any.whl
+  - name: six
+    url: ee/ff/48bde5c0f013094d729fe4b0316ba2a24774b3ff1c52d924a8a4cb04078a/six-1.15.0-py2.py3-none-any.whl
+  - name: altgraph
+    url: ee/3d/bfca21174b162f6ce674953f1b7a640c1498357fa6184776029557c25399/altgraph-0.17-py2.py3-none-any.whl
+  - name: requests_oauthlib
+    url: a3/12/b92740d845ab62ea4edf04d2f4164d82532b5a0b03836d4d4e71c6f3d379/requests_oauthlib-1.3.0-py2.py3-none-any.whl
+  - name: websocket_client
+    url: 29/19/44753eab1fdb50770ac69605527e8859468f3c0fd7dc5a76dd9c4dbd7906/websocket_client-0.56.0-py2.py3-none-any.whl
+  - name: google_auth
+    url: 1d/60/81e68e70eea91ef05bb00bcdac243d67b61f826c65aaca6961de622dffd7/google_auth-1.23.0-py2.py3-none-any.whl
+  - name: certifi
+    url: 5e/c4/6c4fe722df5343c33226f0b4e0bb042e4dc13483228b4718baf286f86d87/certifi-2020.6.20-py2.py3-none-any.whl
+  - name: python_dateutil
+    url: d4/70/d60450c3dd48ef87586924207ae8907090de0b306af2bce5d134d78615cb/python_dateutil-2.8.1-py2.py3-none-any.whl
+  - name: PyYAML
+    url: 64/c2/b80047c7ac2478f9501676c988a5411ed5572f35d1beff9cae07d321512c/PyYAML-5.3.1.tar.gz
+  - name: idna
+    url: a2/38/928ddce2273eaa564f6f50de919327bf3a00f091b5baba8dfa9460f3a8a8/idna-2.10-py2.py3-none-any.whl
+  - name: chardet
+    url: bc/a9/01ffebfb562e4274b6487b4bb1ddec7ca55ec7510b22e4c51f14098443b8/chardet-3.0.4-py2.py3-none-any.whl
+  - name: cffi
+    url: 50/ca/bbca0fd95b24a1d4f0d2e016f09f35ae68d4fe72bf34cc538d0a0d2d3e10/cffi-1.14.3-cp36-cp36m-manylinux1_x86_64.whl
+  - name: asn1crypto
+    url: b5/a8/56be92dcd4a5bf1998705a9b4028249fe7c9a035b955fe93b6a3e5b829f8/asn1crypto-1.4.0-py2.py3-none-any.whl
+  - name: pyparsing
+    url: 8a/bb/488841f56197b13700afd5658fc279a2025a39e22449b7cf29864669b15d/pyparsing-2.4.7-py2.py3-none-any.whl
+  - name: appdirs
+    url: 3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl
+  - name: importlib_metadata
+    url: 6d/6d/f4bb28424bc677bce1210bc19f69a43efe823e294325606ead595211f93e/importlib_metadata-2.0.0-py2.py3-none-any.whl
+  - name: filelock
+    url: 93/83/71a2ee6158bb9f39a90c0dea1637f81d5eef866e188e1971a1b1ab01a35a/filelock-3.0.12-py3-none-any.whl
+  - name: importlib_resources
+    url: c5/1f/ec86d2a5c48ac6490d4471b297885603cf0e8da89d5ffbf0bce6e57f4d64/importlib_resources-3.3.0-py2.py3-none-any.whl
+  - name: distlib
+    url: f5/0a/490fa011d699bb5a5f3a0cf57de82237f52a6db9d40f33c53b2736c9a1f9/distlib-0.3.1-py2.py3-none-any.whl
+  - name: oauthlib
+    url: 05/57/ce2e7a8fa7c0afb54a0581b14a65b56e62b5759dbc98e80627142b8a3704/oauthlib-3.1.0-py2.py3-none-any.whl
+  - name: cachetools
+    url: cd/5c/f3aa86b6d5482f3051b433c7616668a9b96fbe49a622210e2c9781938a5c/cachetools-4.1.1-py3-none-any.whl
+  - name: pyasn1_modules
+    url: 95/de/214830a981892a3e286c3794f41ae67a4495df1108c3da8a9f62159b9a9d/pyasn1_modules-0.2.8-py2.py3-none-any.whl
+  - name: rsa
+    url: 1c/df/c3587a667d6b308fadc90b99e8bc8774788d033efcc70f4ecaae7fad144b/rsa-4.6-py3-none-any.whl
+  - name: pycparser
+    url: ae/e7/d9c3a176ca4b02024debf82342dab36efadfc5776f9c8db077e8f6e71821/pycparser-2.20-py2.py3-none-any.whl
+  - name: zipp
+    url: 41/ad/6a4f1a124b325618a7fb758b885b68ff7b058eec47d9220a12ab38d90b1f/zipp-3.4.0-py3-none-any.whl
+  - name: pyasn1
+    url: 62/1e/a94a8d635fa3ce4cfc7f506003548d0a2447ae76fd5ca53932970fe3053f/pyasn1-0.4.8-py2.py3-none-any.whl
+  - name: jsonschema
+    url: c5/8f/51e89ce52a085483359217bc72cdbf6e75ee595d5b1d4b5ade40c7e018b8/jsonschema-3.2.0-py2.py3-none-any.whl
+  - name: numpy-1
+    url: 62/20/4d43e141b5bc426ba38274933ef8e76e85c7adea2c321ecf9ebf7421cedf/numpy-1.18.1-cp36-cp36m-manylinux1_x86_64.whl
+  - name: numpy-2
+    url: 07/08/a549ba8b061005bb629b76adc000f3caaaf881028b963c2e18f811c6edc1/numpy-1.18.2-cp36-cp36m-manylinux1_x86_64.whl
+  - name: attrs
+    url: 14/df/479736ae1ef59842f512548bacefad1abed705e400212acba43f9b0fa556/attrs-20.2.0-py2.py3-none-any.whl
+  - name: pyrsistent
+    url: 4d/70/fd441df751ba8b620e03fd2d2d9ca902103119616f0f6cc42e6405035062/pyrsistent-0.17.3.tar.gz
+  - name: setuptools
+    url: 6d/38/c21ef5034684ffc0412deefbb07d66678332290c14bb5269c85145fbd55e/setuptools-50.3.2-py3-none-any.whl
+  - name: backports.shutil_get_terminal_size
+    url: 7d/cd/1750d6c35fe86d35f8562091737907f234b78fdffab42b29c72b1dd861f4/backports.shutil_get_terminal_size-1.0.0-py2.py3-none-any.whl
+  - name: backports.ssl_match_hostname
+    url: 76/21/2dc61178a2038a5cb35d14b61467c6ac632791ed05131dda72c20e7b9e23/backports.ssl_match_hostname-3.5.0.1.tar.gz
+  - name: bcrypt
+    url: ad/36/9a0227d048e98409f012570f7bef8a8c2373b9c9c5dfbf82963cbae05ede/bcrypt-3.1.7-cp27-cp27mu-manylinux1_x86_64.whl
+  - name: cached_property
+    url: 3b/86/85c1be2e8db9e13ef9a350aecd6dea292bd612fa288c2f40d035bb750ded/cached_property-1.5.1-py2.py3-none-any.whl
+  - name: cffi
+    url: 5f/a1/489c4a6fddd981b3b0cd74ce23517f12547bc6e14a5b5cab0cf1db3eb1e6/cffi-1.14.2-cp27-cp27mu-manylinux1_x86_64.whl
+  - name: configobj
+    url: 49/9c/4a97c36ba82e60b390614f050cd1d3e8652f1b38d1e6fde6e1ff4f16bc3e/configobj-4.7.2.tar.gz
+  - name: cryptography
+    url: b2/55/b298540fe693643e2b49dfb5ade6ed711f3e1b39159a9f643376325d76a2/cryptography-3.2-cp27-cp27mu-manylinux2010_x86_64.whl
+  - name: decorator
+    url: f3/26/876d492f2394f29401eb652ddfa53dec2bc8721861c7fe0dce1b5d0d2b6a/decorator-3.4.0.tar.gz
+  - name: distro
+    url: 25/b7/b3c4270a11414cb22c6352ebc7a83aaa3712043be29daa05018fd5a5c956/distro-1.5.0-py2.py3-none-any.whl
+  - name: docker
+    url: 09/da/7cc7ecdcd01145e9924a8ccbe9c1baf3a362fc75d4cb150676eb5231ea60/docker-3.7.3-py2.py3-none-any.whl
+  - name: docker_compose
+    url: 43/bf/a9fe1f4b6e0f2ceac7eb7e2dab2fd03edd2fd5ffa8cd90d55ba1453af8b7/docker_compose-1.26.2-py2.py3-none-any.whl
+  - name: dockerpty
+    url: 8d/ee/e9ecce4c32204a6738e0a5d5883d3413794d7498fe8b06f44becc028d3ba/dockerpty-0.4.1.tar.gz
+  - name: docker_pycreds
+    url: f5/e8/f6bd1eee09314e7e6dee49cbe2c5e22314ccdb38db16c9fc72d2fa80d054/docker_pycreds-0.4.0-py2.py3-none-any.whl
+  - name: enum34
+    url: 6f/2c/a9386903ece2ea85e9807e0e062174dc26fdce8b05f216d00491be29fad5/enum34-1.1.10-py2-none-any.whl
+  - name: functools32
+    url: c5/60/6ac26ad05857c601308d8fb9e87fa36d0ebf889423f47c3502ef034365db/functools32-3.2.3-2.tar.gz
+  - name: idna
+    url: 4b/2a/0276479a4b3caeb8a8c1af2f8e4355746a97fab05a372e4a2c6a6b876165/idna-2.7-py2.py3-none-any.whl
+  - name: iniparse
+    url: 0f/d1/3090ef9be165da5ddb1b0cf2b332d3282588bdd2dd0967e94b547f10055f/iniparse-0.4.tar.gz
+  - name: ipaddress
+    url: 23/6a/813ac29a01e4c33c19c2bded98ac3d4266ebbf0bd2c0eb0020e1c969958d/ipaddress-1.0.16-py27-none-any.whl
+  - name: jsonschema
+    url: 77/de/47e35a97b2b05c2fadbec67d44cfcdcd09b8086951b331d82de90d2912da/jsonschema-2.6.0-py2.py3-none-any.whl
+  - name: paramiko
+    url: 06/1e/1e08baaaf6c3d3df1459fd85f0e7d2d6aa916f33958f151ee1ecc9800971/paramiko-2.7.1-py2.py3-none-any.whl
+  - name: pycurl
+    url: 11/73/abcfbbb6e1dd7087fa53042c301c056c11264e8a737a4688f834162d731e/pycurl-7.19.0.tar.gz
+  - name: pygpgme
+    url: dc/96/b2bcbd3a216af313bb9045c2e573aa18653876a65db471b86be7598234dd/pygpgme-0.3.tar.gz
+  - name: pyliblzma
+    url: 17/48/5292ade507dafe573360560ba53783395587dc42eb32b347feb2ac70fc6b/pyliblzma-0.5.3.tar.bz2
+  - name: PyNaCl
+    url: de/63/bb36279da38df643c6df3a8a389f29a6ff4a8854468f4c9b9d925b27d57d/PyNaCl-1.4.0-cp27-cp27mu-manylinux1_x86_64.whl
+  - name: python_dotenv
+    url: 32/2e/e4585559237787966aad0f8fd0fc31df1c4c9eb0e62de458c5b6cde954eb/python_dotenv-0.15.0-py2.py3-none-any.whl
+  - name: pyudev
+    url: 13/8d/437e226f9c4518a821b141009142d24b11b0fe1acc92d135de95daa9953e/pyudev-0.15.tar.gz
+  - name: pyxattr
+    url: 20/7a/2ae2a5a13e550b88cf4aa71aa60e1c2d58d7f002d4a2ccb9b4920f8dc84b/pyxattr-0.5.1.tar.gz
+  - name: PyYAML
+    url: 9f/2c/9417b5c774792634834e730932745bc09a7d36754ca00acf1ccd1ac2594d/PyYAML-5.1.tar.gz
+  - name: requests
+    url: ff/17/5cbb026005115301a8fb2f9b0e3e8d32313142fe8b617070e7baad20554f/requests-2.20.1-py2.py3-none-any.whl
+  - name: subprocess32
+    url: 93/dc/3a0ae313f1cf0f59b582e8e14891196e51fca5db193558b7661bd32b8801/subprocess32-3.5.4-cp27-cp27mu-manylinux2014_x86_64.whl
+  - name: texttable
+    url: 02/e1/2565e6b842de7945af0555167d33acfc8a615584ef7abd30d1eae00a4d80/texttable-0.9.1.tar.gz
+  - name: typing
+    url: 3b/c0/e44213fcb799eac02881e2485724ba5b0914600bc9df6ed922e364fdc059/typing-3.7.4.3-py2-none-any.whl
+  - name: urllib3
+    url: 01/11/525b02e4acc0c747de8b6ccdab376331597c569c42ea66ab0a1dbd36eca2/urllib3-1.24.3-py2.py3-none-any.whl
+  - name: cffi
+    url: 98/76/90d154092a65911a386eb28fc0c6c65808d2d794d662b392cba236fec11e/cffi-1.14.3-cp27-cp27mu-manylinux1_x86_64.whl
+  - name: enum34
+    url: 72/c9/3c640a9cd54a731f3c54d97515b06aae6f6d16a5878a632dbfa9ffe5e663/enum34-1.0.4.tar.gz
+  - name: pycparser
+    url: 6d/31/666614af3db0acf377876d48688c5d334b6e493b96d21aa7d332169bee50/pycparser-2.14.tar.gz
+  - name: pyyaml
+    url: 00/17/3b822893a1789a025d3f676a381338516a8f65e686d915b0834ecc9b4979/PyYAML-3.10.tar.gz
+  - name: six
+    url: 10/e3/a7f8eea80a9fa8358c1cd89ef489bc03675e69e54ed2982cd6f2a28d8295/six-1.9.0-py2.py3-none-any.whl
+  - name: pip
+    url: cb/28/91f26bd088ce8e22169032100d4260614fc3da435025ff389ef1d396a433/pip-20.2.4-py2.py3-none-any.whl
+  - name: backports
+    url: ff/2b/8265224812912bc5b7a607c44bf7b027554e1b9775e9ee0de8032e3de4b2/backports.ssl_match_hostname-3.7.0.1.tar.gz
+  - name: cached_property
+    url: 48/19/f2090f7dad41e225c7f2326e4cfe6fff49e57dedb5b53636c9551f86b069/cached_property-1.5.2-py2.py3-none-any.whl
+  - name: cffi
+    url: 96/07/20d7d0666dfa87f215ea893b1ab16b81d181970c0784300b87cc15ff1dae/cffi-1.14.3-cp27-cp27m-manylinux1_x86_64.whl
+  - name: contextlib2
+    url: 85/60/370352f7ef6aa96c52fb001831622f50f923c1d575427d021b8ab3311236/contextlib2-0.6.0.post1-py2.py3-none-any.whl
+  - name: cryptography
+    url: 08/ef/e98bc93bfa2527cb954efde5f3c7538a40fe0e7a2e55d68707783fcdab5d/cryptography-3.2.1-cp27-cp27mu-manylinux2010_x86_64.whl
+  - name: docker
+    url: 9e/8c/8d42dbd83679483db207535f4fb02dc84325fa78b290f057694b057fcd21/docker-4.3.1-py2.py3-none-any.whl
+  - name: ipaddress
+    url: c2/f8/49697181b1651d8347d24c095ce46c7346c37335ddc7d255833e7cde674d/ipaddress-1.0.23-py2.py3-none-any.whl
+  - name: paramiko
+    url: 95/19/124e9287b43e6ff3ebb9cdea3e5e8e88475a873c05ccdf8b7e20d2c4201e/paramiko-2.7.2-py2.py3-none-any.whl
+  - name: pathlib2
+    url: e9/45/9c82d3666af4ef9f221cbb954e1d77ddbb513faf552aea6df5f37f1a4859/pathlib2-2.3.5-py2.py3-none-any.whl
+  - name: scandir
+    url: df/f5/9c052db7bd54d0cbf1bc0bb6554362bba1012d03e5888950a4f5c5dadc4e/scandir-1.10.0.tar.gz
+  - name: setuptools
+    url: a7/e0/30642b9c2df516506d40b563b0cbd080c49c6b3f11a70b4c7a670f13a78b/setuptools-50.3.2.zip
+  - name: subprocess32
+    url: 32/c8/564be4d12629b912ea431f1a50eb8b3b9d00f1a0b1ceff17f266be190007/subprocess32-3.5.4.tar.gz
+  - name: texttable
+    url: 06/f5/46201c428aebe0eecfa83df66bf3e6caa29659dbac5a56ddfd83cae0d4a4/texttable-1.6.3-py2.py3-none-any.whl
+  - name: urllib3
+    url: 56/aa/4ef5aa67a9a62505db124a5cb5262332d1d4153462eb8fd89c9fa41e5d92/urllib3-1.25.11-py2.py3-none-any.whl
+  - name: configparser
+    url: 7a/2a/95ed0501cf5d8709490b1d3a3f9b5cf340da6c433f896bbe9ce08dbe6785/configparser-4.0.2-py2.py3-none-any.whl
+  - name: cryptography
+    url: 66/58/d7ff652d30e8cbabd8946b3116fba73b39a73ea9c63943b3c1bf3cfcf190/cryptography-3.0-cp27-cp27mu-manylinux1_x86_64.whl
+  - name: google_auth
+    url: 1f/cf/724b6436967a8be879c8de16b09fd80e0e7b0bcad462f5c09ee021605785/google_auth-1.22.1-py2.py3-none-any.whl
+  - name: pyrsistent
+    url: 80/18/1492d651693ef7d40e0a40377ed56a8cc5c5fe86073eb6c56e53513f4480/pyrsistent-0.16.1.tar.gz
+  - name: setuptools
+    url: e1/b7/182161210a13158cd3ccc41ee19aadef54496b74f2817cc147006ec932b4/setuptools-44.1.1-py2.py3-none-any.whl
+  - name: zipp
+    url: 96/0a/67556e9b7782df7118c1f49bdc494da5e5e429c93aa77965f33e81287c8c/zipp-1.2.0-py2.py3-none-any.whl
+  - name: opencv-pythyon-4.1.2
+    url: c0/a9/9828dfaf93f40e190ebfb292141df6b7ea1a2d57b46263e757f52be8589f/opencv_python-4.1.2.30-cp36-cp36m-manylinux1_x86_64.whl
+  - name: docker-compose
+    url: dd/e6/1521d1dfd9c0da1d1863b18e592d91c3df222e55f258b9876fa1e59bc4b5/docker_compose-1.24.1-py2.py3-none-any.whl
+
+### YUM packages.
+rpm-packages:
+  # ansible-precheck.sh; epel-release
+  - name: epel-release
+    rpm: http://mirror.centos.org/altarch/7/extras/aarch64/Packages/epel-release-7-11.noarch.rpm
+  # ansible-precheck.sh; ansible and dependency
+  - name: ansible
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/a/ansible-2.9.14-1.el7.noarch.rpm
+  - name: libyaml
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libyaml-devel-0.1.4-11.el7_0.x86_64.rpm
+  - name: python2-cryptography
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python2-cryptography-1.7.2-2.el7.x86_64.rpm
+  - name: python2-httplib2
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python2-httplib2-0.18.1-3.el7.noarch.rpm
+  - name: python2-jmespath
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python2-jmespath-0.9.4-2.el7.noarch.rpm
+  - name: python2-pyasn1
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python2-pyasn1-0.1.9-7.el7.noarch.rpm
+  - name: python-babel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-babel-0.9.6-8.el7.noarch.rpm
+  - name: python-backports
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-backports-1.0-8.el7.x86_64.rpm
+  - name: python-backports-ssl_match_hostname
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-backports-ssl_match_hostname-3.5.0.1-1.el7.noarch.rpm
+  - name: python-cffi
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-cffi-1.6.0-5.el7.x86_64.rpm
+  - name: python-enum34
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-enum34-1.0.4-1.el7.noarch.rpm
+  - name: python-idna
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-idna-2.4-1.el7.noarch.rpm
+  - name: python-ipaddress
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-ipaddress-1.0.16-2.el7.noarch.rpm
+  - name: python-jinja2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-jinja2-2.7.2-4.el7.noarch.rpm
+  - name: python-markupsafe
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-markupsafe-0.11-10.el7.x86_64.rpm
+  - name: python-netaddr
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-netaddr-0.7.5-9.el7.noarch.rpm
+  - name: python-paramiko
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-paramiko-2.1.1-9.el7.noarch.rpm
+  - name: python-ply
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-ply-3.4-11.el7.noarch.rpm
+  - name: python-pycparser
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-pycparser-2.14-1.el7.noarch.rpm
+  - name: python-setuptools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-setuptools-0.9.8-7.el7.noarch.rpm
+  - name: python-six
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-six-1.9.0-2.el7.noarch.rpm
+  - name: PyYAML
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/PyYAML-3.10-11.el7.x86_64.rpm
+  - name: sshpass
+    rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/sshpass-1.06-2.el7.x86_64.rpm
+  # role: machine_setup/os_setup  install_base_os_packages.yml
+  # controller_group/os_yum_base_packages
+  # git2u-all,jq,vim-common,curl,yum-utils,python2-pip,wget,bridge-utils,rsync,device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch
+  # Install git2u-all and dependency packages
+  - name: apr
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/apr-1.4.8-7.el7.x86_64.rpm
+  - name: apr-util
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/apr-util-1.5.2-6.el7.x86_64.rpm
+  - name: cvs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cvs-1.11.23-35.el7.x86_64.rpm
+  - name: cvsps
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cvsps-2.2-0.14.b1.el7.x86_64.rpm
+  - name: dejavu-fonts-common
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/dejavu-fonts-common-2.33-6.el7.noarch.rpm
+  - name: dejavu-sans-fonts
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/dejavu-sans-fonts-2.33-6.el7.noarch.rpm
+  - name: emacs-common
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/emacs-common-24.3-23.el7.x86_64.rpm
+  - name: emacs-filesystem
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/emacs-filesystem-24.3-23.el7.noarch.rpm
+  - name: emacs-nox
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/emacs-nox-24.3-23.el7.x86_64.rpm
+  - name: fontconfig
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/fontconfig-2.13.0-4.3.el7.x86_64.rpm
+  - name: fontpackages-filesystem
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/fontpackages-filesystem-1.44-8.el7.noarch.rpm
+  - name: gnutls
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gnutls-3.3.29-9.el7_6.x86_64.rpm
+  - name: gpm-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gpm-libs-1.20.7-6.el7.x86_64.rpm
+  - name: libX11
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libX11-1.6.7-2.el7.x86_64.rpm
+  - name: libX11-common
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libX11-common-1.6.7-2.el7.noarch.rpm
+  - name: libXau
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libXau-1.0.8-2.1.el7.x86_64.rpm
+  - name: libXft
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libXft-2.3.2-2.el7.x86_64.rpm
+  - name: libXrender
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libXrender-0.9.10-1.el7.x86_64.rpm
+  - name: liblockfile
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/liblockfile-1.08-17.el7.x86_64.rpm
+  - name: libmodman
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libmodman-2.0.1-8.el7.x86_64.rpm
+  - name: libproxy
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libproxy-0.4.11-11.el7.x86_64.rpm
+  - name: libsecret
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libsecret-0.18.6-1.el7.x86_64.rpm
+  - name: libxcb
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libxcb-1.13-1.el7.x86_64.rpm
+  - name: neon
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/neon-0.30.0-4.el7.x86_64.rpm
+  - name: nettle
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nettle-2.7.1-8.el7.x86_64.rpm
+  - name: pakchois
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pakchois-0.4-10.el7.x86_64.rpm
+  - name: perl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-5.16.3-297.el7.x86_64.rpm
+  - name: perl-Authen-SASL
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Authen-SASL-2.15-10.el7.noarch.rpm
+  - name: perl-Carp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Carp-1.26-244.el7.noarch.rpm
+  - name: perl-Compress-Raw-Bzip2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Compress-Raw-Bzip2-2.061-3.el7.x86_64.rpm
+  - name: perl-Compress-Raw-Zlib
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Compress-Raw-Zlib-2.061-4.el7.x86_64.rpm
+  - name: perl-DBD-SQLite
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-DBD-SQLite-1.39-3.el7.x86_64.rpm
+  - name: perl-DBI
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-DBI-1.627-4.el7.x86_64.rpm
+  - name: perl-Data-Dumper
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Data-Dumper-2.145-3.el7.x86_64.rpm
+  - name: perl-Digest
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Digest-1.17-245.el7.noarch.rpm
+  - name: perl-Digest-HMAC
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Digest-HMAC-1.03-5.el7.noarch.rpm
+  - name: perl-Digest-MD5
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Digest-MD5-2.52-3.el7.x86_64.rpm
+  - name: perl-Digest-SHA
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Digest-SHA-5.85-4.el7.x86_64.rpm
+  - name: perl-Encode
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Encode-2.51-7.el7.x86_64.rpm
+  - name: perl-Error
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Error-0.17020-2.el7.noarch.rpm
+  - name: perl-Exporter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Exporter-5.68-3.el7.noarch.rpm
+  - name: perl-File-Path
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Path-2.09-2.el7.noarch.rpm
+  - name: perl-File-Temp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Temp-0.23.01-3.el7.noarch.rpm
+  - name: perl-Filter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Filter-1.49-3.el7.x86_64.rpm
+  - name: perl-GSSAPI
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-GSSAPI-0.28-9.el7.x86_64.rpm
+  - name: perl-Getopt-Long
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Getopt-Long-2.40-3.el7.noarch.rpm
+  - name: perl-HTTP-Tiny
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-HTTP-Tiny-0.033-3.el7.noarch.rpm
+  - name: perl-IO-Compress
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-IO-Compress-2.061-2.el7.noarch.rpm
+  - name: perl-IO-Socket-IP
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-IO-Socket-IP-0.21-5.el7.noarch.rpm
+  - name: perl-IO-Socket-SSL
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-IO-Socket-SSL-1.94-7.el7.noarch.rpm
+  - name: perl-Mozilla-CA
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Mozilla-CA-20130114-5.el7.noarch.rpm
+  - name: perl-Net-Daemon
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Net-Daemon-0.48-5.el7.noarch.rpm
+  - name: perl-Net-LibIDN
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Net-LibIDN-0.12-15.el7.x86_64.rpm
+  - name: perl-Net-SMTP-SSL
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Net-SMTP-SSL-1.01-13.el7.noarch.rpm
+  - name: perl-Net-SSLeay
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Net-SSLeay-1.55-6.el7.x86_64.rpm
+  - name: perl-PathTools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PathTools-3.40-5.el7.x86_64.rpm
+  - name: perl-PlRPC
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PlRPC-0.2020-14.el7.noarch.rpm
+  - name: perl-Pod-Escapes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Escapes-1.04-297.el7.noarch.rpm
+  - name: perl-Pod-Perldoc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Perldoc-3.20-4.el7.noarch.rpm
+  - name: perl-Pod-Simple
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Simple-3.28-4.el7.noarch.rpm
+  - name: perl-Pod-Usage
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Usage-1.63-3.el7.noarch.rpm
+  - name: perl-Scalar-List-Utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Scalar-List-Utils-1.27-248.el7.x86_64.rpm
+  - name: perl-Socket
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Socket-2.010-5.el7.x86_64.rpm
+  - name: perl-Storable
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Storable-2.45-3.el7.x86_64.rpm
+  - name: perl-TermReadKey
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-TermReadKey-2.30-20.el7.x86_64.rpm
+  - name: perl-Text-ParseWords
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Text-ParseWords-3.29-4.el7.noarch.rpm
+  - name: perl-Time-HiRes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-HiRes-1.9725-3.el7.x86_64.rpm
+  - name: perl-Time-Local
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-Local-1.2300-2.el7.noarch.rpm
+  - name: perl-YAML
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-YAML-0.84-5.el7.noarch.rpm
+  - name: perl-constant
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-constant-1.27-2.el7.noarch.rpm
+  - name: perl-parent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-parent-0.225-244.el7.noarch.rpm
+  - name: perl-podlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-podlators-2.5.1-3.el7.noarch.rpm
+  - name: perl-threads
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-1.87-4.el7.x86_64.rpm
+  - name: perl-threads-shared
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-shared-1.43-6.el7.x86_64.rpm
+  - name: subversion
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/subversion-1.7.14-14.el7.x86_64.rpm
+  - name: subversion-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/subversion-libs-1.7.14-14.el7.x86_64.rpm
+  - name: subversion-perl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/subversion-perl-1.7.14-14.el7.x86_64.rpm
+  - name: tcl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tcl-8.5.13-8.el7.x86_64.rpm
+  - name: tk
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tk-8.5.13-6.el7.x86_64.rpm
+  - name: trousers
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/trousers-0.3.14-2.el7.x86_64.rpm
+  - name: git216-all
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-all-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-2.16.6-2.el7.ius.x86_64.rpm
+  - name: git216-core
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-core-2.16.6-2.el7.ius.x86_64.rpm
+  - name: git216-core-doc
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-core-doc-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-cvs
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-cvs-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-emacs-git
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-emacs-git-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-email
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-email-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-gitk
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-gitk-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-gui
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-gui-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-p4
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-p4-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-perl-Git
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-perl-Git-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-perl-Git-SVN
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-perl-Git-SVN-2.16.6-2.el7.ius.noarch.rpm
+  - name: git216-subtree
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-subtree-2.16.6-2.el7.ius.x86_64.rpm
+  - name: git216-svn
+    rpm: https://repo.ius.io/archive/7/x86_64/packages/g/git216-svn-2.16.6-2.el7.ius.x86_64.rpm
+  # Install jq and dependency packages
+  - name: oniguruma
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/o/oniguruma-6.8.2-1.el7.x86_64.rpm
+  - name: jq
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/j/jq-1.6-2.el7.x86_64.rpm
+  # Install vim-common and dependency packages
+  - name: vim-common
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/vim-common-7.4.629-7.el7.x86_64.rpm
+  - name: vim-filesystem
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/vim-filesystem-7.4.629-7.el7.x86_64.rpm
+  # Install curl and dependency packages
+  - name: curl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/curl-7.29.0-59.el7.x86_64.rpm
+  - name: libcurl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcurl-7.29.0-59.el7.x86_64.rpm
+  - name: libssh2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libssh2-1.8.0-4.el7.x86_64.rpm
+  # Install yum-utils and dependency packages
+  - name: yum-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/yum-utils-1.1.31-54.el7_8.noarch.rpm
+  - name: libxml2-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libxml2-python-2.9.1-6.el7.5.x86_64.rpm
+  - name: python-chardet
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-chardet-2.2.1-3.el7.noarch.rpm
+  - name: python-kitchen
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-kitchen-1.1.1-5.el7.noarch.rpm
+  - name: libxml2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libxml2-2.9.1-6.el7.5.x86_64.rpm
+  # Install python2-pip and dependency packages
+  - name: python2-pip
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python2-pip-8.1.2-14.el7.noarch.rpm
+  - name: python-backports
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-backports-1.0-8.el7.x86_64.rpm
+  - name: python-backports-ssl_match_hostname
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-backports-ssl_match_hostname-3.5.0.1-1.el7.noarch.rpm
+  - name: python-ipaddress
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-ipaddress-1.0.16-2.el7.noarch.rpm
+  - name: python-setuptools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-setuptools-0.9.8-7.el7.noarch.rpm
+  # Install wget and dependency packages
+  - name: wget
+    rpm: http://vault.centos.org/7.6.1810/os/x86_64/Packages/wget-1.14-18.el7.x86_64.rpm
+  # Install bridge-utils and dependency packages
+  - name: bridge-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/bridge-utils-1.5-9.el7.x86_64.rpm
+  # Install rsync and dependency packages
+  - name: rsync
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/rsync-3.1.2-10.el7.x86_64.rpm
+  # Install device-mapper-persistent-data and dependency packages
+  - name: device-mapper-persistent-data
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/device-mapper-persistent-data-0.8.5-3.el7.x86_64.rpm
+  # Install lvm2 and dependency packages
+  - name: lvm2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/lvm2-2.02.187-6.el7.x86_64.rpm
+  - name: device-mapper
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/device-mapper-1.02.170-6.el7.x86_64.rpm
+  - name: device-mapper-event
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/device-mapper-event-1.02.170-6.el7.x86_64.rpm
+  - name: device-mapper-event-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/device-mapper-event-libs-1.02.170-6.el7.x86_64.rpm
+  - name: device-mapper-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/device-mapper-libs-1.02.170-6.el7.x86_64.rpm
+  - name: lvm2-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/lvm2-libs-2.02.187-6.el7.x86_64.rpm
+  # Install moreutils and dependency packages
+  - name: moreutils
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/m/moreutils-0.49-2.el7.x86_64.rpm
+  - name: perl-Carp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Carp-1.26-244.el7.noarch.rpm
+  - name: perl-Encode
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Encode-2.51-7.el7.x86_64.rpm
+  - name: perl-Exporter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Exporter-5.68-3.el7.noarch.rpm
+  - name: perl-File-Path
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Path-2.09-2.el7.noarch.rpm
+  - name: perl-File-Temp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Temp-0.23.01-3.el7.noarch.rpm
+  - name: perl-Filter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Filter-1.49-3.el7.x86_64.rpm
+  - name: perl-Getopt-Long
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Getopt-Long-2.40-3.el7.noarch.rpm
+  - name: perl-HTTP-Tiny
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-HTTP-Tiny-0.033-3.el7.noarch.rpm
+  - name: perl-IO-Tty
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-IO-Tty-1.10-11.el7.x86_64.rpm
+  - name: perl-IPC-Run
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-IPC-Run-0.92-2.el7.noarch.rpm
+  - name: perl-PathTools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PathTools-3.40-5.el7.x86_64.rpm
+  - name: perl-Pod-Perldoc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Perldoc-3.20-4.el7.noarch.rpm
+  - name: perl-Pod-Simple
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Simple-3.28-4.el7.noarch.rpm
+  - name: perl-Pod-Usage
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Usage-1.63-3.el7.noarch.rpm
+  - name: perl-Scalar-List-Utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Scalar-List-Utils-1.27-248.el7.x86_64.rpm
+  - name: perl-Socket
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Socket-2.010-5.el7.x86_64.rpm
+  - name: perl-Storable
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Storable-2.45-3.el7.x86_64.rpm
+  - name: perl-Text-ParseWords
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Text-ParseWords-3.29-4.el7.noarch.rpm
+  - name: perl-Time-Duration
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/perl-Time-Duration-1.06-17.el7.noarch.rpm
+  - name: perl-Time-HiRes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-HiRes-1.9725-3.el7.x86_64.rpm
+  - name: perl-Time-Local
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-Local-1.2300-2.el7.noarch.rpm
+  - name: perl-TimeDate
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-TimeDate-2.30-2.el7.noarch.rpm
+  - name: perl-constant
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-constant-1.27-2.el7.noarch.rpm
+  - name: perl-parent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-parent-0.225-244.el7.noarch.rpm
+  - name: perl-podlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-podlators-2.5.1-3.el7.noarch.rpm
+  - name: perl-threads
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-1.87-4.el7.x86_64.rpm
+  - name: perl-threads-shared
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-shared-1.43-6.el7.x86_64.rpm
+  # Install gcc and dependency packages
+  - name: gcc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gcc-4.8.5-44.el7.x86_64.rpm
+  - name: cpp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cpp-4.8.5-44.el7.x86_64.rpm
+  - name: glibc-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-devel-2.17-317.el7.x86_64.rpm
+  - name: kernel-headers
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/kernel-headers-3.10.0-1160.2.2.el7.x86_64.rpm
+  - name: libmpc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libmpc-1.0.1-3.el7.x86_64.rpm
+  - name: mpfr
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mpfr-3.1.1-4.el7.x86_64.rpm
+  - name: glibc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-2.17-317.el7.x86_64.rpm
+  - name: glibc-common
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-common-2.17-317.el7.x86_64.rpm
+  - name: libgcc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libgcc-4.8.5-44.el7.x86_64.rpm
+  - name: libgomp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libgomp-4.8.5-44.el7.x86_64.rpm
+  # Install python-devel and dependency packages
+  - name: python-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-devel-2.7.5-89.el7.x86_64.rpm
+  - name: python-rpm-macros
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-rpm-macros-3-34.el7.noarch.rpm
+  - name: python-srpm-macros
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-srpm-macros-3-34.el7.noarch.rpm
+  - name: python2-rpm-macros
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python2-rpm-macros-3-34.el7.noarch.rpm
+  - name: python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-2.7.5-89.el7.x86_64.rpm
+  - name: python-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-libs-2.7.5-89.el7.x86_64.rpm
+  # Install createrepo and dependency packages
+  - name: createrepo
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/createrepo-0.9.9-28.el7.noarch.rpm
+  - name: deltarpm
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/deltarpm-3.6-3.el7.x86_64.rpm
+  - name: python-deltarpm
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-deltarpm-3.6-3.el7.x86_64.rpm
+  - name: libxml2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libxml2-2.9.1-6.el7.5.x86_64.rpm
+  # Install psmisc and dependency packages
+  - name: psmisc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/psmisc-22.20-17.el7.x86_64.rpm
+  # Install bash-completion and dependency packages
+  - name: bash-completion
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/bash-completion-2.1-8.el7.noarch.rpm
+  # Install patch and dependency packages
+  - name: patch
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/patch-2.7.1-12.el7_7.x86_64.rpm
+  # Install boost-devel and dependency packages
+  - name: boost-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-devel-1.53.0-28.el7.x86_64.rpm
+  - name: boost
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-1.53.0-28.el7.x86_64.rpm
+  - name: boost-atomic
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-atomic-1.53.0-28.el7.x86_64.rpm
+  - name: boost-chrono
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-chrono-1.53.0-28.el7.x86_64.rpm
+  - name: boost-context
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-context-1.53.0-28.el7.x86_64.rpm
+  - name: boost-date-time
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-date-time-1.53.0-28.el7.x86_64.rpm
+  - name: boost-filesystem
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-filesystem-1.53.0-28.el7.x86_64.rpm
+  - name: boost-graph
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-graph-1.53.0-28.el7.x86_64.rpm
+  - name: boost-iostreams
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-iostreams-1.53.0-28.el7.x86_64.rpm
+  - name: boost-locale
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-locale-1.53.0-28.el7.x86_64.rpm
+  - name: boost-math
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-math-1.53.0-28.el7.x86_64.rpm
+  - name: boost-program-options
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-program-options-1.53.0-28.el7.x86_64.rpm
+  - name: boost-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-python-1.53.0-28.el7.x86_64.rpm
+  - name: boost-random
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-random-1.53.0-28.el7.x86_64.rpm
+  - name: boost-regex
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-regex-1.53.0-28.el7.x86_64.rpm
+  - name: boost-serialization
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-serialization-1.53.0-28.el7.x86_64.rpm
+  - name: boost-signals
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-signals-1.53.0-28.el7.x86_64.rpm
+  - name: boost-system
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-system-1.53.0-28.el7.x86_64.rpm
+  - name: boost-test
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-test-1.53.0-28.el7.x86_64.rpm
+  - name: boost-thread
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-thread-1.53.0-28.el7.x86_64.rpm
+  - name: boost-timer
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-timer-1.53.0-28.el7.x86_64.rpm
+  - name: boost-wave
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-wave-1.53.0-28.el7.x86_64.rpm
+  - name: libicu
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libicu-50.2-4.el7_7.x86_64.rpm
+  # Install openssl-devel and dependency packages
+  - name: openssl-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/openssl-devel-1.0.2k-19.el7.x86_64.rpm
+  - name: keyutils-libs-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/keyutils-libs-devel-1.5.8-3.el7.x86_64.rpm
+  - name: krb5-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/krb5-devel-1.15.1-50.el7.x86_64.rpm
+  - name: libcom_err-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcom_err-devel-1.42.9-19.el7.x86_64.rpm
+  - name: libkadm5
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libkadm5-1.15.1-50.el7.x86_64.rpm
+  - name: libselinux-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libselinux-devel-2.5-15.el7.x86_64.rpm
+  - name: libsepol-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libsepol-devel-2.5-10.el7.x86_64.rpm
+  - name: libverto-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libverto-devel-0.2.5-4.el7.x86_64.rpm
+  - name: pcre-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pcre-devel-8.32-17.el7.x86_64.rpm
+  - name: zlib-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/zlib-devel-1.2.7-18.el7.x86_64.rpm
+  - name: e2fsprogs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/e2fsprogs-1.42.9-19.el7.x86_64.rpm
+  - name: e2fsprogs-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/e2fsprogs-libs-1.42.9-19.el7.x86_64.rpm
+  - name: krb5-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/krb5-libs-1.15.1-50.el7.x86_64.rpm
+  - name: libcom_err
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcom_err-1.42.9-19.el7.x86_64.rpm
+  - name: libselinux
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libselinux-2.5-15.el7.x86_64.rpm
+  - name: libselinux-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libselinux-python-2.5-15.el7.x86_64.rpm
+  - name: libselinux-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libselinux-utils-2.5-15.el7.x86_64.rpm
+  - name: libss
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libss-1.42.9-19.el7.x86_64.rpm
+  - name: openssl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/openssl-1.0.2k-19.el7.x86_64.rpm
+  - name: openssl-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/openssl-libs-1.0.2k-19.el7.x86_64.rpm
+  # Install pcre-devel and dependency packages
+  - name: pcre-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pcre-devel-8.32-17.el7.x86_64.rpm
+  # Install zlib-devel and dependency packages
+  - name: zlib-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/zlib-devel-1.2.7-18.el7.x86_64.rpm
+  # Install glib2-devel and dependency packages
+  - name: glib2-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glib2-devel-2.56.1-7.el7.x86_64.rpm
+  - name: pcre-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pcre-devel-8.32-17.el7.x86_64.rpm
+  - name: glib2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glib2-2.56.1-7.el7.x86_64.rpm
+  # Install autoconf and dependency packages
+  - name: autoconf
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/autoconf-2.69-11.el7.noarch.rpm
+  - name: m4
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/m4-1.4.16-10.el7.x86_64.rpm
+  - name: perl-Carp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Carp-1.26-244.el7.noarch.rpm
+  - name: perl-Data-Dumper
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Data-Dumper-2.145-3.el7.x86_64.rpm
+  - name: perl-Encode
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Encode-2.51-7.el7.x86_64.rpm
+  - name: perl-Exporter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Exporter-5.68-3.el7.noarch.rpm
+  - name: perl-File-Path
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Path-2.09-2.el7.noarch.rpm
+  - name: perl-File-Temp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Temp-0.23.01-3.el7.noarch.rpm
+  - name: perl-Filter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Filter-1.49-3.el7.x86_64.rpm
+  - name: perl-Getopt-Long
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Getopt-Long-2.40-3.el7.noarch.rpm
+  - name: perl-HTTP-Tiny
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-HTTP-Tiny-0.033-3.el7.noarch.rpm
+  - name: perl-PathTools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PathTools-3.40-5.el7.x86_64.rpm
+  - name: perl-Pod-Perldoc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Perldoc-3.20-4.el7.noarch.rpm
+  - name: perl-Pod-Simple
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Simple-3.28-4.el7.noarch.rpm
+  - name: perl-Pod-Usage
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Usage-1.63-3.el7.noarch.rpm
+  - name: perl-Scalar-List-Utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Scalar-List-Utils-1.27-248.el7.x86_64.rpm
+  - name: perl-Socket
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Socket-2.010-5.el7.x86_64.rpm
+  - name: perl-Storable
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Storable-2.45-3.el7.x86_64.rpm
+  - name: perl-Text-ParseWords
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Text-ParseWords-3.29-4.el7.noarch.rpm
+  - name: perl-Time-HiRes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-HiRes-1.9725-3.el7.x86_64.rpm
+  - name: perl-Time-Local
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-Local-1.2300-2.el7.noarch.rpm
+  - name: perl-constant
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-constant-1.27-2.el7.noarch.rpm
+  - name: perl-parent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-parent-0.225-244.el7.noarch.rpm
+  - name: perl-podlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-podlators-2.5.1-3.el7.noarch.rpm
+  - name: perl-threads
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-1.87-4.el7.x86_64.rpm
+  - name: perl-threads-shared
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-shared-1.43-6.el7.x86_64.rpm
+  # Install automake and dependency packages
+  - name: automake
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/automake-1.13.4-3.el7.noarch.rpm
+  - name: autoconf
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/autoconf-2.69-11.el7.noarch.rpm
+  - name: m4
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/m4-1.4.16-10.el7.x86_64.rpm
+  - name: perl-Carp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Carp-1.26-244.el7.noarch.rpm
+  - name: perl-Data-Dumper
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Data-Dumper-2.145-3.el7.x86_64.rpm
+  - name: perl-Encode
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Encode-2.51-7.el7.x86_64.rpm
+  - name: perl-Exporter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Exporter-5.68-3.el7.noarch.rpm
+  - name: perl-File-Path
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Path-2.09-2.el7.noarch.rpm
+  - name: perl-File-Temp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Temp-0.23.01-3.el7.noarch.rpm
+  - name: perl-Filter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Filter-1.49-3.el7.x86_64.rpm
+  - name: perl-Getopt-Long
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Getopt-Long-2.40-3.el7.noarch.rpm
+  - name: perl-HTTP-Tiny
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-HTTP-Tiny-0.033-3.el7.noarch.rpm
+  - name: perl-PathTools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PathTools-3.40-5.el7.x86_64.rpm
+  - name: perl-Pod-Perldoc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Perldoc-3.20-4.el7.noarch.rpm
+  - name: perl-Pod-Simple
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Simple-3.28-4.el7.noarch.rpm
+  - name: perl-Pod-Usage
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Usage-1.63-3.el7.noarch.rpm
+  - name: perl-Scalar-List-Utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Scalar-List-Utils-1.27-248.el7.x86_64.rpm
+  - name: perl-Socket
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Socket-2.010-5.el7.x86_64.rpm
+  - name: perl-Storable
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Storable-2.45-3.el7.x86_64.rpm
+  - name: perl-Test-Harness
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Test-Harness-3.28-3.el7.noarch.rpm
+  - name: perl-Text-ParseWords
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Text-ParseWords-3.29-4.el7.noarch.rpm
+  - name: perl-Thread-Queue
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Thread-Queue-3.02-2.el7.noarch.rpm
+  - name: perl-Time-HiRes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-HiRes-1.9725-3.el7.x86_64.rpm
+  - name: perl-Time-Local
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-Local-1.2300-2.el7.noarch.rpm
+  - name: perl-constant
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-constant-1.27-2.el7.noarch.rpm
+  - name: perl-parent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-parent-0.225-244.el7.noarch.rpm
+  - name: perl-podlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-podlators-2.5.1-3.el7.noarch.rpm
+  - name: perl-threads
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-1.87-4.el7.x86_64.rpm
+  - name: perl-threads-shared
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-shared-1.43-6.el7.x86_64.rpm
+  # Install libtool and dependency packages
+  - name: libtool
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libtool-2.4.2-22.el7_3.x86_64.rpm
+  - name: autoconf
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/autoconf-2.69-11.el7.noarch.rpm
+  - name: automake
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/automake-1.13.4-3.el7.noarch.rpm
+  - name: cpp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cpp-4.8.5-44.el7.x86_64.rpm
+  - name: gcc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gcc-4.8.5-44.el7.x86_64.rpm
+  - name: glibc-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-devel-2.17-317.el7.x86_64.rpm
+  - name: glibc-headers
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glibc-headers-2.17-317.el7.x86_64.rpm
+  - name: libmpc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libmpc-1.0.1-3.el7.x86_64.rpm
+  - name: m4
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/m4-1.4.16-10.el7.x86_64.rpm
+  - name: mpfr
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mpfr-3.1.1-4.el7.x86_64.rpm
+  - name: perl-Carp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Carp-1.26-244.el7.noarch.rpm
+  - name: perl-Data-Dumper
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Data-Dumper-2.145-3.el7.x86_64.rpm
+  - name: perl-Encode
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Encode-2.51-7.el7.x86_64.rpm
+  - name: perl-Exporter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Exporter-5.68-3.el7.noarch.rpm
+  - name: perl-File-Path
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Path-2.09-2.el7.noarch.rpm
+  - name: perl-File-Temp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Temp-0.23.01-3.el7.noarch.rpm
+  - name: perl-Filter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Filter-1.49-3.el7.x86_64.rpm
+  - name: perl-Getopt-Long
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Getopt-Long-2.40-3.el7.noarch.rpm
+  - name: perl-HTTP-Tiny
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-HTTP-Tiny-0.033-3.el7.noarch.rpm
+  - name: perl-PathTools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PathTools-3.40-5.el7.x86_64.rpm
+  - name: perl-Pod-Perldoc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Perldoc-3.20-4.el7.noarch.rpm
+  - name: perl-Pod-Simple
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Simple-3.28-4.el7.noarch.rpm
+  - name: perl-Pod-Usage
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Usage-1.63-3.el7.noarch.rpm
+  - name: perl-Scalar-List-Utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Scalar-List-Utils-1.27-248.el7.x86_64.rpm
+  - name: perl-Socket
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Socket-2.010-5.el7.x86_64.rpm
+  - name: perl-Storable
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Storable-2.45-3.el7.x86_64.rpm
+  - name: perl-Test-Harness
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Test-Harness-3.28-3.el7.noarch.rpm
+  - name: perl-Text-ParseWords
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Text-ParseWords-3.29-4.el7.noarch.rpm
+  - name: perl-Thread-Queue
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Thread-Queue-3.02-2.el7.noarch.rpm
+  - name: perl-Time-HiRes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-HiRes-1.9725-3.el7.x86_64.rpm
+  - name: perl-Time-Local
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-Local-1.2300-2.el7.noarch.rpm
+  - name: perl-constant
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-constant-1.27-2.el7.noarch.rpm
+  - name: perl-macros
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-macros-5.16.3-297.el7.x86_64.rpm
+  - name: perl-parent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-parent-0.225-244.el7.noarch.rpm
+  - name: perl-podlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-podlators-2.5.1-3.el7.noarch.rpm
+  - name: perl-threads
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-1.87-4.el7.x86_64.rpm
+  - name: perl-threads-shared
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-shared-1.43-6.el7.x86_64.rpm
+  # Install flex and dependency packages
+  - name: flex
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/flex-2.5.37-6.el7.x86_64.rpm
+  - name: m4
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/m4-1.4.16-10.el7.x86_64.rpm
+  # Install bison and dependency packages
+  - name: bison
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/bison-3.0.4-2.el7.x86_64.rpm
+  - name: m4
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/m4-1.4.16-10.el7.x86_64.rpm
+  # Install cmake and dependency packages
+  - name: cmake
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cmake-2.8.12.2-2.el7.x86_64.rpm
+  - name: libarchive
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libarchive-3.1.2-14.el7_7.x86_64.rpm
+  # Install pciutils and dependency packages
+  - name: pciutils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pciutils-3.5.1-3.el7.x86_64.rpm
+  # Install python-websocket-client and dependency packages
+  - name: python-websocket-client
+    rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/python-websocket-client-0.56.0-3.git3c25814.el7.noarch.rpm
+  - name: python-six
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-six-1.9.0-2.el7.noarch.rpm
+  # Install jsoncpp-devel and dependency packages
+  - name: jsoncpp-devel
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/j/jsoncpp-devel-0.10.5-2.el7.x86_64.rpm
+  - name: jsoncpp
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/j/jsoncpp-0.10.5-2.el7.x86_64.rpm
+  # Install fcgi-devel and dependency packages
+  - name: fcgi-devel
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/f/fcgi-devel-2.4.0-25.el7.x86_64.rpm
+  - name: fcgi
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/f/fcgi-2.4.0-25.el7.x86_64.rpm
+  # Install hiredis-devel and dependency packages
+  - name: hiredis-devel
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/h/hiredis-devel-0.12.1-2.el7.x86_64.rpm
+  - name: hiredis
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/h/hiredis-0.12.1-2.el7.x86_64.rpm
+  # Install numactl-devel and dependency packages
+  - name: numactl-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/numactl-devel-2.0.12-5.el7.x86_64.rpm
+  - name: numactl-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/numactl-libs-2.0.12-5.el7.x86_64.rpm
+  # Install gcc-c++ and dependency packages
+#  - name: gcc-c++
+#    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gcc-c++-4.8.5-44.el7.x86_64.rpm
+  - name: libmpc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libmpc-1.0.1-3.el7.x86_64.rpm
+#  - name: libstdc++-devel
+#    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libstdc++-devel-4.8.5-44.el7.x86_64.rpm
+  - name: mpfr
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mpfr-3.1.1-4.el7.x86_64.rpm
+#  - name: libstdc++
+#    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libstdc++-4.8.5-44.el7.x86_64.rpm
+  # Install python-httplib2 and dependency packages
+  - name: python2-httplib2
+    rpm: https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python2-httplib2-0.18.1-3.el7.noarch.rpm
+  # Install pixman-devel and dependency packages
+  - name: pixman-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pixman-devel-0.34.0-1.el7.x86_64.rpm
+  - name: pixman
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/pixman-0.34.0-1.el7.x86_64.rpm
+  # role: time/ntp
+  # Install ntp daemon
+  # Install ntp and dependency packages
+  - name: ntp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/ntp-4.2.6p5-29.el7.centos.2.x86_64.rpm
+  - name: autogen-libopts
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/autogen-libopts-5.18-5.el7.x86_64.rpm
+  - name: ntpdate
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/ntpdate-4.2.6p5-29.el7.centos.2.x86_64.rpm
+  # role: machine_setup/custom_kernel
+  # Install kernel-rt-kvm-3.10.0-1062.12.1.rt56.1042.el7.x86_64 kernel-rt-devel-3.10.0-1062.12.1.rt56.1042.el7.x86_64
+  - name: tuned
+    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/tuned-2.9.0-1.el7fdp.noarch.rpm
+  - name: tuned-profiles-realtime
+    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/tuned-profiles-realtime-2.9.0-1.el7_5.2.noarch.rpm
+  - name: tuna
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tuna-0.13-9.el7.noarch.rpm
+  - name: libnl
+    rpm:  http://mirror.centos.org/centos/7/os/x86_64/Packages/libnl-1.1.4-3.el7.x86_64.rpm
+  - name: python-ethtool
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-ethtool-0.8-8.el7.x86_64.rpm
+  - name: kernel-rt
+    rpm: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/x86_64/Packages/kernel-rt-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm
+  - name: kernel-rt-kvm
+    rpm: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/x86_64/Packages/kernel-rt-kvm-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm
+  - name: kernel-rt-devel
+    rpm: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/x86_64/Packages/kernel-rt-devel-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm
+  - name: rtctl
+    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/rtctl-1.13-2.el7.noarch.rpm
+  - name: rt-setup
+    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/rt-setup-1.59-5.el7.noarch.rpm
+  - name: rt-setup
+    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/rt-setup-2.0-9.el7.x86_64.rpm
+  - name: linux-firmware
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/linux-firmware-20191203-76.gite8a0f4c.el7.noarch.rpm
+  # role: docker
+  # Install Docker CE docker-ce-19.03.12 and dependency 
+  - name: audit
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/audit-2.8.5-4.el7.x86_64.rpm
+  - name: audit-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/audit-libs-2.8.5-4.el7.x86_64.rpm
+  - name: audit-libs-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/audit-libs-python-2.8.5-4.el7.x86_64.rpm
+  - name: checkpolicy
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/checkpolicy-2.5-8.el7.x86_64.rpm
+  - name: containerd.io
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.3.7-3.1.el7.x86_64.rpm
+  - name: container-selinux
+    rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
+  - name: docker-ce
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.12-3.el7.x86_64.rpm
+  - name: docker-ce-cli
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.13-3.el7.x86_64.rpm
+  - name: docker-ce-cli12
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.12-3.el7.x86_64.rpm
+  - name: libcgroup
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcgroup-0.41-21.el7.x86_64.rpm
+  - name: libseccomp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libseccomp-2.3.1-4.el7.x86_64.rpm
+  - name: libsemanage-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libsemanage-python-2.5-14.el7.x86_64.rpm
+  - name: policycoreutils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/policycoreutils-2.5-34.el7.x86_64.rpm
+  - name: policycoreutils-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/policycoreutils-python-2.5-34.el7.x86_64.rpm
+  - name: python-IPy
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-IPy-0.75-6.el7.noarch.rpm
+  - name: setools-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/setools-libs-3.3.8-4.el7.x86_64.rpm
+  # Install docker-compose for pip
+  # role: kubernetes
+  # Install unbound and dependency packages
+  - name: unbound
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/unbound-1.6.6-5.el7_8.x86_64.rpm
+  - name: libevent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libevent-2.0.21-4.el7.x86_64.rpm
+  - name: unbound-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/unbound-libs-1.6.6-5.el7_8.x86_64.rpm
+#  - name: openvswitch
+#    rpm: https://github.com/alauda/ovs/releases/download/2.12.0-5/openvswitch-2.12.0-5.el7.x86_64.rpm
+#  - name: ovn
+#    rpm: https://github.com/alauda/ovs/releases/download/2.12.0-5/ovn-2.12.0-5.el7.x86_64.rpm
+  # k8s and dependency
+  - name: conntrack-tools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/conntrack-tools-1.4.4-7.el7.x86_64.rpm
+  - name: libnetfilter_cthelper
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libnetfilter_cthelper-1.0.0-11.el7.x86_64.rpm
+  - name: libnetfilter_cttimeout
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libnetfilter_cttimeout-1.0.0-7.el7.x86_64.rpm
+  - name: libnetfilter_queue
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libnetfilter_queue-1.0.2-2.el7_2.x86_64.rpm
+  - name: socat
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/socat-1.7.3.2-2.el7.x86_64.rpm
+  # role: openness
+  # Install mariadb and dependency packages
+  - name: mariadb
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mariadb-5.5.68-1.el7.x86_64.rpm
+  - name: perl-Carp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Carp-1.26-244.el7.noarch.rpm
+  - name: perl-Encode
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Encode-2.51-7.el7.x86_64.rpm
+  - name: perl-Exporter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Exporter-5.68-3.el7.noarch.rpm
+  - name: perl-File-Path
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Path-2.09-2.el7.noarch.rpm
+  - name: perl-File-Temp
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-File-Temp-0.23.01-3.el7.noarch.rpm
+  - name: perl-Filter
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Filter-1.49-3.el7.x86_64.rpm
+  - name: perl-Getopt-Long
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Getopt-Long-2.40-3.el7.noarch.rpm
+  - name: perl-HTTP-Tiny
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-HTTP-Tiny-0.033-3.el7.noarch.rpm
+  - name: perl-PathTools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-PathTools-3.40-5.el7.x86_64.rpm
+  - name: perl-Pod-Perldoc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Perldoc-3.20-4.el7.noarch.rpm
+  - name: perl-Pod-Simple
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Simple-3.28-4.el7.noarch.rpm
+  - name: perl-Pod-Usage
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Pod-Usage-1.63-3.el7.noarch.rpm
+  - name: perl-Scalar-List-Utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Scalar-List-Utils-1.27-248.el7.x86_64.rpm
+  - name: perl-Socket
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Socket-2.010-5.el7.x86_64.rpm
+  - name: perl-Storable
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Storable-2.45-3.el7.x86_64.rpm
+  - name: perl-Text-ParseWords
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Text-ParseWords-3.29-4.el7.noarch.rpm
+  - name: perl-Time-HiRes
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-HiRes-1.9725-3.el7.x86_64.rpm
+  - name: perl-Time-Local
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Time-Local-1.2300-2.el7.noarch.rpm
+  - name: perl-constant
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-constant-1.27-2.el7.noarch.rpm
+  - name: perl-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-libs-5.16.3-297.el7.x86_64.rpm
+  - name: perl-parent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-parent-0.225-244.el7.noarch.rpm
+  - name: perl-podlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-podlators-2.5.1-3.el7.noarch.rpm
+  - name: perl-threads
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-1.87-4.el7.x86_64.rpm
+  - name: perl-threads-shared
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-threads-shared-1.43-6.el7.x86_64.rpm
+  - name: mariadb-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mariadb-libs-5.5.65-1.el7.x86_64.rpm
+  # role: appache apache_packages: "httpd,mod_ssl"
+  # Install httpd and dependency packages
+  - name: httpd
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/httpd-2.4.6-95.el7.centos.x86_64.rpm
+  - name: apr-util
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/apr-util-1.5.2-6.el7.x86_64.rpm
+  - name: httpd-tools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/httpd-tools-2.4.6-95.el7.centos.x86_64.rpm
+  - name: mailcap
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mailcap-2.1.41-2.el7.noarch.rpm
+  # Install mod_ssl and dependency packages
+  - name: mod_ssl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mod_ssl-2.4.6-95.el7.centos.x86_64.rpm
+  - name: apr-util
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/apr-util-1.5.2-6.el7.x86_64.rpm
+  - name: mailcap
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/mailcap-2.1.41-2.el7.noarch.rpm
+  # role: hddl
+  # Install hddl_kernel_devel
+  - name: hddl_kernel_devel
+    rpm: http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm
+  # role: libvirt
+  # libvirt_packages: "libvirt,libvirt-devel,python-lxml,libvirt-python"
+  # Install libvirt and dependency packages
+  - name: libvirt
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libvirt-4.5.0-36.el7.x86_64.rpm
+  - name: augeas-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/augeas-libs-1.4.0-10.el7.x86_64.rpm
+  - name: autogen-libopts
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/autogen-libopts-5.18-5.el7.x86_64.rpm
+  - name: avahi-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/avahi-libs-0.6.31-20.el7.x86_64.rpm
+  - name: boost-iostreams
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-iostreams-1.53.0-28.el7.x86_64.rpm
+  - name: boost-random
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-random-1.53.0-28.el7.x86_64.rpm
+  - name: boost-system
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-system-1.53.0-28.el7.x86_64.rpm
+  - name: boost-thread
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/boost-thread-1.53.0-28.el7.x86_64.rpm
+  - name: bridge-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/bridge-utils-1.5-9.el7.x86_64.rpm
+  - name: bzip2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/bzip2-1.0.6-13.el7.x86_64.rpm
+  - name: cyrus-sasl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-2.1.26-23.el7.x86_64.rpm
+  - name: cyrus-sasl-gssapi
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-gssapi-2.1.26-23.el7.x86_64.rpm
+  - name: dnsmasq
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/dnsmasq-2.76-16.el7.x86_64.rpm
+  - name: fuse-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/fuse-libs-2.9.2-11.el7.x86_64.rpm
+  - name: glusterfs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glusterfs-6.0-37.el7.x86_64.rpm
+  - name: glusterfs-api
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glusterfs-api-6.0-37.el7.x86_64.rpm
+  - name: glusterfs-cli
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glusterfs-cli-6.0-37.el7.x86_64.rpm
+  - name: glusterfs-client-xlators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glusterfs-client-xlators-6.0-37.el7.x86_64.rpm
+  - name: glusterfs-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/glusterfs-libs-6.0-37.el7.x86_64.rpm
+  - name: gnutls
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gnutls-3.3.29-9.el7_6.x86_64.rpm
+  - name: gnutls-dane
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gnutls-dane-3.3.29-9.el7_6.x86_64.rpm
+  - name: gnutls-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gnutls-utils-3.3.29-9.el7_6.x86_64.rpm
+  - name: gperftools-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gperftools-libs-2.6.1-1.el7.x86_64.rpm
+  - name: gssproxy
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gssproxy-0.7.0-29.el7.x86_64.rpm
+  - name: iscsi-initiator-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/iscsi-initiator-utils-6.2.0.874-19.el7.x86_64.rpm
+  - name: iscsi-initiator-utils-iscsiuio
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/iscsi-initiator-utils-iscsiuio-6.2.0.874-19.el7.x86_64.rpm
+  - name: keyutils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/keyutils-1.5.8-3.el7.x86_64.rpm
+  - name: libbasicobjects
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libbasicobjects-0.1.1-32.el7.x86_64.rpm
+  - name: libcgroup
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcgroup-0.41-21.el7.x86_64.rpm
+  - name: libcollection
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcollection-0.7.0-32.el7.x86_64.rpm
+  - name: libevent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libevent-2.0.21-4.el7.x86_64.rpm
+  - name: libini_config
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libini_config-1.3.1-32.el7.x86_64.rpm
+  - name: libiscsi
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libiscsi-1.9.0-7.el7.x86_64.rpm
+  - name: libnfsidmap
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libnfsidmap-0.25-19.el7.x86_64.rpm
+  - name: libpath_utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libpath_utils-0.2.1-32.el7.x86_64.rpm
+  - name: libpcap
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libpcap-1.5.3-12.el7.x86_64.rpm
+  - name: librados2
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/librados2-10.2.5-4.el7.x86_64.rpm
+  - name: librbd1
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/librbd1-10.2.5-4.el7.x86_64.rpm
+  - name: libref_array
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libref_array-0.1.5-32.el7.x86_64.rpm
+  - name: libtirpc
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libtirpc-0.2.4-0.16.el7.x86_64.rpm
+  - name: libverto-libevent
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libverto-libevent-0.2.5-4.el7.x86_64.rpm
+  - name: libvirt-bash-completion
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-bash-completion-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-client
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-client-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-config-network
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-config-network-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-config-nwfilter
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-config-nwfilter-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-interface
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-interface-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-lxc
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-lxc-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-network
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-network-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-nodedev
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-nodedev-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-nwfilter
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-nwfilter-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-qemu
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-qemu-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-secret
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-secret-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-core
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-core-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-disk
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-disk-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-gluster
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-gluster-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-iscsi
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-iscsi-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-logical
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-logical-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-mpath
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-mpath-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-rbd
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-rbd-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-daemon-driver-storage-scsi
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-daemon-driver-storage-scsi-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libvirt-libs
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-libs-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: libxslt
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libxslt-1.1.28-5.el7.x86_64.rpm
+  - name: lzop
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/lzop-1.03-10.el7.x86_64.rpm
+  - name: netcf-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/netcf-libs-0.2.8-4.el7.x86_64.rpm
+  - name: nettle
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nettle-2.7.1-8.el7.x86_64.rpm
+  - name: nfs-utils
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nfs-utils-1.3.0-0.68.el7.x86_64.rpm
+  - name: nmap-ncat
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nmap-ncat-6.40-19.el7.x86_64.rpm
+  - name: numad
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/numad-0.5-18.20150602git.el7.x86_64.rpm
+  - name: qemu-img
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/qemu-img-1.5.3-175.el7_9.1.x86_64.rpm
+  - name: quota
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/quota-4.01-19.el7.x86_64.rpm
+  - name: quota-nls
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/quota-nls-4.01-19.el7.noarch.rpm
+  - name: radvd
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/radvd-2.17-3.el7.x86_64.rpm
+  - name: rpcbind
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/rpcbind-0.2.0-49.el7.x86_64.rpm
+  - name: tcp_wrappers
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tcp_wrappers-7.6-77.el7.x86_64.rpm
+  - name: trousers
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/trousers-0.3.14-2.el7.x86_64.rpm
+  - name: yajl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/yajl-2.0.4-4.el7.x86_64.rpm
+  # Install libvirt-devel and dependency packages
+  - name: libvirt-devel
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-devel-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: avahi-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/avahi-libs-0.6.31-20.el7.x86_64.rpm
+  - name: cyrus-sasl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-2.1.26-23.el7.x86_64.rpm
+  - name: cyrus-sasl-gssapi
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-gssapi-2.1.26-23.el7.x86_64.rpm
+  - name: gnutls
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gnutls-3.3.29-9.el7_6.x86_64.rpm
+  - name: libpcap
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libpcap-1.5.3-12.el7.x86_64.rpm
+  - name: libvirt-libs
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/libvirt-libs-4.5.0-36.el7_9.2.x86_64.rpm
+  - name: nettle
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nettle-2.7.1-8.el7.x86_64.rpm
+  - name: nmap-ncat
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nmap-ncat-6.40-19.el7.x86_64.rpm
+  - name: trousers
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/trousers-0.3.14-2.el7.x86_64.rpm
+  - name: yajl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/yajl-2.0.4-4.el7.x86_64.rpm
+  # Install libvirt-python and dependency packages
+  - name: libvirt-python
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libvirt-python-4.5.0-1.el7.x86_64.rpm
+  - name: avahi-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/avahi-libs-0.6.31-20.el7.x86_64.rpm
+  - name: cyrus-sasl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-2.1.26-23.el7.x86_64.rpm
+  - name: cyrus-sasl-gssapi
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/cyrus-sasl-gssapi-2.1.26-23.el7.x86_64.rpm
+  - name: gnutls
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/gnutls-3.3.29-9.el7_6.x86_64.rpm
+  - name: libpcap
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libpcap-1.5.3-12.el7.x86_64.rpm
+  - name: libvirt-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libvirt-libs-4.5.0-36.el7.x86_64.rpm
+  - name: nettle
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nettle-2.7.1-8.el7.x86_64.rpm
+  - name: nmap-ncat
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/nmap-ncat-6.40-19.el7.x86_64.rpm
+  - name: trousers
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/trousers-0.3.14-2.el7.x86_64.rpm
+  - name: yajl
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/yajl-2.0.4-4.el7.x86_64.rpm
+  # Install python-lxml and dependency packages
+  - name: python-lxml
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-lxml-3.2.1-4.el7.x86_64.rpm
+  - name: libxslt
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libxslt-1.1.28-5.el7.x86_64.rpm
+  - name: python36
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-3.6.8-13.el7.x86_64.rpm
+  - name: python3-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-libs-3.6.8-13.el7.x86_64.rpm
+  - name: python3-pip
+    rpm: http://mirror.centos.org/centos/7/updates/x86_64/Packages/python3-pip-9.0.3-7.el7_7.noarch.rpm
+  - name: python3-setuptools
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-setuptools-39.2.0-10.el7.noarch.rpm
+  - name: tuned
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tuned-2.11.0-8.el7.noarch.rpm
+  - name: tuned-profiles-realtime
+    rpm: http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+  - name: libyaml
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libyaml-0.1.4-11.el7_0.x86_64.rpm
+  - name: dwz
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/dwz-0.11-3.el7.x86_64.rpm
+  - name: perl-srpm-macros
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-srpm-macros-1-8.el7.noarch.rpm
+  - name: python3
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-3.6.8-18.el7.x86_64.rpm
+  - name: python3-devel
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-devel-3.6.8-18.el7.x86_64.rpm
+  - name: python3-libs
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-libs-3.6.8-18.el7.x86_64.rpm
+  - name: python3-rpm-generators
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-rpm-generators-6-2.el7.noarch.rpm
+  - name: python3-rpm-macros
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-rpm-macros-3-34.el7.noarch.rpm
+  - name: redhat-rpm-config
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/redhat-rpm-config-9.1.0-88.el7.centos.noarch.rpm
+  - name: zip
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/zip-3.0-11.el7.x86_64.rpm
+  - name: expect
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/expect-5.45-14.el7_1.x86_64.rpm
+
+  # TBA
+
+### Online Docker images (from online sources).
+docker-images:
+  - name: kube-proxy
+    image: k8s.gcr.io/kube-proxy:v1.19.3
+  - name: kube-scheduler
+    image: k8s.gcr.io/kube-scheduler:v1.19.3
+  - name: kube-apiserver
+    image: k8s.gcr.io/kube-apiserver:v1.19.3
+  - name: kube-controller-manager
+    image: k8s.gcr.io/kube-controller-manager:v1.19.3
+  - name: kube-ovn-controller
+    image: kubeovn/kube-ovn-controller:v1.0.1
+  - name: kube-ovn-cni
+    image: kubeovn/kube-ovn-cni:v1.0.1
+  - name: pause
+    image: k8s.gcr.io/pause:3.2
+  - name: kube-ovn-db
+    image: kubeovn/kube-ovn-db:v1.0.1
+  - name: coredns1
+    image: k8s.gcr.io/coredns:1.6.7
+  - name: coredns2
+    image: k8s.gcr.io/coredns:1.7.0
+  - name: etcd1
+    image: k8s.gcr.io/etcd:3.4.3-0
+  - name: etcd2
+    image: k8s.gcr.io/etcd:3.4.13-0
+  - name: centos
+    image: centos:7.6.1810
+  - name: syslog-ng
+    image: balabit/syslog-ng:3.19.1
+  - name: debian
+    image: debian:stretch
+  - name: centos7
+    image: centos:7
+  - name: registry
+    image: registry:2
+  - name: nfd
+    image: quay.io/kubernetes_incubator/node-feature-discovery:v0.5.0
+  - name: cadvisor
+    image: k8s.gcr.io/cadvisor:v0.36.0
+  - name: nginx
+    image: nginx:alpine
+  - name: openssl
+    image: emberstack/openssl:latest
+  - name: collectd
+    image: opnfv/barometer-collectd
+  - name: ocd
+    image: otel/opentelemetry-collector-dev:latest
+  - name: busybox
+    image: busybox
+  - name: descheduler
+    image: us.gcr.io/k8s-artifacts-prod/descheduler/descheduler:v0.10.0
+  - name: k8s-prometheus-adapter-amd64
+    image: directxman12/k8s-prometheus-adapter-amd64:latest
+  - name: k8s-prometheus-adapter-amd64-07
+    image: directxman12/k8s-prometheus-adapter-amd64:v0.7.0
+  - name: multus
+    image: nfvpe/multus:v3.4.1
+  - name: pcm
+    image: opcm/pcm:latest
+  - name: node
+    image: calico/node:v3.14.2
+  - name: pod2daemon-flexvol
+    image: calico/pod2daemon-flexvol:v3.14.2
+  - name: cni
+    image: calico/cni:v3.14.2
+  - name: kube-controllers
+    image: calico/kube-controllers:v3.14.2
+  - name: grafana
+    image: grafana/grafana:7.0.3
+  - name: alpine
+    image: alpine:latest
+  - name: k8s-sidecar
+    image: kiwigrid/k8s-sidecar:0.1.151
+  - name: curl
+    image: curlimages/curl:7.70.0
+  - name: node-exporter
+    image: prom/node-exporter:v1.0.0-rc.0
+  - name: configmap-reload
+    image: jimmidyson/configmap-reload:v0.3.0
+  - name: bats
+    image: bats/bats:v1.1.0
+  - name: prometheus
+    image: prom/prometheus:v1.0.0-rc.0
+  - name: prometheus_v2
+    image: prom/prometheus:v2.16.0
+  - name: cdi-uploadproxy
+    image: kubevirt/cdi-uploadproxy:v1.13.0
+  - name: cdi-importer
+    image: kubevirt/cdi-importer:v1.13.0
+  - name: cdi-apiserver
+    image: kubevirt/cdi-apiserver:v1.13.0
+  - name: cdi-controller
+    image: kubevirt/cdi-controller:v1.13.0
+  - name: cdi-cloner
+    image: kubevirt/cdi-cloner:v1.13.0
+  - name: cdi-uploadserver
+    image: kubevirt/cdi-uploadserver:v1.13.0
+  - name: cdi-operator
+    image: kubevirt/cdi-operator:v1.13.0
+  - name: os-core
+    image: clearlinux/os-core:latest
+  - name: golang13
+    image: golang:1.13
+  - name: virt-operator
+    image: index.docker.io/kubevirt/virt-operator@sha256:4537e45d8f09d52ce202d53b368f34ab6744c06c11519f5219457a339355259e
+  - name: virt-controller
+    image: index.docker.io/kubevirt/virt-controller@sha256:1ab2afac91c890be4518bbc5cfa3d66526e2f08032648b4557b2abb86eb369a3
+  - name: virt-handler
+    image: index.docker.io/kubevirt/virt-handler@sha256:0609eb3ea5711ae6290c178275c7d09116685851caa58a8f231277d11224e3d8
+  - name: virt-launcher
+    image: index.docker.io/kubevirt/virt-launcher@sha256:66d6a5ce83d4340bb1c662198668081b3a1a37f39adc8ae4eb8f6c744fcae0fd
+  - name: virt-api
+    image: index.docker.io/kubevirt/virt-api@sha256:26f1d7c255eefa7fa56dec2923efcdafd522d15a8fee7dff956c9f96f2752f47
+  - name: busybox31
+    image: busybox:1.31.1
+  - name: node-feature-discovery
+    image: quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0
+  - name: opentelemetry-collector-dev
+    image: otel/opentelemetry-collector-dev:latest
+  - name: kafka
+    image: strimzi/kafka:0.19.0-kafka-2.5.0
+  - name: kafka-operator
+    image: strimzi/operator:0.19.0
+  - name: multus
+    image: nfvpe/multus:v3.6
+  - name: nginx-photon
+    image: goharbor/nginx-photon:v2.1.0
+  - name: harbor-portal
+    image: goharbor/harbor-portal:v2.1.0
+  - name: harbor-core
+    image: goharbor/harbor-core:v2.1.0
+  - name: harbor-jobservice
+    image: goharbor/harbor-jobservice:v2.1.0
+  - name: registry-photon
+    image: goharbor/registry-photon:v2.1.0
+  - name: harbor-registryctl
+    image: goharbor/harbor-registryctl:v2.1.0
+  - name: chartmuseum-photon
+    image: goharbor/chartmuseum-photon:v2.1.0
+  - name: clair-photon
+    image: goharbor/clair-photon:v2.1.0
+  - name: clair-adapter-photon
+    image: goharbor/clair-adapter-photon:v2.1.0
+  - name: trivy-adapter-photon
+    image: goharbor/trivy-adapter-photon:v2.1.0
+  - name: notary-server-photon
+    image: goharbor/notary-server-photon:v2.1.0
+  - name: notary-signer-photon
+    image: goharbor/notary-signer-photon:v2.1.0
+  - name: harbor-db
+    image: goharbor/harbor-db:v2.1.0
+  - name: redis-photon
+    image: goharbor/redis-photon:v2.1.0
+  - name: centos78
+    image: centos:7.8.2003
+
+  #TBA
+
+### Build Docker images (build on platform).
+build-images:
+  - name: sriov-network-device-plugin
+    tag: nfvpe/sriov-device-plugin:latest
+  - name: sriov-cni
+    tag: nfvpe/sriov-cni:latest
+  - name: edgenode
+    tag:
+  - name: intel-rmd-node-agent
+    tag: intel-rmd-node-agent:latest
+  - name: intel-rmd-operator
+    tag: intel-rmd-operator:latest
+
+  #TBA
+
+### YAML files.
+
+yaml-files:
+  #- name: kubevirt-operator-url
+  #  url: https://github.com/kubevirt/kubevirt/releases/download/v0.26.0/kubevirt-operator.yaml
+  - name: kubevirt-cr-url
+    url: https://github.com/kubevirt/kubevirt/releases/download/v0.26.0/kubevirt-cr.yaml
+  - name: cdi-operator-url
+    url: https://github.com/kubevirt/containerized-data-importer/releases/download/v1.13.0/cdi-operator.yaml
+  - name: cdi-cr-url
+    url: https://github.com/kubevirt/containerized-data-importer/releases/download/v1.13.0/cdi-cr.yaml
+  - name: krew-yaml-url
+    url: https://github.com/kubernetes-sigs/krew/releases/download/v0.3.4/krew.yaml
+  - name: vca-hddl-url
+    url: https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles/e824ebfb71267bb36c2d52aa222250d76b5f3a38/VCAC-A/script/setup_hddl_daemonset.yaml
+  - name: crd-url
+    url: https://raw.githubusercontent.com/alauda/kube-ovn/v1.0.1/yamls/crd.yaml
+  - name: ovn-url
+    url: https://raw.githubusercontent.com/alauda/kube-ovn/v1.0.1/yamls/ovn.yaml
+  - name: kube-ovn-url
+    url: https://raw.githubusercontent.com/alauda/kube-ovn/v1.0.1/yamls/kube-ovn.yaml
+  - name: calico-bpf
+    url: https://docs.projectcalico.org/v3.14/manifests/calico-bpf.yaml
+  - name: calico
+    url: https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+  - name: kube-flannel
+    url: https://raw.githubusercontent.com/coreos/flannel/v0.12.0/Documentation/kube-flannel.yml
+
+  #TBA
+
+### Helm Charts.
+charts-files:
+  - dir: cpu-manager-for-kubernetes
+    file:
+    - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/.helmignore
+    - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/Chart.yaml
+    - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/values.yaml
+    - dir: templates
+      file:
+      - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/templates/NOTES.txt
+      - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/templates/_helpers.tpl
+      - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/templates/daemonset.yml
+      - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/templates/rbac.yml
+      - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/templates/serviceaccount.yml
+      - intel/container-experience-kits/v1.4.1/roles/cmk-install/charts/cpu-manager-for-kubernetes/templates/webhook.yml
+  #download device plugin chart templates
+  - dir: sriov
+    file:
+    - dir: templates
+      file:
+      - intel/container-experience-kits/be472b5ec0728bcca60bf86ffb085c9ec46de08e/roles/sriov-dp-install/charts/sriov-net-dp/templates/sriovdp-daemonset.yaml
+      - intel/container-experience-kits/be472b5ec0728bcca60bf86ffb085c9ec46de08e/roles/sriov-dp-install/charts/sriov-net-dp/templates/sriovdp-sa.yaml
+  - dir: dashboard #download Kubernetes Dashboard chart
+    file:
+    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/.helmignore
+    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/Chart.yaml
+    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/requirements.lock
+    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/requirements.yaml
+    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/values.yaml
+    - dir: templates
+      file:
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/NOTES.txt
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/_helpers.tpl
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrole-metrics.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrole-readonly.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrolebinding-metrics.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrolebinding-readonly.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/deployment.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/ingress.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/networkpolicy.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/pdb.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/role.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/rolebinding.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/secret.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/service.yaml
+      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/serviceaccount.yaml
+  - dir: nfd
+    file:
+    - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/.helmignore
+    - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/Chart.yaml
+    - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/values.yaml
+    - dir: templates
+      file:
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/NOTES.txt
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/_helpers.tpl
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/config.yml
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/master.yml
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/rbac.yml
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/service.yml
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/tls.yml
+      - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/templates/worker.yml
+  - dir: grafana
+    file:
+    - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/.helmignore
+    - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/Chart.yaml
+    - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/values.yaml
+    - dir: templates
+      file:
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/NOTES.txt
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/_helpers.tpl
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/_pod.tpl
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/clusterrole.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/clusterrolebinding.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/configmap-dashboard-provider.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/configmap.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/dashboards-json-configmap.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/deployment.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/headless-service.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/ingress.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/poddisruptionbudget.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/podsecuritypolicy.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/pvc.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/role.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/rolebinding.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/secret-env.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/secret.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/service.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/serviceaccount.yaml
+      - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/statefulset.yaml
+      - dir: tests
+        file:
+        - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/tests/test-configmap.yaml
+        - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/tests/test-podsecuritypolicy.yaml
+        - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/tests/test-role.yaml
+        - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/tests/test-rolebinding.yaml
+        - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/tests/test-serviceaccount.yaml
+        - helm/charts/d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a/stable/grafana/templates/tests/test.yaml
+  - dir: prometheus
+    file:
+    - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/.helmignore
+    - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/Chart.yaml
+    - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/values.yaml
+    - dir: templates
+      file:
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/NOTES.txt
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/_helpers.tpl
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/node-exporter-daemonset.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/node-exporter-podsecuritypolicy.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/node-exporter-role.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/node-exporter-rolebinding.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/node-exporter-service.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/node-exporter-serviceaccount.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-clusterrole.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-clusterrolebinding.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-configmap.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-deployment.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-ingress.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-networkpolicy.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-pdb.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-podsecuritypolicy.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-pvc.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-service-headless.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-service.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-serviceaccount.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-statefulset.yaml
+      - helm/charts/98d951ea63065349fa8a31f552376207fb6115e6/stable/prometheus/templates/server-vpa.yaml
+
+  #TBA
+
+### Other Files.
+
+other-files:
+  - name: krew-tar-url
+    url: https://github.com/kubernetes-sigs/krew/releases/download/v0.3.4/krew.tar.gz
+  - name: docker-completion-bash
+    url: https://raw.githubusercontent.com/docker/docker-ce/v19.03.9/components/cli/contrib/completion/bash/docker
+  - name: docker-compose-completion-bash
+    url: https://raw.githubusercontent.com/docker/compose/1.24.1/contrib/completion/bash/docker-compose
+  - name: dpdk
+    url: http://fast.dpdk.org/rel/dpdk-19.11.1.tar.xz
+  - name: golang
+    url: https://dl.google.com/go/go1.15.5.linux-amd64.tar.gz
+  #- name: OpenVino
+  #  url: http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz
+  - name: ovs
+    url: https://www.openvswitch.org/releases/openvswitch-2.11.1.tar.gz
+  - name: kube-ovn-cleanup-script
+    url: https://raw.githubusercontent.com/alauda/kube-ovn/v1.0.1/dist/images/cleanup.sh
+  - name: helm
+    url: https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz
+  - name: kernel-repo-url
+    url: http://linuxsoft.cern.ch/cern/centos/7/rt/CentOS-RT.repo
+  - name: kernel-repo-key
+    url: http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern
+  - name: vca-image-url
+    url: https://github.com/OpenVisualCloud/VCAC-SW-Analytics/archive/VCAC-A_R5.tar.gz
+  - name: vcac-a-r4
+    url: https://github.com/OpenVisualCloud/VCAC-SW/archive/VCAC-A_R4.tar.gz
+  - name: kernel-7-4
+    url: http://vault.centos.org/7.4.1708/updates/Source/SPackages/kernel-3.10.0-693.17.1.el7.src.rpm
+  - name: kernel-4.19
+    url: https://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/linux-4.19.97.tar.xz
+  - name: kbl-dmc-ver
+    url: https://cgit.freedesktop.org/drm/drm-firmware/tree/i915/kbl_dmc_ver1_04.bin
+  - name: qemu
+    url: http://download.qemu.org/qemu-4.0.0.tar.xz
+  - name: k8s-yum-key
+    url: https://packages.cloud.google.com/yum/doc/yum-key.gpg
+  - name: k8s-rpm-key
+    url: https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    #- name: openvswitch-url
+    #url: https://github.com/alauda/ovs/releases/download/v2.11.4-1/openvswitch-2.11.4-1.el7.x86_64.rpm
+  - name: ubuntu-containerd-url
+    url: https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/containerd.io_1.2.6-3_amd64.deb
+  - name: ubuntu-xenial-url
+    url: https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce-cli_19.03.2~3-0~ubuntu-xenial_amd64.deb
+  - name: ius-rpm-url
+    url: https://repo.ius.io/ius-release-el7.rpm
+  - name: virtctl-linux-url
+    url: https://github.com/kubevirt/kubectl-virt-plugin/releases/download/v0.32.0/virtctl-linux-amd64.tar.gz
+  - name: strimzi-kafka-operator-helm-3-chart
+    url: https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.19.0/strimzi-kafka-operator-helm-3-chart-0.19.0.tgz
+  - name: openssl
+    url: https://www.openssl.org/source/openssl-1.1.1h.tar.gz
+  - name: docker-ce
+    url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.12-3.el7.x86_64.rpm
+  - name: docker-ce-cli
+    url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.12-3.el7.x86_64.rpm
+
+  #TBA

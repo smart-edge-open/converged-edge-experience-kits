@@ -8,6 +8,7 @@ registry_port: ""
 
 sriov_kubevirt_enable: false
 fpga_sriov_userspace_enable: false
+acc100_sriov_userspace_enable: false
 
 #sriov dev plugin values:
 namespace: kube-system

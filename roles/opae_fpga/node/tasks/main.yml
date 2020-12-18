@@ -17,47 +17,33 @@
   - "pps_core"
   - "ptp"
 
-- name: check local n3000-1-3-5-beta-cfg-2x2x25g-setup.zip
-  stat:
-    path: "{{ _opae_local_path_cfg }}"
-  connection: local
-  register: opae_local_file_cfg
-
-- name: file for OPAE config not present
-  debug:
-    msg: "{{ _opae_local_path_cfg }} does not exists, OPAE won't be set up on the node"
-  when: not opae_local_file_cfg.stat.exists
-
-- name: check local n3000-1-3-5-beta-rte-setup.zip
-  stat:
-    path: "{{ _opae_local_path_stp }}"
-  connection: local
-  register: opae_local_file_stp
-
-- name: file for OPAE setup not present
-  debug:
-    msg: "{{ _opae_local_path_stp }} does not exists, OPAE won't be set up on the node"
-  when: not opae_local_file_stp.stat.exists
-
-- name: set up OPAE for the node
+- name: Check if not offline
   block:
-  - name: copy local opae_cfg to remote
-    copy:
-      src: "{{ _opae_local_path_cfg }}"
-      dest: "{{ _opae_remote_path }}"
-  - name: copy local opae_stp to remote
-    copy:
-      src: "{{ _opae_local_path_stp }}"
-      dest: "{{ _opae_remote_path }}"
-  - name: build OPAE for PACN3000 FPGA worker image
-    command: make fpga-opae
-    args:
-      chdir: "{{ _git_repo_dest }}"
-  when:
-  - opae_local_file_cfg.stat.exists
-  - opae_local_file_stp.stat.exists
+  - name: check local OPAE_SDK_1.3.7-5_el7.zip
+    stat:
+      path: "{{ _opae_local_path_stp }}"
+    connection: local
+    register: opae_local_file_stp
 
-- name: Create directory for user FPGA images
-  file:
-    path: "{{ _vran_image_dir }}"
-    state: directory
+  - name: file for OPAE setup not present
+    debug:
+      msg: "{{ _opae_local_path_stp }} does not exists, OPAE won't be set up on the node"
+    when: not opae_local_file_stp.stat.exists
+
+  - name: set up OPAE for the node
+    block:
+    - name: copy local opae_stp to remote
+      copy:
+        src: "{{ _opae_local_path_stp }}"
+        dest: "{{ _opae_remote_path }}"
+    - name: build OPAE for PACN3000 FPGA worker image
+      command: make fpga-opae
+      args:
+        chdir: "{{ _git_repo_dest }}"
+    when: opae_local_file_stp.stat.exists
+
+  - name: Create directory for user FPGA images
+    file:
+      path: "{{ _vran_image_dir }}"
+      state: directory
+  when: not offline_enable

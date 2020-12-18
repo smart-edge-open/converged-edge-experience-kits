@@ -1,0 +1,214 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Check if local offline package exists
+  stat:
+    path: "{{ _offline_package_yum_path }}"
+  register: offline_package_exists
+
+- name: Files not found
+  fail:
+    msg: "{{ _offline_package_yum_path }} does not exists, Offline Package will not be installed"
+  when:
+    - not offline_package_exists.stat.exists
+
+- name: Set up HTTP server and offline YUM repo
+  block:
+  - debug:
+      msg: "package name is: {{ item }}"
+    with_items: "{{ _httpd_packages }}"
+
+  - name: Install yum plugin
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ _yum_localinstall_plugin }}"
+    become: yes
+
+  - name: Install HTTP server and ssl mod packages
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ _httpd_packages }}"
+    become: yes
+
+  - name: Start HTTP server
+    systemd:
+      name: httpd
+      state: started
+    become: yes
+
+  - name: Enable HTTP server
+    systemd:
+      name: httpd
+      enabled: yes
+    become: yes
+
+  - name: Configure HTTP server
+    block:
+      - name: Follow all symlinks
+        replace:
+          path: /etc/httpd/conf/httpd.conf
+          regexp: 'Options Indexes FollowSymLinks'
+          replace: 'Options All Indexes FollowSymLinks'
+        become: yes
+
+      - name: Delete welcome page
+        file:
+          path: /etc/httpd/conf.d/welcome.conf
+          state: absent
+        become: yes
+
+      - name: Create template directory for installing ssl
+        tempfile:
+          state: directory
+          prefix: ssl
+        register: ssl_dir
+
+      - name: Copy expect scripts to controller
+        template:
+          src: generate_ssl.sh.j2
+          dest: "{{ ssl_dir.path }}/generate_ssl.sh"
+          mode: '0600'
+
+      - name: Generate the ssl certificate
+        shell: >
+          cd {{ ssl_dir.path }} && bash generate_ssl.sh {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+
+      - name: Change files mode
+        file:
+          path: "{{ ssl_dir.path }}/{{ item }}"
+          mode: '0600'
+        with_items:
+          - "localhost.key"
+          - "localhost.crt"
+        become: yes
+
+      - name: Check if the ssl certificate exists in the local trust list
+        shell: |
+          tls_str=$(cat /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
+          crt_str=$(cat /etc/pki/tls/certs/localhost.crt | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
+          echo $tls_str | sed 's/[[:space:]]//g' | grep -o "$(echo $crt_str | sed 's/[[:space:]]//g')"
+        ignore_errors: yes
+        register: ssl_exists
+        changed_when: false
+        become: yes
+
+      - name: Copy the target crt file into the path for httpd
+        shell: |
+          cp -f {{ ssl_dir.path }}/localhost.key /etc/pki/tls/private/localhost.key
+          cp -f {{ ssl_dir.path }}/localhost.crt /etc/pki/tls/certs/localhost.crt
+        when: ssl_exists.rc != 0
+        become: yes
+
+      - name: Add the certificate into local trust list
+        shell: >
+            cat {{ ssl_dir.path }}/localhost.crt >> /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+        when: ssl_exists.rc != 0
+        become: yes
+
+      - name: Restart HTTP server
+        command: systemctl restart httpd
+        changed_when: true
+        become: yes
+
+      - name: fetch the crt file back to ansible host
+        fetch:
+          src: "/etc/pki/tls/certs/localhost.crt"
+          dest: "/tmp/"
+          flat: yes
+        become: yes
+
+  - name: Copy RPMs from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_yum_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+    become: yes
+
+  - name: Copy PIP packages from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_pip_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+    become: yes
+
+  - name: Create a list of Docker images
+    block:
+    - name: Find all images
+      find:
+        paths: "{{ _offline_package_docker_path }}"
+        file_type: file
+        recurse: No
+        patterns: "*tar.gz"
+      register: docker_image_files
+    - name: Delete file
+      file:
+        path: "{{ _offline_package_docker_path }}/docker_images.yml"
+        state: absent
+    - name: Create file
+      file:
+        path: "{{ _offline_package_docker_path }}/docker_images.yml"
+        state: touch
+    - name: Populate file
+      lineinfile:
+        path: "{{ _offline_package_docker_path }}/docker_images.yml"
+        insertbefore: BOF
+        line: "{{ item.path | basename }}"
+      with_items: "{{ docker_image_files.files }}"
+  - name: Copy Docker files from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_docker_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+  - name: Copy Helm charts from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_chart_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+  - name: Copy yaml files from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_yaml_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+  - name: Copy other files from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_file_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+  - name: Copy go modules from Offline Package to HTTP server
+    copy:
+      src: "{{ _offline_package_gomod_path }}/"
+      dest: "{{ _http_server_path }}"
+      remote_src: yes
+  - name: Install createrepo and dependancies
+    block:
+    - name: Create template directory
+      tempfile:
+        state: directory
+        prefix: create
+      register: tmp_dir2
+
+    - name: Instal create repo
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ _create_repo_packages }}"
+
+    - name: Createrepo
+      command: createrepo {{ _http_server_path }} --excludes='pkg/*' --excludes='mod/*'
+
+  - name: open common firewall ports
+    ignore_errors: yes
+    firewalld:
+      port: "{{ item }}"
+      permanent: yes
+      state: enabled
+      immediate: yes
+    with_items:
+      - 443/tcp
+    become: yes
+
+  when: offline_package_exists.stat.exists

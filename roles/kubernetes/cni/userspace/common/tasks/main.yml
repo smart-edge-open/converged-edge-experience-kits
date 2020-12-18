@@ -8,6 +8,11 @@
   ignore_errors: yes
   changed_when: true
 
+- name: register go path
+  shell: "source /etc/profile && echo $GOPATH/src/{{ _userspace.repository }}"
+  register: gopath_src_userspace_repo
+  changed_when: true
+
 - name: install userspace-cni-network-plugin dependencies
   shell: "source /etc/profile && cd $GOPATH/src/{{ _userspace.repository }} && make install"
   changed_when: true
@@ -17,8 +22,9 @@
   changed_when: true
 
 - name: copy plugin to cni directory
-  shell: "source /etc/profile && cp $GOPATH/src/{{ _userspace.repository }}/userspace/userspace /opt/cni/bin/."
+  shell: "source /etc/profile && cp {{ gopath_src_userspace_repo.stdout }}/userspace/userspace /opt/cni/bin/."
   changed_when: true
+  become: yes
 
 - name: clean
   shell: "source /etc/profile && cd $GOPATH/src/{{ _userspace.repository }} && make clean"

@@ -47,6 +47,17 @@ data:
                 }
             },
             {{- end }}
+            {{- if .Values.acc100_sriov_userspace_enable }}
+            {
+                "resourceName": "intel_fec_acc100",
+                "deviceType": "accelerator",
+                "selectors": {
+                    "vendors": ["8086"],
+                    "devices": ["0d5d"],
+                    "drivers": ["igb_uio", "vfio-pci"]
+                }
+            },
+            {{- end }}
             {
                 "resourceName": "intel_sriov_dpdk",
                 "selectors": {

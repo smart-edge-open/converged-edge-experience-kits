@@ -9,16 +9,16 @@
 
 - name: check whether helm exist
   block:
-  - name: check /usr/local/bin/helm exist
-    stat:
-      path: "{{ _helm_binary_path }}"
-    register: helm_bin
-  - name: check helm version
-    shell: helm version | grep -E {{ _helm_version }}
-    register: grep_helm_version
-    ignore_errors: yes
-    changed_when: False
-    when: helm_bin.stat.exists
+    - name: check /usr/local/bin/helm exist
+      stat:
+        path: "{{ _helm_binary_path }}"
+      register: helm_bin
+    - name: check helm version
+      shell: helm version | grep -E {{ _helm_version }}
+      register: grep_helm_version
+      ignore_errors: yes
+      changed_when: False
+      when: helm_bin.stat.exists
 
 - name: download helm archive and installation
   block:
@@ -29,7 +29,8 @@
     register: helm_tmp_dir
   - name: download
     get_url:
-      url:  "{{ _helm_download_url }}/{{ _helm_download_item }}"
+      url: "{{ 'https://' + hostvars[groups['controller_group'][0]]['ansible_host'] + '/' + _helm_download_item \
+            if offline_enable else _helm_download_url + '/' + _helm_download_item }}"
       dest: "{{ helm_tmp_dir.path }}/{{ _helm_download_item }}"
     register: helm_download_result
     retries: "{{ number_of_retries }}"

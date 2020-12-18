@@ -33,6 +33,11 @@
   changed_when: False
   register: get_pcm
 
+- name: change pcm pullPolicy for offline
+  set_fact:
+    _pcm_pullPolicy: "IfNotPresent"
+  when: offline_enable
+
 - name: install pcm with Helm chart
   block:
   - name: copy Helm chart to the master node
@@ -40,7 +45,9 @@
       src: "{{ role_path }}/charts/"
       dest: "{{ _pcm_chart_dir }}"
   - name: install pcm using Helm
-    command: "helm install pcm --namespace telemetry {{ _pcm_chart_dir }}"
+    command: >
+      helm install pcm --namespace telemetry "{{ _pcm_chart_dir }}"
+      --set pcm.pullPolicy="{{ _pcm_pullPolicy }}"
     changed_when: true
   when: get_pcm.rc != 0
 

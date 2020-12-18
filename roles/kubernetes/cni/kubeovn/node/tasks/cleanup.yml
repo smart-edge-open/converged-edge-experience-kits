@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: load kubeovn common variables
   include_vars: ../../common/defaults/main.yml
 
@@ -13,3 +12,4 @@
   yum:
     name: "{{ _ovs_packages_to_remove }}"
     state: absent
+  become: yes

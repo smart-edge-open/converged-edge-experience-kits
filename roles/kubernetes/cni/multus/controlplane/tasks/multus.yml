@@ -7,29 +7,34 @@
   command: helm status multus-release
   ignore_errors: yes
   register: get_release_multus
+  changed_when: false
 
 - name: install Multus-cni chart
   block:
-  - name: wait for docker registry to start
-    shell: >
-      set -o pipefail &&
-      kubectl get pods --field-selector status.phase=Running -n openness | grep -q docker-registry-deployment
-    register: docker_registry_started
+  - name: login harbor registry firstly
+    command: docker login "{{ _registry_ip_address }}:{{ _registry_port }}" -uadmin -p{{ harborAdminPassword }}
     retries: 60
     delay: 15
-    until: docker_registry_started.rc == 0
-    changed_when: false
+    ignore_errors: yes
 
   - name: pull multus image
     docker_image:
       name: "{{ _multus_image_name }}"
       tag: "{{ _multus_image_tag }}"
       source: pull
+    when: not offline_enable
 
-  - name: tag multus image and push to docker registry
+  - name: Check if the image already exists
+    shell: >
+      docker images | grep "{{ _multus_image_name }}" | grep "{{ _multus_image_tag }}"
+    register: result
+    failed_when: result.rc != 0
+    when: offline_enable
+
+  - name: tag multus image and push to Harbor registry
     docker_image:
       name: "{{ _multus_image_name }}"
-      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/multus"
+      repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/multus"
       tag: "{{ _multus_image_tag }}"
       push: yes
       source: local
@@ -39,16 +44,18 @@
       state: absent
       name: "{{ _multus_image_name }}"
       tag: "{{ _multus_image_tag }}"
+    when: not offline_enable
 
   - name: copy multus-cni chart
     copy:
       src: "multus-cni"
       dest: "{{ ne_helm_charts_default_dir }}"
+      mode: '0755'
 
   - name: install multus-cni chart
     command: >
-      helm install multus-release {{ ne_helm_charts_default_dir }}/multus-cni
-      --set registry_ip={{ _registry_ip_address }} --set registry_port={{ _registry_port }} --set image_tag={{ _multus_image_tag }}
+      helm install multus-release "{{ ne_helm_charts_default_dir }}/multus-cni"
+      --set registry_ip="{{ _registry_ip_address }}" --set registry_port="{{ _registry_port }}" --set image_tag="{{ _multus_image_tag }}"
     changed_when: true
 
   - name: wait for Multus to start

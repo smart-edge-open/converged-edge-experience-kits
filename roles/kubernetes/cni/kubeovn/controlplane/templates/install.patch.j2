@@ -1,0 +1,57 @@
+--- a/install.sh	2020-12-18 10:47:11.987000000 +0100
++++ b/install.sh	2020-12-18 11:03:22.490000000 +0100
+@@ -702,6 +702,8 @@
+             - mountPath: /sys
+               name: host-sys
+               readOnly: true
++            - mountPath: /dev
++              name: host-dev
+             - mountPath: /etc/openvswitch
+               name: host-config-openvswitch
+             - mountPath: /etc/ovn
+@@ -734,12 +736,12 @@
+             timeoutSeconds: 45
+           resources:
+             requests:
+-              cpu: $DPDK_CPU
+-              memory: $DPDK_MEMORY
++              cpu: 1
++              memory: {{ kubeovn_dpdk_resources_requests }}
+             limits:
+-              cpu: $DPDK_CPU
+-              memory: $DPDK_MEMORY
+-              hugepages-1Gi: 1Gi
++              cpu: 2
++              memory: {{ kubeovn_dpdk_resources_limits }}
++              hugepages-{{ kubeovn_dpdk_hugepage_size }}: {{ kubeovn_dpdk_hugepages }}
+       nodeSelector:
+         kubernetes.io/os: "linux"
+       volumes:
+@@ -755,6 +757,9 @@
+         - name: host-sys
+           hostPath:
+             path: /sys
++        - name: host-dev
++          hostPath:
++            path: /dev
+         - name: host-config-openvswitch
+           hostPath:
+             path: /etc/origin/openvswitch
+@@ -1890,7 +1895,16 @@
+ echo ""
+ 
+ echo "[Step 6] Run network diagnose"
+-kubectl ko diagnose all
++
++retries=0
++while [[ $retries -lt {{ number_of_retries }} ]]; do
++  if kubectl ko diagnose all; then
++    break;
++ fi
++
++  retries=$((retries + 1))
++  sleep {{ retry_delay }}
++done
+ 
+ echo "-------------------------------"
+ echo ""

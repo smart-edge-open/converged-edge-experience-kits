@@ -43,7 +43,7 @@ fi
 if lsmod | grep intel_fpga_fme &> /dev/null ; then
         echo "intel-fpga-fme is loaded"
 else
-        modprobe intel-fpga-fme 
+        modprobe intel-fpga-fme
 fi
 
 if lsmod | grep pac_n3000_net &> /dev/null ; then
@@ -58,12 +58,6 @@ else
         modprobe intel-max10
 fi
 
-if lsmod | grep intel_fpga_pac_iopll &> /dev/null ; then
-        echo "intel-fpga-pac-iopll is loaded"
-else
-        modprobe intel-fpga-pac-iopll
-fi
-
 if lsmod | grep intel_fpga_afu &> /dev/null ; then
         echo "intel-fpga-afu is loaded"
 else
@@ -74,18 +68,6 @@ if lsmod | grep c827_retimer &> /dev/null ; then
         echo "c827_retimer is loaded"
 else
         modprobe c827_retimer
-fi
-
-if lsmod | grep avmmi_bmc &> /dev/null ; then
-        echo "avmmi-bmc is loaded"
-else
-        modprobe avmmi-bmc
-fi
-
-if lsmod | grep intel_fpga_pac_hssi &> /dev/null ; then
-        echo "intel-fpga-pac-hssi is loaded"
-else
-        modprobe intel-fpga-pac-hssi
 fi
 
 if lsmod | grep spi_altera_mod &> /dev/null ; then

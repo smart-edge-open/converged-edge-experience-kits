@@ -8,3 +8,4 @@
     dest: "{{ _hddldaemon_container.download_dir }}/VCAC-A/script/{{ item }}"
   with_items:
   - setup_hddl_daemonset.yaml
+  become: yes

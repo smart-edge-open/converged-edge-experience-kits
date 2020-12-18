@@ -3,12 +3,8 @@
 
 ---
 
-- name: remove ovs/ovn related files
+- name: remove ovs/ovn scripts
   file:
-    path: "{{ item }}"
+    path: "{{ _kubeovn_scripts_dest }}/{{ item }}"
     state: absent
-  with_items: "{{ _kubeovn_cleanup_paths }}"
-- name: remove patch utility
-  yum:
-    name: patch
-    state: absent
+  with_items: "{{ _kubeovn_scripts }}"

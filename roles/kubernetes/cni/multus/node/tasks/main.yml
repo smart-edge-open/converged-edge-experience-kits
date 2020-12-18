@@ -4,7 +4,7 @@
 ---
 
 - name: wait until primary CNI is up on the node
-  shell: set -o pipefail && ls /etc/cni/net.d | grep -P '10-|00-(?!multus)'
+  shell: set -o pipefail && ls /etc/cni/net.d | grep -P '01-|10-|00-(?!multus)'
   register: result
   until: not result.failed
   retries: 30
@@ -27,6 +27,7 @@
   # shell is required due to glob (*)
   shell: rename --verbose '.old' '' /etc/cni/net.d/*
   changed_when: true
+  become: yes
 
 - name: delete Multus pod to recreate 00-multus.conf
   command: kubectl delete pod -n kube-system {{ nodes_multus_pod.stdout }}

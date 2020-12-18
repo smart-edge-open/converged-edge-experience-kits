@@ -2,22 +2,46 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 _kubeovn_cleanup_url: "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/cleanup.sh"
 _kubeovn_cleanup_dest: "/tmp/kubeovn-cleanup.sh"
 
-_kubeovn_yamls:
-- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/yamls/crd.yaml"
-- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/yamls/ovn.yaml"
-- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/yamls/kube-ovn.yaml"
-
 _ovn_packages_urls:
-- "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
-  openvswitch-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
-- "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
-  ovn-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
+  - "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
+    openvswitch-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
+  - "https://github.com/alauda/ovs/releases/download/{{ _ovn_version.main }}-{{ _ovn_version.subversion }}/\
+    ovn-{{ _ovn_version.main }}-{{ _ovn_version.subversion }}.el7.x86_64.rpm"
 
 _ovn_packages_yum:
-- "unbound"
+  - "unbound"
 
 _ovn_packages_to_remove: "openvswitch,ovn,ovn-common,unbound"
+
+_kubeovn_git_repo_dest: /opt/kube-ovn
+_kubeovn_git_repo_branch: add_ovs_dpdk_support
+
+_kubeovn_version: v1.5.2
+_ovn_version:
+  main: "2.14.0"
+  subversion: "0"
+_kubeovn_dpdk_version: "19.11"
+
+_kubeovn_raw_file_repo: https://raw.githubusercontent.com/alauda/kube-ovn
+_kubeovn_destdir: /opt/kube-ovn
+
+_kubeovn_download_files:
+  - "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/install.sh"
+
+_kubeovn_dockerimage_files_to_cp:
+  - install.sh
+
+_kubeovn_install_patch_file: install.patch
+
+kubeovn_dpdk: true
+kubeovn_dpdk_socket_mem: "1024,0"
+kubeovn_dpdk_pmd_cpu_mask: "0x4"
+kubeovn_dpdk_lcore_mask: "0x2"
+
+kubeovn_dpdk_hugepage_size: "2Mi"
+kubeovn_dpdk_hugepages: "1Gi"
+kubeovn_dpdk_resources_requests: "1Gi"
+kubeovn_dpdk_resources_limits: "1Gi"

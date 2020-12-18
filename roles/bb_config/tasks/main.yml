@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+---
+
+- name: include docker registry vars
+  include_vars: ../../harbor_registry/controlplane/defaults/main.yml
+
+- name: set up BB Config utility on the node and template Helm charts
+  block:
+    - name: build steps (only in online mode)
+      block:
+        - name: create temp dir
+          tempfile:
+            state: directory
+            suffix: -fpga-cfg
+          register: tmp_dir
+
+        - name: copy Docker file to remote
+          copy:
+            src: Dockerfile
+            dest: "{{ tmp_dir.path }}/Dockerfile"
+
+        - name: build BB Config utility image
+          docker_image:
+            name: "{{ _bb_config.image }}"
+            tag: "{{ _bb_config.tag }}"
+            source: build
+            build:
+              path: "{{ tmp_dir.path }}"
+              use_config_proxy: yes
+              pull: yes
+          register: result
+          retries: "{{ number_of_retries }}"
+          until: result is succeeded
+          delay: "{{ retry_delay }}"
+      when: not offline_enable
+
+    - name: tag and push CNI image to local registry
+      docker_image:
+        name: "{{ _bb_config.image }}"
+        repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ _bb_config.image }}"
+        tag: "{{ _bb_config.tag }}"
+        push: yes
+        source: local
+
+    - name: remove local version of the image
+      docker_image:
+        state: absent
+        name: "{{ _bb_config.image }}"
+
+    - name: copy Helm chart to the master node
+      copy:
+        src: "{{ role_path }}/charts/bb_config"
+        dest: "{{ ne_helm_charts_default_dir }}"
+
+    - name: template and copy values.yaml
+      template:
+        src: "values.yaml.j2"
+        dest: "{{ ne_helm_charts_default_dir }}/bb_config/values.yaml"
+        force: yes

@@ -17,8 +17,8 @@ frameworks:
   - {{ item.name }}
 {% endfor %}
 
-# registry specifies the docker registry in use
-registry: {{ _registry_ip_address }}:{{ _registry_port }}
+# registry specifies the Harbor registry in use
+registry: {{ _registry_ip_address }}:{{ _registry_port }}/intel
 
 # servingImage video analytics serving image
 servingImage: {{ _va_serving.image }}
@@ -40,3 +40,27 @@ replicas: 1
 
 # enable Istio service mesh integration
 istioEnabled: {{ ne_istio_enable }}
+multiInstances: {{ video_analytics_services_multiinstances }}
+{% if  ne_istio_enable == true and video_analytics_services_multiinstances == true %}
+instances:
+{% for item in _instances %}
+  - name: {{ item.name }}
+    weight: {{ item.weight }}
+{% endfor %}
+{% else %}
+instances:
+  - default
+{% endif %}
+
+# proxy settings for vas_gateways
+{% if proxy_enable | d(false) %}
+proxySettings:
+  enabled: true
+  http: {{ proxy_http }}
+  https: {{ proxy_https }}
+  ftp: {{ proxy_ftp }}
+  noproxy: {{ proxy_noproxy }}
+{% else %}
+proxySettings:
+  enabled: false
+{% endif %}

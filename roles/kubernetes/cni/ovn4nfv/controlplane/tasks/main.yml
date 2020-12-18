@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: open firewall rules
+  ignore_errors: yes
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items:
+    - 6641/tcp
+    - 6642/tcp
+    - 6081/udp
+
+- name: ovn4nfv | Label control-plane node
+  command: >-
+    kubectl label --overwrite node {{ ansible_hostname }}
+    ovn4nfv-k8s-plugin=ovn-control-plane
+
+- name: create tmp dir
+  tempfile:
+    state: directory
+    suffix: -ovn4nfv
+  register: tmp_dir
+
+- name: ovn4nfv | Create ovn4nfv-k8s manifests
+  template:
+    src: "{{ item.file }}.j2"
+    dest: "{{ tmp_dir.path }}/{{ item.file }}"
+  with_items:
+    - {name: ovn-daemonset, file: ovn-daemonset.yml}
+    - {name: ovn4nfv-k8s-plugin, file: ovn4nfv-k8s-plugin.yml}
+    - {name: customize_ovn4nfv_container, file: customize_ovn4nfv_container.yml}
+  register: ovn4nfv_node_manifests
+
+- name: copy kustomization.yml
+  copy:
+    src: "{{ item }}"
+    dest: "{{ tmp_dir.path }}"
+  with_items:
+    - kustomization.yml
+
+- name: apply ovn-daemonset.yml
+  command: kubectl apply -f ovn-daemonset.yml
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  changed_when: true
+
+- name: apply ovn4nfv-k8s-plugin.yml
+  block:
+    - name: apply file with no change
+      command: kubectl apply -f ovn4nfv-k8s-plugin.yml
+      args:
+        chdir: "{{ tmp_dir.path }}"
+      changed_when: true
+  when: not proxy_enable
+
+- name: apply ovn4nfv-k8s-plugin.yml with change
+  block:
+    - name: apply file with change
+      shell: >
+        set -o pipefail &&
+        kubectl kustomize . | kubectl apply -f -
+      args:
+        chdir: "{{ tmp_dir.path }}"
+      changed_when: true
+  when: proxy_enable
+
+- name: apply ovn4nfv's NetworkAttachmentDefinition
+  block:
+    - name: copy NetworkAttachmentDefinition to remote
+      template:
+        src: attach-network-ovn.yml
+        dest: "{{ tmp_dir.path }}/attach-network-ovn.yml"
+    - name: apply ovn4nfv's NetworkAttachmentDefinition
+      command: kubectl apply -f {{ tmp_dir.path }}/attach-network-ovn.yml
+  when:
+    - apply_netdef is defined
+    - apply_netdef

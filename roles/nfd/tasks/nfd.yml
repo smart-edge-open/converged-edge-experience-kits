@@ -15,11 +15,16 @@
         name: "{{ _nfd_image_name }}"
         tag: "{{ _nfd_tag }}"
         source: pull
+      when: not offline_enable
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
 
-    - name: tag NFD image and push to docker registry
+    - name: tag NFD image and push to Harbor registry
       docker_image:
         name: "{{ _nfd_image_name }}"
-        repository: "{{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery"
+        repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/node-feature-discovery"
         tag: "{{ _nfd_tag }}"
         push: yes
         source: local
@@ -29,15 +34,22 @@
         state: absent
         name: "{{ _nfd_image_name }}"
         tag: "{{ _nfd_tag }}"
+      when: not offline_enable
 
     - name: create NFD chart template directory
       file:
         name: "{{ item }}"
         state: directory
+        mode: '0755'
       with_items:
         - "{{ _nfd_chart_dir }}"
         - "{{ _nfd_chart_dir }}/templates"
       changed_when: true
+
+    - name: reset _nfd_cek_url for offline mode
+      set_fact:
+        _nfd_cek_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/nfd"
+      when: offline_enable
 
     - name: download NFD chart
       get_url:
@@ -76,6 +88,8 @@
           yum:
             name: patch
             state: present
+          become: yes
+
         - name: apply CMK worker patch
           patch:
             src: worker.yml.patch
@@ -97,7 +111,8 @@
 
     - name: deploy NFD with Helm chart
       command: >
-        helm install {{ _nfd_release_name }} {{ _nfd_chart_dir }} --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/node-feature-discovery
+        helm install {{ _nfd_release_name }} {{ _nfd_chart_dir }} \
+        --set image.repository={{ _registry_ip_address }}:{{ _registry_port }}/intel/node-feature-discovery \
         --set image.tag={{ _nfd_tag }} --set serviceAccount.name=nfd-master --namespace=openness
       changed_when: true
   when: get_release_nfd.rc != 0

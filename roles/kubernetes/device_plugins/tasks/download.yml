@@ -10,3 +10,4 @@
     clone: yes
     update: no
     version: "{{ _device_plugins.commit }}"
+  become: yes

@@ -36,6 +36,7 @@
     permanent: yes
     state: disabled
     immediate: yes
+  become: yes
 
 - name: uninstall grafana using Helm
   command: "helm uninstall grafana --namespace telemetry"
@@ -52,3 +53,4 @@
   file:
     path: "{{ _pv_dir }}"
     state: absent
+  become: yes

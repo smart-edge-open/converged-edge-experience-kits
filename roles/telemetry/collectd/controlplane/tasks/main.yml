@@ -3,8 +3,8 @@
 
 ---
 
-- name: include docker registry vars
-  include_vars: ../../../docker_registry/controlplane/defaults/main.yml
+- name: include Harbor registry vars
+  include_vars: ../../../harbor_registry/controlplane/defaults/main.yml
 
 - name: check if collectd already exists
   command: helm status collectd -n telemetry
@@ -22,41 +22,39 @@
         warn: false
       register: docker_status
 
-    - name: create build folder
-      file:
-        name: "{{ _collectd_install_path }}"
-        state: directory
+    - name: check if offline
+      block:
+      - name: create build folder
+        file:
+          name: "{{ _collectd_install_path }}"
+          state: directory
 
-    - name: copy opae_cfg to build folder
-      copy:
-        src: "{{ _opae_local_path_cfg }}"
-        dest: "{{ _collectd_install_path }}"
+      - name: copy opae_stp to build folder
+        copy:
+          src: "{{ _opae_local_path_stp }}"
+          dest: "{{ _collectd_install_path }}"
 
-    - name: copy opae_stp to build folder
-      copy:
-        src: "{{ _opae_local_path_stp }}"
-        dest: "{{ _collectd_install_path }}"
+      - name: copy Dockerfile to build folder
+        copy:
+          src: "{{ _collectd_local_path }}"
+          dest: "{{ _collectd_install_path }}"
 
-    - name: copy Dockerfile to build folder
-      copy:
-        src: "{{ _collectd_local_path }}"
-        dest: "{{ _collectd_install_path }}"
+      - name: copy collectd patch to build folder
+        copy:
+          src: "{{ _collectd_patch_path }}"
+          dest: "{{ _collectd_install_path }}"
 
-    - name: copy collectd patch to build folder
-      copy:
-        src: "{{ _collectd_patch_path }}"
-        dest: "{{ _collectd_install_path }}"
+      # Workaround for building the RDT library with GCC version < 4.9.0
+      - name: copy RDT library patch to build folder
+        copy:
+          src: "{{ _collectd_rdt_patch_path }}"
+          dest: "{{ _collectd_install_path }}"
 
-    # Workaround for building the RDT library with GCC version < 4.9.0
-    - name: copy RDT library patch to build folder
-      copy:
-        src: "{{ _collectd_rdt_patch_path }}"
-        dest: "{{ _collectd_install_path }}"
-
-    - name: copy module check script to build folder
-      copy:
-        src: "{{ _collectd_check_module_script_path }}"
-        dest: "{{ _collectd_install_path }}"
+      - name: copy module check script to build folder
+        copy:
+          src: "{{ _collectd_check_module_script_path }}"
+          dest: "{{ _collectd_install_path }}"
+      when: not offline_enable
 
     - name: Build collectd image and apply daemonset
       block:
@@ -73,6 +71,7 @@
         retries: "{{ number_of_retries }}"
         until: result is succeeded
         delay: "{{ retry_delay }}"
+        when: not offline_enable
 
       - name: tag and push collectd image to local registry
         docker_image:
@@ -86,6 +85,7 @@
         docker_image:
           state: absent
           name: "{{ _collectd_image.name }}"
+        when: not offline_enable
 
       - name: remove build folder
         file:

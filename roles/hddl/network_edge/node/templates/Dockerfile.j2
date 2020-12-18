@@ -1,61 +1,115 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-FROM centos:7.6.1810 as builder
-WORKDIR /home
+FROM ubuntu:18.04 as builder
 
-RUN yum update -y
-RUN yum install -y epel-release
-RUN yum install -y \
-    cpio sudo python3-pip python3-setuptools wget \
-    boost\
-    boost-thread \
-    boost-devel \
-    build-essential autoconf automake libtool \
-    kmod libelf-dev libusb-1.0-0 lsb-release
-RUN yum -y install gcc automake autoconf libtool
-RUN yum -y install make
-ARG LIBUSB_VER=v1.0.22
-ARG LIBUSB_REPO=https://github.com/libusb/libusb/archive/${LIBUSB_VER}.tar.gz
-SHELL ["/bin/bash", "-c"]
-RUN wget -O - ${LIBUSB_REPO} | tar xz && \
-    cd libusb* && \
-    ./autogen.sh enable_udev=no && \
-    make -j $(nproc) && \
-    cp ./libusb/.libs/libusb-1.0.so /usr/lib64/libusb-1.0.so.0
+USER root
+WORKDIR /
 
-ARG OPENVINO_VER=2020.2.120
-ARG OPENVINO_REPO=http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_${OPENVINO_VER}.tgz
+# Creating user openvino and adding it to groups "video" and "users" to use GPU and VPU
+RUN useradd -ms /bin/bash -G video,users openvino && \
+    chown openvino -R /home/openvino
 
-RUN wget -O - ${OPENVINO_REPO} | tar xz && \
+# hadolint ignore=DL3008
+RUN apt-get update && apt upgrade -y --no-install-recommends && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN ln -snf /usr/share/zoneinfo/$(curl https://ipapi.co/timezone -k) /etc/localtime
+
+ARG DEPENDENCIES="autoconf \
+                  automake \
+                  build-essential \
+                  libgtk-3-0 \
+                  libcairo2-dev \
+                  gobject-introspection \
+                  libglib2.0-0 \
+                  libgdk-pixbuf2.0-0 \
+                  cmake \
+                  cpio \
+                  sudo \
+                  libtool \
+                  udev \
+                  unzip \
+                  kmod \
+                  wget \
+                  libgstreamer1.0-0 \
+                  gstreamer1.0-plugins-base \
+                  gstreamer1.0-plugins-good \
+                  gstreamer1.0-plugins-bad \
+                  gstreamer1.0-vaapi \
+                  ffmpeg \
+                  dos2unix"
+
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ${DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /thirdparty
+RUN sed -Ei 's/# deb-src /deb-src /' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get source ${DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# setup Python
+ENV PYTHON_VER python3.6
+
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3-pip python3-dev python3-setuptools lib${PYTHON_VER} && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN ${PYTHON_VER} -m pip install --upgrade pip
+
+# get product from URL
+ARG package_url=http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz
+ARG TEMP_DIR=/tmp/openvino_installer
+
+WORKDIR ${TEMP_DIR}
+# hadolint ignore=DL3020
+RUN wget ${package_url}
+
+# install product by copying archive content
+ARG TEMP_DIR=/tmp/openvino_installer
+ENV INTEL_OPENVINO_DIR /opt/intel/openvino
+
+
+RUN tar -xzf "${TEMP_DIR}"/*.tgz && \
     cd l_openvino_toolkit* && \
     sed -i 's/decline/accept/g' silent.cfg && \
     ./install.sh -s silent.cfg
 
-RUN cd /opt/intel/openvino/deployment_tools/tools/deployment_manager && \
-    python3 deployment_manager.py --targets=hddl --output_dir=/home --archive_name=hddl && \
-    mkdir -p /home/opt/intel/openvino && \
-    cd /home/opt/intel/openvino && \
-    tar xvf /home/hddl.tar.gz
+RUN export OV_BUILD OV_FOLDER
+RUN OV_BUILD="$(find . -maxdepth 1 -type d -name "*openvino*" | grep -oP '(?<=_)\d+.\d+.\d+')" && \
+    OV_YEAR="$(find . -maxdepth 1 -type d -name "*openvino*" | grep -oP '(?<=_)\d+')" && \
+    OV_FOLDER="$(find . -maxdepth 1 -type d -name "*openvino*")" && \
+    ln --symbolic /opt/intel/openvino_"$OV_BUILD"/ /opt/intel/openvino 
 
-FROM centos:7.6.1810
+FROM ubuntu:18.04
 
-SHELL ["/bin/bash", "-c"]
-RUN yum update -y 
-RUN yum install -y epel-release
-RUN yum install -y sudo
-RUN yum install -y nasm \
-    boost\
-    boost-thread \
-    boost-devel \
-    libusb-1.0-0 autoconf automake make libtool kmod libelf-dev \
-    redhat-lsb-core-4.1-27.el7.centos.1.x86_64
+WORKDIR /tmp
 
-COPY --from=builder /usr/lib64/libusb-1.0.so.0 /usr/lib64/libusb-1.0.so.0
-COPY --from=builder /home/opt/intel/openvino /opt/intel/openvino
-RUN sed -i '/"abort_if_hw_reset_failed"/ s/true/false/' /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/config/hddl_autoboot.config
-RUN sed -i '/"device_snapshot_mode"/ s/none/full/' /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/config/hddl_service.config
-COPY *_hddl.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init_hddl.sh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        make \
+        sudo \
+        libusb-1.0-0 \
+        libboost-filesystem1.65-dev=1.65.1+dfsg-0ubuntu5 \
+        libboost-thread1.65-dev=1.65.1+dfsg-0ubuntu5 \
+        libjson-c3=0.12.1-1.3 libxxf86vm-dev=1:1.1.4-1 \
+        libboost-program-options1.65 \
+        lsb-release && \      
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/intel/openvino/python /opt/intel/openvino/python
+COPY --from=builder /opt/intel/openvino/bin /opt/intel/openvino/bin
+COPY --from=builder /opt/intel/openvino/deployment_tools /opt/intel/openvino/deployment_tools
+
+RUN sudo sed -i '/"abort_if_hw_reset_failed"/ s/true/false/' /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/config/hddl_autoboot.config
+RUN sudo sed -i '/"device_snapshot_mode"/ s/none/full/' /opt/intel/openvino/deployment_tools/inference_engine/external/hddl/config/hddl_service.config
+COPY run_hddl.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/run_hddl.sh
 

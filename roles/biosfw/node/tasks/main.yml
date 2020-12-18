@@ -2,26 +2,28 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-- name: check local syscfg_package.zip
-  stat:
-    path: "{{ _syscfg_local_path }}"
-  connection: local
-  register: syscfg_local_file
-
-- name: file not present
-  debug:
-    msg: "{{ _syscfg_local_path }} does not exists, BIOSFW won't be set up on the node"
-  when: not syscfg_local_file.stat.exists
-
-- name: set up biosfw for the node
+- name: Check if not offline
   block:
-  - name: copy local syscfg to remote
-    copy:
-      src: "{{ _syscfg_local_path }}"
-      dest: "{{ _syscfg_remote_path }}"
-  - name: build BIOSFW worker image
-    command: make biosfw
-    args:
-      chdir: "{{ _git_repo_dest }}"
-  when: syscfg_local_file.stat.exists
+  - name: check local syscfg_package.zip
+    stat:
+      path: "{{ _syscfg_local_path }}"
+    connection: local
+    register: syscfg_local_file
+
+  - name: file not present
+    debug:
+      msg: "{{ _syscfg_local_path }} does not exists, BIOSFW won't be set up on the node"
+    when: not syscfg_local_file.stat.exists
+
+  - name: set up biosfw for the node
+    block:
+    - name: copy local syscfg to remote
+      copy:
+        src: "{{ _syscfg_local_path }}"
+        dest: "{{ _syscfg_remote_path }}"
+    - name: build BIOSFW worker image
+      command: make biosfw
+      args:
+        chdir: "{{ _git_repo_dest }}"
+    when: syscfg_local_file.stat.exists
+  when: not offline_enable

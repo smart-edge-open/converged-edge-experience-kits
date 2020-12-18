@@ -19,3 +19,4 @@
   with_items:
   - "{{ _hddldaemon_container.download_dir }}"
   ignore_errors: yes
+  become: yes

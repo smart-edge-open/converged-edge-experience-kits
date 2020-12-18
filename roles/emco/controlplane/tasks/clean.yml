@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: delete emcoctl binary in go path
+  file:
+    path: /root/go/bin/emcoctl
+    state: absent
+  changed_when: false
+  ignore_errors: yes
+
+- name: cleanup emco helm
+  command: helm uninstall emco-app -n emco
+  args:
+    chdir: "{{ _emco.dest }}/deployments/helm/emcoCI/"
+  changed_when: false
+  ignore_errors: yes
+
+- name: delete emco repo
+  file:
+    path: "{{ _emco.dest }}"
+    state: absent
+  changed_when: false
+  ignore_errors: yes
+
+- name: delete clusters_config used by emco
+  file:
+    path: /opt/clusters_config
+    state: absent
+  changed_when: false
+  ignore_errors: yes
+
+- name: delete resource files used by emco
+  file:
+    path: "/opt/{{ item }}"
+    state: absent
+  with_items:
+    - smtc_cloud_helmchart.tar.gz
+    - smtc_edge_helmchart.tar.gz
+    - smtc_cloud_profile.tar.gz
+    - smtc_edge_profile.tar.gz
+    - sensor-info.json
+  changed_when: false
+  ignore_errors: yes

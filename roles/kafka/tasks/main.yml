@@ -2,7 +2,6 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
-
 - name: check if Strimzi release already exists
   command: helm status strimzi -n kafka
   ignore_errors: yes
@@ -17,9 +16,19 @@
         state: directory
       changed_when: true
 
+    - name: Create URLs for Strimzi packages
+      set_fact:
+        _strimzi_url: "{{ _strimzi_chart_url }}"
+      when: not offline_enable
+
+    - name: Create URLs for Strimzi packages
+      set_fact:
+        _strimzi_url: "{{ 'https://' + hostvars[groups['controller_group'][0]]['ansible_host'] + '/' + _strimzi_tar_name }}"
+      when: offline_enable
+
     - name: download Strimzi Helm chart
       get_url:
-        url: "{{ _strimzi_chart_url }}"
+        url: "{{ _strimzi_url }}"
         dest: "{{ _strimzi_chart_dest }}"
       register: result
       retries: "{{ number_of_retries }}"
@@ -43,7 +52,6 @@
       changed_when: true
   when: get_release_strimzi.rc != 0
 
-
 - name: Kafka Cluster
   block:
     - name: create directory for Kafka persistent volume
@@ -54,7 +62,7 @@
     - name: create temporary directory
       tempfile:
         state: directory
-        prefix: kafka
+        prefix: kafka-
       register: tmp_dir
 
     - name: create directories for persistent volumes
@@ -78,7 +86,7 @@
     - name: copy Kafka cluster definition
       template:
         src: kafka-cluster.yml
-        dest:  "{{ tmp_dir.path }}"
+        dest: "{{ tmp_dir.path }}"
 
     - name: apply definition of Kafka cluster definition
       command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/kafka-cluster.yml"
@@ -87,7 +95,7 @@
     - name: copy EAA Kafka user definition
       template:
         src: eaa-user.yml
-        dest:  "{{ tmp_dir.path }}"
+        dest: "{{ tmp_dir.path }}"
 
     - name: apply definition of EAA Kafka user definition
       command: kubectl apply -n kafka -f "{{ tmp_dir.path }}/eaa-user.yml"

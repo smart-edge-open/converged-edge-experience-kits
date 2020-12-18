@@ -3,6 +3,13 @@
 
 ---
 
+- name: Configure ptp for the single node setup
+  include_tasks: gm_single_node.yml
+  when:
+    (inventory_hostname in groups['ptp_slave_group'] and
+    gm_ip|length > 0 and
+    ptp_port|length > 0)
+
 - name: Configure PTP master
   block:
   - name: Import vars from master
@@ -25,7 +32,7 @@
       state: present
 
   - name: Start slave port towards PTP master
-    command: ./ptp4l -f ./configs/default_slave.cfg -2 -i {{ ptp_port }} -m
+    command: ./ptp4l -f ./configs/default_slave.cfg {{ ptp_network_transport }} -i {{ ptp_port }} -m
     args:
       chdir: "{{ _linuxptp_git_repo.download_dir }}"
     async: "{{ async_time }}"

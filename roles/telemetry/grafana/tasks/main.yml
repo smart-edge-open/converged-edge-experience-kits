@@ -70,6 +70,7 @@
   - name: add default Helm repository
     command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
     changed_when: true
+    when: not offline_enable
 
   - name: create Grafana chart template directory
     file:
@@ -86,6 +87,11 @@
       name: "{{ _grafana_chart_dir }}/files"
       state: directory
     changed_when: true
+
+  - name: reset _grafana_chart_url under offline mode
+    set_fact:
+      _grafana_chart_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/grafana"
+    when: offline_enable
 
   - name: download Grafana chart
     get_url:

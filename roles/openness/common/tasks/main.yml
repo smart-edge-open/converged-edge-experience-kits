@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: enable or disable certificate signer/requester
+  set_fact:
+    cert_enabled: "{{ (eaa_enable or dns_enable or ('kubeovn' in kubernetes_cnis)) | bool }}"

@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+{{- if not (or (eq .Values.device "FPGA") (eq .Values.device "ACC100")) -}}
+{{- fail "Invalid device type" -}}
+{{- end -}}
+{{- $config := ternary .Values.fpgaConfig .Values.acc100Config (eq .Values.device "FPGA") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-{{ .Values.nodeName }}"
+spec:
+  template:
+    metadata:
+    spec:
+      containers:
+      - securityContext:
+          privileged: true
+        name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        command: [ "sudo", "/bin/bash", "-c", "--" ]
+        args: [ "./pf_bb_config {{ $config.networkType }} -c /home/bb_config/accelerator/{{ $config.configFileName }}" ]
+        volumeMounts:
+        - name: class
+          mountPath: /sys/devices
+          readOnly: false
+        - name: config-volume
+          mountPath: /home/bb_config/accelerator
+          readOnly: true
+      volumes:
+      - hostPath:
+          path: "/sys/devices"
+        name: class
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}
+          items:
+          - key: {{ $config.configFileName }}
+            path: {{ $config.configFileName }}
+      restartPolicy: "{{ .Values.restartPolicy }}"
+      nodeSelector:
+        kubernetes.io/hostname: "{{ .Values.nodeName }}"

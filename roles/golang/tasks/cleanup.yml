@@ -10,6 +10,7 @@
   with_items:
   - /usr/local/go
   - /root/go
+  become: yes
 
 - name: remove exports from /etc/profile
   lineinfile:
@@ -20,3 +21,4 @@
   - "export GOROOT=/usr/local/go"
   - "export GOPATH=~/go"
   - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"
+  become: yes

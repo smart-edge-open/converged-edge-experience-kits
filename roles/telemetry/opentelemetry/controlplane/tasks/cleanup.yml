@@ -15,4 +15,3 @@
   command: "helm uninstall otel-collector --namespace telemetry"
   changed_when: true
   ignore_errors: yes
-

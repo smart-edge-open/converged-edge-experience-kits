@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+ - name: Disable local yum repo
+   file:
+     path: "{{ _repos_path }}/local.repo"
+     state: absent
+   changed_when: false
+   become: yes
+   ignore_errors: yes
+
+ - name: Reset origin files
+   shell: |
+     files=$(ls /etc/yum.repos.d)
+     for file in $files
+     do
+       name=$(echo $file | grep -E "*.repo.bak$")
+       if [ ! -z "$name" ];then
+         mv /etc/yum.repos.d/$file /etc/yum.repos.d/${name::-4}
+       fi
+     done
+   ignore_errors: yes
+   changed_when: false
+   become: yes

@@ -4,7 +4,7 @@
 ## Custom FlexRAN flavor configuration
 # CPUs to be isolated (for RT procesess)
 cpu_isol: "2-23,26-47"
-# CPUs not to be isolate (for non-RT processes) - minimum of two OS cores necessary for controller
+# CPUs not to be isolated (for non-RT processes) - minimum of two OS cores necessary for controller - adjust according to CPU model, HT enabled/disabled
 cpu_os: "0-1,24-25"
 
 ## Kernel configuration
@@ -14,7 +14,13 @@ cpu_os: "0-1,24-25"
 kernel_skip: false
 
 # Version of the kernel.
-kernel_version: 3.10.0-1062.12.1.rt56.1042.el7.x86_64
+kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
+
+## Tuned configuration
+## Skip tuned configuration
+## If true, tuned will not be configured
+## If false, tuned_packages will be installed, tuned_profile will be applied with tuned_vars
+tuned_skip: true
 
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)

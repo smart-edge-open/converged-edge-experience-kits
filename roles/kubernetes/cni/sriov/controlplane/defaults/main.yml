@@ -16,6 +16,7 @@ _sriov_dev_plugin:
   commit: "4e0302aeb4812844524005686b74175d8b0fc515"
 
 fpga_sriov_userspace_enable: false
+acc100_sriov_userspace_enable: false
 
 # VM support
 sriov_kubevirt_enable: false

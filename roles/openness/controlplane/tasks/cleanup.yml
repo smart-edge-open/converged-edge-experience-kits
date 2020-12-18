@@ -2,16 +2,15 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: get worker node name
   block:
-  - name: hostname
-    command: hostname
-    register: hostname_output
+    - name: hostname
+      command: hostname
+      register: hostname_output
 
-  - name: set k8s worker node name
-    set_fact:
-      k8s_worker_node_name: "{{ hostname_output.stdout | lower }}"
+    - name: set k8s worker node name
+      set_fact:
+        k8s_worker_node_name: "{{ ansible_nodename | lower }}"
 
 - name: remove openness definitions
   command: kubectl delete -f {{ item }}
@@ -22,8 +21,14 @@
 - name: remove secrets (root CA and certgen)
   command: kubectl delete secret {{ item }} --namespace=openness
   with_items:
-  - certgen
-  - root-ca
+    - certgen
+    - root-ca
+    - ca-certrequester
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove Certificate Requester secret
+  command: kubectl delete secret ca-certrequester
   ignore_errors: yes
   changed_when: true
 
@@ -37,18 +42,21 @@
     path: "{{ item }}"
     state: absent
   with_items:
-  - "{{ _certs_dest }}/client/interfaceservice"
-  - "{{ _certs_dest }}/client/edgeclient"
-  - "{{ _certs_dest }}/CA"
-  - "{{ _certs_dest }}"
-  - "/etc/openness"
+    - "{{ _certs_dest }}/client/interfaceservice"
+    - "{{ _certs_dest }}/client/edgeclient"
+    - "{{ _certs_dest }}/CA"
+    - "{{ _certs_dest }}"
+    - "{{ openness_dir }}"
+  become: yes
 
 - name: remove kubectl plugins
   file:
     path: "{{ item }}"
     state: absent
   with_items:
-  - "/usr/local/bin/edgednscli"
-  - "/usr/local/bin/kubectl-edgedns"
-  - "/usr/local/bin/interfaceservicecli"
-  - "/usr/local/bin/kubectl-interfaceservice"
+    - "/usr/local/bin/edgednscli"
+    - "/usr/local/bin/kubectl-edgedns"
+    - "/usr/local/bin/interfaceservicecli"
+    - "/usr/local/bin/kubectl-interfaceservice"
+  become: yes
+

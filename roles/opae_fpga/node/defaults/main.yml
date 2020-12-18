@@ -3,7 +3,6 @@
 
 ---
 
-_opae_local_path_stp: "./opae_fpga/n3000-1-3-5-beta-rte-setup.zip"
-_opae_local_path_cfg: "./opae_fpga/n3000-1-3-5-beta-cfg-2x2x25g-setup.zip"
+_opae_local_path_stp: "./opae_fpga/OPAE_SDK_1.3.7-5_el7.zip"
 _opae_remote_path: "{{ _git_repo_dest }}/build/fpga_opae/"
 _vran_image_dir: "/temp/vran_images/"

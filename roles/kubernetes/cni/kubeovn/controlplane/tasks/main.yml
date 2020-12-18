@@ -2,40 +2,10 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
-- name: check if packages installed in proper version
-  shell: rpm -q openvswitch ovn ovn-common | grep {{ _ovn_version.main }}-{{ _ovn_version.subversion }} | wc -l # noqa 306
-  args:
-    warn: false
-  register: rpm_grep
-  changed_when: false
-
-- name: (re)install openvswitch tools if needed
-  block:
-  - name: remove old packages
-    yum:
-      name: "{{ _ovn_packages_to_remove }}"
-      state: absent
-  - name: install OVN tools dependencies
-    yum:
-      name: "{{ _ovn_packages_yum }}"
-      state: installed
-      update_cache: yes
-      allow_downgrade: true
-      validate_certs: no
-  - name: download OVN tools
-    command: "yum install --downloadonly -y {{ _ovn_packages_urls | join(' ') }}"
-    args:
-      warn: false
-    register: result
-    retries: "{{ number_of_retries }}"
-    until: result is succeeded
-    delay: "{{ retry_delay }}"
-  - name: install OVN tools
-    command: "yum install -y {{ _ovn_packages_urls | join(' ') }}"
-    args:
-      warn: false
-  when: "'3' not in rpm_grep.stdout"
+- name: include dpdk role
+  include_role:
+    name: dpdk
+  when: kubeovn_dpdk and single_node_deployment | default(false)
 
 - name: open kube-ovn firewall rules
   ignore_errors: yes
@@ -45,114 +15,50 @@
     state: enabled
     immediate: yes
   with_items:
-  - 6641/tcp
-  - 6642/tcp
-  - 6081/udp
+    - 6641/tcp
+    - 6642/tcp
+    - 6081/udp
 
-- name: apply kube-ovn/role=master label to master node
-  command: "kubectl label node {{ node_name }} kube-ovn/role=master --overwrite"
-  changed_when: true
-
-- name: create temp dir
-  tempfile:
-    state: directory
-    suffix: -kube-ovn
-  register: tmp_dir
-
-- name: download kube-ovn yaml files
-  get_url:
-    url: "{{ item }}"
-    dest: "{{ tmp_dir.path }}"
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  with_items: "{{ _kubeovn_yamls }}"
-
-- name: remove kube-ovn-pinger from kube-ovn.yaml
+- name: install kubeovn
   block:
-    - name: split kube-ovn.yaml into separate resource files(one YAML document per file)
-      shell: csplit -z -f kube-ovn -b "%04d.yaml" kube-ovn.yaml '/^---$/' '{*}'
-      args:
-        chdir: "{{ tmp_dir.path }}"
-    - name: remove all files that contain 'kube-ovn-pinger'(including kube-ovn.yaml)
-      shell: grep -l 'kube-ovn-pinger' kube-ovn* | xargs rm # noqa 306
-      args:
-        chdir: "{{ tmp_dir.path }}"
-    - name: merge files
-      shell: cat kube-ovn000* > kube-ovn.yaml
-      args:
-        chdir: "{{ tmp_dir.path }}"
+    - name: Creates kubeovn directory
+      file:
+        path: "{{ _kubeovn_destdir }}"
+        state: directory
 
-- name: customize ovn-central's command and ovn images
-  block:
-    - name: copy kustomization
+    - name: download kubeovn files
+      get_url:
+        url: "{{ item }}"
+        dest: "{{ _kubeovn_destdir }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      with_items: "{{ _kubeovn_download_files }}"
+
+    - name: create patch file for install.sh from template
       template:
-        src: kustomization_ovn.yaml.j2
-        dest: "{{ tmp_dir.path }}/kustomization.yaml"
-    - name: copy ovn_central kustomization file
-      copy:
-        src: ovn_central.yaml
-        dest: "{{ tmp_dir.path }}/ovn_central.yaml"
-    - name: kustomize ovn.yaml
-      shell: kubectl kustomize . > ovn-customized.yaml
-      args:
-        chdir: "{{ tmp_dir.path }}"
-    - name: rename ovn-customized.yaml to ovn.yaml
-      copy:
-        src: "{{ tmp_dir.path }}/ovn-customized.yaml"
-        dest: "{{ tmp_dir.path }}/ovn.yaml"
+        src: "{{ _kubeovn_install_patch_file }}.j2"
+        dest: "{{ _kubeovn_destdir }}/{{ _kubeovn_install_patch_file }}"
+
+    - name: apply patch for install.sh
+      patch:
+        src: "{{ _kubeovn_destdir }}/{{ _kubeovn_install_patch_file }}"
+        dest: "{{ _kubeovn_destdir }}/install.sh"
+        basedir: "{{ _kubeovn_destdir }}"
         remote_src: yes
 
-- name: customize kube-ovn images
-  block:
-    - name: copy kustomization
-      template:
-        src: kustomization_kube_ovn.yaml.j2
-        dest: "{{ tmp_dir.path }}/kustomization.yaml"
-    - name: kustomize kube-ovn.yaml
-      shell: kubectl kustomize . > kube-ovn-customized.yaml
+    - name: install kube-ovn with DPDK support
+      command: bash install.sh --with-dpdk=19.11
       args:
-        chdir: "{{ tmp_dir.path }}"
-    - name: rename kube-ovn-customized.yaml to kube-ovn.yaml
-      copy:
-        src: "{{ tmp_dir.path }}/kube-ovn-customized.yaml"
-        dest: "{{ tmp_dir.path }}/kube-ovn.yaml"
-        remote_src: yes
+        chdir: "{{ _kubeovn_destdir }}"
+      when: kubeovn_dpdk
 
-- name: enable DPDK support
-  block:
-    - name: create kustomization.yaml
-      copy:
-        src: kustomization.yaml
-        dest: "{{ tmp_dir.path }}/kustomization.yaml"
-    - name: create enable_dpdk.yaml
-      template:
-        src: enable_dpdk.yaml.j2
-        dest: "{{ tmp_dir.path }}/enable_dpdk.yaml"
-    - name: kustomize ovn.yaml
-      shell: kubectl kustomize . > ovn-dpdk.yaml
+    - name: install kube-ovn
+      command: bash install.sh
       args:
-        chdir: "{{ tmp_dir.path }}"
-    - name: rename ovn-dpdk.yaml to ovn.yaml
-      copy:
-        src: "{{ tmp_dir.path }}/ovn-dpdk.yaml"
-        dest: "{{ tmp_dir.path }}/ovn.yaml"
-        remote_src: yes
-  when: kubeovn_dpdk
-
-- name: apply kube-ovn
-  command: "kubectl apply -f {{ item.split('/')[-1] }}"
-  with_items: "{{ _kubeovn_yamls }}"
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: true
-
-- name: remove temp directory
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
+        chdir: "{{ _kubeovn_destdir }}"
+      when: not kubeovn_dpdk
 
 - name: Wait till k8s master starts
   shell: >
@@ -168,66 +74,67 @@
 - name: create temp crd_local.yml
   template:
     src: crd_local.yml.j2
-    dest: "{{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+    dest: "{{ openness_dir }}/crd_local.yml"
 
 - name: apply CRD defining local subnet
-  command: "kubectl apply -f {{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+  command: "kubectl apply -f {{ openness_dir }}/crd_local.yml"
   changed_when: true
   when: groups['edgenode_group'] | length > 0
 
 - name: remove temp crd_local.yml
   file:
-    path: "{{ _git_repo_dest }}/network-edge/kube-ovn/crd_local.yml"
+    path: "{{ openness_dir }}/crd_local.yml"
     state: absent
 
 - name: wait for OVS & OVN databases
   block:
-  - name: wait for running ovs-ovn & ovn-central pods
-    shell: >
-      set -o pipefail &&
-      kubectl get pods -n kube-system
-      -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
-      --field-selector spec.nodeName={{ node_name }} | grep -E "ovs-ovn|ovn-central"
-    register: kubeovn_pods
-    retries: 30
-    delay: 30
-    until:
-    - kubeovn_pods.stdout_lines | length == 2
-    - kubeovn_pods.stdout_lines[0].find("Running") != -1
-    - kubeovn_pods.stdout_lines[1].find("Running") != -1
-    changed_when: false
+    - name: wait for running ovs-ovn & ovn-central pods
+      shell: >
+        set -o pipefail &&
+        kubectl get pods -n kube-system
+        -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers
+        --field-selector spec.nodeName={{ node_name }} | grep -E "ovs-ovn|ovn-central"
+      register: kubeovn_pods
+      retries: 30
+      delay: 30
+      until:
+        - kubeovn_pods.stdout_lines | length == 2
+        - kubeovn_pods.stdout_lines[0].find("Running") != -1
+        - kubeovn_pods.stdout_lines[1].find("Running") != -1
+      changed_when: false
 
-  - name: waiting for OVS DB socket
-    wait_for:
-      path: /var/run/openvswitch/db.sock
-      timeout: 300
+    - name: waiting for OVS DB socket
+      wait_for:
+        path: /run/openvswitch/db.sock #/var/run/openvswitch/db.sock
+        timeout: 300
   rescue:
-  - name: events of ovs-ovn & ovn-central pods
-    shell: >
-      set -o pipefail &&
-      kubectl describe pod -n kube-system $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name | grep {{ item }}) |
-      sed -n '/^Events:/,//p'
-    changed_when: false
-    ignore_errors: true
-    with_items:
-    - ovs-ovn
-    - ovn-central
-  - name: try to get ovs-ovn execution logs
-    shell: >
-      set -o pipefail &&
-      kubectl logs -n kube-system $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name | grep {{ item }})
-    changed_when: false
-    ignore_errors: true
-    with_items:
-    - ovs-ovn
-    - ovn-central
-  - name: end the playbook
-    fail:
-      msg: "end the playbook: either ovs-ovn or ovn-central pod did not start or the socket was not created"
+    - name: events of ovs-ovn & ovn-central pods
+      shell: >
+        set -o pipefail &&
+        kubectl describe pod -n kube-system $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name | grep {{ item }}) |
+        sed -n '/^Events:/,//p'
+      changed_when: false
+      ignore_errors: true
+      with_items:
+        - ovs-ovn
+        - ovn-central
+    - name: try to get ovs-ovn execution logs
+      shell: >
+        set -o pipefail &&
+        kubectl logs -n kube-system $(kubectl get pods -n kube-system -o custom-columns=NAME:.metadata.name | grep {{ item }})
+      changed_when: false
+      ignore_errors: true
+      with_items:
+        - ovs-ovn
+        - ovn-central
+    - name: end the playbook
+      fail:
+        msg: "end the playbook: either ovs-ovn or ovn-central pod did not start or the socket was not created"
 
 - name: add local-ovs-phy port to local switch
   command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
   register: result
+  become: yes
   until: not result.failed
   retries: 20
   delay: 30
@@ -240,17 +147,20 @@
     ovn-nbctl lsp-set-addresses "{{ item }}"-ovs-phy unknown
     ovn-nbctl lsp-set-type "{{ item }}"-ovs-phy localnet
     ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
+  become: yes
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
   when: groups['edgenode_group'] | length > 0
 
-- name: configure OVS
+- name: configure OVS for single node deployment
   shell: |
-    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
+    ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ item }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
   register: result
+  become: yes
   until: not result.failed
   retries: 5
   delay: 60
   changed_when: true
+  with_items: "{{ groups['edgenode_group'] }}"
   when: single_node_deployment | default(false)

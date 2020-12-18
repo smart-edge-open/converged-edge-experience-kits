@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+{{- if (eq .Values.device "ACC100") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}"
+{{- with .Values.acc100Config }}
+data:
+  "{{ .configFileName }}": |
+    [MODE]
+    pf_mode_en = {{ .pf_mode_en }}
+
+    [VFBUNDLES]
+    num_vf_bundles = {{ .num_vf_bundles }}
+
+    [MAXQSIZE]
+    max_queue_size = {{ .max_queue_size }}
+
+    [QUL4G]
+    num_qgroups = {{ .queues4G.ul.num_qgroups }}
+    num_aqs_per_groups = {{ .queues4G.ul.num_aqs_per_groups }}
+    aq_depth_log2 = {{ .queues4G.ul.aq_depth_log2 }}
+
+    [QDL4G]
+    num_qgroups = {{ .queues4G.dl.num_qgroups }}
+    num_aqs_per_groups = {{ .queues4G.dl.num_aqs_per_groups }}
+    aq_depth_log2 = {{ .queues4G.dl.aq_depth_log2 }}
+
+    [QUL5G]
+    num_qgroups = {{ .queues5G.ul.num_qgroups }}
+    num_aqs_per_groups = {{ .queues5G.ul.num_aqs_per_groups }}
+    aq_depth_log2 = {{ .queues5G.ul.aq_depth_log2 }}
+
+    [QDL5G]
+    num_qgroups = {{ .queues5G.dl.num_qgroups }}
+    num_aqs_per_groups = {{ .queues5G.dl.num_aqs_per_groups }}
+    aq_depth_log2 = {{ .queues5G.dl.aq_depth_log2 }}
+{{- end}}
+{{- end}}

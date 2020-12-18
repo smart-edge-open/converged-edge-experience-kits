@@ -6,10 +6,10 @@
 # CNIs are applied in order of definition
 # Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
 # Available CNIs:
-# - kubeovn (note: must be main/primary/first CNI),
+# - kubeovn (note: if the kubeovn CNI is used, then it must be main/primary CNI, i.e. first on the list)
 # - weavenet
 # - flannel
-# - calico
+# - calico (note: note: if the calico CNI is used, then it must be main/primary CNI, i.e. first on the list)
 # - sriov (note: cannot be main or standalone)
 # - userspace (note: cannot be main or standalone)
 # NOTE - For VCAC-A setup, use `weavenet` CNI
@@ -22,6 +22,7 @@ calico_cidr: "10.243.0.0/16"
 ### SR-IOV CNI
 # FPGA SRIOV Userspace
 fpga_sriov_userspace_enable: true
+acc100_sriov_userspace_enable: false
 
 # FPGA Userspace VF configuration
 fpga_userspace_vf:
@@ -29,6 +30,14 @@ fpga_userspace_vf:
   vendor_id: "8086"
   vf_device_id: "0d90"
   pf_device_id: "0d8f"
+  vf_number: "2"
+  vf_driver: "vfio-pci"
+
+acc100_userspace_vf:
+  enabled: false
+  vendor_id: "8086"
+  vf_device_id: "0d5d"
+  pf_device_id: "0d5c"
   vf_number: "2"
   vf_driver: "vfio-pci"
 
@@ -44,8 +53,8 @@ ne_biosfw_enable: true
 cpu:
   # CPU policy - possible values: none (disabled), static (default)
   policy: "static"
-  # Reserved CPUs
-  reserved_cpus: 1
+  # Reserved CPUs for K8s and OS daemons - list of reserved CPUs - adjust according to CPU model, HT enabled/disabled and Single Node enabled/disabled
+  reserved_cpus: "0,24"
 
 # Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
 topology_manager:
@@ -56,7 +65,7 @@ ne_nfd_enable: True
 
 ###Telemetry
 ## Network Edge Processor Counter Monitor (PCM)
-telemetry_pcm_enable: true
+telemetry_pcm_enable: false
 
 ## Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
 telemetry_flavor: flexran
@@ -67,3 +76,9 @@ telemetry_grafana_enable: True
 ###RMD
 rmd_operator_enable: True
 
+##Path to offline download
+_offline_package_path: "/opt/opcdownloads"
+
+offline_tuned_packages:
+  - tuned-2.11.0-8.el7
+  - tuned-profiles-realtime-2.11.0-8.el7

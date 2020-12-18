@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: include common vars
+  include_vars: ../defaults/main.yml
+
+- name: delete the RMD temporary directory
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ _rmd_main_dir }}"
+  ignore_errors: yes
+  become: yes

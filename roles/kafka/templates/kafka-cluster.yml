@@ -14,6 +14,10 @@ spec:
         securityContext:
           runAsUser: 0
           fsGroup: 0
+        tolerations:
+          - effect: NoSchedule
+            key: cmk
+            operator: Exists
     replicas: 1
     listeners:
       tls:
@@ -38,6 +42,10 @@ spec:
           securityContext:
             runAsUser: 0
             fsGroup: 0
+          tolerations:
+            - effect: NoSchedule
+              key: cmk
+              operator: Exists
     replicas: 1
     storage:
       type: persistent-claim
@@ -48,3 +56,9 @@ spec:
   entityOperator:
     topicOperator: {}
     userOperator: {}
+    template:
+      pod:
+        tolerations:
+          - effect: NoSchedule
+            key: cmk
+            operator: Exists

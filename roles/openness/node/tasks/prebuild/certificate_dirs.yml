@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: create openness certificate directories
+  file:
+    path: "{{ item.dir }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: 1001
+  with_items:
+    - {dir: "{{ _certs_dest }}/eaa", owner: 1005}
+    - {dir: "{{ _certs_dest }}/edgedns", owner: 1006}
+    - {dir: "{{ _certs_dest }}/interfaceservice", owner: 1007}
+  become: yes

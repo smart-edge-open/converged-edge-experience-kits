@@ -3,5 +3,7 @@
 
 ---
 
+- include_tasks: ../../common/tasks/main.yml
+- include_tasks: fact.yml
 - include_tasks: prebuild.yml
 - include_tasks: build.yml

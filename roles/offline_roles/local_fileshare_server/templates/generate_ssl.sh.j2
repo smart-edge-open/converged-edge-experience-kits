@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+#!/bin/bash
+/usr/bin/expect <<-EOF
+  spawn openssl genrsa -des3 -out pass.key 2048
+
+  expect {
+    "Enter pass phrase for pass.key:" { send "1234\r" }
+  }
+  expect {
+    "Verifying - Enter pass phrase for pass.key:" { send "1234\r" }
+  }
+  expect eof
+EOF
+
+
+/usr/bin/expect <<-EOF
+  spawn openssl rsa -in pass.key -out localhost.key
+
+  expect {
+    "Enter pass phrase for pass.key:" { send "1234\r" }
+  }
+  expect eof
+EOF
+
+openssl req -new -key localhost.key -out localhost.csr -subj "/CN=$1"
+
+openssl x509 -req -days 365 -in localhost.csr -signkey localhost.key -out localhost.crt
+
+echo Done!!!

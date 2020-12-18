@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+ - name: Close common firewall ports
+   firewalld:
+     port: "{{ item }}"
+     permanent: yes
+     state: disabled
+   with_items:
+     - 443/tcp
+   ignore_errors: yes
+   become: yes
+
+ - name: Remove packages from http services
+   file:
+     path: "{{ _http_server_path }}"
+     state: absent
+   become: yes
+
+ - name: Get docker images name
+   command: docker ps -aq
+   changed_when: false
+   register: docker_names
+   become: yes
+
+ - name: Remove docker images
+   docker_container:
+     name: "{{ item }}"
+     state: absent
+   with_items: "{{ docker_names.stdout.split('\n') }}"
+   ignore_errors: yes
+   become: yes
+
+ - name: Uninstall tools
+   yum:
+     name: "{{ item }}"
+     state: absent
+   with_items:
+     - "createrepo"
+     - "httpd"
+   ignore_errors: yes
+   become: yes

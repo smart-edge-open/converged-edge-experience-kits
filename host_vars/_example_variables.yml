@@ -2,22 +2,24 @@
 # Copyright (c) 2020 Intel Corporation
 
 ---
+
 # This file lists variables that user might want to customize per-host.
 # Default values are stored in the specific role's `defaults/main.yml` file.
 # To override variable for specific node, put the variable in the `hosts_vars/inventory_name_of_node.yml` file.
 
 # -- machine_setup
 # --- machine_setup/custom_kernel
-kernel_skip: false # use this variable to disable custom kernel installation for host
+kernel_skip: false  # use this variable to disable custom kernel installation for host
 
-kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7/rt/CentOS-RT.repo
-kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern
+kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo
+kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7.8.2003/os/x86_64/RPM-GPG-KEY-cern
 kernel_package: kernel-rt-kvm
 kernel_devel_package: kernel-rt-devel
-kernel_version: 3.10.0-1062.12.1.rt56.1042.el7.x86_64
+kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
 
 kernel_dependencies_urls: []
 kernel_dependencies_packages: []
+
 
 # --- machine_setup/grub
 hugepage_size: "2M" # Or 1G
@@ -26,20 +28,22 @@ hugepage_amount: "5000"
 default_grub_params: "hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
 additional_grub_params: ""
 
+
 # --- machine_setup/configure_tuned
-tuned_skip: false # use this variable to skip tuned profile configuration for host
+tuned_skip: false   # use this variable to skip tuned profile configuration for host
 tuned_packages:
-  - http://linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages/tuned-2.11.0-9.el7.noarch.rpm
-  - http://linuxsoft.cern.ch/scientific/7x/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm
+- tuned-2.11.0-8.el7
+- http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
 tuned_profile: realtime
 tuned_vars: |
   isolated_cores=2-3
   nohz=on
   nohz_full=2-3
 
+
 # -- dpdk
 # provide a package / URL to kernel-devel package
-dpdk_kernel_devel: http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm
+dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
 
 # -- sriov_device_init
 sriov:

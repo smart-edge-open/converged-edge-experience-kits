@@ -2,12 +2,12 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: install libvirt
   yum:
     name: "{{ _libvirt_packages }}"
     state: present
     skip_broken: yes
+  become: yes
 
 - name: enable and restart libvirtd service
   systemd:
@@ -15,3 +15,4 @@
     state: restarted
     enabled: yes
     masked: no
+  become: yes

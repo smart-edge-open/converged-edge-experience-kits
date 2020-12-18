@@ -12,6 +12,7 @@
     immediate: yes
   with_items:
   - 6783/tcp
+  - 6784/tcp
   - 6783/udp
   - 6784/udp
 

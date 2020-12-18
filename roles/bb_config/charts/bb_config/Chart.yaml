@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+apiVersion: v2
+name: bb_config
+description: A Helm chart for programming Baseband FEC queues via BBDEV application
+type: application
+version: 0.1.0
+appVersion: 0.1.0

@@ -10,8 +10,8 @@
   delegate_to: "{{ groups['controller_group'][0] }}"
   changed_when: false
 
-- name: include docker registry vars
-  include_vars: ../../../docker_registry/controlplane/defaults/main.yml
+- name: include Harbor registry vars
+  include_vars: ../../../harbor_registry/controlplane/defaults/main.yml
 
 # CMK deployment is called on Controller after node is ready
 - name: deploy CMK with Helm chart

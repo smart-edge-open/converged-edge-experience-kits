@@ -5,7 +5,7 @@
 
 _video_analytics_serving:
   repo: "https://github.com/intel/video-analytics-serving"
-  commit: "v0.3.0-alpha"
+  commit: "v0.3.1.1-alpha"
   dest: "/opt/video-analytics-serving"
 
 _va_serving:
@@ -24,3 +24,9 @@ _vas_helmChartVersion: 0.1.0
 _frameworks:
   - { name: ffmpeg, image: openvisualcloud/xeon-ubuntu1804-analytics-ffmpeg }
   - { name: gstreamer, image: openvisualcloud/xeon-ubuntu1804-analytics-gst }
+
+# instances names for vas multiinstances
+_instances:
+  - { name: "instance1", weight: 50 }
+  - { name: "instance2", weight: 30 }
+  - { name: "instance3", weight: 20 }

@@ -3,38 +3,10 @@
 
 ---
 
-_kubeovn_version: v1.0.1
+_kubeovn_scripts:
+- ovs-vsctl
+- ovn-nbctl
 
-_ovn_version:
-  main: "2.12.0"
-  subversion: "5"
+_kubeovn_scripts_dest: /usr/local/bin
 
-_kubeovn_raw_file_repo: https://raw.githubusercontent.com/alauda/kube-ovn
-_kubeovn_destdir: /tmp/kube-ovn
-
-_kubeovn_cleanup_paths:
-- /var/run/openvswitch
-- /etc/origin/openvswitch/
-- /etc/openvswitch
-- /etc/cni/net.d/00-kube-ovn.conflist
-
-_kubeovn_download_files:
-- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/Dockerfile.node"
-- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/start-ovs.sh"
-- "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/ovs-healthcheck.sh"
-
-_kubeovn_dockerimage_files_to_cp:
-- Dockerfile.dpdk
-- start-ovs-dpdk.sh
-- ovs-healthcheck.sh
-
-kubeovn_dpdk: true
-kubeovn_dpdk_socket_mem: "1024,0"
-kubeovn_dpdk_pmd_cpu_mask: "0x4"
-kubeovn_dpdk_lcore_mask: "0x2"
-kubeovn_dpdk_hugepage_size: "2Mi"
-kubeovn_dpdk_hugepages: "1Gi"
-kubeovn_dpdk_resources_requests: "1Gi"
-kubeovn_dpdk_resources_limits: "1Gi"
-
-_ovs_dpdk_patch_file: "start_ovs_dpdk_v1.0.1.patch"
+_kubeovn_ovs_config_path: /opt/ovs-config

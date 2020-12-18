@@ -1,5 +1,5 @@
---- custom-metrics-apiserver-deployment.yaml	2020-06-17 16:47:05.931000000 +0200
-+++ custom-metrics-apiserver-deployment.yaml.new	2020-06-19 12:41:52.857000000 +0200
+--- custom-metrics-apiserver-deployment.yaml    2020-10-30 11:32:21.968000000 +0100
++++ custom-metrics-apiserver-deployment.yaml.new        2020-10-30 11:31:59.292000000 +0100
 @@ -4,7 +4,7 @@
    labels:
      app: custom-metrics-apiserver
@@ -9,19 +9,25 @@
  spec:
    replicas: 1
    selector:
-@@ -16,6 +16,11 @@
+@@ -16,16 +16,25 @@
          app: custom-metrics-apiserver
        name: custom-metrics-apiserver
      spec:
 +      tolerations:
 +        - effect: NoSchedule
 +          key: node-role.kubernetes.io/master
++        - effect: NoSchedule
++          key: cmk
++          operator: Exists
 +      nodeSelector:
 +        node-role.kubernetes.io/master: ""
        serviceAccountName: custom-metrics-apiserver
        containers:
        - name: custom-metrics-apiserver
-@@ -25,7 +30,8 @@
+-        image: directxman12/k8s-prometheus-adapter-amd64
++        image: directxman12/k8s-prometheus-adapter-amd64:v0.7.0
+         args:
+         - --secure-port=6443
          - --tls-cert-file=/var/run/serving-cert/tls.crt
          - --tls-private-key-file=/var/run/serving-cert/tls.key
          - --logtostderr=true
@@ -31,7 +37,7 @@
          - --metrics-relist-interval=1m
          - --v=10
          - --config=/etc/adapter/config.yaml
-@@ -40,6 +46,10 @@
+@@ -40,6 +49,10 @@
            readOnly: true
          - mountPath: /tmp
            name: tmp-vol
@@ -42,13 +48,13 @@
        volumes:
        - name: volume-serving-cert
          secret:
-@@ -49,3 +59,9 @@
+@@ -49,3 +62,9 @@
            name: adapter-config
        - name: tmp-vol
          emptyDir: {}
 +      - name: tls-config
 +        hostPath:
-+          path: /etc/openness/certs/telemetry/tas-adapter
++          path: "/opt/openness/certs/telemetry/tas-adapter"
 +      - name: ca
 +        secret:
 +          secretName: root-ca

@@ -7,6 +7,9 @@ _qemu_version: "4.0.0"
 _qemu_targets: "x86_64-softmmu"
 
 _qemu_name: "qemu-{{ _qemu_version }}"
-_qemu_download_url: "http://download.qemu.org/{{ _qemu_name }}.tar.xz"
+_qemu_download_url: "https://download.qemu.org/{{ _qemu_name }}.tar.xz"
 _qemu_download_dest: "/tmp/{{ _qemu_name }}.tar.xz"
 _qemu_install_dir: "/opt/{{ _qemu_name }}"
+
+_qemu_download_retries: 20
+_qemu_download_interval: 30

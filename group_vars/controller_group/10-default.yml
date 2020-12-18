@@ -13,15 +13,15 @@
 kernel_skip: true
 
 # URL to the rpm repository with the kernel
-kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7/rt/CentOS-RT.repo
+kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo
 # GPG Key to be used with the repository
-kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7/os/x86_64/RPM-GPG-KEY-cern
+kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7.8.2003/os/x86_64/RPM-GPG-KEY-cern
 # Name of the package with kernel to be installed
 kernel_package: kernel-rt-kvm
 # Name of the kernel's development package
 kernel_devel_package: kernel-rt-devel
 # Version of the kernel.
-kernel_version: 3.10.0-1062.12.1.rt56.1042.el7.x86_64
+kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
 
 ## If kernel requires any additional, it should be placed in following variables
 # List of URL to kernel dependencies
@@ -33,15 +33,15 @@ kernel_dependencies_packages: []
 # URL or package name providing non-realtime `kernel-devel` package when role `custom_kernel` is:
 # - disabled (commented), or
 # - skipped for specific host (`customize_kernel_skip` variable)
-# Default value is valid for Centos 7.6-1810. Variable must be updated accordingly if using other version.
-dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.6.1810/os/x86_64/Packages/kernel-devel-3.10.0-957.el7.x86_64.rpm"
+# Default value is valid for Centos 7.8-2003. Variable must be updated accordingly if using other version.
+dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
 
 ## ebpf
 # URL or package name providing `kernel-ml and kernel-ml-devel` package when role `custom_kernel` is:
 # - disabled (commented), or
 # - skipped for specific host (`customize_kernel_skip` variable)
-# Default value is valid for Centos 7.6-1810. Variable must be updated accordingly if using other version.
-ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm"
+# Default value is valid for Centos 7.8-2003. Variable must be updated accordingly if using other version.
+ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-5.el7.elrepo.noarch.rpm"
 
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
@@ -60,13 +60,13 @@ kubeovn_dpdk_socket_mem: "1024,0"
 # Packages to be installed on the Edge Controller host
 os_yum_base_packages:
   "git2u-all,jq,vim-common,curl,yum-utils,python2-pip,python3,wget,bridge-utils,rsync,\
-  device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch,openssl11"
+  device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch"
 
 ## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
 docker_images: []
 
 git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgenode.git
-_git_repo_dest: /opt/edgenode
+_git_repo_dest: "{{ openness_dir }}/edgenode"
 
 ## Network Edge Helm Charts Storage Default Directory
-ne_helm_charts_default_dir: /opt/openness-helm-charts/
+ne_helm_charts_default_dir: "{{ openness_dir }}/helm-charts"

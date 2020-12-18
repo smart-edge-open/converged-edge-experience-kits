@@ -32,6 +32,11 @@
     _base_noproxy: "{{ _base_noproxy + ',' + flannel_cidr }}"
   when: '"flannel" in kubernetes_cnis'
 
+- name: Adding ovn4nfv CIDR to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + ovn4nfv_cidr }}"
+  when: '"ovn4nfv" in kubernetes_cnis'
+
 - name: Adding istio_noproxy to noproxy
   set_fact:
     _base_noproxy: "{{ _base_noproxy + ',' + istio_noproxy }}"

@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: create config directory
   file:
     path: "{{ _configs_dest }}"
@@ -15,8 +14,12 @@
     directory_mode: yes
     remote_src: yes
   with_items:
-  - appliance.json
-  - eaa.json
+    - appliance.json
+    - eaa.json
+    - certsigner.json
+    - eaa_certrequest.json
+    - edgedns_certrequest.json
+    - interfaceservice_certrequest.json
 
 - name: copy interfaceservice config
   copy:
@@ -28,15 +31,25 @@
 
 - name: customize eaa.json
   block:
-  - name: change validation endpoint for EAA
-    shell: jq '.ValidationEndpoint=""' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
-  - name: change EAA common name
-    shell: jq '.Certs.CommonName="eaa.openness"' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
-  - name: change Kafka URL
-    shell: jq '.KafkaBroker="{{ kafka_cluster }}-kafka-bootstrap.kafka:9093"' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
+    - name: change validation endpoint for EAA
+      shell: jq '.ValidationEndpoint=""' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
+    - name: change EAA common name
+      shell: jq '.Certs.CommonName="eaa.openness"' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
+    - name: change Kafka URL
+      shell: jq '.KafkaBroker="{{ kafka_cluster }}-kafka-bootstrap.kafka:9093"' '{{ _configs_dest }}/eaa.json' | sponge '{{ _configs_dest }}/eaa.json'
+
+- name: customize Certificate Requester configs
+  block:
+    - name: include node name in EdgeDNS CSR name
+      shell: jq '.CSR.Name="edgedns-{{ node_name }}"' '{{ _configs_dest }}/edgedns_certrequest.json' | sponge '{{ _configs_dest }}/edgedns_certrequest.json'
+    - name: include node name in Interfaceservice CSR name
+      shell: >
+        jq '.CSR.Name="interfaceservice-{{ node_name }}"' '{{ _configs_dest }}/interfaceservice_certrequest.json' |
+        sponge '{{ _configs_dest }}/interfaceservice_certrequest.json'
 
 - name: copy logrotate config
   copy:
     src: logrotate_edgenode
     dest: /etc/logrotate.d/edgenode
     remote_src: no
+  become: yes

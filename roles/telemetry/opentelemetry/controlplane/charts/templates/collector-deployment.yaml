@@ -40,6 +40,7 @@ spec:
           - "--mem-ballast-size-mib=683"
           - "--log-level=DEBUG"
         image: {{ .Values.collector.image }}
+        imagePullPolicy: {{ .Values.collector.imagePullPolicy }}
         resources:
           limits:
             cpu: {{ .Values.collector.resources.limits.cpu }}

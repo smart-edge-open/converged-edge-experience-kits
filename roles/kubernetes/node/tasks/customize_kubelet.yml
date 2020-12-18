@@ -2,14 +2,14 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: setting KUBELET_EXTRA_ARGS
   lineinfile:
     path: "{{ _kubernetes_env_file }}"
     regexp: "^KUBELET_EXTRA_ARGS="
     line: "KUBELET_EXTRA_ARGS=--config /usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
+  become: yes
   notify:
-  - enable and restart kubelet
+    - enable and restart kubelet
 
 - name: creating kubelet config
   blockinfile:
@@ -19,6 +19,7 @@
     block: |
       apiVersion: kubelet.config.k8s.io/v1beta1
       kind: KubeletConfiguration
+      cgroupDriver: "systemd"
       KubeletCgroups: "/systemd/system.slice"
       authentication:
         x509:
@@ -29,8 +30,9 @@
       featureGates:
         TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
       podPidsLimit: 2048
+  become: yes
   notify:
-  - enable and restart kubelet
+    - enable and restart kubelet
 
 - name: customize kubelet config - CPU Manager
   blockinfile:
@@ -38,11 +40,11 @@
     marker: "# {mark} OpenNESS configuration - CPU Manager"
     block: |
       cpuManagerPolicy: {{ cpu.policy }}
-      kubeReserved:
-        cpu: "{{ cpu.reserved_cpus }}"
+      reservedSystemCPUs: {{ cpu.reserved_cpus }}
     state: "{{ 'present' if cpu.policy == 'static' else 'absent' }}"
+  become: yes
   notify:
-  - enable and restart kubelet
+    - enable and restart kubelet
 
 - name: customize kubelet config - Topology Manager
   blockinfile:
@@ -51,8 +53,9 @@
     block: |
       topologyManagerPolicy: {{ topology_manager.policy }}
     state: "{{ 'absent' if topology_manager.policy == 'none' else 'present' }}"
+  become: yes
   notify:
-  - enable and restart kubelet
+    - enable and restart kubelet
 
 - name: restart kubelet
   meta: flush_handlers

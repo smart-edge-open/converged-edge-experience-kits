@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+
+# If True, then repository will be deleted and cloned again
+# If False, repository will be left as it is and any changes won't be overwritten.
+# Option mainly for developers.
+always_clean_repository: True

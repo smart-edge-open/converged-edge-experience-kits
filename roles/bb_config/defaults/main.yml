@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_bb_config:
+  image: "bb-config-utility"
+  tag: 0.1.0

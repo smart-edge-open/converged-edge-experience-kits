@@ -2,13 +2,17 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: check if already installed
   stat:
     path: /usr/local/go/bin/go
   register: go_exe_file
 
-- name: download
+- name: Check if offline mode
+  set_fact:
+    _golang_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _golang_download_name }}"
+  when: offline_enable
+
+- name: download golang url {{ _golang_download_url }}
   get_url:
     url: "{{ _golang_download_url }}"
     dest: "{{ _golang_download_dest }}"
@@ -25,6 +29,7 @@
     dest: "/usr/local"
     remote_src: yes
     creates: /usr/local/go/bin/go
+  become: yes
   when: not go_exe_file.stat.exists
 
 - name: add exports to /etc/profile
@@ -32,8 +37,38 @@
     state: present
     dest: /etc/profile
     line: "{{ item }}"
+  become: yes
   with_items:
-  - "export GOROOT=/usr/local/go"
-  - "export GOPATH=~/go"
-  - "export GOPRIVATE=github.com/open-ness"
-  - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"
+    - "export GOROOT=/usr/local/go"
+    - "export GOPATH=~/go"
+    - "export GOPRIVATE=github.com/open-ness"
+    - "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH"
+
+- name: Get offline modules
+  block:
+  - name: create temp directory for gomods
+    tempfile:
+      state: directory
+      suffix: gomods
+    register: gomods_temp_dir
+
+  - name: Download  modules if offline mode
+    get_url:
+      url: "{{ item }}"
+      dest: "{{ gomods_temp_dir.path }}"
+    with_items: "{{ _offline_gomod_url }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+  - name: Create pkg directory
+    file:
+      state: directory
+      path: "{{ _offline_gomod_dest }}"
+
+  - name: Populate go mods
+    unarchive:
+      src: "{{ gomods_temp_dir.path }}/gomod.tar.gz"
+      dest: "{{ _offline_gomod_dest }}"
+      remote_src: yes
+  when: offline_enable | default(False) and ('controller_group' in group_names or single_node_deployment)

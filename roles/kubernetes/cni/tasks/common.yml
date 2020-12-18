@@ -6,7 +6,7 @@
 - block:
   - name: find cni dir
     find:
-      paths: .
+      paths: "{{ _cni_normal_path if not offline_enable else _cni_offline_path }}"
       patterns: "cni"
       recurse: yes
       file_type: directory

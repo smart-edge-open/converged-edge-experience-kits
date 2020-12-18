@@ -2,7 +2,6 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - name: get current kernel
   command: uname -r
   register: unamer
@@ -18,38 +17,44 @@
 
 - name: install kernel-devel package
   block:
-  - name: use kernel-devel-uname-r
-    set_fact:
-      kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
-  - name: use kernel-devel from provided URL/package
-    set_fact:
-      kernel_devel_to_install: "{{ dpdk_kernel_devel }}"
-    when:
-    - dpdk_kernel_devel is defined
-    - dpdk_kernel_devel|length > 0
+    - name: use kernel-devel-uname-r
+      set_fact:
+        kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
+    - name: use kernel-devel from provided URL/package
+      set_fact:
+        kernel_devel_to_install: "{{ dpdk_kernel_devel }}"
+      when:
+        - dpdk_kernel_devel is defined
+        - dpdk_kernel_devel|length > 0
 
-  - name: fail if kernel-devel version is not correct
-    fail:
-      msg: "kernel-devel version({{ kernel_devel_to_install }}) does not match the current kernel({{ unamer.stdout }})"
-    when: 'unamer.stdout not in kernel_devel_to_install'
+    - name: fail if kernel-devel version is not correct
+      fail:
+        msg: "kernel-devel version({{ kernel_devel_to_install }}) does not match the current kernel({{ unamer.stdout }})"
+      when: "unamer.stdout not in kernel_devel_to_install"
 
-  - name: install kernel-devel package
-    yum:
-      name: "{{ kernel_devel_to_install }}"
-      state: present
-      disable_excludes: all
-      allow_downgrade: yes
+    - name: install kernel-devel package
+      yum:
+        name: "{{ kernel_devel_to_install }}"
+        state: present
+        disable_excludes: all
+        allow_downgrade: yes
+      become: yes
   # install kernel-devel package if:
   # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
   # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
   when:
-  - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
-  - yum_list_kernel_devel.rc == 1   # kernel-(rt-)devel is missing
+    - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+    - yum_list_kernel_devel.rc == 1 # kernel-(rt-)devel is missing
 
 - name: check if already installed
   stat:
     path: "{{ _dpdk_install_dir }}"
   register: dpdk_dest_dir
+
+- name: Check if offline
+  set_fact:
+    _dpdk_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _dpdk_name }}.tar.xz"
+  when: offline_enable
 
 - name: download
   get_url:
@@ -88,7 +93,7 @@
 
 - name: remove old dpdk path to compiled DPDK
   file:
-    path: /etc/ansible/facts.d/dpdk.fact
+    path: "{{ openness_dir }}/ansible/facts.d/dpdk.fact"
     state: absent
   when: not igb_uio_module.stat.exists
 
@@ -101,6 +106,7 @@
   yum:
     name: "numactl-devel"
     state: present
+  become: yes
   when: not igb_uio_module.stat.exists
 
 - name: compile
@@ -115,13 +121,13 @@
 
 - name: create Ansible dpdk facts.d folder
   file:
-    path: /etc/ansible/facts.d
+    path: "{{ openness_dir }}/ansible/facts.d"
     state: directory
 
 - name: save dpdk path to local fact file
   template:
     src: dpdk.fact.j2
-    dest: /etc/ansible/facts.d/dpdk.fact
+    dest: "{{ openness_dir }}/ansible/facts.d/dpdk.fact"
 
 - name: copy kernel modules
   copy:
@@ -131,52 +137,68 @@
   with_items:
     - "igb_uio.ko"
     - "rte_kni.ko"
+  become: yes
 
 - name: depmod
   command: depmod -a
   changed_when: true
+  become: yes
 
 - name: copy list of modules to load at boot
   copy:
     src: dpdk.conf
     dest: /etc/modules-load.d/dpdk.conf
+  become: yes
 
 - name: copy list of modules to modprobe at boot
   copy:
     src: dpdk0kni.conf
     dest: /etc/modprobe.d/dpdk0kni.conf
+  become: yes
 
 - name: unload modules
   modprobe:
     name: "{{ item }}"
     state: absent
   with_items:
-  - "igb_uio"
-  - "rte_kni"
-  - "uio_pci_generic"
-  - "uio"
+    - "igb_uio"
+    - "rte_kni"
+    - "uio_pci_generic"
+    - "uio"
+  become: yes
 
 - name: unload vfio
   modprobe:
-    name: vfio
+    name: "{{ item }}"
     state: absent
+  with_items:
+  - "vfio-pci"
+  - "vfio"
   ignore_errors: yes
+  become: yes
 
 - name: load uio and igb_uio modules
   modprobe:
     name: "{{ item }}"
     state: present
   with_items:
-  - "uio"
-  - "igb_uio"
+    - "uio"
+    - "igb_uio"
+  become: yes
 
 - name: load rte_kni module
   modprobe:
     name: "rte_kni"
     state: present
-    params: 'carrier=on'
+    params: "carrier=on"
+  become: yes
 
 - name: load vfio module
   modprobe:
-    name: vfio
+    name: "{{ item }}"
     state: present
+  with_items:
+  - "vfio-pci"
+  - "vfio"
+  ignore_errors: yes
+  become: yes

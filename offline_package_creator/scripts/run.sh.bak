@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+echo $DOCKER_NETRC > /root/.netrc
+git config --global http.proxy $git_proxy
+cd /opt/app
+
+echo "MOD downloading, please wait..."
+mv go.mod go.mod.bak
+
+line=$(grep 'open-ness/common' go.mod.bak)
+cat << EOF > go.mod
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2019-2020 Intel Corporation
+
+module github.com/open-ness/edgenode
+
+go 1.15
+
+require (
+	$line
+)
+EOF
+go mod download
+
+cp -f go.mod.bak go.mod
+sed -i '/open-ness\/common/d' go.mod
+export GOPROXY="https://proxy.golang.org"
+go mod download
+
+mv go.mod.bak go.mod -f
+
+if [ $? -eq 0 ];then
+  echo "1" > /root/.ret
+fi
+
