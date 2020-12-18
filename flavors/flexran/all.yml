@@ -65,7 +65,7 @@ ne_nfd_enable: True
 
 ###Telemetry
 ## Network Edge Processor Counter Monitor (PCM)
-telemetry_pcm_enable: true
+telemetry_pcm_enable: false
 
 ## Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
 telemetry_flavor: flexran
