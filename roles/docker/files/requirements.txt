@@ -36,8 +36,6 @@ PyYAML==3.10
 requests==2.24.0
 schedutils==0.4
 six==1.9.0
-slip==0.4.0
-slip.dbus==0.4.0
 texttable==1.6.3
 urlgrabber==3.10
 urllib3==1.25.11
