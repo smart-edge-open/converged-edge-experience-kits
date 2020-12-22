@@ -166,7 +166,7 @@ pip-packages:
   - name: attrs
     url: 14/df/479736ae1ef59842f512548bacefad1abed705e400212acba43f9b0fa556/attrs-20.2.0-py2.py3-none-any.whl
   - name: pyrsistent
-    url: 4d/70/fd441df751ba8b620e03fd2d2d9ca902103119616f0f6cc42e6405035062/pyrsistent-0.17.3.tar.gz
+    url: 80/18/1492d651693ef7d40e0a40377ed56a8cc5c5fe86073eb6c56e53513f4480/pyrsistent-0.16.1.tar.gz
   - name: setuptools
     url: 6d/38/c21ef5034684ffc0412deefbb07d66678332290c14bb5269c85145fbd55e/setuptools-50.3.2-py3-none-any.whl
   - name: backports.shutil_get_terminal_size
