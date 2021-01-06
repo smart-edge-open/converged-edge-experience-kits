@@ -76,8 +76,11 @@
       ignore_errors: yes
       register: ser_line
     - name: append server line to /etc/hosts
-      command: "ssh {{ vca_node_ip }} echo '{{ ser_line.stdout }}' >> /etc/hosts"
+      shell: >
+        ssh {{ vca_node_ip }} "grep -q '{{ item }}' /etc/hosts" || ssh {{ vca_node_ip }} "echo \"{{ item }}\" >> /etc/hosts"
       become: yes
+      when: "item | length > 0"
+      with_items: "{{ ser_line.stdout_lines }}"
     - name: create `/etc/docker/` folder
       command: "ssh {{ vca_node_ip }} mkdir -p /etc/docker/"
       become: yes
