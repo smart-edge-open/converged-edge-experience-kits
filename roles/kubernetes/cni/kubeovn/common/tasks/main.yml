@@ -13,19 +13,23 @@
       EOF
   with_items: "{{ _kubeovn_scripts }}"
   changed_when: true
+  become: yes
 
 - name: change permissions of ovn/ovs scripts
   file:
     path: "{{ _kubeovn_scripts_dest }}/{{ item }}"
     mode: 0755
   with_items: "{{ _kubeovn_scripts }}"
+  become: yes
 
 - name: create a directory for ovs config
   file:
     path: "{{ _kubeovn_ovs_config_path }}"
     state: directory
+  become: yes
 
 - name: prepare ovs config
   template:
     src: config.cfg.j2
     dest: "{{ _kubeovn_ovs_config_path }}/config.cfg"
+  become: yes

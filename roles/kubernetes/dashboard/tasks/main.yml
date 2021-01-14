@@ -18,6 +18,7 @@
       permanent: yes
       state: enabled
       immediate: yes
+    become: yes
 
   - name: create Kubernetes Dashboard directories
     file:

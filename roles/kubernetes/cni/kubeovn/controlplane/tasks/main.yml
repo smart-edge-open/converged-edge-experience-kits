@@ -18,6 +18,7 @@
     - 6641/tcp
     - 6642/tcp
     - 6081/udp
+  become: yes
 
 - name: install kubeovn
   block:
@@ -53,12 +54,14 @@
       args:
         chdir: "{{ _kubeovn_destdir }}"
       when: kubeovn_dpdk
+      become: yes
 
     - name: install kube-ovn
       command: bash install.sh
       args:
         chdir: "{{ _kubeovn_destdir }}"
       when: not kubeovn_dpdk
+      become: yes
 
 - name: Wait till k8s master starts
   shell: >
@@ -134,7 +137,6 @@
 - name: add local-ovs-phy port to local switch
   command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
   register: result
-  become: yes
   until: not result.failed
   retries: 20
   delay: 30
@@ -147,7 +149,6 @@
     ovn-nbctl lsp-set-addresses "{{ item }}"-ovs-phy unknown
     ovn-nbctl lsp-set-type "{{ item }}"-ovs-phy localnet
     ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
-  become: yes
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
   when: groups['edgenode_group'] | length > 0

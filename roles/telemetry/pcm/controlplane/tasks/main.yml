@@ -26,6 +26,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 - name: check if pcm already exists
   command: helm status pcm --namespace telemetry

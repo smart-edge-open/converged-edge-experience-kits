@@ -9,6 +9,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 - name: patch node's Pod CIDR
   command: kubectl patch node "{{ node_name }}" -p '{ "spec":{ "podCIDR":"{{ flannel_cidr | ipsubnet(24, groups['all'].index(inventory_hostname)) }}" }}'

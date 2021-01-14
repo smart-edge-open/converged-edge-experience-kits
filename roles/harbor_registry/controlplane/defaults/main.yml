@@ -15,7 +15,7 @@ _registry_ip_address: "{{ hostvars[groups['controller_group'][0]]['ansible_host'
 
 _git_repo_harbor: "https://github.com/goharbor/harbor-helm.git"
 _version_harbor: "v1.5.0"
-_git_repo_dest_harbor: "/opt/harbor"
+_git_repo_dest_harbor: "/opt/openness/harbor"
 _disk_dest_harbor: "/opt/disks"
 
 harborAdminPassword: Harbor12345

@@ -46,6 +46,7 @@
     with_items:
     - 319/udp
     - 320/udp
+    become: yes
 
   - name: Reload firewall rules
     command: firewall-cmd --reload

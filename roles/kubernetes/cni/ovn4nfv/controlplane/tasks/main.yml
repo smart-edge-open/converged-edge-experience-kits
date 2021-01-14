@@ -14,6 +14,7 @@
     - 6641/tcp
     - 6642/tcp
     - 6081/udp
+  become: yes
 
 - name: ovn4nfv | Label control-plane node
   command: >-

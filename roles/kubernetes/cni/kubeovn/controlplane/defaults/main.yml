@@ -26,7 +26,7 @@ _ovn_version:
 _kubeovn_dpdk_version: "19.11"
 
 _kubeovn_raw_file_repo: https://raw.githubusercontent.com/alauda/kube-ovn
-_kubeovn_destdir: /opt/kube-ovn
+_kubeovn_destdir: /opt/openness/kube-ovn
 
 _kubeovn_download_files:
   - "{{ _kubeovn_raw_file_repo }}/{{ _kubeovn_version }}/dist/images/install.sh"

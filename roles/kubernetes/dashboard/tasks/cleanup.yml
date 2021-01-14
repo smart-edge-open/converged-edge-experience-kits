@@ -24,6 +24,7 @@
     permanent: yes
     state: disabled
     immediate: yes
+  become: yes
 
 - name: delete chart dir
   file:

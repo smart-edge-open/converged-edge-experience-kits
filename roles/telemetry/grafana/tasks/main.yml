@@ -46,6 +46,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 - name: check if Grafana release already exists
   command: helm status grafana -n telemetry

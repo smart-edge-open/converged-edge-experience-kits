@@ -26,6 +26,7 @@
     permanent: yes
     state: disabled
     immediate: yes
+  become: yes
 
 - name: uninstall prometheus using Helm
   command: "helm uninstall prometheus --namespace telemetry"

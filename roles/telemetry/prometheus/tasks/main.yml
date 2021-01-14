@@ -31,6 +31,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 - name: check if Prometheus release already exists
   command: helm status prometheus -n telemetry

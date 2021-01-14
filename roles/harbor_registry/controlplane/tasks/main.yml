@@ -65,6 +65,7 @@
       - harbor-disk4
       - harbor-disk5
       - harbor-disk6
+    become: yes
 
   - name: copy pv disk.yaml to host
     template:
