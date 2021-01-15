@@ -6,6 +6,7 @@
 # To apply the rules in runtime and save them they are run with and without '--permanent' option
 - name: "[WORKAROUND] add firewall rule for flannel(Source)"
   command: firewall-cmd {{ item }} --direct --add-rule ipv4 filter FORWARD 10 -s {{ flannel_cidr }} -j ACCEPT
+  become: yes
   ignore_errors: yes
   changed_when: true
   with_items:
@@ -14,6 +15,7 @@
 
 - name: "[WORKAROUND] add firewall rule for flannel(Destination)"
   command: firewall-cmd {{ item }} --direct --add-rule ipv4 filter FORWARD 10 -d {{ flannel_cidr }} -j ACCEPT
+  become: yes
   ignore_errors: yes
   changed_when: true
   with_items:
