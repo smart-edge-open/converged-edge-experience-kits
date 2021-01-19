@@ -27,7 +27,7 @@
         state: absent
       become: yes
     - name: obtain the join command
-      command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
+      command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_nodename }} ({{ ansible_host }})"
       register: join_command
       delegate_to: "{{ groups['controller_group'][0] }}"
     - name: join the cluster

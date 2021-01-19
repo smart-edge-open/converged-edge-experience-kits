@@ -23,7 +23,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - {{ hostvars[groups['controller_group'][0]]['ansible_hostname'] }}
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -62,7 +62,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - {{ hostvars[groups['controller_group'][0]]['ansible_hostname'] }}
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -101,7 +101,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - {{ hostvars[groups['controller_group'][0]]['ansible_hostname'] }}
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -140,7 +140,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - {{ hostvars[groups['controller_group'][0]]['ansible_hostname'] }}
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -179,7 +179,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - {{ hostvars[groups['controller_group'][0]]['ansible_hostname'] }}
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -218,7 +218,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - {{ hostvars[groups['controller_group'][0]]['ansible_hostname'] }}
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

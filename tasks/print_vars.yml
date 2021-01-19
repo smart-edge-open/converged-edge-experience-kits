@@ -29,7 +29,7 @@
     msg: |
       ansible ver: {{ ansible_version.string }}
       distro: {{ ansible_distribution }} {{ ansible_distribution_version }}
-      hostname: {{ ansible_hostname }}
+      hostname: {{ ansible_nodename }}
       cmdline: {{ ansible_proc_cmdline }}
       interfaces: {{ ansible_interfaces }}
       memory: {{ ansible_memory_mb }}

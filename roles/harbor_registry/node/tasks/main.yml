@@ -75,7 +75,7 @@
   include_tasks: node_cert.yml
   vars:
     vca_node_ip: "172.32.{{ vca_idx }}.1"
-    cert_cn: "{{ ansible_hostname }}-vca{{ vca_idx }}"
+    cert_cn: "{{ ansible_nodename }}-vca{{ vca_idx }}"
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
