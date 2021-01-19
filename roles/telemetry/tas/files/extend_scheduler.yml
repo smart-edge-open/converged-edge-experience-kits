@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- op: add
+  path: /spec/containers/0/command/-
+  value: --config=/etc/kubernetes/scheduler-config.yml
+- op: add
+  path: /spec/volumes/-
+  value:
+    hostPath:
+      path: /etc/kubernetes/scheduler-config.yml
+      type: File
+    name: config
+- op: add
+  path: /spec/containers/0/volumeMounts/-
+  value:
+    mountPath: /etc/kubernetes/scheduler-config.yml
+    name: config
+    readOnly: true

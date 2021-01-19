@@ -140,26 +140,49 @@
 
 - name: Kubernetes Scheduler Extender
   block:
-  - name: replace TAS service url
-    replace:
-      path: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration/scheduler-extender-configmap.yaml"
-      regexp: 'https://tas-service\.default\.svc\.cluster\.local:9001'
-      replace: "{{ _tas_svc_url }}"
+  - name: copy Scheduler config
+    template:
+      src: "scheduler-config.yml"
+      dest: "/etc/kubernetes/scheduler-config.yml"
 
-  - name: patch Kubernetes Scheduler Extender configuration script
-    patch:
-      src: "configure-scheduler.sh.patch"
-      dest: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration/configure-scheduler.sh"
+  - name: backup Scheduler manifest
+    copy:
+      src: /etc/kubernetes/manifests/kube-scheduler.yaml
+      dest: /etc/kubernetes/manifests/kube-scheduler.yaml_bak
+      remote_src: true
 
-  - name: configure Kubernetes Scheduler Extender
-    command: "bash configure-scheduler.sh {{ _tas_svc_domain }}"
-    register: configure_scheduler_result
-    failed_when: "configure_scheduler_result.rc != 0 or
-                  ('error:' in configure_scheduler_result.stderr and 'already exists' not in configure_scheduler_result.stderr)"
-    changed_when: true
-    args:
-      chdir: "{{ tmp_dir.path }}/tas-repo/deploy/extender-configuration"
-    become: yes
+  - name: copy Scheduler kustomization file
+    copy:
+      src: kustomization_scheduler.yaml
+      dest:  "/etc/kubernetes/manifests/kustomization.yaml"
+
+  - name: copy Scheduler kustomization patch file
+    copy:
+      src: extend_scheduler.yml
+      dest:  "/etc/kubernetes/manifests/"
+
+  - name: kustomize Scheduler
+    block:
+      - name: save kustomized definition
+        shell: kubectl kustomize . > tmp
+        args:
+          chdir: "/etc/kubernetes/manifests/"
+        changed_when: true
+      - name: overwrite Scheduler manifest
+        copy:
+          src: "/etc/kubernetes/manifests/tmp"
+          dest: "/etc/kubernetes/manifests/kube-scheduler.yaml"
+          remote_src: true
+      - name: delete temporary file
+        file:
+          path: "/etc/kubernetes/manifests/tmp"
+          state: absent
+
+  - name: add TAS URL to no_proxy
+    command: "{{ item }}"
+    with_items:
+      - "perl -i -p0e \"s/(name: NO_PROXY\\n.*)/\\1,{{ _tas_svc_domain }}/gm\" /etc/kubernetes/manifests/kube-scheduler.yaml"
+      - "perl -i -p0e \"s/(name: no_proxy\\n.*)/\\1,{{ _tas_svc_domain }}/gm\" /etc/kubernetes/manifests/kube-scheduler.yaml"
 
   - name: create Scheduler Extender secret
     command: kubectl -n telemetry create secret tls extender-secret --cert /etc/kubernetes/pki/ca.crt --key /etc/kubernetes/pki/ca.key
