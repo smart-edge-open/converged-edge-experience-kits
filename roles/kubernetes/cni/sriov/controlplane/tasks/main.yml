@@ -76,6 +76,12 @@
       source: local
     when: offline_enable
 
+  - name: "[WORKAROUND] change alpine tag to build the image"
+    replace:
+      path: "{{ _sriov_dev_plugin.download_dir }}/images/Dockerfile"
+      regexp: "^FROM alpine$"
+      replace: "FROM alpine:3.10"
+
   - name: build device plugin image
     command: make image
     args:
