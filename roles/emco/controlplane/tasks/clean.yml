@@ -9,6 +9,7 @@
     state: absent
   changed_when: false
   ignore_errors: yes
+  become: yes
 
 - name: cleanup emco helm
   command: helm uninstall emco-app -n emco
@@ -16,6 +17,7 @@
     chdir: "{{ _emco.dest }}/deployments/helm/emcoCI/"
   changed_when: false
   ignore_errors: yes
+  become: yes
 
 - name: delete emco repo
   file:
@@ -23,6 +25,7 @@
     state: absent
   changed_when: false
   ignore_errors: yes
+  become: yes
 
 - name: delete clusters_config used by emco
   file:
@@ -30,6 +33,7 @@
     state: absent
   changed_when: false
   ignore_errors: yes
+  become: yes
 
 - name: delete resource files used by emco
   file:
@@ -43,3 +47,4 @@
     - sensor-info.json
   changed_when: false
   ignore_errors: yes
+  become: yes
