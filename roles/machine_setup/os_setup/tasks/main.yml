@@ -25,3 +25,6 @@
 - include_tasks: install_epel_repository.yml
 
 - include_tasks: install_base_os_packages.yml
+
+# Removes python-requests yum package for cloud-init enabled systems.
+- include_tasks: reinstall_python_requests_if_needed.yml
