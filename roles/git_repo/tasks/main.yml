@@ -2,6 +2,10 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+
+- name: create temporary custom .openness_gitconfig
+  include_tasks: ./gitconfig_bootstrap.yml
+
 - name: online mode
   block:
     - debug:
@@ -42,3 +46,7 @@
       set_fact:
         _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
       when: "'controller_group' in group_names"
+
+  always:
+    - name: remove .openness_gitconfig
+      include_tasks: ./gitconfig_remove.yml

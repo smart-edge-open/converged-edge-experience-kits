@@ -2,6 +2,13 @@
 # Copyright (c) 2019 Intel Corporation
 
 ---
+- name: make sure openness directory exists
+  file:
+    path: "{{ openness_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+  become: yes
+
 - name: create temporary custom gitconfig
   copy:
     dest: "{{ openness_dir }}/.openness_gitconfig"
