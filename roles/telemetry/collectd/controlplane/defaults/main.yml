@@ -8,7 +8,7 @@ _collectd_local_path: "Dockerfile"
 _collectd_patch_path: "fpga_telemetry_plugin.patch"
 _collectd_rdt_patch_path: "rdt_gcc_version.patch"
 _collectd_check_module_script_path: "check_if_modules_loaded.sh"
-_collectd_install_path: "/opt/collectd_opae"
+_collectd_install_path: "/opt/openness/collectd_opae"
 _collectd_image:
   name: "collectd_fpga_plugin"
   tag: "0.1.0"
