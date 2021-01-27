@@ -10,7 +10,6 @@
     clone: yes
     update: no
     version: "{{ _video_analytics_serving.commit }}"
-  become: yes
 
 - name: uninstall old video analytics serving release if exists
   block:
@@ -39,7 +38,6 @@
     until: build_status is succeeded
     delay: "{{ retry_delay }}"
     with_items: "{{ _frameworks }}"
-    become: yes
   - name: tag the VAS image
     docker_image:
       name: "{{ _va_serving.image }}-{{ item.name }}"
@@ -49,7 +47,6 @@
       source: local
     changed_when: true
     with_items: "{{ _frameworks }}"
-    become: yes
   when: vas_helm_chart.stdout | length == 0
 
 - name: build, tag and push the video analytics serving images to Harbor registry
@@ -58,7 +55,6 @@
     shell: source /etc/profile && make {{ _vas_sidecar.name }}
     args:
       chdir: "{{ _git_repo_dest }}"
-    become: yes
   - name: build VAS sidecar image
     docker_image:
       name: "{{ _vas_sidecar.image }}"
@@ -68,7 +64,6 @@
         path: "{{ _git_repo_dest }}/{{ _vas_sidecar.name }}"
         use_config_proxy: yes
         pull: yes
-    become: yes
   - name: tag VAS sidecar image and push to Harbor registry
     docker_image:
       name: "{{ _vas_sidecar.image }}"
@@ -76,7 +71,6 @@
       tag: "{{ _vas_sidecar.tag }}"
       push: yes
       source: local
-    become: yes
 
 - name: template Helm chart on the master node and deploy VAS with the Helm Charts
   block:
@@ -102,7 +96,6 @@
     command: helm install {{ _vas_helmReleaseName }} {{ _vas_helmReleaseName }}
     args:
       chdir: "{{ ne_helm_charts_default_dir }}"
-    become: yes
   - name: check if deployed successfully
     shell: helm list | grep {{ _vas_helmReleaseName }} | awk '{print $8}'
     register: vas_helm_status

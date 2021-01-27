@@ -6,7 +6,7 @@
 _video_analytics_serving:
   repo: "https://github.com/intel/video-analytics-serving"
   commit: "v0.3.1.1-alpha"
-  dest: "/opt/video-analytics-serving"
+  dest: "/opt/openness/video-analytics-serving"
 
 _va_serving:
   image: "video-analytics-serving"
