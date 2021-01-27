@@ -32,7 +32,6 @@
   until: result is succeeded
   retries: 60
   delay: 10
-  ignore_errors: yes
   changed_when: false
 
 - name: check whether the intel project is created
