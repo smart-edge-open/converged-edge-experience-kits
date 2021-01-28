@@ -24,3 +24,4 @@
   args:
     chdir: "{{ _git_repo_dest }}/fpga/kube-rsu/"
   changed_when: true
+  become: yes

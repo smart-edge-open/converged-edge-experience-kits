@@ -9,6 +9,7 @@
     src: resctrl
     fstype: resctrl
     state: mounted
+  become: yes
 
 - name: clone RMD repository
   git:
@@ -38,6 +39,7 @@
     chdir: "{{ _pqos_dir }}"
   changed_when: false
   when: not offline_enable
+  become: yes
 
 - name: clone the RMD operator
   git:

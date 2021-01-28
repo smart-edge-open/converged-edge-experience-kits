@@ -7,6 +7,7 @@
   copy:
     src: opaedeps.conf
     dest: /etc/modules-load.d/opaedeps.conf
+  become: yes
 
 - name: load opae dependancy modules
   modprobe:
@@ -16,6 +17,7 @@
   - "mtd"
   - "pps_core"
   - "ptp"
+  become: yes
 
 - name: Check if not offline
   block:
@@ -46,4 +48,5 @@
     file:
       path: "{{ _vran_image_dir }}"
       state: directory
+    become: yes
   when: not offline_enable
