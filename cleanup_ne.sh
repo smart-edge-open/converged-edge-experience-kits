@@ -3,6 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019-2020 Intel Corporation
 
+# Usage:
+#  Regular Network Edge mode:
+#   ./cleanup_ne.sh -f <flavor>               cleanup both controller & nodes
+#   ./cleanup_ne.sh -f <flavor> c[ontroller]  cleanup only controller
+#   ./cleanup_ne.sh -f <flavor> n[odes]       cleanup only nodes
+
 source scripts/ansible-precheck.sh
 source scripts/task_log_file.sh
 source scripts/parse_args.sh
@@ -26,7 +32,9 @@ find "${PWD}/group_vars/" -type l -name "30_*_flavor.yml" -delete
 
 if [[ -z "${flavor}" ]]; then
     echo "No flavor provided"
-    echo -e "   $0 [-f <flavor>] <filter>. Available flavors: $(ls -m flavors)"
+    echo -e "   $0 -f <flavor> <filter>"
+    echo "Available flavors: minimal, $(ls -m flavors -I minimal)"
+    exit 1
 else
     flavor_path="${PWD}/flavors/${flavor}"
     if [[ ! -d "${flavor_path}" ]]; then

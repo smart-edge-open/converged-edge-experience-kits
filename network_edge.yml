@@ -37,7 +37,7 @@
     - role: machine_setup/grub
 
     - role: machine_setup/configure_tuned
-      when: "not (tuned_skip | default(False)) and 'edgenode_group' in group_names"
+      when: not (tuned_skip | default(False))
     - role: machine_setup/conditional_reboot
 
     - role: git_repo

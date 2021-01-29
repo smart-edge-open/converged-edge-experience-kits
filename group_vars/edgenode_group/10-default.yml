@@ -10,7 +10,7 @@
 # Skip kernel configuration
 # If true, kernel will not be installed.
 # If false, package composed from variables kernel_package and kernel_version will be installed together with it's devel
-kernel_skip: false
+kernel_skip: true
 
 # URL to the rpm repository with the kernel
 kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo
@@ -50,7 +50,7 @@ ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-5.el7.elrepo.noa
 # Skip tuned configuration
 # If true, tuned will not be configured
 # If false, tuned_packages will be installed, tuned_profile will be applied with tuned_vars
-tuned_skip: false
+tuned_skip: true
 # Packages to install
 tuned_packages:
   - tuned-2.11.0-8.el7
@@ -70,7 +70,7 @@ hugepage_size: "2M"
 # Amount of hugepages
 hugepage_amount: "2048"
 # Default grub parameters
-default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt rdt=l3cat"
+default_grub_params: ""
 # Additional grub parameters
 additional_grub_params: ""
 

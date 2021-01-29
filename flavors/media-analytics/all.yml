@@ -5,15 +5,6 @@
 kubernetes_cnis:
   - calico
 
-# Kube-virt settings
-kubevirt_enable: false
-
-# Network Edge Processor Counter Monitor (PCM)
-telemetry_pcm_enable: false
-
-## Network Edge Node Feature Discovery (NFD)
-ne_nfd_enable: true
-
 # Deploy Video Analytics services
 video_analytics_services_enable: true
 video_analytics_services_multiinstances: false

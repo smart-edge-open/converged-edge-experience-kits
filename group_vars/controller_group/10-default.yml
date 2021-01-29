@@ -43,13 +43,31 @@ dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Pac
 # Default value is valid for Centos 7.8-2003. Variable must be updated accordingly if using other version.
 ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-5.el7.elrepo.noarch.rpm"
 
+## Tuned configuration
+# Skip tuned configuration
+# If true, tuned will not be configured
+# If false, tuned_packages will be installed, tuned_profile will be applied with tuned_vars
+tuned_skip: true
+# Packages to install
+tuned_packages:
+  - tuned-2.11.0-8.el7
+  - http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+
+# Profile to be applied
+tuned_profile: realtime
+# Variables applied with the profile
+tuned_vars: |
+  isolated_cores=2-3
+  nohz=on
+  nohz_full=2-3
+
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
 hugepage_size: "2M"
 # Amount of hugepages
 hugepage_amount: "1024"
 # Default grub parameters
-default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt"
+default_grub_params: ""
 # Additional grub parameters
 additional_grub_params: ""
 

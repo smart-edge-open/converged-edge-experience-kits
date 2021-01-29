@@ -73,6 +73,7 @@ ptp_sync_enable: False
 
 ## Istio no_proxy settings
 istio_noproxy: "istio-sidecar-injector.istio-system.svc"
+ne_istio_enable: False
 
 ### Network Edge's Kubernetes CNIs
 # List of requested CNIs to be used in Network Edge mode
@@ -107,7 +108,7 @@ ovn4nfv_cidr: "10.233.64.0/18"
 
 ## Kube-ovn with OVS-DPDK
 # Enable kube-ovn with OVS-DPDK
-kubeovn_dpdk: true
+kubeovn_dpdk: false
 # Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
 kubeovn_dpdk_socket_mem: "1024,0"
 # Core bitmask for datapath packet processing. 0x4 selects core 2
@@ -129,6 +130,8 @@ calico_ebpf_enabled: false
 ## SR-IOV CNI
 # FPGA SRIOV Userspace
 fpga_sriov_userspace_enable: false
+# ACC100 SRIOV Userspace
+acc100_sriov_userspace_enable: false
 
 # FPGA Userspace VF configuration
 fpga_userspace_vf:
@@ -139,11 +142,20 @@ fpga_userspace_vf:
   vf_number: "2"
   vf_driver: "vfio-pci"
 
+# ACC100 Userspace VF configuration
+acc100_userspace_vf:
+  enabled: false
+  vendor_id: "8086"
+  vf_device_id: "0d5d"
+  pf_device_id: "0d5c"
+  vf_number: "2"
+  vf_driver: "vfio-pci"
+
 # SR-IOV support for kube-virt based Virtual Machines
 sriov_kubevirt_enable: false
 
 # Kube-virt settings
-kubevirt_enable: true
+kubevirt_enable: false
 kubevirt_default_pv_dir: /var/vd/
 kubevirt_default_pv_vol_name: vol
 kubevirt_pv_vm_max_num: 64
@@ -240,3 +252,6 @@ docker_images_dir: "{{ openness_dir }}/images-cache"
 kafka_cluster: cluster
 kafka_eaa_user: eaa-kafka
 kafka_secret_timeout_min: 60
+
+## Video analitics
+video_analytics_services_enable: False

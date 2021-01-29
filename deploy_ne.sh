@@ -5,12 +5,12 @@
 
 # Usage:
 #  Regular Network Edge mode:
-#   ./deploy_ne.sh [-f <flavor>]               deploy both controller & nodes
-#   ./deploy_ne.sh [-f <flavor>] c[ontroller]  deploy only controller
-#   ./deploy_ne.sh [-f <flavor>] n[odes]       deploy only nodes
+#   ./deploy_ne.sh -f <flavor>               deploy both controller & nodes
+#   ./deploy_ne.sh -f <flavor> c[ontroller]  deploy only controller
+#   ./deploy_ne.sh -f <flavor> n[odes]       deploy only nodes
 #
 #  Single-node cluster:
-#   ./deploy_ne.sh [-f <flavor>] s[ingle]      deploy single-node cluster playbook
+#   ./deploy_ne.sh -f <flavor> s[ingle]      deploy single-node cluster playbook
 
 set -eu
 
@@ -36,8 +36,10 @@ shift $((OPTIND-1))
 find "${PWD}/group_vars/" -type l -name "30_*_flavor.yml" -delete
 
 if [[ -z "${flavor}" ]]; then
-    echo "No flavor provided"
-    echo -e "   $0 [-f <flavor>] <filter>. Available flavors: $(ls -m flavors)"
+    echo "No flavor provided, please choose specific flavor"
+    echo -e "   $0 -f <flavor> <filter>"
+    echo "Available flavors: minimal, $(ls -m flavors -I minimal)"
+    exit 1
 else
     flavor_path="${PWD}/flavors/${flavor}"
     if [[ ! -d "${flavor_path}" ]]; then
