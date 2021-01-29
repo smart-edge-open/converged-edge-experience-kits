@@ -144,6 +144,8 @@
 
   - name: run CNIs cleanup
     include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
+    vars:
+      - role_path: "{{ playbook_dir }}/roles/kubernetes/cni"
 
   - name: helm cleanup
     block:
@@ -243,6 +245,8 @@
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
+      vars:
+        - role_path: "{{ playbook_dir }}/roles/kubernetes/cni"
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
@@ -316,6 +320,8 @@
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
+      vars:
+        - role_path: "{{ playbook_dir }}/roles/kubernetes/cni"
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/common/defaults/main.yml
