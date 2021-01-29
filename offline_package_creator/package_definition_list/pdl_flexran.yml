@@ -11,11 +11,11 @@ github-repos:
     flag: tag
     value: master
   - name: sriov-network-device-plugin
-    url: https://github.com/intel/sriov-network-device-plugin
+    url: https://github.com/k8snetworkplumbingwg/sriov-network-device-plugin
     flag: tag
     value: v3.3.1
   - name: sriov-cni
-    url: https://github.com/intel/sriov-cni
+    url: https://github.com/k8snetworkplumbingwg/sriov-cni
     flag: tag
     value: v2.6
   - name: rmd
