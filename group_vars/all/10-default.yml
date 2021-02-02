@@ -255,3 +255,7 @@ kafka_secret_timeout_min: 60
 
 ## Video analitics
 video_analytics_services_enable: False
+
+## Hyperthreading
+check_hyperthreading: False
+expected_hyperthreading_state: "enabled"

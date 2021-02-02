@@ -27,3 +27,22 @@
         It is expected in: {{ playbook_dir }}/{{ defaults._syscfg_local_path | replace('./', '') }}
     when: not biosfw_syscfg_package_stat.stat.exists
   when: ne_biosfw_enable | default(False)
+
+- name: check Hyperthreading state
+  block:
+  - name: check current state
+    shell: set -o pipefail && lscpu | grep "Thread(s) per core" | awk '{print $NF}'
+    register: ht
+  - name: fail if Hyperthreading is ENABLED instead of DISABLED
+    fail:
+      msg: |
+        Expected deployment Hyperthreading state - DISABLED.
+        Current Hyperthreading state - ENABLED.
+    when: expected_hyperthreading_state  == "disabled" and ht.stdout != "1"
+  - name: fail if Hyperthreading is DISABLED instead of ENABLED
+    fail:
+      msg: |
+        Expected deployment Hyperthreading state - ENABLED.
+        Current Hyperthreading state - DISABLED.
+    when: expected_hyperthreading_state == "enabled" and ht.stdout != "2"
+  when: check_hyperthreading | bool
