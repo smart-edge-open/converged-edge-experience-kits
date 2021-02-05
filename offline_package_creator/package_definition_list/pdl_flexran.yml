@@ -1702,28 +1702,28 @@ charts-files:
       - intel/container-experience-kits/be472b5ec0728bcca60bf86ffb085c9ec46de08e/roles/sriov-dp-install/charts/sriov-net-dp/templates/sriovdp-sa.yaml
   - dir: dashboard #download Kubernetes Dashboard chart
     file:
-    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/.helmignore
-    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/Chart.yaml
-    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/requirements.lock
-    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/requirements.yaml
-    - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/values.yaml
+    - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/.helmignore
+    - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/Chart.yaml
+    - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/requirements.lock
+    - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/requirements.yaml
+    - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/values.yaml
     - dir: templates
       file:
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/NOTES.txt
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/_helpers.tpl
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrole-metrics.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrole-readonly.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrolebinding-metrics.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrolebinding-readonly.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/deployment.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/ingress.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/networkpolicy.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/pdb.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/role.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/rolebinding.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/secret.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/service.yaml
-      - kubernetes/dashboard/v2.0.3/aio/deploy/helm-chart/kubernetes-dashboard/templates/serviceaccount.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/NOTES.txt
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/_helpers.tpl
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrole-metrics.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrole-readonly.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrolebinding-metrics.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/clusterrolebinding-readonly.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/deployment.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/ingress.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/networkpolicy.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/pdb.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/role.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/rolebinding.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/secret.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/service.yaml
+      - kubernetes/dashboard/v2.1.0/aio/deploy/helm-chart/kubernetes-dashboard/templates/serviceaccount.yaml
   - dir: nfd
     file:
     - intel/container-experience-kits/df61e6e46beb10ad596206ab25b04dbeb9162663/roles/nfd-install/charts/node-feature-discovery/.helmignore
