@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+resources:
+  - kube-scheduler.yaml
+
+patchesJson6902:
+  - target:
+      version: v1
+      kind: Pod
+      name: kube-scheduler
+    path: extend_scheduler.yml
