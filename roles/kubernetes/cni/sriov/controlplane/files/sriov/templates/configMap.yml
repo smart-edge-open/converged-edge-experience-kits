@@ -13,8 +13,8 @@ data:
                 "resourceName": "intel_sriov_netdevice",
                 "selectors": {
                     "vendors": ["8086"],
-                    "devices": ["154c", "10ed"],
-                    "drivers": ["iavf", "i40evf", "ixgbevf"]
+                    "devices": ["154c", "10ed","1520"],
+                    "drivers": ["iavf", "i40evf", "ixgbevf","igbvf"]
                 }
             },
             {{- if .Values.sriov_kubevirt_enable }}
