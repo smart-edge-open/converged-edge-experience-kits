@@ -42,11 +42,6 @@
         update: no
       when: not always_clean_repository
 
-    - name: update controller repo path
-      set_fact:
-        _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
-      when: "'controller_group' in group_names"
-
   always:
     - name: remove .openness_gitconfig
       include_tasks: ./gitconfig_remove.yml

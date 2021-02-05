@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2021 Intel Corporation
+
+---
+
+# Playbook for Network Edge deployment
+- hosts: controller_group
+  any_errors_fatal: true
+
+  pre_tasks:
+  - name: update controller repo path
+    set_fact:
+      _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
+
+  roles:
+    - role: kubernetes/controlplane
+    - role: kubernetes/helm
+    - role: harbor_registry/controlplane
+    - role: kubernetes/cni
+    - role: kubernetes/device_plugins
+      when: k8s_device_plugins_enable | default(False)
+    - role: kubernetes/dashboard
+      when: kubernetes_dashboard_enable | default(False)
+
+    - role: kubevirt/controlplane
+      when: kubevirt_enable | default(True)
+
+    - role: bb_config
+      when: fpga_sriov_userspace_enable | default(False) or acc100_sriov_userspace_enable | default(False)
+    - role: opae_fpga/controlplane
+      when: ne_opae_fpga_enable | default(False)
+    - role: nfd
+      when: ne_nfd_enable | default(True)
+    - role: biosfw/controlplane
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/controlplane
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/controlplane
+      when: ne_hddl_enable | default(False)
+    - role: ptp/controlplane
+      when: ptp_sync_enable | default(False)
+
+    - role: telemetry/certs
+    - role: telemetry/prometheus
+    - role: telemetry/opentelemetry/controlplane
+    - role: telemetry/collectd/controlplane
+    - role: telemetry/tas
+    - role: telemetry/cadvisor/controlplane
+    - role: telemetry/grafana
+      when: telemetry_grafana_enable | default(True)
+    - role: telemetry/pcm/controlplane
+      when: telemetry_pcm_enable | default(False)
+
+    - role: rmd/controlplane
+      when: rmd_operator_enable | default(False)
+
+- hosts: edgenode_group
+  any_errors_fatal: true
+  roles:
+    - role: rmd/node
+      when: "rmd_operator_enable | default(False)"
+
+    - role: opae_fpga/node
+      when: ne_opae_fpga_enable | default(False)
+    - role: kubernetes/node
+    - role: harbor_registry/node
+    - role: kubernetes/cni
+    - role: telemetry/collectd/node
+    - role: telemetry/cadvisor/node
+    - role: kubevirt/node
+      when: kubevirt_enable | default(True)
+    - role: biosfw/node
+      when: ne_biosfw_enable | default(False)
+    - role: cmk/node
+      when: ne_cmk_enable | default(False)
+    - role: hddl/network_edge/node
+      when: ne_hddl_enable | default(False)
+    - role: ptp/node
+      when: ptp_sync_enable | default(False)
+
+    - role: telemetry/pcm/node
+      when: telemetry_pcm_enable | default(False)

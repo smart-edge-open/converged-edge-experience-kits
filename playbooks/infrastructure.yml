@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2021 Intel Corporation
+
+---
+
+# Common platform setup playbook
+- hosts: controller_group:edgenode_group
+  any_errors_fatal: true
+
+  roles:
+    - role: machine_setup/os_setup
+    - role: time/ntp
+      when: ntp_enable | default(False)
+    - role: time/verify
+      when: "'edgenode_group' in group_names"
+    - role: machine_setup/custom_kernel
+      when: not (kernel_skip | default(True))
+    - role: machine_setup/grub
+
+    - role: machine_setup/configure_tuned
+      when: not (tuned_skip | default(False))
+    - role: machine_setup/conditional_reboot
+
+    - role: git_repo
+
+    - role: golang
+    - role: docker
