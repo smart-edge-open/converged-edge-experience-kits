@@ -135,6 +135,12 @@
     remote_src: yes
   become: yes
 
+- name: remove Dockerfile.m4
+  file:
+    path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon/Dockerfile.m4"
+    state: absent
+  become: yes
+
 - name: create kustomization files from templates
   template:
     src: "{{ item }}.j2"

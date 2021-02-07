@@ -5,11 +5,11 @@
 _hddldaemon_container:
   url: "https://github.com/OpenVisualCloud/Dockerfiles"
   download_dir : "/opt/ovc_dockerfiles"
-  commit: "49badeed92421e392c3fa0aaf261d0e9f1dec9b3"
+  commit: "4a07dbe08b27c7f3c744ed4f9c9dbac2546b6b89"
 
 _openvino:
-  url: "http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz"
+  url: "https://registrationcenter-download.intel.com/akdlm/irc_nas/17062/l_openvino_toolkit_p_2021.1.110.tgz"
   download_dir: "/tmp/openvino_download"
-  install_dir: "/opt/intel/openvino_2020.2.120"
-  version: "2020.2.120"
+  install_dir: "/opt/intel/openvino_2021.1.110"
+  version: "2021.1.110"
 hddl_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"

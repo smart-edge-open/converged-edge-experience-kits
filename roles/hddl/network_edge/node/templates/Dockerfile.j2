@@ -64,7 +64,7 @@ RUN apt-get update && \
 RUN ${PYTHON_VER} -m pip install --upgrade pip
 
 # get product from URL
-ARG package_url=http://registrationcenter-download.intel.com/akdlm/irc_nas/16612/l_openvino_toolkit_p_2020.2.120.tgz
+ARG package_url={{ _openvino.url }}
 ARG TEMP_DIR=/tmp/openvino_installer
 
 WORKDIR ${TEMP_DIR}
