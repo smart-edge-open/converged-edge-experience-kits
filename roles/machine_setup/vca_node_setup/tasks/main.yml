@@ -25,6 +25,7 @@
     chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/scripts"
   ignore_errors: yes
   register: vcad_build_ret
+  become: yes
 
 - name: check build system image of VCA node result
   fail:
