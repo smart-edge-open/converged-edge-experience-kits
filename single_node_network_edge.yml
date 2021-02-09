@@ -102,6 +102,9 @@
     - role: istio
       when: ne_istio_enable | default(False)
 
+    - role: rmd/controlplane
+      when: rmd_operator_enable | default(False)
+
 - hosts: edgenode_group
   roles:
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
@@ -117,3 +120,5 @@
       when: ne_hddl_enable | default(False)
     - role: ptp/node
       when: ptp_sync_enable | default(False)
+    - role: rmd/node
+      when: rmd_operator_enable | default(False)
