@@ -1471,6 +1471,8 @@ rpm-packages:
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/zip-3.0-11.el7.x86_64.rpm
   - name: expect
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/expect-5.45-14.el7_1.x86_64.rpm
+  - name: zlib
+    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/zlib-1.2.7-19.el7_9.x86_64.rpm
 
   # TBA
 

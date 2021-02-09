@@ -58,3 +58,12 @@ python-srpm-macros
 python-netaddr
 redhat-rpm-config
 zip
+python-setuptools
+python-backports
+python-backports-ssl_match_hostname
+python-ipaddress
+python3-pip
+libtirpc
+python3
+python3-libs
+python3-setuptools
