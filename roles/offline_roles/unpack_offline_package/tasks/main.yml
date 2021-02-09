@@ -28,27 +28,32 @@
     file:
       path: "{{ _offline_package_path }}"
       state: directory
+    become: true
 
   - name: Copy Offline Package
     copy:
       src: "{{ _offline_package_name }}"
       dest: "{{ _offline_package_path }}"
+    become: true
 
   - name: Copy Offline Package checksum hash number
     copy:
       src: "{{ _offline_checksum_name }}"
       dest: "{{ _offline_package_path }}"
+    become: true
 
   - name: Get expected checksum hash value
     slurp:
       src: "{{ _offline_package_path }}/{{ _offline_checksum_name }}"
     register: expected_checksum
+
   - name: Retrive Checksum of file
     stat:
       path: "{{ _offline_package_path }}/{{ _offline_package_name }}"
       checksum_algorithm: md5
       get_checksum: yes
     register: file_checksum
+
   - name: Compare the expected checksum vs checksum of file.
     assert:
       that:
@@ -59,11 +64,14 @@
     failed_when:
       - result.evaluated_to is defined
       - not result.evaluated_to
+
   - name: Unarchive a file on the remote machine
     unarchive:
       src: "{{ _offline_package_path }}/{{ _offline_package_name }}"
       dest: "{{ _offline_package_path }}"
       remote_src: yes
+    become: true
+
   - name: Remove packed package
     file:
       path: "{{ _offline_package_path }}/{{ item }}"
@@ -71,6 +79,7 @@
     with_items:
       - "{{ _offline_package_name }}"
       - "{{ _offline_checksum_name }}"
+    become: true
   when:
     - offline_package.stat.exists
     - offline_checksum.stat.exists

@@ -3,15 +3,25 @@
 
 ---
 
+- name: Create temp directory for storing certificate
+  tempfile:
+    state: directory
+    prefix: crt
+  register: crt_dir
+
+- name: set certificate file destination
+  set_fact:
+    crt_file_dest: "{{ crt_dir.path }}/localhost.crt"
+
 - name: Copy crt file to nodes
   copy:
     src: "/tmp/localhost.crt"
-    dest: "/tmp/localhost.crt"
+    dest: "{{ crt_file_dest }}"
 
 - name: Check if the ssl certificate exists in the local trust list
   shell: |
     tls_str=$(cat /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
-    crt_str=$(cat /tmp/localhost.crt | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
+    crt_str=$(cat {{ crt_file_dest }} | sed 's/-//g' | sed 's/BEGIN CERTIFICATE//g' | sed 's/END CERTIFICATE//g')
     echo $tls_str | sed 's/[[:space:]]//g' | grep -o "$(echo $crt_str | sed 's/[[:space:]]//g')"
   register: ssl_exists
   ignore_errors: yes
@@ -19,5 +29,11 @@
 
 - name: Add ssl certificate into local trust list'
   shell:
-    cat /tmp/localhost.crt >> /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+    cat {{ crt_file_dest }} >> /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
   when: ssl_exists.rc != 0
+  become: true
+
+- name: Remove temporary certificate directory
+  file:
+    path: "{{ crt_dir.path }}"
+    state: absent

@@ -71,4 +71,5 @@
       src: "{{ gomods_temp_dir.path }}/gomod.tar.gz"
       dest: "{{ _offline_gomod_dest }}"
       remote_src: yes
+      keep_newer: yes
   when: offline_enable | default(False) and ('controller_group' in group_names or single_node_deployment)

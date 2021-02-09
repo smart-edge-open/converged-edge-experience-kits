@@ -163,26 +163,31 @@
       src: "{{ _offline_package_docker_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+    become: true
   - name: Copy Helm charts from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_chart_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+    become: true
   - name: Copy yaml files from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_yaml_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+    become: true
   - name: Copy other files from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_file_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+    become: true
   - name: Copy go modules from Offline Package to HTTP server
     copy:
       src: "{{ _offline_package_gomod_path }}/"
       dest: "{{ _http_server_path }}"
       remote_src: yes
+    become: true
   - name: Install createrepo and dependancies
     block:
     - name: Create template directory
@@ -199,6 +204,7 @@
 
     - name: Createrepo
       command: createrepo {{ _http_server_path }} --excludes='pkg/*' --excludes='mod/*'
+      become: true
 
   - name: open common firewall ports
     ignore_errors: yes
