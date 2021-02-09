@@ -14,5 +14,5 @@ os_remove_yum_plugins: true
 docker_images: []
 
 git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgenode.git
-git_repo_branch: openness-20.12.01
+git_repo_branch: openness-20.12.02
 _git_repo_dest: "{{ openness_dir }}/edgenode"

@@ -11,13 +11,13 @@ github-repos:
     flag: tag
     value: master
   - name: sriov-network-device-plugin
-    url: https://github.com/intel/sriov-network-device-plugin
-    flag: commit
-    value: 4e0302aeb4812844524005686b74175d8b0fc515
-  - name: sriov-cni
-    url: https://github.com/intel/sriov-cni
+    url: https://github.com/k8snetworkplumbingwg/sriov-network-device-plugin
     flag: tag
-    value: v2.3
+    value: v3.3.1
+  - name: sriov-cni
+    url: https://github.com/k8snetworkplumbingwg/sriov-cni
+    flag: tag
+    value: v2.6
   - name: rmd
     url: https://github.com/intel/rmd
     flag: tag
@@ -50,8 +50,8 @@ github-repos:
     url: https://github.com/goharbor/harbor-helm.git
     flag: tag
     value: v1.5.0
-  - name: x-epcforedge
-    url: https://github.com/open-ness/x-epcforedge.git
+  - name: ido-epcforedge
+    url: https://github.com/open-ness/ido-epcforedge.git
     flag: tag
     value: master
 
@@ -61,7 +61,7 @@ github-repos:
 # go modules are downloaded with the go.mod file
 go-modules:
   - name: edgenode
-  - name: x-epcforedge
+  - name: ido-epcforedge
   - name: rmd-operator
   - name: telemetry-aware-scheduling
 
@@ -224,7 +224,7 @@ pip-packages:
   - name: pyxattr
     url: 20/7a/2ae2a5a13e550b88cf4aa71aa60e1c2d58d7f002d4a2ccb9b4920f8dc84b/pyxattr-0.5.1.tar.gz
   - name: PyYAML
-    url: 9f/2c/9417b5c774792634834e730932745bc09a7d36754ca00acf1ccd1ac2594d/PyYAML-5.1.tar.gz
+    url: bd/da/0a49c1a31c60634b93fd1376b3b7966c4f81f2da8263f389cad5b6bbd6e8/PyYAML-4.2b1.tar.gz
   - name: requests
     url: ff/17/5cbb026005115301a8fb2f9b0e3e8d32313142fe8b617070e7baad20554f/requests-2.20.1-py2.py3-none-any.whl
   - name: subprocess32
@@ -268,7 +268,7 @@ pip-packages:
   - name: scandir
     url: df/f5/9c052db7bd54d0cbf1bc0bb6554362bba1012d03e5888950a4f5c5dadc4e/scandir-1.10.0.tar.gz
   - name: setuptools
-    url: a7/e0/30642b9c2df516506d40b563b0cbd080c49c6b3f11a70b4c7a670f13a78b/setuptools-50.3.2.zip
+    url: 12/68/95515eaff788370246dac534830ea9ccb0758e921ac9e9041996026ecaf2/setuptools-53.0.0.tar.gz
   - name: subprocess32
     url: 32/c8/564be4d12629b912ea431f1a50eb8b3b9d00f1a0b1ceff17f266be190007/subprocess32-3.5.4.tar.gz
   - name: texttable
@@ -278,7 +278,7 @@ pip-packages:
   - name: configparser
     url: 7a/2a/95ed0501cf5d8709490b1d3a3f9b5cf340da6c433f896bbe9ce08dbe6785/configparser-4.0.2-py2.py3-none-any.whl
   - name: cryptography
-    url: 66/58/d7ff652d30e8cbabd8946b3116fba73b39a73ea9c63943b3c1bf3cfcf190/cryptography-3.0-cp27-cp27mu-manylinux1_x86_64.whl
+    url: c6/0e/561d53ee8f95803b006a90050875a915c147af39142716a0c6c81263fe63/cryptography-3.2.1-cp27-cp27mu-manylinux1_x86_64.whl
   - name: google_auth
     url: 1f/cf/724b6436967a8be879c8de16b09fd80e0e7b0bcad462f5c09ee021605785/google_auth-1.22.1-py2.py3-none-any.whl
   - name: pyrsistent

@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+apiVersion: kubescheduler.config.k8s.io/v1beta1
+kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: /etc/kubernetes/scheduler.conf
+extenders:
+  - urlPrefix: "{{ _tas_svc_url }}"
+    prioritizeVerb: "scheduler/prioritize"
+    filterVerb: "scheduler/filter"
+    weight: 1
+    enableHTTPS: true
+    managedResources:
+      - name: "telemetry/scheduling"
+        ignoredByScheduler: true
+    ignorable: true

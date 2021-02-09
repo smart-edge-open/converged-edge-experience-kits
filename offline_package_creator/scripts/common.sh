@@ -439,7 +439,7 @@ opc::download::gomodules() {
       rm -f "$OPC_DOWNLOAD_PATH"/ret
     fi
     touch "$OPC_DOWNLOAD_PATH"/ret
-    if [[ "$name" == "edgenode" || "$name" == "x-epcforedge" ]];then
+    if [[ "$name" == "edgenode" || "$name" == "ido-epcforedge" ]];then
       dirs=$(find . -name go.mod)
       for dir in $dirs
       do
