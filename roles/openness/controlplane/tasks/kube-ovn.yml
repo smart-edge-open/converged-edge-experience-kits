@@ -10,6 +10,7 @@
         state: directory
     - name: create Interface Service client certificate
       command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh interfaceservice.openness {{ _certs_dest }}/client/interfaceservice {{ _certs_dest }}/CA"
+      become: yes
     - name: create symbolic link to root's cert
       file:
         src: "{{ _certs_dest }}/CA/cert.pem"
@@ -19,6 +20,7 @@
       file:
         path: "{{ _certs_dest }}/client/interfaceservice/key.pem"
         mode: "0600"
+      become: yes
 
 - name: add interface service for kube-ovn
   command: kubectl apply -f {{ item }}

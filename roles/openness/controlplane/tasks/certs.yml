@@ -55,6 +55,7 @@
       state: directory
   - name: create EdgeDNS client certificate
     command: "{{ _git_repo_dest }}/network-edge/tls_pair.sh edgedns.openness {{ _certs_dest }}/client/edgedns {{ _certs_dest }}/CA"
+    become: yes
   - name: create symbolic link to root's cert
     file:
       src: "{{ _certs_dest }}/CA/cert.pem"
@@ -64,6 +65,7 @@
     file:
       path: "{{ _certs_dest }}/client/edgedns/key.pem"
       mode: '0600'
+    become: yes
   when: dns_enable
 
 - name: certificates for EAA
