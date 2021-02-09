@@ -6,14 +6,14 @@
 _sriov_chart_dir: "{{ ne_helm_charts_default_dir }}/sriov-net-dp"
 
 _sriov_cni:
-  url: "https://github.com/intel/sriov-cni"
+  url: "https://github.com/k8snetworkplumbingwg/sriov-cni"
   download_dir : "/tmp/_sriov_cni"
-  commit: "v2.3"
+  commit: "v2.6"
 
 _sriov_dev_plugin:
-  url: "https://github.com/intel/sriov-network-device-plugin"
+  url: "https://github.com/k8snetworkplumbingwg/sriov-network-device-plugin"
   download_dir: "/tmp/_sriov_dev_plugin"
-  commit: "4e0302aeb4812844524005686b74175d8b0fc515"
+  commit: "v3.3.1"
 
 fpga_sriov_userspace_enable: false
 acc100_sriov_userspace_enable: false

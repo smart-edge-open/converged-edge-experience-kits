@@ -11,13 +11,13 @@ github-repos:
     flag: tag
     value: master
   - name: sriov-network-device-plugin
-    url: https://github.com/intel/sriov-network-device-plugin
-    flag: commit
-    value: 4e0302aeb4812844524005686b74175d8b0fc515
-  - name: sriov-cni
-    url: https://github.com/intel/sriov-cni
+    url: https://github.com/k8snetworkplumbingwg/sriov-network-device-plugin
     flag: tag
-    value: v2.3
+    value: v3.3.1
+  - name: sriov-cni
+    url: https://github.com/k8snetworkplumbingwg/sriov-cni
+    flag: tag
+    value: v2.6
   - name: rmd
     url: https://github.com/intel/rmd
     flag: tag

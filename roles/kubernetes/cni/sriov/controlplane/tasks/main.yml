@@ -53,12 +53,6 @@
     until: result is succeeded
     ignore_errors: yes
 
-  - name: "[WORKAROUND] change golang:alpine tag to build the CNI image"
-    replace:
-      path: "{{ _sriov_cni.download_dir }}/Dockerfile"
-      regexp: "^FROM golang:alpine as builder$"
-      replace: "FROM golang:alpine3.10 as builder"
-
   - name: build CNI image
     docker_image:
       build:
@@ -81,18 +75,6 @@
       push: yes
       source: local
     when: offline_enable
-
-  - name: "[WORKAROUND] change alpine tag to build the DP image"
-    replace:
-      path: "{{ _sriov_dev_plugin.download_dir }}/images/Dockerfile"
-      regexp: "^FROM alpine$"
-      replace: "FROM alpine:3.10"
-
-  - name: "[WORKAROUND] change golang:alpine tag to build the DP image"
-    replace:
-      path: "{{ _sriov_dev_plugin.download_dir }}/images/Dockerfile"
-      regexp: "^FROM golang:alpine as builder$"
-      replace: "FROM golang:alpine3.10 as builder"
 
   - name: build device plugin image
     command: make image
