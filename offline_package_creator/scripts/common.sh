@@ -376,11 +376,11 @@ opc::download::github() {
     url=$(echo "$list" | cut -d ',' -f 2)
     flag=$(echo "$list" | cut -d ',' -f 3)
     value=$(echo "$list" | cut -d ',' -f 4)
-    # otcshare git repo need a token
-    ret=$(opc::check::exist "$url" "otcshare")
+    # open-ness git repo need a token
+    ret=$(opc::check::exist "$url" "open-ness")
     if [[ "$ret" -eq 0 ]];then
       if [ -z "$GITHUB_TOKEN" ];then
-        opc::log::error "Cannot download otcshare code!"
+        opc::log::error "Cannot download open-ness code!"
       fi
       part1=$(echo "$url" | cut -d ':' -f 1)
       part2=$(echo "$url" | cut -d ':' -f 2)
@@ -439,7 +439,7 @@ opc::download::gomodules() {
       rm -f "$OPC_DOWNLOAD_PATH"/ret
     fi
     touch "$OPC_DOWNLOAD_PATH"/ret
-    if [[ "$name" == "edgenode" || "$name" == "x-epcforedge" ]];then
+    if [[ "$name" == "edgenode" || "$name" == "ido-epcforedge" ]];then
       dirs=$(find . -name go.mod)
       for dir in $dirs
       do
