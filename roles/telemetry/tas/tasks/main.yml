@@ -139,6 +139,7 @@
   when: get_release_prometheus_adapter.rc != 0
 
 - name: Kubernetes Scheduler Extender
+  become: yes
   block:
   - name: copy Scheduler config
     template:
@@ -189,7 +190,6 @@
     register: create_secret_result
     failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
     changed_when: true
-    become: yes
 
 - name: Telemetry Aware Scheduling
   block:
