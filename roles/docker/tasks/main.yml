@@ -53,6 +53,29 @@
   notify:
     - enable and start docker service
 
+- name: get runc version
+  shell: set -o pipefail && runc --version | grep -oP '{{ _runc_ver_pattern }}\K(.+)'
+  register: runc_rc_ver
+  ignore_errors: true
+  changed_when: false
+
+# Upgrade runc to v1.0.0-rc93 which fixes an issue of freezing/frozen cgroups.
+- name: upgrade runc to a fixed version
+  block:
+    - name: backup old runc
+      copy:
+        src: /usr/bin/runc
+        dest: /usr/bin/runc_bak
+        remote_src: true
+      become: yes
+    - name: download specific runc
+      get_url:
+        url: "{{ _runc_url }}"
+        dest: /usr/bin/runc
+        checksum: "sha256:{{ _runc_checksum }}"
+      become: yes
+  when: runc_rc_ver.rc == 0 and runc_rc_ver.stdout|int < _runc_min_rc
+
 - name: Check if offline mode
   set_fact:
     local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \

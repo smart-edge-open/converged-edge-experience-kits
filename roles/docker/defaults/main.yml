@@ -27,3 +27,8 @@ _docker_audit_files:
 
 _docker_completion_url: "https://raw.githubusercontent.com/docker/docker-ce/v{{ _docker_version }}/components/cli/contrib/completion/bash/docker"
 _docker_compose_completion_url: "https://raw.githubusercontent.com/docker/compose/{{ _docker_compose_version }}/contrib/completion/bash/docker-compose"
+
+_runc_min_rc: 93
+_runc_ver_pattern: "runc version 1.0.0-rc"
+_runc_url: "https://github.com/opencontainers/runc/releases/download/v1.0.0-rc{{ _runc_min_rc }}/runc.amd64"
+_runc_checksum: "9feaa82be15cb190cf0ed76fcb6d22841abd18088d275a47e894cd1e3a0ee4b6"
