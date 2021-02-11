@@ -53,10 +53,12 @@
     - name: create helper variable
       set_fact:
         single_node_deployment: true
+    - name: update controller repo path
+      set_fact:
+        _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
 
   roles:
     - role: machine_setup/os_setup
-    - role: git_repo
     - role: kubernetes/controlplane
     - role: kubernetes/helm
     - role: harbor_registry/controlplane
@@ -106,6 +108,11 @@
       when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_group
+  pre_tasks:
+    - name: update edgenode repo path
+      set_fact:
+        _git_repo_dest: "{{ openness_dir }}/edgenode"
+
   roles:
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
     # - role: telemetry/cadvisor/node
