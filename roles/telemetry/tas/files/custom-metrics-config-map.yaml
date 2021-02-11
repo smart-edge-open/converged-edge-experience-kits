@@ -67,7 +67,73 @@ data:
         matches: ^(.*)_total$
         as: ""
       metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[1m])) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^user$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_user
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^user$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^system$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_system
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^system$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^steal$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_steal
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^steal$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^softirq$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_softirq
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^softirq$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^nice$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_nice
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^nice$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^irq$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_irq
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^irq$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^iowait$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_iowait
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^iowait$"}) by (<<.GroupBy>>)
+    - seriesQuery: '{__name__=~"^node_cpu_seconds_total$",mode=~"^idle$"}'
+      resources:
+        overrides:
+          instance:
+            resource: node
+      name:
+        as: cpu_seconds_total_idle
+      metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>,mode=~"^idle$"}) by (<<.GroupBy>>)
     - seriesQuery: '{__name__=~"^node_.*"}'
+      seriesFilters:
+        - isNot: "^node_cpu_seconds_total$"
       resources:
         overrides:
           instance:
