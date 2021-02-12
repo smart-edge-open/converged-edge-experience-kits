@@ -4,7 +4,7 @@
 ---
 
 # Common platform setup playbook
-- hosts: all
+- hosts: edgenode_group:controller_group
   any_errors_fatal: true
 
   pre_tasks:
