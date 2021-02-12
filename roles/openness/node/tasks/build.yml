@@ -102,9 +102,15 @@
 
 # OpenNESS pods send a CSR from an init container - we should automatically approve it
 - name: approve openness CSRs
-  shell: >
-    set -o pipefail && kubectl certificate approve {{ item.svc }} && kubectl get pods --namespace=openness
-    --field-selector spec.nodeName={{ node_name }} | grep -E '{{ item.pod }}' | grep -E 'Running'
+  shell: |
+    set -o pipefail
+    kubectl get pods --namespace=openness --field-selector spec.nodeName={{ node_name }} | \
+      grep -E '{{ item.pod }}' | grep -E 'Running'
+    if [ $? -ne 0 ]
+    then
+      kubectl certificate approve {{ item.svc }}
+      exit 1
+    fi
   when: "item.when"
   with_items:
     - { svc: "edgedns-{{ node_name }}", pod: "edgedns", when: "{{ dns_enable }}"}
