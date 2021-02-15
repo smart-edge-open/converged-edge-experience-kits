@@ -163,6 +163,7 @@
       dest:  "/etc/kubernetes/manifests/"
 
   - name: kustomize Scheduler
+    become: yes
     block:
       - name: save kustomized definition
         shell: kubectl kustomize . > tmp
@@ -184,12 +185,14 @@
     with_items:
       - "perl -i -p0e \"s/(name: NO_PROXY\\n.*)/\\1,{{ _tas_svc_domain }}/gm\" /etc/kubernetes/manifests/kube-scheduler.yaml"
       - "perl -i -p0e \"s/(name: no_proxy\\n.*)/\\1,{{ _tas_svc_domain }}/gm\" /etc/kubernetes/manifests/kube-scheduler.yaml"
+    become: yes
 
   - name: create Scheduler Extender secret
     command: kubectl -n telemetry create secret tls extender-secret --cert /etc/kubernetes/pki/ca.crt --key /etc/kubernetes/pki/ca.key
     register: create_secret_result
     failed_when: "create_secret_result.rc != 0 and 'AlreadyExists' not in create_secret_result.stderr"
     changed_when: true
+    become: yes
 
 - name: Telemetry Aware Scheduling
   block:
@@ -245,6 +248,7 @@
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo/deploy/"
     changed_when: true
+    become: yes
 
 - name: Descheduler
   block:
@@ -258,3 +262,4 @@
       command: kubectl apply -f "{{ tmp_dir.path }}/{{ item }}"
       changed_when: true
       with_items: "{{ _descheduler_deployment_files }}"
+      become: yes
