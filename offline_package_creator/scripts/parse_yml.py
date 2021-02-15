@@ -28,12 +28,12 @@ def get_charts_struct(parent, dic):
     """ Parse the PDL yaml file to output a long string
     """
     line = ''
-    for fi in dic['file']:
-        if isinstance(fi, dict):
+    for file in dic['file']:
+        if isinstance(file, dict):
             new_parent = parent + '/' + dic['dir']
-            line = line + get_charts_struct(new_parent, fi)
+            line = line + get_charts_struct(new_parent, file)
         else:
-            line = line + parent + '/' + dic['dir'] + '|' + fi + ','
+            line = line + parent + '/' + dic['dir'] + '|' + file + ','
     if line[-1] == ',':
         line = line[:-1]
     return line

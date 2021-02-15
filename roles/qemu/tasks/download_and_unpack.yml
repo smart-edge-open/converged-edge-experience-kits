@@ -31,7 +31,8 @@
     become: yes
 
   rescue:
-    - fail:
+    - name: Fail if retry counter limit is reached
+      fail:
         msg: retry counter limit reached
       when: retry_count | int == _qemu_download_retries | int
 

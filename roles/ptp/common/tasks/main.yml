@@ -5,8 +5,12 @@
 
 - name: Verify if host's environment supports PTP
   block:
+  - name: Get current kernel
+    command: uname -r
+    register: current_kernel
+
   - name: Register kernel ptp settings from /boot/config
-    shell: "grep {{ item }}= /boot/config-`uname -r`"
+    command: "grep {{ item }}= /boot/config-{{ current_kernel.stdout }}"
     loop: "{{ _kernel_ptp_config_vars }}"
     register: ptp_vars
 
@@ -17,7 +21,7 @@
     with_items: "{{ ptp_vars.results }}"
     changed_when: true
 
-  - name: Register heardware timestamp support
+  - name: Register hardware timestamp support
     command: ethtool -T {{ item }}
     with_items: "{{ ptp_port }}"
     register: hardware_timestamp
