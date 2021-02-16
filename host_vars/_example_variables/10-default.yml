@@ -11,11 +11,11 @@
 # --- machine_setup/custom_kernel
 kernel_skip: false  # use this variable to disable custom kernel installation for host
 
-kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo
-kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7.8.2003/os/x86_64/RPM-GPG-KEY-cern
+kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo
+kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/RPM-GPG-KEY-cern
 kernel_package: kernel-rt-kvm
 kernel_devel_package: kernel-rt-devel
-kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
+kernel_version: 3.10.0-1160.11.1.rt56.1145.el7.x86_64
 
 kernel_dependencies_urls: []
 kernel_dependencies_packages: []
@@ -32,8 +32,8 @@ additional_grub_params: ""
 # --- machine_setup/configure_tuned
 tuned_skip: false   # use this variable to skip tuned profile configuration for host
 tuned_packages:
-- tuned-2.11.0-8.el7
-- http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+- tuned-2.11.0-9.el7
+- http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm
 tuned_profile: realtime
 tuned_vars: |
   isolated_cores=2-3
@@ -43,7 +43,7 @@ tuned_vars: |
 
 # -- dpdk
 # provide a package / URL to kernel-devel package
-dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
+dpdk_kernel_devel: "http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/Packages/kernel-devel-3.10.0-1160.el7.x86_64.rpm"
 
 # -- sriov_device_init
 sriov:

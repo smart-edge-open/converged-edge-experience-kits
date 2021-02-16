@@ -26,9 +26,9 @@ name = Docker CE repository" | sudo tee /etc/yum.repos.d/docker.repo
   done
   if [[ ! -e "/etc/yum.repos.d/CentOS-RT.repo" ]];then
     sudo_cmd wget -e http_proxy="$HTTP_PROXY" -e https_proxy="$HTTP_PROXY" \
-      http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo -O /etc/yum.repos.d/CentOS-RT.repo
+      http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo -O /etc/yum.repos.d/CentOS-RT.repo
     sudo_cmd wget -e http_proxy="$HTTP_PROXY" -e https_proxy="$HTTP_PROXY" \
-      http://linuxsoft.cern.ch/cern/centos/7.8.2003/os/x86_64/RPM-GPG-KEY-cern -O /etc/pki/rpm-gpg/RPM-GPG-KEY-cern
+      http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/RPM-GPG-KEY-cern -O /etc/pki/rpm-gpg/RPM-GPG-KEY-cern
   fi
 }
 

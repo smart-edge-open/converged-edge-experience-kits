@@ -7,11 +7,11 @@
 # Can be overridden in host_vars if shouldn't have customized kernel
 kernel_skip: false
 
-kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo
-kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7.8.2003/os/x86_64/RPM-GPG-KEY-cern
+kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo
+kernel_repo_key: http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/RPM-GPG-KEY-cern
 kernel_package: kernel-rt-kvm
 kernel_devel_package: kernel-rt-devel
-kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
+kernel_version: 3.10.0-1160.11.1.rt56.1145.el7.x86_64
 
 # list of URLs to RPMs
 kernel_dependencies_urls: []

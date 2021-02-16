@@ -1069,11 +1069,11 @@ rpm-packages:
   - name: ntpdate
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/ntpdate-4.2.6p5-29.el7.centos.2.x86_64.rpm
   # role: machine_setup/custom_kernel
-  # Install kernel-rt-kvm-3.10.0-1062.12.1.rt56.1042.el7.x86_64 kernel-rt-devel-3.10.0-1062.12.1.rt56.1042.el7.x86_64
+  # Install kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm kernel-rt-devel-3.10.0-1160.11.1.rt56.1145.el7.x86_64
   - name: tuned
-    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/tuned-2.9.0-1.el7fdp.noarch.rpm
+    rpm: http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-2.11.0-9.el7.noarch.rpm
   - name: tuned-profiles-realtime
-    rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/tuned-profiles-realtime-2.9.0-1.el7_5.2.noarch.rpm
+    rpm: http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm
   - name: tuna
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tuna-0.13-9.el7.noarch.rpm
   - name: libnl
@@ -1081,11 +1081,11 @@ rpm-packages:
   - name: python-ethtool
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-ethtool-0.8-8.el7.x86_64.rpm
   - name: kernel-rt
-    rpm: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/x86_64/Packages/kernel-rt-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm
+    rpm: http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/x86_64/Packages/kernel-rt-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm
   - name: kernel-rt-kvm
-    rpm: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/x86_64/Packages/kernel-rt-kvm-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm
+    rpm: http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/x86_64/Packages/kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm
   - name: kernel-rt-devel
-    rpm: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/x86_64/Packages/kernel-rt-devel-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm
+    rpm: http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/x86_64/Packages/kernel-rt-devel-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm
   - name: rtctl
     rpm: http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/rtctl-1.13-2.el7.noarch.rpm
   - name: rt-setup
@@ -1095,7 +1095,7 @@ rpm-packages:
   - name: linux-firmware
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/linux-firmware-20191203-76.gite8a0f4c.el7.noarch.rpm
   # role: docker
-  # Install Docker CE docker-ce-19.03.12 and dependency 
+  # Install Docker CE docker-ce-20.10.2 and dependency
   - name: audit
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/audit-2.8.5-4.el7.x86_64.rpm
   - name: audit-libs
@@ -1105,15 +1105,17 @@ rpm-packages:
   - name: checkpolicy
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/checkpolicy-2.5-8.el7.x86_64.rpm
   - name: containerd.io
-    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.3.7-3.1.el7.x86_64.rpm
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.4.3-3.1.el7.x86_64.rpm
   - name: container-selinux
     rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
   - name: docker-ce
-    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.12-3.el7.x86_64.rpm
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-20.10.2-3.el7.x86_64.rpm
   - name: docker-ce-cli
     rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.13-3.el7.x86_64.rpm
-  - name: docker-ce-cli12
-    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.12-3.el7.x86_64.rpm
+  - name: docker-ce-cli20
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-20.10.2-3.el7.x86_64.rpm
+  - name: docker-ce-rootless-extras
+    rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-rootless-extras-20.10.2-3.el7.x86_64.rpm
   - name: libcgroup
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libcgroup-0.41-21.el7.x86_64.rpm
   - name: libseccomp
@@ -1128,6 +1130,12 @@ rpm-packages:
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python-IPy-0.75-6.el7.noarch.rpm
   - name: setools-libs
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/setools-libs-3.3.8-4.el7.x86_64.rpm
+  - name: slirp4netns
+    rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm
+  - name: fuse-overlayfs
+    rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm
+  - name: fuse3-libs
+    rpm: http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-libs-3.6.1-4.el7.x86_64.rpm
   # Install docker-compose for pip
   # role: kubernetes
   # Install unbound and dependency packages
@@ -1446,9 +1454,9 @@ rpm-packages:
   - name: python3-setuptools
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/python3-setuptools-39.2.0-10.el7.noarch.rpm
   - name: tuned
-    rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/tuned-2.11.0-8.el7.noarch.rpm
+    rpm: http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-2.11.0-9.el7.noarch.rpm
   - name: tuned-profiles-realtime
-    rpm: http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+    rpm: http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm
   - name: libyaml
     rpm: http://mirror.centos.org/centos/7/os/x86_64/Packages/libyaml-0.1.4-11.el7_0.x86_64.rpm
   - name: dwz
@@ -1853,9 +1861,9 @@ other-files:
     #- name: openvswitch-url
     #url: https://github.com/alauda/ovs/releases/download/v2.11.4-1/openvswitch-2.11.4-1.el7.x86_64.rpm
   - name: ubuntu-containerd-url
-    url: https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/containerd.io_1.2.6-3_amd64.deb
+    url: https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/containerd.io_1.4.3-1_amd64.deb
   - name: ubuntu-xenial-url
-    url: https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce-cli_19.03.2~3-0~ubuntu-xenial_amd64.deb
+    url: https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce-cli_20.10.2~3-0~ubuntu-xenial_amd64.deb
   - name: ius-rpm-url
     url: https://repo.ius.io/ius-release-el7.rpm
   - name: virtctl-linux-url
@@ -1863,10 +1871,10 @@ other-files:
   - name: strimzi-kafka-operator-helm-3-chart
     url: https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.19.0/strimzi-kafka-operator-helm-3-chart-0.19.0.tgz
   - name: openssl
-    url: https://www.openssl.org/source/openssl-1.1.1h.tar.gz
+    url: https://www.openssl.org/source/openssl-1.1.1i.tar.gz
   - name: docker-ce
-    url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.12-3.el7.x86_64.rpm
+    url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-20.10.2-3.el7.x86_64.rpm
   - name: docker-ce-cli
-    url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.12-3.el7.x86_64.rpm
+    url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-20.10.2-3.el7.x86_64.rpm
 
   #TBA

@@ -13,4 +13,4 @@ _dpdk_download_url: "http://fast.dpdk.org/rel/{{ _dpdk_name }}.tar.xz"
 _dpdk_download_dest: "/tmp/{{ _dpdk_name }}.tar.xz"
 
 # URL or package name providing kernel-devel package when role `custom_kernel` is disabled (commented) or skipped for specific host (`customize_kernel_skip` variable)
-dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
+dpdk_kernel_devel: "http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/Packages/kernel-devel-3.10.0-1160.el7.x86_64.rpm"

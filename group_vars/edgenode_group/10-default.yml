@@ -13,18 +13,18 @@
 kernel_skip: true
 
 # URL to the rpm repository with the kernel
-kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.8.2003/rt/CentOS-RT.repo
+kernel_repo_url: http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo
 
 # GPG Key to be used with the repository
 kernel_repo_key:
   "{{ 'https://www.elrepo.org/RPM-GPG-KEY-elrepo.org' if calico_ebpf_enabled
-  else 'http://linuxsoft.cern.ch/cern/centos/7.8.2003/os/x86_64/RPM-GPG-KEY-cern' }}"
+  else 'http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/RPM-GPG-KEY-cern' }}"
 # Name of the package with kernel to be installed
 kernel_package: kernel-rt-kvm
 # Name of the kernel's development package
 kernel_devel_package: kernel-rt-devel
 # Version of the kernel.
-kernel_version: 3.10.0-1127.19.1.rt56.1116.el7.x86_64
+kernel_version: 3.10.0-1160.11.1.rt56.1145.el7.x86_64
 
 ## If kernel requires any additional, it should be placed in following variables
 # List of URL to kernel dependencies
@@ -36,14 +36,14 @@ kernel_dependencies_packages: []
 # URL or package name providing non-realtime `kernel-devel` package when role `custom_kernel` is:
 # - disabled (commented), or
 # - skipped for specific host (`customize_kernel_skip` variable)
-# Default value is valid for Centos 7.8-2003. Variable must be updated accordingly if using other version.
-dpdk_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
+# Default value is valid for Centos 7.9-2009. Variable must be updated accordingly if using other version.
+dpdk_kernel_devel: "http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/Packages/kernel-devel-3.10.0-1160.el7.x86_64.rpm"
 
 ## ebpf
 # URL or package name providing `kernel-ml and kernel-ml-devel` package when role `custom_kernel` is:
 # - disabled (commented), or
 # - skipped for specific host (`customize_kernel_skip` variable)
-# Default value is valid for Centos 7.8-2003. Variable must be updated accordingly if using other version.
+# Default value is valid for Centos 7.9-2009. Variable must be updated accordingly if using other version.
 ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-5.el7.elrepo.noarch.rpm"
 
 ## Tuned configuration
@@ -53,8 +53,9 @@ ebpf_kernel_package: "https://www.elrepo.org/elrepo-release-7.0-5.el7.elrepo.noa
 tuned_skip: true
 # Packages to install
 tuned_packages:
-  - tuned-2.11.0-8.el7
-  - http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm
+  - tuned-2.11.0-9.el7
+  - http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm
+
 
 # Profile to be applied
 tuned_profile: realtime

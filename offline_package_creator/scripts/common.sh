@@ -15,7 +15,7 @@ urlDic=(
 [docker]='https://download.docker.com/linux/centos/7/x86_64/stable/Packages/' \
 [ius]='https://repo.ius.io/archive/7/x86_64/packages/' \
 [ius-archive]='https://repo.ius.io/archive/7/x86_64/packages/' \
-[other]='http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/' \
+[other]='http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/' \
 )
 
 progressfilt() {
@@ -304,11 +304,11 @@ opc::download::rpm() {
   do_download "http://mirror.centos.org/centos/7/os/x86_64/Packages/libstdc++-4.8.5-44.el7.x86_64.rpm" 0
   do_download "https://github.com/alauda/ovs/releases/download/2.12.0-5/openvswitch-2.12.0-5.el7.x86_64.rpm" 0
   do_download "https://github.com/alauda/ovs/releases/download/2.12.0-5/ovn-2.12.0-5.el7.x86_64.rpm" 0
-  do_download "http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-2.11.0-8.el7.noarch.rpm" 0
-  do_download "http://ftp.scientificlinux.org/linux/scientific/7.8/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm" 0
-  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm" 0
-  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-kvm-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm" 0
-  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-devel-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm" 0
+  do_download "http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-2.11.0-9.el7.noarch.rpm" 0
+  do_download "http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm" 0
+  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm" 0
+  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm" 0
+  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-devel-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm" 0
 }
 
 # Download the k8s commands from internet
@@ -585,8 +585,8 @@ build::fpga-opae-pacn3000() {
 
   kernel_version=$(uname -r)
   if [[ "$BUILD_OPAE" == "enable" ]];then
-    if [[ "$kernel_version" != "3.10.0-1127.19.1.rt56.1116.el7.x86_64" ]];then
-      echo -n "Update the kernel to kernel-rt-kvm-3.10.0-1127.19.1.rt56.1116.el7.x86_64, do you agree?(Y/N) ";read update_kernel
+    if [[ "$kernel_version" != "3.10.0-1160.11.1.rt56.1145.el7.x86_64" ]];then
+      echo -n "Update the kernel to kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64, do you agree?(Y/N) ";read update_kernel
       update_kernel=$(echo "${update_kernel}" | tr '[:upper:]' '[:lower:]')
       if [[ "$update_kernel" == "y" ]];then
         opc::update_kernel
@@ -677,14 +677,14 @@ opc::update_kernel() {
   tmp_dir=$(mktemp -d)
   # clean tuned version
   sudo_cmd yum remove tuned -y
-  sudo_cmd rpm -ivh "${RPM_DOWNLOAD_PATH}"/tuned-2.11.0-8.el7.noarch.rpm
+  sudo_cmd rpm -ivh "${RPM_DOWNLOAD_PATH}"/tuned-2.11.0-9.el7.noarch.rpm
   tuned_list=(libnl-1.1.4-3.el7.x86_64.rpm  \
                     python-ethtool-0.8-8.el7.x86_64.rpm  \
                     tuna-0.13-9.el7.noarch.rpm  \
-                    tuned-profiles-realtime-2.11.0-8.el7.noarch.rpm)
-  kernel_list=(kernel-rt-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm  \
-                    kernel-rt-kvm-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm  \
-                    kernel-rt-devel-3.10.0-1127.19.1.rt56.1116.el7.x86_64.rpm \
+                    tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm)
+  kernel_list=(kernel-rt-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm  \
+                    kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm  \
+                    kernel-rt-devel-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm \
                     rt-setup-2.0-9.el7.x86_64.rpm)
   for f in "${tuned_list[@]}"
   do
@@ -696,7 +696,7 @@ opc::update_kernel() {
   done
   sudo_cmd yum localinstall -y "$tmp_dir"/* && rm "$tmp_dir" -rf
 
-  sudo_cmd grubby --set-default /boot/vmlinuz-3.10.0-1127.19.1.rt56.1116.el7.x86_64
+  sudo_cmd grubby --set-default /boot/vmlinuz-3.10.0-1160.11.1.rt56.1145.el7.x86_64
   echo -n "Take effect after restart, whether to restart now?(Y/N) ";read choice
   choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
   if [[ "$choice" == "y" ]];then
@@ -709,8 +709,8 @@ build::collectd_fpga_plugin() {
 
   kernel_version=$(uname -r)
   if [[ "$BUILD_COLLECTD_FPGA" == "enable" && ! -z "${DIR_OF_FPGA_ZIP}" ]];then
-    if [[ "$kernel_version" != "3.10.0-1127.19.1.rt56.1116.el7.x86_64" ]];then
-      echo -n "Update the kernel to kernel-rt-kvm-3.10.0-1127.19.1.rt56.1116.el7.x86_64, do you agree?(Y/N) ";read update_kernel
+    if [[ "$kernel_version" != "3.10.0-1160.11.1.rt56.1145.el7.x86_64" ]];then
+      echo -n "Update the kernel to kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64, do you agree?(Y/N) ";read update_kernel
       update_kernel=$(echo "${update_kernel}" | tr '[:upper:]' '[:lower:]')
       if [[ "${update_kernel}" == "y" ]];then
         opc::update_kernel
