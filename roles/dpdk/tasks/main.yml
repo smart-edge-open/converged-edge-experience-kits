@@ -118,6 +118,22 @@
   environment:
     "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
   when: not igb_uio_module.stat.exists
+  ignore_errors: true
+
+- name: check if already compiled after first compilation
+  stat:
+    path: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
+  register: igb_uio_module
+
+# This is a workaround for rare compilation error
+# Lets try to re-compile it again by using shell make
+- name: re-compile again if previous failed
+  shell: >
+    source /etc/profile &&
+    make install T=x86_64-native-linuxapp-gcc "-j{{ nproc_out.stdout|int + 1 }}"
+  args:
+    chdir: "{{ _dpdk_install_dir }}"
+  when: not igb_uio_module.stat.exists
 
 - name: create Ansible dpdk facts.d folder
   file:
