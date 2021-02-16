@@ -39,7 +39,7 @@ def read_cfg(path):
     return config
 
 
-def main():
+def main(): # pylint: disable=too-many-locals
     """
     Function creates archive file with Openness experience kit information and
     send it to controller root directory.
