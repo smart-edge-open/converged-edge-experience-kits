@@ -85,7 +85,7 @@
   become: yes
 
 - name: configure VCAC-A node hostname
-  command: "vcactl config {{ vca_idx | int - 1 }} 0 node-name {{ inventory_hostname }}-vca{{ vca_idx }}"
+  command: "vcactl config {{ vca_idx | int - 1 }} 0 node-name {{ inventory_hostname | lower }}-vca{{ vca_idx }}"
   changed_when: true
   loop_control:
     loop_var: vca_idx
