@@ -606,14 +606,14 @@ build::fpga-opae-pacn3000() {
 
 build::sriov_network() {
   cd "${CODE_DOWNLOAD_PATH}"/sriov-network-device-plugin
-  make image HTTP_PROXY="${HTTP_PROXY}" HTTP_PROXYS="${HTTP_PROXY}" \
+  make image HTTP_PROXY="${HTTP_PROXY}" HTTPS_PROXY="${HTTPS_PROXY}" \
     || opc::log::error "make image sriov_network_device_plugin"
   docker save nfvpe/sriov-device-plugin:latest > "$IMAGE_DOWNLOAD_PATH"/sriov-device-plugin.tar.gz
 }
 
 build::sriov_cni() {
   cd "$CODE_DOWNLOAD_PATH"/sriov-cni
-  make image HTTP_PROXY="${HTTP_PROXY}" HTTP_PROXYS="${HTTP_PROXY}" \
+  make image HTTP_PROXY="${HTTP_PROXY}" HTTPS_PROXY="${HTTPS_PROXY}" \
     || opc::log::error "make image sriov_cni"
   docker save nfvpe/sriov-cni:latest > "$IMAGE_DOWNLOAD_PATH"/sriov_cni.tar.gz
 }

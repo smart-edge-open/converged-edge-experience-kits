@@ -25,6 +25,7 @@ GITHUB_TOKEN=""
 
 # User add ones
 HTTP_PROXY="" #Add proxy first
+HTTPS_PROXY="" #Add proxy for HTTPS
 GIT_PROXY=""
 
 # location of OPAE_SDK_1.3.7-5_el7.zip

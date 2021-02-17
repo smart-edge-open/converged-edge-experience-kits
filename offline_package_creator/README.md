@@ -71,6 +71,7 @@ To configure first and the configuration file is located in "scripts/initrc"
 | GITHUB_USERNAME | must not be nil | Your name of gitHub account |
 | GITHUB_TOKEN | must not be nil | The token of accessing github.[How to set token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) |
 | HTTP_PROXY | must not be nill | Proxy |
+| HTTPS_PROXY | must not be nill | Prox for HTTPS |
 | GIT_PROXY | must not be nill | In most cases, the value is the same as HTTP proxy |
 | BUILD_BIOSFW | enable\|disable | Enable build the image of 'biosfw' (default: disable), if enable it, you should set the value of 'DIR_OF_BIOSFW_ZIP' |
 | BUILD_OPAE | enable\|disable | Enable build the image of 'opae' (default: disable), if enable it, you should set the value of 'DIR_OF_OPAE_ZIP' |
@@ -106,7 +107,8 @@ GITHUB_TOKEN="1111234rr47af7f1130d385f912fcfafdafdaf"
 
 # User add ones
 HTTP_PROXY="http://example.com:1234" #Add proxy first
-GIT_PROXY="http://example.com:2345"
+HTTPS_PROXY="http://example.com:2345" #Add proxy for HTTPS
+GIT_PROXY="http://example.com:3456"
 
 # location of OPAE_SDK_1.3.7-5_el7.zip
 BUILD_OPAE=enable
