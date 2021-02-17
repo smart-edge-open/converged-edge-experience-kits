@@ -13,7 +13,7 @@
   block:
   - name: load biosfw vars
     include_vars:
-      file: ../roles/biosfw/node/defaults/main.yml
+      file: "{{ role_path }}/defaults/main.yml"
       name: defaults
   - name: check syscfg_package.zip
     stat:
@@ -24,9 +24,11 @@
     fail:
       msg: |
         BIOSFW feature enabled, but the SYSCFG package is missing.
-        It is expected in: {{ playbook_dir }}/{{ defaults._syscfg_local_path | replace('./', '') }}
+        It is expected in: {{ defaults._syscfg_local_path }}
     when: not biosfw_syscfg_package_stat.stat.exists
   when: ne_biosfw_enable | default(False)
+  vars:
+    role_path: "{{ playbook_dir }}/roles/biosfw/node"
 
 - name: check Hyperthreading state
   block:
