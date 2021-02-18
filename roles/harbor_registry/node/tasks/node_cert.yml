@@ -7,7 +7,9 @@
     path: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}
     state: directory
     mode: '0755'
+  become: yes
 
 - name: copy docker registry cert to VCA node
   command: "scp -r /etc/docker/certs.d {{ vca_node_ip }}:/etc/docker/"
   when: vca_node_ip is defined
+  become: yes

@@ -8,6 +8,7 @@
   ignore_errors: yes
   register: get_release_harbor
   changed_when: false
+  become: yes
 
 - name: Set Git Repo URL
   set_fact:
@@ -16,13 +17,6 @@
 
 - name: harbor installation
   block:
-  - name: create directory for copying certificate
-    file:
-      path: "{{ _git_repo_dest_harbor }}"
-      state: directory
-      mode: '0755'
-    changed_when: true
-
   - name: download helm-harbor repo
     git:
       repo: "{{ _git_repo_harbor }}"
@@ -51,13 +45,13 @@
       src: values.j2
       dest:  "{{ _git_repo_dest_harbor }}/values.yaml"
       mode: '0755'
+    become: yes
 
   - name: make pv disk
     file:
       path: "{{ _disk_dest_harbor }}/{{ item }}"
       state: directory
       mode: '0700'
-    changed_when: true
     with_items:
       - harbor-disk1
       - harbor-disk2
@@ -72,10 +66,10 @@
       src: templates/disks.j2
       dest:  "{{ _git_repo_dest_harbor }}/disks.yaml"
       mode: '0755'
+    become: yes
 
   - name: create namespace for harbor
     command: kubectl create namespace harbor
-    changed_when: true
     ignore_errors: yes
 
   - name: create PersistentVolume for harbor
@@ -88,5 +82,4 @@
     args:
       chdir: "{{ _git_repo_dest_harbor }}"
     ignore_errors: no
-    changed_when: true
   when: get_release_harbor.rc != 0
