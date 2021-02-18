@@ -2,126 +2,152 @@
 # Copyright (c) 2020 Intel Corporation
 
 - name: load harbor-registry variables
-  include_vars: ../../../harbor_registry/controlplane/defaults/main.yml
+  include_vars: "{{ playbook_dir }}/roles/harbor_registry/controlplane/defaults/main.yml"
 
-# - name: setup gitconfig
-#   include_tasks:  ../../../git_repo/tasks/gitconfig_bootstrap.yml
+- name: create temporary custom .openness_gitconfig
+  include_tasks: "{{ playbook_dir }}/roles/git_repo/tasks/gitconfig_bootstrap.yml"
 
-- name: create directory for emco repo
-  file:
-    path: /opt/emco/
-    state: directory
-    mode: "0755"
+- name: checkout EMCO repository
+  block:
+    - debug:
+        msg: "Using git token for EMCO repository checkout"
+      when: git_repo_token|length > 0
+
+    - name: clone emco repo
+      git:
+        repo: "{{ _emco.repo }}"
+        dest: "{{ _emco.dest }}"
+        clone: yes
+        update: no
+        version: "{{ _emco.commit }}"
+
+  always:
+    - name: remove .openness_gitconfig
+      include_tasks:  "{{ playbook_dir }}/roles/git_repo/tasks/gitconfig_remove.yml"
+    - name: remove emco repo
+      file:
+        path: "{{ _emco.dest }}"
+        state: absent
+      when: emco_repo_cleanup
+      changed_when: true
+      become: yes
+
+- name: get serviceBaseImageName
+  shell: set -o pipefail && cat config/*.txt | grep 'SERVICE_BASE_IMAGE_NAME' | cut -d'=' -f2
+  args:
+    chdir: "{{ _emco.dest }}"
+  register: serviceBaseImageName
+  changed_when: false
+  become: yes
+
+- name: get serviceBaseImageVersion
+  shell: set -o pipefail && cat config/*.txt  | grep 'SERVICE_BASE_IMAGE_VERSION' | cut -d'=' -f2
+  args:
+    chdir: "{{ _emco.dest }}"
+  register: serviceBaseImageVersion
+  changed_when: false
+  become: yes
+
+- name: Set facts for EMCO service base image
+  set_fact:
+    service_base_image_name: "{{ serviceBaseImageName.stdout }}"
+    service_base_image_version: "{{ serviceBaseImageVersion.stdout }}"
+
+- name: pull EMCO service base image
+  docker_image:
+    name: "{{ service_base_image_name }}{{ service_base_image_version }}"
+    source: pull
+
+- name: tag EMCO service base image
+  docker_image:
+    name: "{{ service_base_image_name }}{{ service_base_image_version }}"
+    repository: "{{ _emco.registryPrefix }}{{ service_base_image_name }}{{ service_base_image_version }}"
+
+- name: push EMCO service base image to harbor repository
+  docker_image:
+    name: "{{ _emco.registryPrefix }}{{ service_base_image_name }}{{ service_base_image_version }}"
+    push: yes
+
+- name: Build EMCO 'build-base' target with EMCODOCKERREPO
+  make:
+    chdir: "{{ _emco.dest }}"
+    target: build-base
+    params:
+      EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+  register: buildBase
+
+- name: Build EMCO 'all' target with EMCODOCKERREPO (Wait about ten minutes here)
+  make:
+    chdir: "{{ _emco.dest }}"
+    target: all
+    params:
+      EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+  register: all
+
+- name: push all of EMCO microservice images to private/harbor registry
+  command: "{{ _emco.dest }}/scripts/deploy_emco.sh latest"
+  args:
+    chdir: "{{ _emco.dest }}"
+  environment:
+      EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+      BUILD_CAUSE: "{{ _emco.buildCause }}"
+      EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
+  changed_when: false
+
+- name: Ensure repository is set in deployments/helm/emcoOpenNESS/common/values.yaml
+  lineinfile:
+    path: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS/common/values.yaml"
+    regexp: '^repository:'
+    line: 'repository: "{{ _emco.registryPrefix }}"'
+
+- name: Build 'clean' target in helm/emcoOpenNESS
+  make:
+    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
+    target: clean
+  register: clean
+
+- name: Build 'all' target in helm/emcoOpenNESS (Wait about several minutes here)
+  make:
+    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
+    target: all
+  register: all
+
+- name: deploy pods on master in K8s cluster
+  command: kubectl taint nodes --all node-role.kubernetes.io/master-
   changed_when: true
-  become: yes
-
-- name: clone emco repo
-  git:
-    repo: "{{ _emco.repo }}"
-    dest: "{{ _emco.dest }}"
-    clone: yes
-    update: no
-    version: "{{ _emco.commit }}"
-  become: yes
-
-#- name: clone emco repo
-#  git:
-#    repo: "https://{{ git_repo_token }}@github.com/otcshare/EMCO.git"
-#    dest: "/opt/emco/"
-#    update: no
-#    version: main
-#  register: result
-
-- name: replace deploy_emco.sh
-  template:
-    src: deploy_emco.j2
-    dest: "{{ _emco.dest }}/scripts/deploy_emco.sh"
-    mode: "0744"
-  become: yes
-
-# use local base image instead of base-image for CICD to build rest of images
-- name: replace Makefile
-  template:
-    src: Makefile.j2
-    dest: "{{ _emco.dest }}/Makefile"
-    mode: "0744"
-  become: yes
-
-- name: replace build-base-images.sh
-  template:
-    src: build-base-images.sh
-    dest: "{{ _emco.dest }}/scripts/build-base-images.sh"
-    mode: "0744"
-  become: yes
-
-- name: replace Dockerfile.build-base
-  template:
-    src: Dockerfile.build-base
-    dest: "{{ _emco.dest }}/build/docker/Dockerfile.build-base"
-    mode: "0744"
-  become: yes
-
-- name: build base image
-  shell: source /etc/profile && bash "{{ _emco.dest }}/scripts/build-base-images.sh"
-  args:
-    chdir: "{{ _emco.dest }}"
-  changed_when: false
-  become: yes
-
-- name: build emco image & push image to private/harbor registry
-  shell: source /etc/profile && make deploy
-  args:
-    chdir: "{{ _emco.dest }}"
-  changed_when: false
-  become: yes
+  ignore_errors: yes
+  when: emco_single_node_cluster
 
 - name: create namespace for emco
   command: kubectl create namespace emco
   changed_when: true
   ignore_errors: yes
-  become: yes
-
-- name: generate emco values.yaml and replace default
-  template:
-    src: values.j2
-    dest: "{{ _emco.dest }}/deployments/helm/emcoCI/values.yaml"
-    mode: "0744"
-  become: yes
-
-- name: add tolerations for emco_deployments and replace default
-  copy:
-    src: emco_deployments.j2
-    dest: "{{ _emco.dest }}/deployments/helm/emcoCI/templates/deployment.yaml"
-    mode: "0744"
-  become: yes
 
 - name: helm install emco with dbAuthEnable false
-  command: helm install emco-app -f values.yaml -set enableDbAuth=false . -n emco
+  command: helm install emco-app -set enableDbAuth=false ./dist/packages/emco-0.1.0.tgz -n emco
   args:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoCI/"
+    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
   ignore_errors: yes
   changed_when: false
   when: not emco_db_auth_enable
-  become: yes
 
 - name: helm install emco with dbAuthEnable true
   command: |
-    helm install emco-app -f values.yaml --set enableDbAuth=true \
+    helm install emco-app --set enableDbAuth=true \
     --set db.rootPassword={{ emco_db_password }} \
     --set db.emcoPassword={{ emco_db_password }} \
     --set contextdb.rootPassword={{ emco_db_password }} \
-    --set contextdb.emcoPassword={{ emco_db_password }} . -n emco
+    --set contextdb.emcoPassword={{ emco_db_password }} \
+    ./dist/packages/emco-0.1.0.tgz -n emco
   args:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoCI/"
+    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
   ignore_errors: yes
   changed_when: false
   when: emco_db_auth_enable
-  become: yes
 
 - name: add emcoctl to go path
-  shell: mkdir -p  ~/go/bin; cp /opt/emco/bin/emcoctl/emcoctl /root/go/bin/
+  shell: "mkdir -p  {{ ansible_env.HOME }}/go/bin; cp {{ _emco.dest }}/bin/emcoctl/emcoctl {{ ansible_env.HOME }}/go/bin/"
   args:
     chdir: "{{ _emco.dest }}"
     warn: false
   changed_when: false
-  become: yes

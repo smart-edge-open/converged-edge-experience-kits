@@ -3,9 +3,12 @@
 
 ---
 
+- name: load harbor-registry variables
+  include_vars: "{{ playbook_dir }}/roles/harbor_registry/controlplane/defaults/main.yml"
+
 - name: delete emcoctl binary in go path
   file:
-    path: /root/go/bin/emcoctl
+    path: "{{ ansible_env.HOME }}go/bin/emcoctl"
     state: absent
   changed_when: false
   ignore_errors: yes
@@ -14,7 +17,7 @@
 - name: cleanup emco helm
   command: helm uninstall emco-app -n emco
   args:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoCI/"
+    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
   changed_when: false
   ignore_errors: yes
   become: yes
