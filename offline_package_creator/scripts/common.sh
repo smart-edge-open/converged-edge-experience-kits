@@ -336,11 +336,11 @@ repo_gpgcheck = 1" | sudo tee /etc/yum.repos.d/kubernetes.repo
   sudo_cmd yumdownloader cri-tools-1.13.0-0 --resolve --destdir="$tmp_dir"
   sudo_cmd yumdownloader kubernetes-cni-0.8.7-0 --resolve --destdir="$tmp_dir"
   # Download kubeadm-1.18.4
-  sudo_cmd yumdownloader kubeadm-1.19.3-0 --resolve --destdir="$tmp_dir"
+  sudo_cmd yumdownloader kubeadm-1.20.0-0 --resolve --destdir="$tmp_dir"
   # Download kubelet-1.18.4
-  sudo_cmd yumdownloader kubelet-1.19.3-0 --resolve --destdir="$tmp_dir"
+  sudo_cmd yumdownloader kubelet-1.20.0-0 --resolve --destdir="$tmp_dir"
   # Download kubectl-1.18.4
-  sudo_cmd yumdownloader kubectl-1.19.3-0 --resolve --destdir="$tmp_dir"
+  sudo_cmd yumdownloader kubectl-1.20.0-0 --resolve --destdir="$tmp_dir"
 
   # Rename
   files=$(ls "$tmp_dir")
