@@ -3,6 +3,6 @@
 
 ---
 
-_opae_local_path_stp: "./opae_fpga/OPAE_SDK_1.3.7-5_el7.zip"
+_opae_local_path_stp: "{{ role_path }}/../../../../opae_fpga/OPAE_SDK_1.3.7-5_el7.zip"
 _opae_remote_path: "{{ _git_repo_dest }}/build/fpga_opae/"
 _vran_image_dir: "/temp/vran_images/"
