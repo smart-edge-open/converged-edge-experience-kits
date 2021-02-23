@@ -14,21 +14,12 @@
   ignore_errors: yes
   become: yes
 
-- name: cleanup emco helm
-  command: helm uninstall emco-app -n emco
+- name: Uninstall EMCO on the K8s cluster
+  command: "./emco-openness-helm-install.sh uninstall"
   args:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
+    chdir: "{{ _emco.dest }}/bin/helm"
   changed_when: false
-  ignore_errors: yes
-  become: yes
-
-- name: delete emco repo
-  file:
-    path: "{{ _emco.dest }}"
-    state: absent
-  changed_when: false
-  ignore_errors: yes
-  become: yes
+  ignore_errors: no
 
 - name: delete clusters_config used by emco
   file:

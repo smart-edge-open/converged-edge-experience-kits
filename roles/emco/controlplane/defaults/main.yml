@@ -8,5 +8,5 @@ _emco:
   commit: main
   dest: /opt/openness/emco
   registryPrefix: "{{ _registry_host }}:{{ _registry_port }}/intel/"
-  buildCause: RELEASE
+  buildCause: DEV_TEST
   emcoSrvRelease: latest

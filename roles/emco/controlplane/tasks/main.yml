@@ -24,13 +24,6 @@
   always:
     - name: remove .openness_gitconfig
       include_tasks:  "{{ playbook_dir }}/roles/git_repo/tasks/gitconfig_remove.yml"
-    - name: remove emco repo
-      file:
-        path: "{{ _emco.dest }}"
-        state: absent
-      when: emco_repo_cleanup
-      changed_when: true
-      become: yes
 
 - name: get serviceBaseImageName
   shell: set -o pipefail && cat config/*.txt | grep 'SERVICE_BASE_IMAGE_NAME' | cut -d'=' -f2
@@ -76,41 +69,15 @@
       EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
   register: buildBase
 
-- name: Build EMCO 'all' target with EMCODOCKERREPO (Wait about ten minutes here)
+- name: Build EMCO 'deploy' target with EMCODOCKERREPO (Wait about ten minutes here)
   make:
     chdir: "{{ _emco.dest }}"
-    target: all
+    target: deploy
     params:
       EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
-  register: all
-
-- name: push all of EMCO microservice images to private/harbor registry
-  command: "{{ _emco.dest }}/scripts/deploy_emco.sh latest"
-  args:
-    chdir: "{{ _emco.dest }}"
-  environment:
-      EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
       BUILD_CAUSE: "{{ _emco.buildCause }}"
-      EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
-  changed_when: false
-
-- name: Ensure repository is set in deployments/helm/emcoOpenNESS/common/values.yaml
-  lineinfile:
-    path: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS/common/values.yaml"
-    regexp: '^repository:'
-    line: 'repository: "{{ _emco.registryPrefix }}"'
-
-- name: Build 'clean' target in helm/emcoOpenNESS
-  make:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
-    target: clean
-  register: clean
-
-- name: Build 'all' target in helm/emcoOpenNESS (Wait about several minutes here)
-  make:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
-    target: all
-  register: all
+      # EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
+  register: deploy
 
 - name: deploy pods on master in K8s cluster
   command: kubectl taint nodes --all node-role.kubernetes.io/master-
@@ -118,31 +85,34 @@
   ignore_errors: yes
   when: emco_single_node_cluster
 
-- name: create namespace for emco
-  command: kubectl create namespace emco
-  changed_when: true
-  ignore_errors: yes
-
-- name: helm install emco with dbAuthEnable false
-  command: helm install emco-app -set enableDbAuth=false ./dist/packages/emco-0.1.0.tgz -n emco
+- name: Installing EMCO on the K8s cluster with enableDbAuth=false
+  command: "./emco-openness-helm-install.sh -s 'enableDbAuth=false' install"
   args:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
-  ignore_errors: yes
+    chdir: "{{ _emco.dest }}/bin/helm"
+  environment:
+      EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+      BUILD_CAUSE: "{{ _emco.buildCause }}"
+      # EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
   changed_when: false
+  ignore_errors: no
   when: not emco_db_auth_enable
 
-- name: helm install emco with dbAuthEnable true
-  command: |
-    helm install emco-app --set enableDbAuth=true \
-    --set db.rootPassword={{ emco_db_password }} \
-    --set db.emcoPassword={{ emco_db_password }} \
-    --set contextdb.rootPassword={{ emco_db_password }} \
-    --set contextdb.emcoPassword={{ emco_db_password }} \
-    ./dist/packages/emco-0.1.0.tgz -n emco
+- name: Installing EMCO on the K8s cluster with enableDbAuth=true
+  command: >
+    ./emco-openness-helm-install.sh -s 'enableDbAuth=true
+    --set db.rootPassword={{ emco_db_password }}
+    --set db.emcoPassword={{ emco_db_password }}
+    --set contextdb.rootPassword={{ emco_db_password }}
+    --set contextdb.emcoPassword={{ emco_db_password }}'
+    install
   args:
-    chdir: "{{ _emco.dest }}/deployments/helm/emcoOpenNESS"
-  ignore_errors: yes
+    chdir: "{{ _emco.dest }}/bin/helm"
+  environment:
+    EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+    BUILD_CAUSE: "{{ _emco.buildCause }}"
+    # EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
   changed_when: false
+  ignore_errors: no
   when: emco_db_auth_enable
 
 - name: add emcoctl to go path
