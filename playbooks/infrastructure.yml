@@ -8,20 +8,31 @@
   any_errors_fatal: true
 
   roles:
-    - role: machine_setup/os_setup
-    - role: time/ntp
+    - role: infrastructure/os_setup
+    - role: infrastructure/time_setup_ntp
       when: ntp_enable | default(False)
-    - role: time/verify
+    - role: infrastructure/time_verify_ntp
       when: "'edgenode_group' in group_names"
-    - role: machine_setup/custom_kernel
+    - role: infrastructure/custom_kernel
       when: not (kernel_skip | default(True))
-    - role: machine_setup/grub
+    - role: infrastructure/grub
 
-    - role: machine_setup/configure_tuned
+    - role: infrastructure/configure_tuned
       when: not (tuned_skip | default(False))
-    - role: machine_setup/conditional_reboot
+    - role: infrastructure/conditional_reboot
 
-    - role: git_repo
+    - role: infrastructure/git_repo
+    - role: infrastructure/golang
+    - role: infrastructure/docker
 
-    - role: golang
-    - role: docker
+- hosts: controller_group
+  any_errors_fatal: true
+  roles:
+    - role: infrastructure/ptp/controlplane
+      when: ptp_sync_enable | default(False)
+
+- hosts: edgenode_group
+  any_errors_fatal: true
+  roles:
+    - role: infrastructure/ptp/node
+      when: ptp_sync_enable | default(False)

@@ -196,11 +196,12 @@
         prefix: create
       register: tmp_dir2
 
-    - name: Instal create repo
+    - name: Install create repo
       yum:
         name: "{{ item }}"
         state: present
       with_items: "{{ _create_repo_packages }}"
+      become: true
 
     - name: Createrepo
       command: createrepo {{ _http_server_path }} --excludes='pkg/*' --excludes='mod/*'

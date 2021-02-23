@@ -4,6 +4,8 @@
 ---
 
 # Playbook for post Network Edge deployment
+
+
 - hosts: controller_group
   any_errors_fatal: true
 
@@ -13,19 +15,25 @@
         _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
 
   roles:
-    - role: kafka
+    - role: applications/kafka
       when: eaa_enable | default(True)
+    - role: applications/openness/controlplane
 
-    - role: openness/controlplane
-
-    - role: istio
-      when: ne_istio_enable | default(False)
-
-    - role: video_analytics_services
+    - role: applications/video_analytics_services
       when: video_analytics_services_enable | default(False)
 
+    - role: applications/emco/controlplane
+      when: emco_enable | default(False)
 
 - hosts: edgenode_group
   any_errors_fatal: true
   roles:
-    - role: openness/node
+    - role: applications/openness/node
+
+
+- hosts: controller_group
+  any_errors_fatal: true
+  roles:
+    # VAS deployment must happen after openness/node and must be run on the same node as openness/node.
+    - role: applications/video_analytics_services
+      when: video_analytics_services_enable | default(False)

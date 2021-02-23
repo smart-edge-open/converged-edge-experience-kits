@@ -4,7 +4,7 @@
 ---
 
 - name: include Harbor registry vars
-  include_vars: ../../../harbor_registry/controlplane/defaults/main.yml
+  include_vars: ../../../kubernetes/harbor_registry/controlplane/defaults/main.yml
 
 - name: check if collectd already exists
   command: helm status collectd -n telemetry

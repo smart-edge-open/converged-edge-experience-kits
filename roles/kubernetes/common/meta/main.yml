@@ -4,4 +4,4 @@
 ---
 
 dependencies:
-- docker
+- role: infrastructure/docker

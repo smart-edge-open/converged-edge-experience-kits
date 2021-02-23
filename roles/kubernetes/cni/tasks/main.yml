@@ -63,7 +63,7 @@
 
 - name: apply harbor node role
   include_role:
-    name: "harbor_registry/node"
+    name: "kubernetes/harbor_registry/node"
 
 
 - name: multiple CNIs

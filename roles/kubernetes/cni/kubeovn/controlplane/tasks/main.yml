@@ -4,7 +4,7 @@
 ---
 - name: include dpdk role
   include_role:
-    name: dpdk
+    name: infrastructure/dpdk
   when: kubeovn_dpdk and single_node_deployment | default(false)
 
 - name: open kube-ovn firewall rules

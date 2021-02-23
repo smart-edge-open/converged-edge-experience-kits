@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: enable or disable certificate signer/requester
+  set_fact:
+    cert_enabled: "{{ (eaa_enable or dns_enable or ('kubeovn' in kubernetes_cnis)) | bool }}"
+    _gitconfig_bootstrap_path: "{{ role_path }}/../../../infrastructure/git_repo/tasks/gitconfig_bootstrap.yml"
+    _gitconfig_remove_path: "{{ role_path }}/../../../infrastructure/git_repo/tasks/gitconfig_remove.yml"

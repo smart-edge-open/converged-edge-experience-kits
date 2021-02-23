@@ -28,7 +28,7 @@
     when: not biosfw_syscfg_package_stat.stat.exists
   when: ne_biosfw_enable | default(False)
   vars:
-    role_path: "{{ playbook_dir }}/roles/biosfw/node"
+    role_path: "{{ playbook_dir }}/roles/kubernetes/biosfw/node"
 
 - name: check Hyperthreading state
   block:

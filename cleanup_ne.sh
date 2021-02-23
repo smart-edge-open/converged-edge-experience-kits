@@ -55,11 +55,11 @@ fi
 limit=""
 filter="${1:-}"
 
+playbook="network_edge_cleanup.yml"
+
 if [[ "${flavor}" == central_orchestrator ]]; then
-    playbook="network_edge_orchestrator_cleanup.yml"
     limit=$(get_limit "c")
 else
-    playbook="network_edge_cleanup.yml"
     limit=$(get_limit "${filter}")
 fi
 

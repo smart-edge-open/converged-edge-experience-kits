@@ -3,7 +3,7 @@
 
 ---
 dependencies:
-  - role: sriov_device_init
+  - role: infrastructure/sriov_device_init
     vars:
       _git_repo_dest: "{{ openness_dir }}/edgenode"
     when: single_node_deployment | default(false)

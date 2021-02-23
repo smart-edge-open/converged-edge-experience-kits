@@ -9,16 +9,28 @@
   # - multus
   # - sriov/controlplane
 
+  - name: emco cleanup
+    block:
+    - name: load emco variables
+      include_vars: ./roles/applications/emco/controlplane/defaults/main.yml
+    - name: emco cleanup
+      include_tasks: ./roles/applications/emco/controlplane/tasks/clean.yml
+    vars:
+      - role_path: "{{ playbook_dir }}/roles/applications/emco/"
+    when: emco_enable | default(False)
+
   - name: video analytics services cleanup
-    include_tasks: ./roles/video_analytics_services/tasks/cleanup.yml
+    include_tasks: ./roles/applications/video_analytics_services/tasks/cleanup.yml
+    vars:
+      - role_path: "{{ playbook_dir }}/roles/applications/video_analytics_services/"
     when: video_analytics_services_enable | default(False)
 
   - name: istio cleanup
     block:
     - name: load istio variables
-      include_vars: ./roles/istio/defaults/main.yml
+      include_vars: ./roles/kubernetes/istio/defaults/main.yml
     - name: cleanup istio
-      include_tasks: ./roles/istio/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/istio/tasks/cleanup.yml
     when: ne_istio_enable | default(False)
 
   - name: grafana cleanup
@@ -38,77 +50,81 @@
   - name: ptp sychronization cleanup
     block:
     - name: load ptp sync variables
-      include_vars: ./roles/ptp/common/defaults/main.yml
+      include_vars: ./roles/infrastructure/ptp/common/defaults/main.yml
     - name: ptp synchronization cleanup
-      include_tasks: ./roles/ptp/common/tasks/cleanup.yml
+      include_tasks: ./roles/infrastructure/ptp/common/tasks/cleanup.yml
     when: ptp_sync_enable | default(False)
 
   - name: OPAE FPGA cleanup
     block:
     - name: load fpga variables
-      include_vars: ./roles/opae_fpga/controlplane/defaults/main.yml
+      include_vars: ./roles/kubernetes/opae_fpga/controlplane/defaults/main.yml
     - name: cleanup fpga
-      include_tasks: ./roles/opae_fpga/controlplane/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/opae_fpga/controlplane/tasks/cleanup.yml
     when: ne_opae_fpga_enable | default(False)
 
   - name: uninstall hddl
-    include_tasks: ./roles/hddl/network_edge/controlplane/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/hddl/network_edge/controlplane/tasks/cleanup.yml
     when: ne_hddl_enable | default(False)
 
   - name: load kubevirt variables
-    include_vars: ./roles/kubevirt/controlplane/defaults/main.yml
+    include_vars: ./roles/kubernetes/kubevirt/controlplane/defaults/main.yml
 
   - name: cleanup multus-cni
     include_tasks: ./roles/kubernetes/cni/multus/controlplane/tasks/cleanup.yml
 
   - name: cleanup kubevirt
-    include_tasks: ./roles/kubevirt/controlplane/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/kubevirt/controlplane/tasks/cleanup.yml
 
   - name: CPU Manager for Kubernetes cleanup
     block:
     - name: load cmk variables
-      include_vars: ./roles/cmk/controlplane/defaults/main.yml
+      include_vars: ./roles/kubernetes/cmk/controlplane/defaults/main.yml
     - name: cleanup cmk
-      include_tasks: ./roles/cmk/controlplane/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/cmk/controlplane/tasks/cleanup.yml
     when: ne_cmk_enable | default(False)
 
   - name: load biosfw variables
-    include_vars: ./roles/biosfw/controlplane/defaults/main.yml
+    include_vars: ./roles/kubernetes/biosfw/controlplane/defaults/main.yml
 
   - name: cleanup biosfw
-    include_tasks: ./roles/biosfw/controlplane/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/biosfw/controlplane/tasks/cleanup.yml
 
   - name: Node Feature Discovery cleanup
     block:
     - name: load nfd variables
-      include_vars: ./roles/nfd/defaults/main.yml
+      include_vars: ./roles/kubernetes/nfd/defaults/main.yml
     - name: cleanup nfd
-      include_tasks: ./roles/nfd/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/nfd/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
 
   - name: load harbor_registry variables
-    include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
+    include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
 
   - name: cleanup harbor_registry
-    include_tasks: ./roles/harbor_registry/controlplane/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/harbor_registry/controlplane/tasks/cleanup.yml
 
   - name: load network edge variables
-    include_vars: ./roles/openness/controlplane/defaults/main.yml
+    include_vars: ./roles/applications/openness/controlplane/defaults/main.yml
 
   - name: cleanup network edge
-    include_tasks: ./roles/openness/controlplane/tasks/cleanup.yml
+    include_tasks: ./roles/applications/openness/controlplane/tasks/cleanup.yml
 
   - name: cleanup prometheus
     include_tasks: ./roles/telemetry/prometheus/tasks/cleanup.yml
+    when: telemetry_prometheus_enable | d(True)
 
   - name: cleanup otel collector
     include_tasks: ./roles/telemetry/opentelemetry/controlplane/tasks/cleanup.yml
+    when: telemetry_opentelemetry_enable | d(True)
 
   - name: cleanup TAS
     include_tasks: ./roles/telemetry/tas/tasks/cleanup.yml
+    when: telemetry_tas_enable | d(True)
 
   - name: cleanup cAdvisor
     include_tasks: ./roles/telemetry/cadvisor/controlplane/tasks/cleanup.yml
+    when: telemetry_cadvisor_enable | d(True)
 
   - name: kubernetes dashboard cleanup
     include_tasks: ./roles/kubernetes/dashboard/tasks/cleanup.yml
@@ -118,14 +134,17 @@
     include_tasks: ./roles/telemetry/certs/tasks/cleanup.yml
 
   - name: FPGA config cleanup
-    include_tasks: ./roles/bb_config/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/bb_config/tasks/cleanup.yml
     when: fpga_sriov_userspace_enable | default(False)
 
-  - name: load Kafka variables
-    include_vars: ./roles/kafka/defaults/main.yml
+  - name: cleanup kafka
+    block:
+      - name: load Kafka variables
+        include_vars: ./roles/applications/kafka/defaults/main.yml
 
-  - name: Kafka Cluster cleanup
-    include_tasks: ./roles/kafka/tasks/cleanup.yml
+      - name: Kafka Cluster cleanup
+        include_tasks: ./roles/applications/kafka/tasks/cleanup.yml
+    when: eaa_enable | d(True)
 
   - name: helm cleanup
     block:
@@ -164,25 +183,26 @@
     include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
 
   - name: load docker variables
-    include_vars: ./roles/docker/defaults/main.yml
+    include_vars: ./roles/infrastructure/docker/defaults/main.yml
 
   - name: prune docker
-    include_tasks: ./roles/docker/tasks/prune.yml
+    include_tasks: ./roles/infrastructure/docker/tasks/prune.yml
 
   - name: uninstall docker
-    include_tasks: ./roles/docker/tasks/uninstall.yml
+    include_tasks: ./roles/infrastructure/docker/tasks/uninstall.yml
 
   - name: load golang variables
-    include_vars: ./roles/golang/defaults/main.yml
+    include_vars: ./roles/infrastructure/golang/defaults/main.yml
 
   - name: cleanup | include golang cleanup.yml
-    include_tasks: ./roles/golang/tasks/cleanup.yml
+    include_tasks: ./roles/infrastructure/golang/tasks/cleanup.yml
 
-  - name: load git variables
-    include_vars: ./roles/git_repo/defaults/main.yml
+  - block:
+      - name: load git variables
+        include_vars: ./roles/infrastructure/git_repo/defaults/main.yml
 
-  - name: cleanup git repos
-    include_tasks: ./roles/git_repo/tasks/cleanup.yml
+      - name: cleanup git repos
+        include_tasks: ./roles/infrastructure/git_repo/tasks/cleanup.yml
 
   - name: cleanup git
     yum:
@@ -191,7 +211,7 @@
     become: yes
 
   - name: rmd controller cleanup
-    include_tasks: ./roles/rmd/common/tasks/cleanup.yml
+    include_tasks: ./roles/kubernetes/rmd/common/tasks/cleanup.yml
     when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_group
@@ -202,9 +222,9 @@
     - name: cleanup acc100 dpdk init app
       block:
       - name: load acc100 dpdk init app variables
-        include_vars: ./roles/init_app_acc100/defaults/main.yml
+        include_vars: ./roles/infrastructure/init_app_acc100/defaults/main.yml
       - name: load acc100 dpdk init app
-        include_tasks: ./roles/init_app_acc100/tasks/cleanup.yml
+        include_tasks: ./roles/infrastructure/init_app_acc100/tasks/cleanup.yml
       when: acc100_userspace_vf.enabled | default(False)
 
     - name: load kubernetes variables
@@ -216,32 +236,35 @@
     - name: ptp sychronization cleanup
       block:
       - name: load ptp sync variables
-        include_vars: ./roles/ptp/common/defaults/main.yml
+        include_vars: ./roles/infrastructure/ptp/common/defaults/main.yml
       - name: ptp synchronization cleanup
-        include_tasks: ./roles/ptp/common/tasks/cleanup.yml
+        include_tasks: ./roles/infrastructure/ptp/common/tasks/cleanup.yml
       when: ptp_sync_enable | default(False)
 
     - name: load kubevirt variables
-      include_vars: ./roles/kubevirt/node/defaults/main.yml
+      include_vars: ./roles/kubernetes/kubevirt/node/defaults/main.yml
 
     - name: cleanup kubevirt
-      include_tasks: ./roles/kubevirt/node/tasks/cleanup.yml
-
-    - name: load cmk variables
-      include_vars: ./roles/cmk/node/defaults/main.yml
+      include_tasks: ./roles/kubernetes/kubevirt/node/tasks/cleanup.yml
 
     - name: cleanup cmk
-      include_tasks: ./roles/cmk/node/tasks/cleanup.yml
+      block:
+        - name: load cmk variables
+          include_vars: ./roles/kubernetes/cmk/node/defaults/main.yml
+
+        - name: cleanup cmk
+          include_tasks: ./roles/kubernetes/cmk/node/tasks/cleanup.yml
+      when: ne_cmk_enable | default(False)
 
     - name: uninstall hddl
-      include_tasks: ./roles/hddl/network_edge/node/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/hddl/network_edge/node/tasks/cleanup.yml
       when: ne_hddl_enable | default(False)
 
     - name: load network edge variables
-      include_vars: ./roles/openness/node/defaults/main.yml
+      include_vars: ./roles/applications/openness/node/defaults/main.yml
 
     - name: cleanup network edge
-      include_tasks: ./roles/openness/node/tasks/cleanup.yml
+      include_tasks: ./roles/applications/openness/node/tasks/cleanup.yml
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
@@ -255,10 +278,10 @@
       include_tasks: ./roles/kubernetes/common/tasks/uninstall.yml
 
     - name: load fpga variables
-      include_vars: ./roles/opae_fpga/node/defaults/main.yml
+      include_vars: ./roles/kubernetes/opae_fpga/node/defaults/main.yml
 
     - name: cleanup fpga
-      include_tasks: ./roles/opae_fpga/node/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/opae_fpga/node/tasks/cleanup.yml
 
     - name: cleanup otel collector
       include_tasks: ./roles/telemetry/opentelemetry/node/tasks/cleanup.yml
@@ -267,34 +290,34 @@
       include_tasks: ./roles/telemetry/cadvisor/node/tasks/cleanup.yml
 
     - name: load docker variables
-      include_vars: ./roles/docker/defaults/main.yml
+      include_vars: ./roles/infrastructure/docker/defaults/main.yml
 
     - name: prune docker
-      include_tasks: ./roles/docker/tasks/prune.yml
+      include_tasks: ./roles/infrastructure/docker/tasks/prune.yml
 
     - name: uninstall docker
-      include_tasks: ./roles/docker/tasks/uninstall.yml
+      include_tasks: ./roles/infrastructure/docker/tasks/uninstall.yml
 
     - name: load golang variables
-      include_vars: ./roles/golang/defaults/main.yml
+      include_vars: ./roles/infrastructure/golang/defaults/main.yml
 
     - name: cleanup golang
-      include_tasks: ./roles/golang/tasks/cleanup.yml
+      include_tasks: ./roles/infrastructure/golang/tasks/cleanup.yml
 
     - name: load git variables
-      include_vars: ./roles/git_repo/defaults/main.yml
+      include_vars: ./roles/infrastructure/git_repo/defaults/main.yml
 
     - name: cleanup git
-      include_tasks: ./roles/git_repo/tasks/cleanup.yml
+      include_tasks: ./roles/infrastructure/git_repo/tasks/cleanup.yml
 
     - name: load harbor_registry variables
-      include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
+      include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
 
     - name: cleanup harbor_registry certificate
-      include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/harbor_registry/node/tasks/cleanup.yml
 
     - name: rmd node cleanup
-      include_tasks: ./roles/rmd/common/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/rmd/common/tasks/cleanup.yml
       when: rmd_operator_enable | default(False)
 
 - hosts: edgenode_vca_group
@@ -307,16 +330,16 @@
       include_tasks: ./roles/kubernetes/node/tasks/cleanup.yml
 
     - name: load cmk variables
-      include_vars: ./roles/cmk/node/defaults/main.yml
+      include_vars: ./roles/kubernetes/cmk/node/defaults/main.yml
 
     - name: cleanup cmk
-      include_tasks: ./roles/cmk/node/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/cmk/node/tasks/cleanup.yml
 
     - name: load network edge variables
-      include_vars: ./roles/openness/node/defaults/main.yml
+      include_vars: ./roles/applications/openness/node/defaults/main.yml
 
     - name: cleanup network edge
-      include_tasks: ./roles/openness/node/tasks/cleanup.yml
+      include_tasks: ./roles/applications/openness/node/tasks/cleanup.yml
 
     - name: run CNIs cleanup
       include_tasks: ./roles/kubernetes/cni/tasks/cleanup.yml
@@ -336,28 +359,29 @@
       include_tasks: ./roles/telemetry/cadvisor/node/tasks/cleanup.yml
 
     - name: load docker variables
-      include_vars: ./roles/docker/defaults/main.yml
+      include_vars: ./roles/infrastructure/docker/defaults/main.yml
 
     - name: prune docker
-      include_tasks: ./roles/docker/tasks/prune.yml
+      include_tasks: ./roles/infrastructure/docker/tasks/prune.yml
 
     - name: uninstall docker
-      include_tasks: ./roles/docker/tasks/uninstall.yml
+      include_tasks: ./roles/infrastructure/docker/tasks/uninstall.yml
 
     - name: load golang variables
-      include_vars: ./roles/golang/defaults/main.yml
+      include_vars: ./roles/infrastructure/golang/defaults/main.yml
 
     - name: cleanup golang
-      include_tasks: ./roles/golang/tasks/cleanup.yml
+      include_tasks: ./roles/infrastructure/golang/tasks/cleanup.yml
 
-    - name: load git variables
-      include_vars: ./roles/git_repo/defaults/main.yml
+    - block:
+        - name: load git variables
+          include_vars: ./roles/infrastructure/git_repo/defaults/main.yml
 
-    - name: cleanup git
-      include_tasks: ./roles/git_repo/tasks/cleanup.yml
+        - name: cleanup git repos
+          include_tasks: ./roles/infrastructure/git_repo/tasks/cleanup.yml
 
     - name: load harbor_registry variables
-      include_vars: ./roles/harbor_registry/controlplane/defaults/main.yml
+      include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
 
     - name: cleanup harbor_registry certificate
-      include_tasks: ./roles/harbor_registry/node/tasks/cleanup.yml
+      include_tasks: ./roles/kubernetes/harbor_registry/node/tasks/cleanup.yml

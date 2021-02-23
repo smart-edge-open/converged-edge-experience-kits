@@ -35,23 +35,31 @@
 - hosts: edgenode_vca_group
   any_errors_fatal: true
 
+  pre_tasks:
+    - name: set node name
+      set_fact: node_name={{ ansible_nodename | lower }}
+    - name: check deployment settings
+      include_tasks: ./tasks/settings_check_ne.yml
+    - name: print deployment settings
+      include_tasks: ./tasks/print_vars.yml
+
   roles:
-    - role: machine_setup/os_setup
-    - role: time/ntp
+    - role: infrastructure/os_setup
+    - role: infrastructure/time_setup_ntp
       when: ntp_enable | default(False)
-    - role: time/verify
-    - role: git_repo
-    - role: golang
-    - role: docker
-    - role: machine_setup/vca_host_setup
-    - role: machine_setup/conditional_reboot
-    - role: machine_setup/vca_node_setup
+    - role: infrastructure/time_verify_ntp
+    - role: infrastructure/git_repo
+    - role: infrastructure/golang
+    - role: infrastructure/docker
+    - role: infrastructure/vca_host_setup
+    - role: infrastructure/conditional_reboot
+    - role: infrastructure/vca_node_setup
     - role: kubernetes/node
-    - role: harbor_registry/node
+    - role: kubernetes/harbor_registry/node
     - role: kubernetes/cni
     - role: telemetry/collectd/node
     - role: telemetry/cadvisor/node
-    - role: openness/node
+    - role: applications/openness/node
     - role: telemetry/pcm/node
       when: telemetry_pcm_enable | default(False)
-    - role: hddl/vca_setup
+    - role: kubernetes/hddl/vca_setup

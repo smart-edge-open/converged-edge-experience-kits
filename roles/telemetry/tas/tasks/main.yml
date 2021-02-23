@@ -8,7 +8,7 @@
 
 - name: include Harbor Registry vars
   include_vars:
-    file: ../../../harbor_registry/controlplane/defaults/main.yml
+    file: ../../../kubernetes/harbor_registry/controlplane/defaults/main.yml
 
 - name: create temporary directory
   tempfile:

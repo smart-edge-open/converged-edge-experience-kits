@@ -631,7 +631,7 @@ build::biosfw() {
 
 build::bb_config() {
   docker build --build-arg http_proxy="${HTTP_PROXY}" --build-arg https_proxy="${HTTP_PROXY}" -t \
-    bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/bb_config/files
+    bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/kubernetes/bb_config/files
   docker save bb-config-utility:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/bb-config-utility.tar.gz
 }
 

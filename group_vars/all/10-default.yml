@@ -214,14 +214,35 @@ ne_nfd_enable: True
 ## Network Edge Helm Charts Storage Default Directory
 ne_helm_charts_default_dir: "{{ openness_dir }}/helm-charts"
 
-## Network Edge Grafana
+###############
+## Telemetry
+
+# Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
+telemetry_flavor: common
+
+# Grafana
 telemetry_grafana_enable: True
 
-## Network Edge Processor Counter Monitor (PCM)
+# Processor Counter Monitor (PCM)
 telemetry_pcm_enable: False
 
-## Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
-telemetry_flavor: common
+# Prometheus
+telemetry_prometheus_enable: True
+
+# Open Telemetry
+telemetry_opentelemetry_enable: True
+
+# Collectd
+telemetry_collectd_enable: True
+
+# Telemetry Aware Scheduler
+telemetry_tas_enable: True
+
+# CAdvisor
+telemetry_cadvisor_enable: True
+
+
+###############
 
 ## Network Edge RMD
 rmd_operator_enable: False
@@ -259,3 +280,6 @@ video_analytics_services_enable: False
 ## Hyperthreading
 check_hyperthreading: False
 expected_hyperthreading_state: "enabled"
+
+## EMCO
+emco_enable: False

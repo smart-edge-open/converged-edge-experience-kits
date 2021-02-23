@@ -4,4 +4,4 @@
 ---
 
 dependencies:
-- role: sriov_device_init
+- role: infrastructure/sriov_device_init

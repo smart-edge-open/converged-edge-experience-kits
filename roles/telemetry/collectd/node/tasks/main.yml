@@ -15,7 +15,6 @@
   file:
     path: "{{ openness_dir }}/certs/telemetry/collectd"
     state: directory
-  become: yes
 
 - name: create collectd config directory
   file:
