@@ -42,3 +42,10 @@
   changed_when: false
   ignore_errors: yes
   become: yes
+
+- name: remove emco repository
+  file:
+    path: "{{ _emco.dest }}"
+    state: absent
+  changed_when: true
+  become: yes
