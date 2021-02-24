@@ -99,6 +99,7 @@
 - name: Installing EMCO on the K8s cluster with enableDbAuth=true
   command: >
     ./emco-openness-helm-install.sh -s 'enableDbAuth=true
+    --timeout 30m
     --set db.rootPassword={{ emco_db_password }}
     --set db.emcoPassword={{ emco_db_password }}
     --set contextdb.rootPassword={{ emco_db_password }}
