@@ -12,4 +12,4 @@ _openvino:
   download_dir: "/tmp/openvino_download"
   install_dir: "/opt/intel/openvino_2021.1.110"
   version: "2021.1.110"
-hddl_kernel_devel: "http://linuxsoft.cern.ch/centos-vault/7.8.2003/os/x86_64/Packages/kernel-devel-3.10.0-1127.el7.x86_64.rpm"
+hddl_kernel_devel: "http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/Packages/kernel-devel-3.10.0-1160.el7.x86_64.rpm"
