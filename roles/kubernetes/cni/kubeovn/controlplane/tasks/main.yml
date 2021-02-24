@@ -158,7 +158,6 @@
     ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ item }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
   register: result
-  become: yes
   until: not result.failed
   retries: 5
   delay: 60

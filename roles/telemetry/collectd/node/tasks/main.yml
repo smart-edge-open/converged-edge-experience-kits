@@ -112,7 +112,6 @@
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']
-  become: yes
 
 - name: copy collectd folder to VCA node
   command: "scp -r {{ openness_dir }}/collectd {{ vca_node_ip }}:{{ openness_dir }}/"

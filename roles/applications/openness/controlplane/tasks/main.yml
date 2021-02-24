@@ -12,7 +12,6 @@
     - "{{ openness_dir }}"
     - "{{ _certs_dest }}"
     - "{{ _configs_dest }}"
-  become: yes
 
 - name: create openness namespace if needed
   block:

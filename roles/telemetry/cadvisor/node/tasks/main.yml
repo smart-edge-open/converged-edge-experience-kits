@@ -6,7 +6,6 @@
   file:
     path: "{{ openness_dir }}/certs/telemetry/cadvisor"
     state: directory
-  become: yes
 
 - name: get number of VCA nodes
   shell: set -o pipefail && vcactl status | grep Card | wc -l
@@ -23,4 +22,3 @@
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']
-  become: yes
