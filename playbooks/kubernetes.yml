@@ -66,9 +66,6 @@
     - role: kubernetes/rmd/controlplane
       when: "rmd_operator_enable | default(False)"
 
-    - role: kubernetes/istio
-      when: "ne_istio_enable | default(False)"
-
 - hosts: edgenode_group
   any_errors_fatal: true
   roles:
@@ -95,3 +92,10 @@
       when: "ne_hddl_enable | default(False)"
     - role: telemetry/pcm/node
       when: "telemetry_pcm_enable | default(False)"
+
+- hosts: controller_group
+  any_errors_fatal: true
+  roles:
+    # Istio operator requires working worker node to deploy successfully.
+    - role: kubernetes/istio
+      when: "ne_istio_enable | default(False)"
