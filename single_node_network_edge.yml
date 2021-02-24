@@ -4,6 +4,8 @@
 ---
 # Playbook for single node Network Edge cluster deployment
 
+
+
 - hosts: edgenode_group
   pre_tasks:
     - name: set node name
@@ -72,14 +74,33 @@
       when: eaa_enable | default(True)
 
     - role: applications/openness/controlplane
+      when: openness_enable | default(True)
 
     - role: telemetry/certs
+      when: >
+        "telemetry_prometheus_enable | default(True) OR
+        telemetry_opentelemetry_enable | default(True) OR
+        telemetry_collectd_enable | default(True) OR
+        telemetry_tas_enable | default(True) OR
+        telemetry_cadvisor_enable | default(True) OR
+        telemetry_grafana_enable | default(True) OR
+        telemetry_pcm_enable | default(False)"
+
     - role: telemetry/prometheus
+      when: "telemetry_prometheus_enable | default(True)"
     - role: telemetry/opentelemetry/controlplane
+      when: "telemetry_opentelemetry_enable | default(True)"
     - role: telemetry/collectd/controlplane
+      when: "telemetry_collectd_enable | default(True)"
     - role: telemetry/tas
-    # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
-    # - role: telemetry/cadvisor/controlplane
+      when: "telemetry_tas_enable | default(True)"
+#   # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
+#    - role: telemetry/cadvisor/controlplane
+#      when: "telemetry_cadvisor_enable | default(True)"
+    - role: telemetry/grafana
+      when: "telemetry_grafana_enable | default(True)"
+    - role: telemetry/pcm/controlplane
+      when: "telemetry_pcm_enable | default(False)"
 
     - role: kubernetes/bb_config
       when: fpga_sriov_userspace_enable | default(False) or acc100_sriov_userspace_enable | default(False)
@@ -95,11 +116,6 @@
       when: ne_cmk_enable | default(False)
     - role: kubernetes/hddl/network_edge/controlplane
       when: ne_hddl_enable | default(False)
-
-    - role: telemetry/grafana
-      when: telemetry_grafana_enable | default(True)
-    - role: telemetry/pcm/controlplane
-      when: telemetry_pcm_enable | default(False)
 
     - role: kubernetes/istio
       when: ne_istio_enable | default(False)

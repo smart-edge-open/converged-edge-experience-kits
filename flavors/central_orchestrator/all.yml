@@ -27,3 +27,4 @@ telemetry_prometheus_enable: False
 telemetry_opentelemetry_enable: False
 telemetry_collectd_enable: False
 telemetry_tas_enable: False
+openness_enable: False

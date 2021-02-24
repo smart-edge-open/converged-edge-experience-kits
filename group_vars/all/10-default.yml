@@ -193,6 +193,9 @@ cpu:
 topology_manager:
   policy: "best-effort"
 
+# Deploy OpenNESS services
+openness_enable: True
+
 # OpenNESS installation directory
 openness_dir: "/opt/openness"
 

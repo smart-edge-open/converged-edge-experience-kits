@@ -17,7 +17,9 @@
   roles:
     - role: applications/kafka
       when: eaa_enable | default(True)
+
     - role: applications/openness/controlplane
+      when: openness_enable | default(True)
 
     - role: applications/video_analytics_services
       when: video_analytics_services_enable | default(False)
@@ -29,6 +31,7 @@
   any_errors_fatal: true
   roles:
     - role: applications/openness/node
+      when: openness_enable | default(True)
 
 
 - hosts: controller_group
