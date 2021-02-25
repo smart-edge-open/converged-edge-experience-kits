@@ -41,6 +41,12 @@
   changed_when: true
   become: yes
 
+- name: get installed OpenSSL version
+  command: "openssl version"
+  ignore_errors: yes
+  register: installed_openssl_version
+  changed_when: false
+
 - name: install base OpenSSL from sources
   block:
     - name: OpenSSL create temp dir
@@ -88,3 +94,4 @@
       file:
         path: "{{ tmp_dir.path }}"
         state: absent
+  when: _openssl_version|string not in installed_openssl_version.stdout.split()
