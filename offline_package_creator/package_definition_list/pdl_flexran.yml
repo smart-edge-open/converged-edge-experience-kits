@@ -50,8 +50,8 @@ github-repos:
     url: https://github.com/goharbor/harbor-helm.git
     flag: tag
     value: v1.5.0
-  - name: x-epcforedge
-    url: https://github.com/otcshare/x-epcforedge.git
+  - name: ido-epcforedge
+    url: https://github.com/otcshare/ido-epcforedge.git
     flag: tag
     value: master
 
@@ -61,7 +61,7 @@ github-repos:
 # go modules are downloaded with the go.mod file
 go-modules:
   - name: edgenode
-  - name: x-epcforedge
+  - name: ido-epcforedge
   - name: rmd-operator
   - name: telemetry-aware-scheduling
 
