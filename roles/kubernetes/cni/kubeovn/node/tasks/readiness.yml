@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: check if socket exists
+  stat:
+    path: /run/openvswitch/db.sock
+  register: this
+  failed_when: not this.stat.exists
+  changed_when: false
+
+- name: check if br-local exists
+  command: timeout 15s ovs-vsctl br-exists br-local
+  changed_when: false
+
+- name: verify ovn configuration
+  shell: |
+    set -o pipefail && ovn-nbctl lrp-list ovn-cluster | grep ovn-cluster-{{ inventory_hostname | lower }}-local
+    set -o pipefail && ovn-nbctl ls-list | grep {{ inventory_hostname | lower }}-local
+    set -o pipefail && ovn-nbctl lsp-list {{ inventory_hostname | lower }}-local | grep {{ inventory_hostname | lower }}-local-ovn-cluster
+    set -o pipefail && ovn-nbctl lsp-list {{ inventory_hostname | lower }}-local | grep {{ inventory_hostname | lower }}-ovs-phy
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: false
+

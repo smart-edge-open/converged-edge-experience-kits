@@ -106,7 +106,7 @@
             },
             {
                 "command": "kubectl logs <POD> -n <NAMESPACE>",
-                "file_name": "kubectl_<POD>.log"
+                "file_name": "kubectl_logs_<POD>.log"
             },
             {
                 "command": "kubectl describe pod <POD> -n <NAMESPACE>",

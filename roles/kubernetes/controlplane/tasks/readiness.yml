@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: cluster-info
+  command: kubectl cluster-info
+  changed_when: false
+
+- name: get livez
+  uri:
+    url: https://localhost:6443/livez?verbose
+    return_content: yes
+    validate_certs: no
+  changed_when: false
+
+- name: get readyz
+  uri:
+    url: https://localhost:6443/readyz?verbose
+    return_content: yes
+    validate_certs: no
+  changed_when: false
+
+- name: controlplane should be ready
+  command: kubectl get node {{ ansible_nodename | lower }} -o jsonpath="{@.status.conditions[?(@.type=='Ready')].status}"
+  register: this
+  failed_when: "'True' not in this.stdout"
+  changed_when: false

@@ -207,6 +207,11 @@ def collect_pods_logs(file_name, com):
                        stderr=subprocess.STDOUT).stdout.decode("utf-8"))
 
     for pod in pods["items"]:
+
+        # following pod is ignored, but it's generating massive amounts of logs
+        if "custom-metrics-apiserver" in pod["metadata"]["name"]:
+            continue
+
         command = re.sub("<POD>", pod["metadata"]["name"], com)
         command = re.sub("<NAMESPACE>", pod["metadata"]["namespace"], command)
         path = re.sub("<POD>", "_".join(pod["metadata"]["name"].split("-")),

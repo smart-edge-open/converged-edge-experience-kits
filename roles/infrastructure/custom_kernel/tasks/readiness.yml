@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: requested kernel should be active
+  assert:
+    that:
+      - ansible_kernel == kernel_version
+

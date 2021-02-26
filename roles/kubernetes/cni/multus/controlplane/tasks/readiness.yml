@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: verify multus daemonset
+  check_k8s_object:
+    name: kube-multus-ds-amd64
+    namespace: kube-system
+    kind: daemonset
+
+- name: 00-multus.conf should be present
+  stat:
+    path: /etc/cni/net.d/00-multus.conf
+  register: this
+  failed_when: not this.stat.exists

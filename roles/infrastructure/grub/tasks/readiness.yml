@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: get current kernel params
+  command: cat /proc/cmdline
+  register: kernel_params
+  changed_when: false
+
+- name: requested grub params should be active
+  assert:
+    that:
+      - default_grub_params in kernel_params.stdout
+      - additional_grub_params in kernel_params.stdout
