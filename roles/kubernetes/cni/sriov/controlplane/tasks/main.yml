@@ -100,9 +100,18 @@
       name: nfvpe/sriov-device-plugin
 
   - name: copy sriov chart
-    copy:
-      src: "sriov"
-      dest: "{{ ne_helm_charts_default_dir }}"
+    block:
+    - name: copy base files
+      copy:
+        src: "sriov"
+        dest: "{{ ne_helm_charts_default_dir }}"
+    - name: template rest of the chart
+      template:
+        src: "{{ item }}.j2"
+        dest: "{{ ne_helm_charts_default_dir }}/sriov/templates/{{ item }}"
+      with_items:
+      - configMap.yml
+      - crd.yml
 
   - name:
     set_fact:

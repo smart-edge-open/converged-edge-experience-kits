@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 
 ---
 
@@ -24,7 +24,7 @@ spec:
   }
 }'
 
-{{- if .Values.sriov_kubevirt_enable }}
+{{ '{{- if .Values.sriov_kubevirt_enable }}' }}
 ---
 
 apiVersion: "k8s.cni.cncf.io/v1"
@@ -47,4 +47,9 @@ spec:
         "gateway": "192.168.20.1"
   }
 }'
-{{- end }}
+{{ '{{- end }}' }}
+
+{% for crdExt in _sriov_dp_crd_extension %}
+---
+{{ crdExt }}
+{% endfor %}
