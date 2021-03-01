@@ -89,7 +89,7 @@ ne_istio_enable: False
 # - ovn4nfv
 # NOTE - For VCAC-A setup, use `weavenet` CNI
 kubernetes_cnis:
-  - kubeovn
+  - calico
 
 # Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
 calico_cidr: "10.243.0.0/16"

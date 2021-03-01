@@ -1545,13 +1545,13 @@ docker-images:
   - name: pcm
     image: opcm/pcm:latest
   - name: node
-    image: calico/node:v3.14.2
+    image: calico/node:v3.17.1
   - name: pod2daemon-flexvol
-    image: calico/pod2daemon-flexvol:v3.14.2
+    image: calico/pod2daemon-flexvol:v3.17.1
   - name: cni
-    image: calico/cni:v3.14.2
+    image: calico/cni:v3.17.1
   - name: kube-controllers
-    image: calico/kube-controllers:v3.14.2
+    image: calico/kube-controllers:v3.17.1
   - name: grafana
     image: grafana/grafana:7.0.3
   - name: alpine
@@ -1680,9 +1680,9 @@ yaml-files:
   - name: kube-ovn-url
     url: https://raw.githubusercontent.com/alauda/kube-ovn/v1.0.1/yamls/kube-ovn.yaml
   - name: calico-bpf
-    url: https://docs.projectcalico.org/v3.14/manifests/calico-bpf.yaml
+    url: https://docs.projectcalico.org/v3.17/manifests/calico-bpf.yaml
   - name: calico
-    url: https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+    url: https://docs.projectcalico.org/v3.17/manifests/calico.yaml
   - name: kube-flannel
     url: https://raw.githubusercontent.com/coreos/flannel/v0.12.0/Documentation/kube-flannel.yml
 
