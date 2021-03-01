@@ -10,7 +10,7 @@
   pre_tasks:
   - name: update controller repo path
     set_fact:
-      _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
+      _git_repo_dest: "{{ openness_dir }}/edgeservices/edgecontroller"
 
   roles:
     - role: kubernetes/controlplane

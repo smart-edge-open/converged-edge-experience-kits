@@ -57,7 +57,7 @@
         single_node_deployment: true
     - name: update controller repo path
       set_fact:
-        _git_repo_dest: "{{ openness_dir }}/edgenode/edgecontroller"
+        _git_repo_dest: "{{ openness_dir }}/edgeservices/edgecontroller"
 
   roles:
     - role: infrastructure/os_setup
@@ -127,7 +127,7 @@
   pre_tasks:
     - name: update edgenode repo path
       set_fact:
-        _git_repo_dest: "{{ openness_dir }}/edgenode"
+        _git_repo_dest: "{{ openness_dir }}/edgeservices"
 
   roles:
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk

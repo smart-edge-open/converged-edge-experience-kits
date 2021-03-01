@@ -5,4 +5,4 @@
 
 - name: update node repo path
   set_fact:
-    _git_repo_dest: "{{ openness_dir }}/edgenode"
+    _git_repo_dest: "{{ openness_dir }}/edgeservices"

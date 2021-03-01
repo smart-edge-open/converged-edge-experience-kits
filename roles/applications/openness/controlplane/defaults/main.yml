@@ -14,4 +14,4 @@ _kubeovn_openness_yamls:
   - "{{ _git_repo_dest }}/network-edge/kube-ovn/interfaceservice-rbac.yaml"
   - "{{ _git_repo_dest }}/network-edge/kube-ovn/interfaceservice.yaml"
 
-_opcdownload_edgenode_dest: "/opt/opcdownloads/github/edgenode/edgecontroller"
+_opcdownload_edgeservices_dest: "/opt/opcdownloads/github/edgeservices/edgecontroller"

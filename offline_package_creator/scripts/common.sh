@@ -439,7 +439,7 @@ opc::download::gomodules() {
       rm -f "$OPC_DOWNLOAD_PATH"/ret
     fi
     touch "$OPC_DOWNLOAD_PATH"/ret
-    if [[ "$name" == "edgenode" || "$name" == "ido-epcforedge" ]];then
+    if [[ "$name" == "edgeservices" || "$name" == "ido-epcforedge" ]];then
       dirs=$(find . -name go.mod)
       for dir in $dirs
       do
@@ -540,7 +540,7 @@ opc::download::images() {
 }
 
 build::cli() {
-  cd "$CODE_DOWNLOAD_PATH"/edgenode/edgecontroller
+  cd "$CODE_DOWNLOAD_PATH"/edgeservices/edgecontroller
   docker run --rm -ti \
     -v "$GOMODULE_DOWNLOAD_PATH":/go/pkg \
     -v "$PWD":/opt/app \
@@ -549,7 +549,7 @@ build::cli() {
 }
 
 build::common_services() {
-  cd "$CODE_DOWNLOAD_PATH"/edgenode
+  cd "$CODE_DOWNLOAD_PATH"/edgeservices
   docker run --rm -ti \
     -v "$GOMODULE_DOWNLOAD_PATH":/go/pkg \
     -v "$PWD":/opt/app \
@@ -567,7 +567,7 @@ build::common_services() {
 }
 
 build::interfaceservice() {
-  cd "$CODE_DOWNLOAD_PATH"/edgenode
+  cd "$CODE_DOWNLOAD_PATH"/edgeservices
   docker run --rm -ti \
     -v "$GOMODULE_DOWNLOAD_PATH":/go/pkg \
     -v "$PWD":/opt/app \
@@ -592,7 +592,7 @@ build::fpga-opae-pacn3000() {
         opc::update_kernel
       fi
     else
-      cd "$CODE_DOWNLOAD_PATH"/edgenode
+      cd "$CODE_DOWNLOAD_PATH"/edgeservices
       sudo_cmd chown -R "$USER":"$USER" ./*
       cp "$DIR_OF_OPAE_ZIP"/OPAE_SDK_1.3.7-5_el7.zip build/fpga_opae
       docker build --build-arg http_proxy="${HTTP_PROXY}" \
@@ -620,7 +620,7 @@ build::sriov_cni() {
 
 build::biosfw() {
   if [[ "${BUILD_BIOSFW}" == "enable" ]];then
-    cd "$CODE_DOWNLOAD_PATH"/edgenode
+    cd "$CODE_DOWNLOAD_PATH"/edgeservices
     sudo_cmd chown -R "${USER}":"${USER}" ./*
     cp "$DIR_OF_BIOSFW_ZIP"/syscfg_package.zip dist/biosfw
     docker build --build-arg http_proxy="${HTTP_PROXY}" -t openness-biosfw dist/biosfw

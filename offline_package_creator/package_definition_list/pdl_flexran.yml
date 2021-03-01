@@ -7,7 +7,7 @@
 
 github-repos:
   - name: edge-node-repo
-    url: https://github.com/otcshare/edgenode.git
+    url: https://github.com/otcshare/edgeservices.git
     flag: tag
     value: master
   - name: sriov-network-device-plugin

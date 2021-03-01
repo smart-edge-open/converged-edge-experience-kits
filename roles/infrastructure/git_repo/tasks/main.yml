@@ -14,7 +14,7 @@
 
     - name: Set Git Repo URL
       set_fact:
-        git_repo_url: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:{{ _offline_package_path }}/github/edgenode/"
+        git_repo_url: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:{{ _offline_package_path }}/github/edgeservices/"
       when: offline_enable
 
     - name: make sure openness directory exists

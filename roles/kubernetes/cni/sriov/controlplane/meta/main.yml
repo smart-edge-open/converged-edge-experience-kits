@@ -5,5 +5,5 @@
 dependencies:
   - role: infrastructure/sriov_device_init
     vars:
-      _git_repo_dest: "{{ openness_dir }}/edgenode"
+      _git_repo_dest: "{{ openness_dir }}/edgeservices"
     when: single_node_deployment | default(false)

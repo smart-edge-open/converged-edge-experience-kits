@@ -8,7 +8,7 @@
     state: absent
   with_items:
   - "{{ openness_dir }}"
-  - /etc/logrotate.d/edgenode
+  - /etc/logrotate.d/edgeservices
   become: yes
 
 # built executables are removed during git_repo's role cleanup
