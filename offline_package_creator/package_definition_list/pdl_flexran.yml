@@ -1876,5 +1876,7 @@ other-files:
     url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-20.10.2-3.el7.x86_64.rpm
   - name: docker-ce-cli
     url: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-20.10.2-3.el7.x86_64.rpm
+  - nane: runc
+    url: https://github.com/opencontainers/runc/releases/download/v1.0.0-rc93/runc.amd64
 
   #TBA

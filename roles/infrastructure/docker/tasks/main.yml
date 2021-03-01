@@ -59,6 +59,13 @@
   ignore_errors: true
   changed_when: false
 
+- name: Check if offline mode
+  set_fact:
+    local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
+--trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+    _runc_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/runc.amd64"
+  when: offline_enable
+
 # Upgrade runc to v1.0.0-rc93 which fixes an issue of freezing/frozen cgroups.
 - name: upgrade runc to a fixed version
   block:
@@ -75,12 +82,6 @@
         checksum: "sha256:{{ _runc_checksum }}"
       become: yes
   when: runc_rc_ver.rc == 0 and runc_rc_ver.stdout|int < _runc_min_rc
-
-- name: Check if offline mode
-  set_fact:
-    local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
---trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
-  when: offline_enable
 
 - name: install pip dependencies
   block:
