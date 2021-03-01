@@ -91,15 +91,17 @@
       when: init_result.stdout != "1"
     when: acc100_userspace_vf.enabled | default (False)
 
+  - name: combine PCI addresses
+    set_fact:
+      pci_addresses: "{{ (fpga_pci_address.stdout_lines | default([])) + (acc100_pci_address.stdout_lines | default([])) }}"
+
   - name: bind FPGA and/or ACC100 SRIOV PF to IGB UIO
     include_role:
       name: infrastructure/bind_device_to_driver
     vars:
-      - pci_address: "{{ item.pci }}"
+      - pci_address: "{{ item }}"
       - driver: "igb_uio"
-    with_items:
-      - { pci: "{{ acc100_pci_address.stdout_lines }}", when: "{{ acc100_userspace_vf.enabled }}" }
-      - { pci: "{{ fpga_pci_address.stdout_lines }}", when: "{{ fpga_userspace_vf.enabled }}" }
+    with_items: "{{ pci_addresses }}"
 
   - name: create FPGA SRIOV VFs
     shell: >
@@ -145,15 +147,18 @@
     register: acc100_vf_pci_address
     when: acc100_userspace_vf.enabled | default (False)
 
+  - name: zip VF PCI addresses with their drivers
+    set_fact:
+      acc100_vf_pci_address_drivers: "{{ acc100_vf_pci_address.stdout_lines | default([]) | zip_longest([], fillvalue=acc100_userspace_vf.vf_driver) | list }}"
+      fpga_vf_pci_address_drivers: "{{ fpga_vf_pci_address.stdout_lines | default([]) | zip_longest([], fillvalue=fpga_userspace_vf.vf_driver) | list }}"
+
   - name: bind FPGA and/or ACC100 SRIOV VFs to userspace driver
     include_role:
       name: infrastructure/bind_device_to_driver
     vars:
-      - pci_address: "{{ item.pci }}"
-      - driver: "{{ item.driver }}"
-    with_items:
-      - { pci: "{{ acc100_vf_pci_address.stdout_lines }}", driver: "{{ acc100_userspace_vf.vf_driver }}", when: "{{ acc100_userspace_vf.enabled }}" }
-      - { pci: "{{ fpga_vf_pci_address.stdout_lines }}", driver: "{{ fpga_userspace_vf.vf_driver }}", when: "{{ fpga_userspace_vf.enabled }}" }
+      - pci_address: "{{ item.0 }}"
+      - driver: "{{ item.1 }}"
+    loop: "{{ acc100_vf_pci_address_drivers + fpga_vf_pci_address_drivers }}"
   when: fpga_userspace_vf.enabled or acc100_userspace_vf.enabled
 
 - name: get SR-IOV ethernet interfaces from /etc/rc.d/rc.local
