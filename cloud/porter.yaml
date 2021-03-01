@@ -132,9 +132,9 @@ install:
         - login
       flags:
         service-principal:
-        username: "{{ bundle.credentials.AZ_CLIENT_ID}}"
-        password: "{{ bundle.credentials.AZ_CLIENT_SECRET}}"
-        tenant: "{{ bundle.credentials.AZ_TENANT_ID}}"
+        username: "{{ bundle.credentials.AZ_CLIENT_ID }}"
+        password: "{{ bundle.credentials.AZ_CLIENT_SECRET }}"
+        tenant: "{{ bundle.credentials.AZ_TENANT_ID }}"
       suppress-output: true
   - az:
       description: "[Azure] Create resource group {{ bundle.parameters.az_resource_group }} in {{ bundle.parameters.az_group_location }}"
@@ -142,8 +142,8 @@ install:
         - group
         - create
       flags:
-        resource-group: "{{ bundle.parameters.az_resource_group}}"
-        location: "{{ bundle.parameters.az_group_location}}"
+        resource-group: "{{ bundle.parameters.az_resource_group }}"
+        location: "{{ bundle.parameters.az_group_location }}"
       suppress-output: true
   - az:
       description: "[Azure] Create VM scale set[{{ bundle.parameters.az_vm_count }} VMs]"
@@ -151,16 +151,16 @@ install:
         - vmss
         - create
       flags:
-        resource-group: "{{ bundle.parameters.az_resource_group}}"
+        resource-group: "{{ bundle.parameters.az_resource_group }}"
         name: "{{ bundle.parameters.az_vmss }}"
-        image: "{{ bundle.parameters.az_vm_image}}"
+        image: "{{ bundle.parameters.az_vm_image }}"
         vm-sku: "{{ bundle.parameters.az_vm_flavor }}"
         os-disk-size-gb: "{{ bundle.parameters.az_vm_disk_size }}"
         instance-count: "{{ bundle.parameters.az_vm_count }}"
         public-ip-per-vm:
         generate-ssh-keys:
         vm-domain-name: "oekvm"
-        admin-username: "{{ bundle.parameters.az_vm_username}}"
+        admin-username: "{{ bundle.parameters.az_vm_username }}"
         load-balancer: '""'
       suppress-output: true
 
@@ -175,9 +175,9 @@ uninstall:
         - login
       flags:
         service-principal:
-        username: "{{ bundle.credentials.AZ_CLIENT_ID}}"
-        password: "{{ bundle.credentials.AZ_CLIENT_SECRET}}"
-        tenant: "{{ bundle.credentials.AZ_TENANT_ID}}"
+        username: "{{ bundle.credentials.AZ_CLIENT_ID }}"
+        password: "{{ bundle.credentials.AZ_CLIENT_SECRET }}"
+        tenant: "{{ bundle.credentials.AZ_TENANT_ID }}"
       suppress-output: true
   - az:
       description: "[Azure] Remove resource group {{ bundle.parameters.az_resource_group }}. It will take some time..."
@@ -185,5 +185,5 @@ uninstall:
         - group
         - delete
       flags:
-        resource-group: "{{ bundle.parameters.az_resource_group}}"
+        resource-group: "{{ bundle.parameters.az_resource_group }}"
         "yes":
