@@ -49,7 +49,7 @@ spec:
       - name: cert-vol
         hostPath:
           path: {{ _telemetry_certs_dest }}
-          type: DirectoryOrCreate
+          type: Directory
       - name: ca
         secret:
           secretName: root-ca

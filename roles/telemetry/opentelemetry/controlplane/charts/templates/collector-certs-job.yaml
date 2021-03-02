@@ -46,7 +46,7 @@ spec:
       - name: cert-vol
         hostPath:
           path: {{ .Values.certs.certsHostPath }}
-          type: DirectoryOrCreate
+          type: Directory
       - name: ca
         secret:
           secretName: {{ .Values.rootSecretName }}

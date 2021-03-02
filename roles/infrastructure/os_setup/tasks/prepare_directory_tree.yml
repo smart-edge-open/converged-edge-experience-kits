@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+- name: prepare directory tree
+  block:
+    - name: create main directory
+      file:
+        path: "{{ openness_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      become: yes
+
+    - name: create openness subdirectories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      with_items:
+        - "{{ openness_dir }}/certs"
+        - "{{ openness_dir }}/certs/telemetry"
+        - "{{ openness_dir }}/certs/eaa-kafka"
+        - "{{ openness_dir }}/configs"
+
+    - name: create collectd certificate directory
+      file:
+        name: "{{ openness_dir }}/certs/telemtery/collectd"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: "telemetry_collectd_enable | default(True)"

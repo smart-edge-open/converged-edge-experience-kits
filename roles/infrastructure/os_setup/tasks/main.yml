@@ -18,6 +18,7 @@
 - include_tasks: enable_ipv4_forwarding.yml
 - include_tasks: reload_udev.yml
 - include_tasks: add_kubeovn_env.yml
+- include_tasks: prepare_directory_tree.yml
 
 - include_tasks: disable_yum_plugins.yml
 - include_tasks: remove_yum_excludes.yml
