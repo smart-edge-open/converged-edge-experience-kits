@@ -23,8 +23,8 @@
         For single-node Network Edge deployment Controller and Node should be the same machine (i.e. same IP address), e.g.
 
         # inventory.ini file
-        controller ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
-        node01 ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+        controller ansible_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+        node01 ansible_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
 
         [controller_group]
         controller
@@ -40,8 +40,8 @@
         For single-node Network Edge deployment should be different entries with the same IP address, e.g.:
 
         # inventory.ini file
-        controller ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
-        node01 ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+        controller ansible_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+        node01 ansible_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
 
         [controller_group]
         controller

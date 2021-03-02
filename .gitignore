@@ -2,3 +2,5 @@
 /logs/
 *.pyc
 /group_vars/*/30_*_flavor.yml
+/tmp/
+/inventory/

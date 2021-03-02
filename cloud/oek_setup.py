@@ -102,18 +102,18 @@ def create_inventory(options, oek_path):
 
     hosts = options.hosts.split(',')
 
-    cfg['all']["ctrl ansible_ssh_user={} ansible_host={}".format(
+    cfg['all']["ctrl ansible_user={} ansible_host={}".format(
         options.ansible_user, hosts[0])] = None
     cfg['controller_group']['ctrl'] = None
 
     if len(hosts) == 1:
         _LOG.info("Single node deployment")
-        cfg['all']["node-0 ansible_ssh_user={} ansible_host={}".format(
+        cfg['all']["node-0 ansible_user={} ansible_host={}".format(
             options.ansible_user, hosts[0])] = None
         cfg['edgenode_group']["node-0"] = None
     else:
         for i, node in enumerate(hosts[1:]):
-            cfg['all']["node-{} ansible_ssh_user={} ansible_host={}".format(
+            cfg['all']["node-{} ansible_user={} ansible_host={}".format(
                 i, options.ansible_user, node)] = None
             cfg['edgenode_group']["node-{}".format(i)] = None
 
