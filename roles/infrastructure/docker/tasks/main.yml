@@ -29,12 +29,6 @@
     state: present
   become: yes
 
-- name: add group "{{ openness_user_group }}"
-  group:
-    name: "{{ openness_user_group }}"
-    state: present
-  become: yes
-
 - name: Add current user to docker group
   user:
     name: "{{ ansible_user }}"
