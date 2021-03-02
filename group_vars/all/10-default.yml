@@ -92,7 +92,7 @@ kubernetes_cnis:
   - calico
 
 # Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
-calico_cidr: "10.243.0.0/16"
+calico_cidr: "10.245.0.0/16"
 
 # Flannel's CIDR (will be included automatically to noproxy when flannel is included in kubernetes_cnis)
 flannel_cidr: "10.244.0.0/16"

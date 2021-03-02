@@ -16,8 +16,6 @@
 kubernetes_cnis:
   - calico
   - sriov
-# Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
-calico_cidr: "10.243.0.0/16"
 
 ### SR-IOV CNI
 # FPGA SRIOV Userspace

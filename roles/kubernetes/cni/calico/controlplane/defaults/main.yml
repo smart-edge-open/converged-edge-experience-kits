@@ -7,4 +7,4 @@ _calico_manifest: "{{ 'calico-bpf.yaml' if calico_ebpf_enabled else 'calico.yaml
 _calico_url: https://docs.projectcalico.org/{{ _calico_version }}/manifests/{{ _calico_manifest }}
 calico_ipam_type: "{{ 'calico-ipam' if calico_ebpf_enabled else 'host-local' }}"
 
-calico_cidr: "10.243.0.0/16"
+calico_cidr: "10.245.0.0/16"
