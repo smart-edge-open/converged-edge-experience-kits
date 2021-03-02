@@ -42,6 +42,22 @@
     _base_noproxy: "{{ _base_noproxy + ',' + istio_noproxy }}"
   when: ne_istio_enable is defined and ne_istio_enable
 
+- name: Create list of OpenNESS hostnames
+  set_fact:
+    _openness_hostnames: "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | list | \
+                             select('defined') | join(',') }}"
+
+- name: Adding OpenNESS machines to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + _openness_hostnames }}"
+
+- name: Adding docker_registry_mirrors to noproxy
+  set_fact:
+    _base_noproxy: "{{ _base_noproxy + ',' + item | urlsplit('hostname') + ':' + \
+                       item | urlsplit('port') | string }}"
+  with_items: "{{ docker_registry_mirrors }}"
+  when: docker_registry_mirrors is defined
+
 - name: Adding base noproxy setting to user defined ones
   set_fact:
       proxy_noproxy: "{{ proxy_noproxy + ',' + _base_noproxy }}"
@@ -55,4 +71,3 @@
 - name: Build noproxy result
   debug:
     msg: "Final noproxy value:{{ proxy_noproxy }} "
-
