@@ -60,7 +60,7 @@ github-repos:
 ### Go Modules.
 # go modules are downloaded with the go.mod file
 go-modules:
-  - name: edgenode
+  - name: edgeservices
   - name: ido-epcforedge
   - name: rmd-operator
   - name: telemetry-aware-scheduling
@@ -1649,7 +1649,7 @@ build-images:
     tag: nfvpe/sriov-device-plugin:latest
   - name: sriov-cni
     tag: nfvpe/sriov-cni:latest
-  - name: edgenode
+  - name: edgeservices
     tag:
   - name: intel-rmd-node-agent
     tag: intel-rmd-node-agent:latest
