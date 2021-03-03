@@ -200,7 +200,7 @@ openness_enable: True
 openness_dir: "/opt/openness"
 
 # OpenNESS users group
-openness_user_group: "openness"
+openness_user_group: "{{ ansible_user }}"
 
 # OpenNESS pods retry variable
 openness_pods_timeout_min: 15
