@@ -4,7 +4,7 @@
 # Copyright (c) 2021 Intel Corporation
 
 """
-Deploy OpenNESS with given configuration file (inventory.yml or inventory.ini)
+Deploy OpenNESS with inventory.yml file.
 """
 
 import argparse
