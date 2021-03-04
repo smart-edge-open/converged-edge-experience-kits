@@ -8,7 +8,6 @@
     state: directory
     suffix: prometheus
   register: tmp_dir
-  delegate_to: localhost
 
 - name: chown tmp dir
   file:
