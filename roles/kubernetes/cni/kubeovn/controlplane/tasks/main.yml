@@ -20,6 +20,11 @@
     - 6081/udp
   become: yes
 
+- name: Check if kube-ovn kubectl plugin exists
+  stat:
+    path: /usr/local/bin/kubectl-ko
+  register: kube_ovn_plugin_file
+
 - name: install kubeovn
   block:
     - name: Creates kubeovn directory
@@ -62,6 +67,8 @@
         chdir: "{{ _kubeovn_destdir }}"
       when: not kubeovn_dpdk
       become: yes
+  when: not kube_ovn_plugin_file.stat.exists or
+        (kube_ovn_plugin_file.stat.executable is defined and not kube_ovn_plugin_file.stat.executable)
 
 - name: Wait till k8s master starts
   shell: >
