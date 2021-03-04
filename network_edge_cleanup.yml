@@ -9,6 +9,12 @@
   # - multus
   # - sriov/controlplane
 
+  - name: load harbor_registry variables
+    include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
+
+  - name: cleanup harbor_registry
+    include_tasks: ./roles/kubernetes/harbor_registry/controlplane/tasks/cleanup.yml
+
   - name: emco cleanup
     block:
     - name: load emco variables
@@ -97,12 +103,6 @@
     - name: cleanup nfd
       include_tasks: ./roles/kubernetes/nfd/tasks/cleanup.yml
     when: ne_nfd_enable | default(False)
-
-  - name: load harbor_registry variables
-    include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
-
-  - name: cleanup harbor_registry
-    include_tasks: ./roles/kubernetes/harbor_registry/controlplane/tasks/cleanup.yml
 
   - name: load network edge variables
     include_vars: ./roles/applications/openness/controlplane/defaults/main.yml
