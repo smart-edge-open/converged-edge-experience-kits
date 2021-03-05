@@ -171,6 +171,7 @@
   shell: echo 0 > {{ item }}
   with_items: "{{ sriov_ifaces.stdout_lines }}"
   changed_when: true
+  become: yes
 
 - name: clear SR-IOV boot time setup
   lineinfile:
