@@ -14,5 +14,5 @@ patchesJson6902:
     group: apps
     version: v1
     kind: DaemonSet
-    name: kube-flannel-ds-amd64
+    name: kube-flannel-ds
   path: customize_flannel_conf.yml

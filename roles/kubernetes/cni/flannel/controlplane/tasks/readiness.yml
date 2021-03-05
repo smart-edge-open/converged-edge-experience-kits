@@ -5,6 +5,6 @@
 
 - name: verify flannel daemonsets
   check_k8s_object:
-    name: kube-flannel-ds-amd64
+    name: kube-flannel-ds
     namespace: kube-system
     kind: daemonset
