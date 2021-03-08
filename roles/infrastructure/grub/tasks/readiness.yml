@@ -11,5 +11,5 @@
 - name: requested grub params should be active
   assert:
     that:
-      - default_grub_params in kernel_params.stdout
-      - additional_grub_params in kernel_params.stdout
+      - default_grub_params|trim in kernel_params.stdout
+      - additional_grub_params|trim in kernel_params.stdout
