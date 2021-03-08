@@ -79,7 +79,7 @@ def call_kubectl(kind, name, namespace, result):
                       '-n', str(namespace),
                       str(name)]
 
-        output = subprocess.check_output(parameters)
+        output = subprocess.check_output(parameters, stderr=subprocess.STDOUT)
         output = json.loads(output)
 
         result['cmd'] = " ".join(parameters)
@@ -117,7 +117,7 @@ def check_daemonset(output):
             result = True
             message = "Daemonset seems to be running normally"
         else:
-            message = "Not enough available nodes {}/{}".format(
+            message = "Not enough available replicas {}/{}".format(
                 available, desired
             )
     except KeyError as err:

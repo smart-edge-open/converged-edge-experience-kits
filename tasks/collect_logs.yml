@@ -6,16 +6,17 @@
   - name: copy log_collector to the controller
     copy:
       src: ./scripts/log_collector{{ item.ext }}
-      dest: /opt/log_collector{{ item.ext }}
+      dest: "{{ ansible_facts.user_dir }}/log_collector{{ item.ext }}"
       mode: "{{ item.mode }}"
     with_items:
     - { ext: "", mode: "0755"}
     - { ext: ".json", mode: "0644"}
 
   - name: collect logs
-    command: /opt/log_collector --force
+    command: "{{ ansible_facts.user_dir }}/log_collector --force"
     args:
-      chdir: /opt/
+      chdir: "{{ ansible_facts.user_dir }}"
+    become: yes
 
   - name: create var for filename
     set_fact:
@@ -23,7 +24,7 @@
 
   - name: get logs from remote
     fetch:
-      src: /opt/Result.tar.gz
+      src: "{{ ansible_facts.user_dir }}/Result.tar.gz"
       dest: "{{ log_filename }}"
       flat: yes
 
