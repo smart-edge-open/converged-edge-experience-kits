@@ -26,6 +26,13 @@
   until: result is succeeded
   become: yes
 
+- name: change the owner and group of harbor.crt
+  file:
+    path: /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}/harbor.crt
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: yes
+
 - name: login harbor registry firstly
   command: docker login "{{ _registry_ip_address }}:{{ _registry_port }}" -uadmin -p{{ harborAdminPassword }}
   register: result

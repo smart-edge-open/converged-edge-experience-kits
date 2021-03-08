@@ -15,7 +15,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   local:
-    path: "/opt/disks/harbor-disk1"
+    path: "{{ _harbor_pv_dir }}/harbor-disk1"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -54,7 +54,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   local:
-    path: "/opt/disks/harbor-disk2"
+    path: "{{ _harbor_pv_dir }}/harbor-disk2"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -93,7 +93,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   local:
-    path: "/opt/disks/harbor-disk3"
+    path: "{{ _harbor_pv_dir }}/harbor-disk3"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -132,7 +132,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   local:
-    path: "/opt/disks/harbor-disk4"
+    path: "{{ _harbor_pv_dir }}/harbor-disk4"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -171,7 +171,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   local:
-    path: "/opt/disks/harbor-disk5"
+    path: "{{ _harbor_pv_dir }}/harbor-disk5"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -210,7 +210,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   local:
-    path: "/opt/disks/harbor-disk6"
+    path: "{{ _harbor_pv_dir }}/harbor-disk6"
   nodeAffinity:
     required:
       nodeSelectorTerms:

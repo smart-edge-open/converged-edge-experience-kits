@@ -48,7 +48,7 @@
 
   - name: make pv disk
     file:
-      path: "{{ _disk_dest_harbor }}/{{ item }}"
+      path: "{{ _harbor_pv_dir }}/{{ item }}"
       state: directory
       mode: '0700'
     with_items:
@@ -58,14 +58,12 @@
       - harbor-disk4
       - harbor-disk5
       - harbor-disk6
-    become: yes
 
   - name: copy pv disk.yaml to host
     template:
       src: templates/disks.j2
       dest:  "{{ _git_repo_dest_harbor }}/disks.yaml"
       mode: '0755'
-    become: yes
 
   - name: create namespace for harbor
     command: kubectl create namespace harbor

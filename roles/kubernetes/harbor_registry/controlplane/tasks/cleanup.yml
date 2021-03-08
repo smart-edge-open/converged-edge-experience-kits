@@ -21,7 +21,7 @@
 
 - name: delete harbor data
   file:
-    path: "{{ _disk_dest_harbor }}"
+    path: "{{ _harbor_pv_dir }}"
     state: absent
   ignore_errors: yes
 
