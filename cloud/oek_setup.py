@@ -127,7 +127,7 @@ def main(options):
     create_inventory(options, OEK_PATH)
 
     # Clean previous flavor links
-    for flavor in glob.glob(os.path.join(OEK_PATH, "group_vars", "*", "30_*_flavor.yml")):
+    for flavor in glob.glob(os.path.join(OEK_PATH, "inventory", "default", "group_vars", "*", "30_*_flavor.yml")):
         if os.path.islink(flavor):
             os.unlink(flavor)
 
@@ -137,7 +137,7 @@ def main(options):
             _LOG.fatal("Failed to find flavor directory %s", flavor_path)
         for flavor in Path(flavor_path).iterdir():
             group_name = flavor.stem
-            dst_dir = os.path.join(OEK_PATH, "group_vars", group_name)
+            dst_dir = os.path.join(OEK_PATH, "inventory", "default", "group_vars", group_name)
             if not (os.path.exists(dst_dir) and os.path.isdir(dst_dir)):
                 _LOG.fatal(
                     "Failed to find group_vars directory %s", dst_dir)

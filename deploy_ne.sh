@@ -33,7 +33,7 @@ done
 shift $((OPTIND-1))
 
 # Remove all previous flavors
-find "${PWD}/group_vars/" -type l -name "30_*_flavor.yml" -delete
+find "${PWD}/inventory/default/group_vars/" -type l -name "30_*_flavor.yml" -delete
 
 if [[ -z "${flavor}" ]]; then
     echo "No flavor provided, please choose specific flavor"
@@ -50,10 +50,10 @@ else
     for f in "${flavor_path}"/*.yml
     do
         fname=$(basename "${f}" .yml)
-        dir="${PWD}/group_vars/${fname}"
+        dir="${PWD}/inventory/default/group_vars/${fname}"
         if [[ ! -d "${dir}" ]]; then
             echo "${f} does not match a directory in group_vars:"
-            ls "${PWD}/group_vars/"
+            ls "${PWD}/inventory/default/group_vars/"
             exit 1
         fi
         ln -sfn "${f}" "${dir}/30_${flavor}_flavor.yml"
@@ -75,7 +75,7 @@ fi
 
 eval ansible-playbook -vv \
     "${playbook}" \
-    --inventory inventory.ini "${limit}"
+    --inventory inventory/default/inventory.ini "${limit}"
 
 if ! python3 scripts/log_all.py; then
     echo "[Warning] Log collection failed"

@@ -37,8 +37,9 @@ ROOT_PART = 0
 START_WORKING_DIR = os.getcwd()
 GROUP_VARS_DIR = "group_vars"
 HOST_VARS_DIR = "host_vars"
-GROUP_VARS_PATH = os.path.join(START_WORKING_DIR, GROUP_VARS_DIR)
-HOST_VARS_PATH = os.path.join(START_WORKING_DIR, HOST_VARS_DIR)
+DEFAULT_INVENTORY_PATH = os.path.join(START_WORKING_DIR, "inventory", "default")
+DEFAULT_GROUP_VARS_PATH = os.path.join(DEFAULT_INVENTORY_PATH, GROUP_VARS_DIR)
+DEFAULT_HOST_VARS_PATH = os.path.join(DEFAULT_INVENTORY_PATH, HOST_VARS_DIR)
 ANSIBLE_LOGS_PATH = os.path.join(START_WORKING_DIR, "logs")
 TEMP_DIR_PATH = os.path.join(START_WORKING_DIR, "tmp")
 ALT_INVENTORIES_PATH = os.path.join(START_WORKING_DIR, "inventory", "automated")
@@ -82,7 +83,7 @@ def verify_flavor(flavor, flavor_path):
     return os.path.exists(os.path.join(flavor_path, flavor))
 
 
-def create_sym_links_for_flavor(flavor, flavor_path, group_vars_path=GROUP_VARS_PATH):
+def create_sym_links_for_flavor(flavor, flavor_path, group_vars_path=DEFAULT_GROUP_VARS_PATH):
     """Creates symlinks from flavor files for ansible"""
     flavor_path_content = next(os.walk(flavor_path))
     for flavor_file in flavor_path_content[FILENAMES]:
@@ -118,30 +119,12 @@ def prepare_alt_dir_layout():
     """Prepares alternative directory layout for multiple clusters"""
     if not os.path.exists(ALT_INVENTORIES_PATH):
         os.makedirs(ALT_INVENTORIES_PATH)
-    if not os.path.exists(TEMP_DIR_PATH):
-        os.mkdir(TEMP_DIR_PATH)
-    try:
-        shutil.move(GROUP_VARS_PATH, TEMP_DIR_PATH)
-    except OSError as error:
-        logging.info("%s, ignoring...", error)
-    try:
-        shutil.move(HOST_VARS_DIR, TEMP_DIR_PATH)
-    except OSError as error:
-        logging.info("%s, ignoring...", error)
-    logging.info('Original "%s" and "%s" directories has been moved to "%s"',
-                 GROUP_VARS_DIR, HOST_VARS_DIR, TEMP_DIR_PATH)
 
 
 def handle_alt_dir_layout_cleanup():
-    """Moves original group_vars and host_vars to main directory, removes alternative layout"""
-    if not os.path.exists(GROUP_VARS_PATH):
-        shutil.move(os.path.join(TEMP_DIR_PATH, GROUP_VARS_DIR), START_WORKING_DIR)
-    if not os.path.exists(HOST_VARS_PATH):
-        shutil.move(os.path.join(TEMP_DIR_PATH, HOST_VARS_DIR), START_WORKING_DIR)
+    """Removes alternative layout"""
     if os.path.exists(ALT_INVENTORIES_PATH):
         shutil.rmtree(ALT_INVENTORIES_PATH)
-    if os.path.exists(TEMP_DIR_PATH):
-        shutil.rmtree(TEMP_DIR_PATH)
 
 
 def create_symlinks_for_inventory(src_vars_path, dest_vars_path):
@@ -165,8 +148,8 @@ def handle_cluster_inventory_dir(cluster_inventory_path, group_vars_path, host_v
     if not os.path.exists(cluster_inventory_path):
         os.mkdir(cluster_inventory_path)
 
-    create_symlinks_for_inventory(os.path.join(TEMP_DIR_PATH, GROUP_VARS_DIR), group_vars_path)
-    create_symlinks_for_inventory(os.path.join(TEMP_DIR_PATH, HOST_VARS_DIR), host_vars_path)
+    create_symlinks_for_inventory(DEFAULT_GROUP_VARS_PATH, group_vars_path)
+    create_symlinks_for_inventory(DEFAULT_HOST_VARS_PATH, host_vars_path)
 
 
 def run_deployment(inventory, cleanup=False):

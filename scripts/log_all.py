@@ -48,7 +48,7 @@ def main(): # pylint: disable=too-many-locals
     file_name = "../%s_Openness_experience_kit_archive.tar.gz" % start
     config = read_cfg("scripts/log_all.json")
 
-    with open("inventory.ini", "r") as inventory_file:
+    with open("inventory/default/inventory.ini", "r") as inventory_file:
         lines = inventory_file.read().split("\n")
         name = lines[lines.index("[controller_group]") + 1].strip()
         controller = [x for x in lines

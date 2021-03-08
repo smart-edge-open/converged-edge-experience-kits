@@ -16,7 +16,7 @@ fi
 
 # Check the value of offline_enable
 TOP_PATH=$(cd "$(dirname "$0")";pwd)
-if grep "offline_enable" "$TOP_PATH"/group_vars/all/*.yml | grep -qE "[T|t]rue"; then
+if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | grep -qE "[T|t]rue"; then
   prepackagePath=""
   if [ -e "${TOP_PATH}/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz" ]; then
      prepackagePath="${TOP_PATH}/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz"

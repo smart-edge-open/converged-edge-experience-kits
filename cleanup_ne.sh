@@ -28,7 +28,7 @@ done
 shift $((OPTIND-1))
 
 # Remove all previous flavors
-find "${PWD}/group_vars/" -type l -name "30_*_flavor.yml" -delete
+find "${PWD}/inventory/default/group_vars/" -type l -name "30_*_flavor.yml" -delete
 
 if [[ -z "${flavor}" ]]; then
     echo "No flavor provided"
@@ -45,7 +45,7 @@ else
     for f in "${flavor_path}"/*.yml
     do
         fname=$(basename "${f}" .yml)
-        dir="${PWD}/group_vars/${fname}"
+        dir="${PWD}/inventory/default/group_vars/${fname}"
         if [[ -f "${dir}/30_${flavor}_flavor.yml" ]]; then
             rm -f "${dir}/30_${flavor}_flavor.yml"
         fi

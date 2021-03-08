@@ -4,7 +4,7 @@
 ---
 # This file contains variables intended to be configured by user.
 # It allows feature enabling and configuration.
-# Per-host variables should be places in `host_vars` directory.
+# Per-host variables should be places in `inventory/default/host_vars` directory.
 # Features should not be configured by changing roles' defaults (i.e. role/defaults/main.yml)
 
 ##################################################
@@ -55,9 +55,9 @@ ntp_servers: []
 
 ### Kernel, grub & tuned configuration
 # Kernel, grub & tuned configurations are machine-type specific:
-# - Edge Nodes - edit `group_vars/edgenode_group/10-default.yml`
-# - Edge Controller - edit `group_vars/controller_group/10-default.yml`
-# To provide configuration for specific machine, place the settings in `host_vars/_inventory_host_name.yml`
+# - Edge Nodes - edit `inventory/default/group_vars/edgenode_group/10-default.yml`
+# - Edge Controller - edit `inventory/default/group_vars/controller_group/10-default.yml`
+# To provide configuration for specific machine, place the settings in `inventory/default/host_vars/_inventory_host_name.yml`
 
 ### Retry settings for network-based tasks
 # - number_of_retries - configures how many times failed task should be retried
