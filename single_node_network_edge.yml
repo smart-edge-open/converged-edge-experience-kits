@@ -76,6 +76,9 @@
     - role: applications/openness/controlplane
       when: openness_enable | default(True)
 
+    - role: kubernetes/qat_dev_plugin/controller
+      when: qat_device_plugin_enable | default(False)
+
     - role: telemetry/certs
       when: >
         "telemetry_prometheus_enable | default(True) OR
@@ -143,5 +146,7 @@
       when: ne_hddl_enable | default(False)
     - role: infrastructure/ptp/node
       when: ptp_sync_enable | default(False)
+    - role: kubernetes/qat_dev_plugin/node
+      when: qat_device_plugin_enable | default(False)
     - role: kubernetes/rmd/node
       when: rmd_operator_enable | default(False)

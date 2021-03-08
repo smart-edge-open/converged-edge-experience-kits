@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-config"
+data:
+  DPDK_DRIVER: "{{ .Values.drivers.dpdk }}"
+  KERNEL_VF_DRIVERS: "{{ .Values.drivers.kernel }}"
+  MAX_NUM_DEVICES: "{{ .Values.maxNumDevices }}"
+  DEBUG: "{{ .Values.debug }}"

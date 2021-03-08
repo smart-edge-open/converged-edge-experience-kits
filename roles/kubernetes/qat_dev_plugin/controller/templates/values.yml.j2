@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+image:
+  repository: {{ _qat_dp.image }}
+  tag: {{ _qat_dp.version }}
+pullPolicy: IfNotPresent
+
+drivers:
+  dpdk: {{ _qat_dp.dpdk_drivers }}
+  kernel: {{ _qat_dp.kernel_drivers }}
+
+maxNumDevices: {{ _qat_dp.max_num_devices }}
+
+debug: {{ _qat_dp.debug | default("false") }}
+
+apparmor:
+  profile: {{ _qat_dp.apparmor_profile | default("unconfined") }}
