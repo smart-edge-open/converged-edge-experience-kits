@@ -3,7 +3,7 @@
 
 ---
 
-_qemu_version: "4.0.0"
+_qemu_version: "5.2.0"
 _qemu_targets: "x86_64-softmmu"
 
 _qemu_name: "qemu-{{ _qemu_version }}"

@@ -16,9 +16,9 @@
     path: "{{ _qemu_install_dir }}"
   register: qemu_dest_dir
 
-- name: chech if offline
+- name: check if offline
   set_fact:
-    _qemu_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/qemu-4.0.0.tar.xz"
+    _qemu_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/qemu-{{ _qemu_version }}.tar.xz"
   when: offline_enable
 
 - include_tasks: download_and_unpack.yml
@@ -28,6 +28,18 @@
 - name: install zlib-devel package
   yum:
     name: "zlib-devel"
+    state: present
+  become: yes
+
+- name: install ninja-build
+  yum:
+    name: ninja-build
+    state: present
+  become: yes
+
+- name: install bzip2
+  yum:
+    name: bzip2
     state: present
   become: yes
 
@@ -49,4 +61,10 @@
     target: install
   environment:
     "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
+  become: yes
+
+- name: uninstall ninja-build
+  yum:
+    name: ninja-build
+    state: absent
   become: yes
