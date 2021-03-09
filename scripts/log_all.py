@@ -16,8 +16,8 @@ import sys
 import subprocess
 import tarfile
 import json
+import re
 from datetime import datetime
-
 
 def read_cfg(path):
     """
@@ -28,16 +28,41 @@ def read_cfg(path):
 
     Returns:
     dict: Tool configuration dictionary. Read config on success,
-          default config otherwise.
+          empty config otherwise.
     """
     # to avoid script error default git configuration is also available.
-    config = ["git status", "git diff", "git log -n100"]
     if os.path.isfile(path):
         with open(path, "r") as config_file:
-            config = json.load(config_file)["commands"]
-            return config
-    return config
+            return json.load(config_file)
+    return dict()
 
+def tar_filter_with_exclude(exclude_paths):
+    """
+    Filters out files which paths match any RE from exclude_paths list
+
+    Parameters:
+    exclude_paths (list(RE)): List of regular expresions with excluded paths
+
+    Returs:
+    function: Function performing TarInfo base filtering depending on exclude_paths size
+    """
+    def tar_filter_none(tar_info):
+        return tar_info
+
+    def tar_filter(tar_info):
+        dir_sep_pos = tar_info.name.find(os.sep)
+        if dir_sep_pos > 0:
+            file_path_without_base = tar_info.name[dir_sep_pos + 1:]
+
+            for exclude_path in exclude_paths:
+                if exclude_path.search(file_path_without_base):
+                    print('Excluding: ', tar_info.name)
+                    return None
+        return tar_info
+
+    if len(exclude_paths) > 0:
+        return tar_filter
+    return tar_filter_none
 
 def main(): # pylint: disable=too-many-locals
     """
@@ -47,6 +72,14 @@ def main(): # pylint: disable=too-many-locals
     start = (datetime.now()).strftime("%Y_%m_%d_%H_%M_%S")
     file_name = "../%s_Openness_experience_kit_archive.tar.gz" % start
     config = read_cfg("scripts/log_all.json")
+
+    commands = ["git status", "git diff", "git log -n100"]
+    if "commands" in config:
+        commands = config["commands"]
+
+    exclude_paths = []
+    if "excludePaths" in config:
+        exclude_paths = [re.compile(excluded_path) for excluded_path in config["excludePaths"]]
 
     with open("inventory/default/inventory.ini", "r") as inventory_file:
         lines = inventory_file.read().split("\n")
@@ -58,13 +91,13 @@ def main(): # pylint: disable=too-many-locals
             user = [x for x in controller if x.startswith("ansible_user")][0].split("=")[-1]
         else:
             user = ""
-
     try:
         with tarfile.open(file_name, "w:gz") as tar:
             main_dir = os.path.abspath(os.getcwd())
-            tar.add(main_dir, arcname=os.path.basename(main_dir))
+            tar.add(main_dir, arcname=os.path.basename(main_dir),
+                    filter=tar_filter_with_exclude(exclude_paths))
             if os.path.isdir(main_dir + "/.git"):
-                for com in config:
+                for com in commands:
                     path = com.replace(" ", "_") + ".log"
                     with open(path, "w") as log_file:
                         subprocess.run(com,
