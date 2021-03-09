@@ -3,21 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-declare -A oneLine
-declare -A longName
-declare -A urlDic
-urlDic=(
-[base]='http://mirror.centos.org/centos/7/os/x86_64/Packages/' \
-[updates]='http://mirror.centos.org/centos/7/updates/x86_64/Packages/' \
-[epel]='https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/' \
-[extras]='http://mirror.centos.org/centos/7/extras/x86_64/Packages/' \
-[rt]='http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/' \
-[docker]='https://download.docker.com/linux/centos/7/x86_64/stable/Packages/' \
-[ius]='https://repo.ius.io/archive/7/x86_64/packages/' \
-[ius-archive]='https://repo.ius.io/archive/7/x86_64/packages/' \
-[other]='http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/' \
-)
-
 progressfilt() {
   local flag=false c count cr=$'\r' nl=$'\n'
   set +e
@@ -39,183 +24,64 @@ progressfilt() {
   set -e
 }
 
-# Downoad package from network
-do_download() {
-  local i=0
-  longName=$(echo "$1" | rev | cut -d '/' -f 1 | rev)
-  if [ -e "${RPM_DOWNLOAD_PATH}"/"$longName" ];then
-    return
+# Install required repos
+host_repos_required() {
+  if [[ ! -e "/etc/yum.repos.d/docker.repo" ]];then
+sudo_cmd ls > /dev/null
+echo "[docker]
+baseurl = https://download.docker.com/linux/centos/7/\$basearch/stable
+gpgcheck = 1
+gpgkey = https://download.docker.com/linux/centos/gpg
+name = Docker CE repository" | sudo tee /etc/yum.repos.d/docker.repo
   fi
-  wget --progress=bar:force -e http_proxy="${HTTP_PROXY}" -e https_proxy="${HTTP_PROXY}" \
-    -P "${RPM_DOWNLOAD_PATH}" "$1" 2>&1 | progressfilt || \
-  if [[ "$2" -eq 0 ]];then
-    echo "Wget Error"
+  if [[ ! -e "/etc/yum.repos.d/ius.repo" ]];then
+    sudo_cmd yum install -y https://repo.ius.io/ius-release-el7.rpm || opc::log::error "ERROR:ius-release-el7.rpm"
+  fi
+  if [[ ! -e "/etc/yum.repos.d/kubernetes.repo" ]];then
+sudo_cmd ls > /dev/null
+echo "[kubernetes]
+baseurl = https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled = 1
+gpgcheck = 1
+gpgkey = https://packages.cloud.google.com/yum/doc/yum-key.gpg
+        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+name = Kubernetes repository
+repo_gpgcheck = 1" | sudo tee /etc/yum.repos.d/kubernetes.repo
+  fi
+  if [[ ! -e "/etc/yum.repos.d/CentOS-RT.repo" ]];then
+    sudo_cmd wget http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo -O /etc/yum.repos.d/CentOS-RT.repo \
+    || opc::log::error "ERROR: Install CentOS-RT.repo"
+    sudo_cmd wget http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/RPM-GPG-KEY-cern -O /etc/pki/rpm-gpg/RPM-GPG-KEY-cern \
+    || opc::log::error "ERROR: Install CentOS-RT.repo key"
+  fi
+  sudo_cmd yum makecache fast
+}
+
+host_commands_required() {
+  local cmd=${1:-}
+  for cmd; do
+    echo "--->$cmd"
+    which "$cmd" > /dev/null 2>&1 || sudo_cmd yum install -y "${SOURCES_TABLES[${cmd}]}" \
+    || opc::log::error "ERROR: Install package ${cmd}"
+  done
+}
+
+host_pylibs_required() {
+  local lib=${1:-}
+  for lib;do
+    sudo_cmd pip3 install "$lib" || opc::log::error "ERROR: pip3 install package $lib"
+  done
+}
+
+restart_dep() {
+  local choice
+  sudo_cmd usermod -aG docker "$USER"
+  echo -n "You need to restart the machine and active the new docker user. Take effect after restart, whether to restart now?(Y/N) ";read -r choice
+  choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+  if [[ "$choice" == "y" ]];then
+    sudo_cmd reboot
+  else
     exit
-  fi
-}
-
-# Try to find the package on the all possible addresses list
-do_try_download() {
-  local rname=$1
-  local arch=$2
-  local ignore=$3
-
-  if [ -e "${RPM_DOWNLOAD_PATH}"/"${rname}"."${arch}".rpm ];then
-    return
-  fi
-
-  for url in "${urlDic[@]}"
-  do
-    wget --progress=bar:force -e http_proxy="${HTTP_PROXY}" -e https_proxy="${HTTP_PROXY}" -P \
-      "${RPM_DOWNLOAD_PATH}" "${url}${rname}.${arch}.rpm" 2>&1 | progressfilt || continue
-    return
-  done
-
-  if [[ "$ignore" -eq 0 ]];then
-    echo "Wget Error"
-    exit
-  fi
-}
-
-# Find the key in the map urlDic
-do_try_find_key() {
-  for key in "${!urlDic[@]}"
-  do
-    if [[ "$1" == "$key" ]];then
-      echo 0
-      return
-    fi
-  done
-  echo 1
-}
-
-# Remove the '@' if it exists
-do_remove_at() {
-  local type
-
-  type="$1"
-  if [[ "${type:0:1}" == "@" ]];then
-    echo "${type:1}"
-  else
-    echo "$type"
-  fi
-}
-
-# Deal with the broken row in the file tmp/list.log
-# Example :
-# kernel-rt.x86_64                        3.10.0-1127.19.1.rt56.1116.el7
-#                                                                      @/kernel-rt-3.10.0-1127.19.1.rt56.1116.el7.x86_64
-do_broken_row() {
-  local n
-  local item
-  local type
-  local version
-  local rname
-  local columns
-  local ret
-  local name=$1
-  local arch=$2
-
-  n=$(echo "${oneLine[@]}" | awk '{print $1}' | cut -d ':' -f 1)
-  n=$(( n + 1 ))
-  item=$(sed -n "${n}p" /tmp/list.log)
-  columns=$(( 3 - $3 ))
-  type=$(echo "$item" | awk -v x="${columns}" '{print $x}')
-  type=$(do_remove_at "$type")
-  if [[ "$3" -eq 1 ]];then
-    version=$(echo "$item" | awk '{print $1}' | cut -d ':' -f 2)
-    rname="${name}-${version}"
-  elif [[ "$3" -eq 2 ]];then
-    version=$(echo "${oneLine[@]}" | awk '{print $2}' | cut -d ':' -f 2)
-    rname="${name}-${version}"
-  fi
-  ret=$(do_try_find_key "$type")
-  if [[ "$ret" -eq 0 ]];then
-    do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$4"
-  else
-    do_try_download "$rname" "$arch" "$4"
-  fi
-}
-
-# Deal with the normal row in the file /tmp/list.log
-# Example:
-# libacl.x86_64                           2.2.51-15.el7                @anaconda
-do_row() {
-  local version
-  local rname
-  local type
-  local ret
-  local name=$1
-  local arch=$2
-
-  version=$(echo "${oneLine[@]}" | awk '{print $2}' | cut -d ':' -f 2)
-  rname="${name}-${version}"
-  type=$(echo "${oneLine[@]}" | awk '{print $3}')
-  type=$(do_remove_at "$type")
-  if [[ "$type" == "epel" || "$type" == "ius" \
-     || "$type" == "ius-archive" ]];then
-    do_download "${urlDic[$type]}${name:0:1}/${rname}.${arch}.rpm" "$3"
-  else
-    ret=$(do_try_find_key "$type")
-    if [[ "$ret" == "0" ]];then
-      if [[ "$type" == "updates" ]];then
-        do_download "${urlDic[base]}${rname}.${arch}.rpm" 1
-        do_download "${urlDic[updates]}${rname}.${arch}.rpm" 1
-      else
-        do_download "${urlDic[$type]}${rname}.${arch}.rpm" "$3"
-      fi
-    else
-      do_try_download "$rname" "$arch" "$3"
-    fi
-  fi
-}
-
-# Deal with multiple versions function
-# Example:
-# gcc.x86_64                              4.8.5-39.el7                 base
-# gcc.x86_64                              4.8.5-44.el7                 base
-do_multi_version() {
-  local columns
-  local name=$1
-  local arch=$2
-  local n=$3
-
-  i=1
-  echo "===== $name.$arch"
-  n=$(( n + 1 ))
-  while [ $i -lt $n ]
-  do
-    oneLine=$(grep -nE "^$name.${arch}" /tmp/list.log | sed -n "${i}p")
-    let i++
-    columns=$(echo "${oneLine[@]}" | awk -F ' ' '{print NF}')
-    if [[ "$columns" -lt 3 ]];then
-      do_broken_row "$name" "$arch" "$columns" 1
-    else
-      do_row "$name" "$arch" 1
-    fi
-  done
-}
-
-# Download rpm main function
-# Parse the address through each line of the file
-# that generated by one command, sudo yum list > list.log
-do_rpm_main() {
-  local ret
-  local columns
-  local name=$1
-  local arch=$2
-
-  ret=$(grep -cE "^${name}.${arch}" /tmp/list.log)
-  if [[ "$ret" -gt 1 ]];then
-    do_multi_version "$name" "$arch" "$ret"
-  elif [[ "$ret" -eq 1 ]];then
-    oneLine=$(grep -nE "^$name.$arch" /tmp/list.log)
-    columns=$(echo "${oneLine[@]}" | awk -F ' ' '{print NF}')
-    if [[ "$columns" -lt 3 ]];then
-      do_broken_row "$name" "$arch" "$columns" 0
-    else
-      do_row "$name" "$arch" 0
-    fi
   fi
 }
 
@@ -268,6 +134,7 @@ readonly YAML_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/yaml"
 readonly IMAGE_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/images"
 readonly OTHER_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/other"
 readonly CHARTS_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/charts"
+export PRERPM_DOWNLOAD_PATH="$OPC_DOWNLOAD_PATH/prerpms"
 
 # Create directory under the path of '../'
 opc::dir::create() {
@@ -277,86 +144,22 @@ opc::dir::create() {
 }
 
 # Download the rpms from internet
-opc::download::rpm() {
-  local url
-  local ret
-  local shortName
-
-  sudo_cmd yum clean all
-  sudo_cmd yum makecache fast
-  sudo_cmd yum list --enablerepo=ius-archive > /tmp/list.log
+opc::download::yum() {
   for list in $1
   do
-    url=$(echo "$list" | cut -d ',' -f 2)
-    longName=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
-    shortName=$(echo "$longName" | sed 's/-[0-9]/ /' | awk '{print $1}')
-    echo "------> $shortName"
-    ret=$(opc::check::exist "$longName" "noarch")
-    if [[ "$ret" -eq 0 ]];then
-      do_rpm_main "$shortName" "noarch"
+    set +e
+    if echo "$list" | grep "\.rpm" ; then
+      name=$(echo "$list" | rev | cut -d '/' -f 1 | rev)
+      if [[ ! -e "$RPM_DOWNLOAD_PATH"/"$name" ]];then
+        wget --progress=bar:force "$list" -P "$RPM_DOWNLOAD_PATH" 2>&1 | progressfilt \
+        || opc::log::error "Wget $list"
+      fi
     else
-      do_rpm_main "$shortName" "x86_64"
+      sudo_cmd yum install --disableexcludes=all --enablerepo=ius-archive --skip-broken \
+        --downloadonly --downloaddir="$RPM_DOWNLOAD_PATH" "$list"
     fi
+    set -e
   done
-  # for special packages
-  do_download "http://mirror.centos.org/centos/7/os/x86_64/Packages/gcc-c++-4.8.5-44.el7.x86_64.rpm" 0
-  do_download "http://mirror.centos.org/centos/7/os/x86_64/Packages/libstdc++-devel-4.8.5-44.el7.x86_64.rpm" 0
-  do_download "http://mirror.centos.org/centos/7/os/x86_64/Packages/libstdc++-4.8.5-44.el7.x86_64.rpm" 0
-  do_download "https://github.com/alauda/ovs/releases/download/2.12.0-5/openvswitch-2.12.0-5.el7.x86_64.rpm" 0
-  do_download "https://github.com/alauda/ovs/releases/download/2.12.0-5/ovn-2.12.0-5.el7.x86_64.rpm" 0
-  do_download "http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-2.11.0-9.el7.noarch.rpm" 0
-  do_download "http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm" 0
-  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm" 0
-  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm" 0
-  do_download "http://linuxsoft.cern.ch/cern/centos/7/rt/x86_64/Packages/kernel-rt-devel-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm" 0
-}
-
-# Download the k8s commands from internet
-opc::download::k8s_commands() {
-  local new_name
-  local files
-
-  # generate the repo files
-  if [[ ! -e "/etc/yum.repos.d/kubernetes.repo" ]];then
-sudo_cmd ls > /dev/null
-echo "[kubernetes]
-baseurl = https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-enabled = 1
-gpgcheck = 1
-gpgkey = https://packages.cloud.google.com/yum/doc/yum-key.gpg
-        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-name = Kubernetes repository
-repo_gpgcheck = 1" | sudo tee /etc/yum.repos.d/kubernetes.repo
-  fi
-  # Create temp dir
-  tmp_dir=$(mktemp -d)
-  # Install yum plugin
-  sudo_cmd yum install yum-utils -y
-  # Downloading for dependencies
-  sudo_cmd yumdownloader cri-tools-1.13.0-0 --resolve --destdir="$tmp_dir"
-  sudo_cmd yumdownloader kubernetes-cni-0.8.7-0 --resolve --destdir="$tmp_dir"
-  # Download kubeadm-1.18.4
-  sudo_cmd yumdownloader kubeadm-1.20.0-0 --resolve --destdir="$tmp_dir"
-  # Download kubelet-1.18.4
-  sudo_cmd yumdownloader kubelet-1.20.0-0 --resolve --destdir="$tmp_dir"
-  # Download kubectl-1.18.4
-  sudo_cmd yumdownloader kubectl-1.20.0-0 --resolve --destdir="$tmp_dir"
-
-  # Rename
-  files=$(ls "$tmp_dir")
-  set +e
-  for f in $files
-  do
-    new_name=$(echo "$f" | grep -o -E '\-[k|c][u|r].*' | sed 's/^-//')
-    if [[ "$f" == "$new_name" || -z "$new_name" ]];then
-      continue
-    else
-      mv "${tmp_dir}/$f" "${tmp_dir}/${new_name}"
-    fi
-  done
-  set -e
-  cp -n "${tmp_dir}"/* "${RPM_DOWNLOAD_PATH}"
-  rm -rf "${tmp_dir}"
 }
 
 # Download the github code from internet
@@ -366,6 +169,7 @@ opc::download::github() {
   local flag
   local value
   local ret
+  local arr
   local pwd=$PWD
 
   # make the directory to be clean
@@ -382,27 +186,25 @@ opc::download::github() {
       if [ -z "$GITHUB_TOKEN" ];then
         opc::log::error "Cannot download otcshare code!"
       fi
-      part1=$(echo "$url" | cut -d ':' -f 1)
-      part2=$(echo "$url" | cut -d ':' -f 2)
-      part2="${part2:2}"
-      docker run --rm -ti \
-      -v "$PWD":/opt/app \
-      -w /opt/app \
-      golang:1.14.9 bash -c "git config --global http.proxy ${GIT_PROXY} \
-        && git clone ${part1}://${GITHUB_TOKEN}@${part2}"
+      # shellcheck disable=SC2206
+      arr=( ${url//\/\// } )
+
+      docker run --rm -ti -v "$PWD":/opt/app \
+        -w /opt/app golang:1.14.9 bash -c "if [[ -n ${HTTP_PROXY} ]];then \
+        if [[ -n $GIT_PROXY ]];then git config --global http.proxy ${GIT_PROXY}; \
+        else git config --global http.proxy ${HTTP_PROXY};fi;fi;git clone https://${GITHUB_TOKEN}@${arr[1]}"
     else
       if [[ "$flag" == "tag" ]];then
         docker run --rm -ti \
-        -v "$PWD":/opt/app \
-        -w /opt/app \
-        golang:1.14.9 bash -c "git config --global http.proxy ${GIT_PROXY} \
-          && git clone $url && cd $name && git checkout $value"
+        -v "$PWD":/opt/app -w /opt/app \
+        golang:1.14.9 bash -c "if [[ -n ${HTTP_PROXY} ]];then \
+        if [[ -n $GIT_PROXY ]];then git config --global http.proxy ${GIT_PROXY}; \
+        else git config --global http.proxy ${HTTP_PROXY};fi;fi;git clone $url && cd $name && git checkout $value"
       else
-        docker run --rm -ti \
-        -v "$PWD":/opt/app \
-        -w /opt/app \
-        golang:1.14.9 bash -c "git config --global http.proxy ${GIT_PROXY} \
-          && git clone $url && cd $name && git reset --hard $value"
+        docker run --rm -ti -v "$PWD":/opt/app \
+        -w /opt/app golang:1.14.9 bash -c "if [[ -n ${HTTP_PROXY} ]];then \
+        if [[ -n $GIT_PROXY ]];then git config --global http.proxy ${GIT_PROXY}; \
+        else git config --global http.proxy ${HTTP_PROXY};fi;fi;git clone $url && cd $name && git reset --hard $value"
       fi
     fi
   done
@@ -411,53 +213,30 @@ opc::download::github() {
 }
 
 download::module() {
-  docker run -ti --rm  \
+  docker run -ti --rm    \
     -v "$PWD":/opt/app   \
-    -v "${OPC_BASE_DIR}"/scripts/run.sh.bak:/root/run.sh:ro \
-    -v "${GOMODULE_DOWNLOAD_PATH}":/go/pkg              \
-    -v "${OPC_DOWNLOAD_PATH}"/ret:/root/.ret            \
-    -e http_proxy="${HTTP_PROXY}"                   \
-    -e https_proxy="${HTTP_PROXY}"                  \
-    -e git_proxy="${GIT_PROXY}"                     \
-    -e DOCKER_NETRC="machine github.com login $GITHUB_USERNAME password $GITHUB_TOKEN" \
-    golang:1.14.9 bash /root/run.sh
+    -v "$GOMODULE_DOWNLOAD_PATH":/go/pkg \
+    -v "$OPC_BASE_DIR"/scripts/download_mod.sh:/root/dmod.sh:ro \
+    -w /opt/app         \
+    golang:1.15.5 bash -c "if [[ -n ${HTTP_PROXY} ]];then \
+      if [[ -n $GIT_PROXY ]];then \
+      git config --global http.proxy ${GIT_PROXY}; else \
+      git config --global http.proxy ${HTTP_PROXY};fi; \
+      fi;if [[ -n ${HTTP_PROXY} ]];then \
+      export http_proxy=$HTTP_PROXY;export https_proxy=$HTTP_PROXY;fi;\
+      git config --global --add url.\"https://$GITHUB_TOKEN@github.com/\".insteadOf \"https://github.com/\" \
+      && go env -w GOPRIVATE=github.com/otcshare && /root/dmod.sh"
 }
 
 # Download go modules
 opc::download::gomodules() {
-  local name
   local pwd="$PWD"
-
-  for list in $1
+  cd "$CODE_DOWNLOAD_PATH"
+  for dir in $1
   do
-    name=$(echo "$list" | cut -d ',' -f 1)
-    cd "${CODE_DOWNLOAD_PATH}"/"$name"
-    if [[ ! -e "go.mod" ]];then
-      continue
-    fi
-    if [ -e "$OPC_DOWNLOAD_PATH"/ret ];then
-      rm -f "$OPC_DOWNLOAD_PATH"/ret
-    fi
-    touch "$OPC_DOWNLOAD_PATH"/ret
-    if [[ "$name" == "edgeservices" || "$name" == "ido-epcforedge" ]];then
-      dirs=$(find . -name go.mod)
-      for dir in $dirs
-      do
-        mod_dir=$(dirname "$dir")
-        pushd "$mod_dir"
-        download::module
-        popd
-      done
-    else
-      download::module
-    fi
-    ret=$(cat "$OPC_DOWNLOAD_PATH"/ret)
-    if [[ -z "$ret" ]];then
-      rm "$OPC_DOWNLOAD_PATH"/ret -f
-      opc::log::error "ERROR: Project $name ---> go mod download"
-    fi
-    rm "$OPC_DOWNLOAD_PATH"/ret -f
-    opc::log::status "Download mod successful for $name"
+    pushd "$dir"
+    download::module
+    popd
   done
   cd "$GOMODULE_DOWNLOAD_PATH"
   if [ -e "gomod.tar.gz" ];then
@@ -468,7 +247,7 @@ opc::download::gomodules() {
   cd "${pwd}"
 }
 
-# Download pip packages
+# Download pip3 packages
 opc::download::pippackage() {
   local url
   local name
@@ -478,8 +257,7 @@ opc::download::pippackage() {
     url=$(echo "$list" | cut -d ',' -f 2)
     name=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     if [[ ! -e "$PIP_DOWNLOAD_PATH/$name" ]];then
-      wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" -e http_proxy="${HTTP_PROXY}" \
-        -P "$PIP_DOWNLOAD_PATH" https://files.pythonhosted.org/packages/"$url" 2>&1 | progressfilt \
+      wget --progress=bar:force -P "$PIP_DOWNLOAD_PATH" https://files.pythonhosted.org/packages/"$url" 2>&1 | progressfilt \
       || opc::log::error "Wget https://files.pythonhosted.org/packages/$url"
     fi
   done
@@ -495,8 +273,7 @@ opc::download::yamls() {
     url=$(echo "$list" | cut -d ',' -f 2)
     name=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     if [ ! -e "$YAML_DOWNLOAD_PATH"/"$name" ];then
-      wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" \
-           -e http_proxy="${HTTP_PROXY}" -P "${YAML_DOWNLOAD_PATH}" "$url" 2>&1 | progressfilt \
+      wget --progress=bar:force -P "${YAML_DOWNLOAD_PATH}" "$url" 2>&1 | progressfilt \
       || opc::log::error "Wget $url"
     fi
   done
@@ -556,10 +333,17 @@ build::common_services() {
     -w /opt/app golang:1.14.9 \
     bash -c "ln -sf /bin/cp /usr/bin/cp \
     && make common-services SKIP_DOCKER_IMAGES=1"
-    docker build --build-arg http_proxy="${HTTP_PROXY}" -t eaa:1.0 dist/eaa
-    docker build --build-arg http_proxy="${HTTP_PROXY}" -t edgednssvr:1.0 dist/edgednssvr
-    docker build --build-arg http_proxy="${HTTP_PROXY}" -t certsigner:1.0 dist/certsigner
-    docker build --build-arg http_proxy="${HTTP_PROXY}" -t certrequester:1.0 dist/certrequester
+    if [[ -n "$HTTP_PROXY" ]];then
+      docker build --build-arg http_proxy="${HTTP_PROXY}" -t eaa:1.0 dist/eaa
+      docker build --build-arg http_proxy="${HTTP_PROXY}" -t edgednssvr:1.0 dist/edgednssvr
+      docker build --build-arg http_proxy="${HTTP_PROXY}" -t certsigner:1.0 dist/certsigner
+      docker build --build-arg http_proxy="${HTTP_PROXY}" -t certrequester:1.0 dist/certrequester
+    else
+      docker build -t eaa:1.0 dist/eaa
+      docker build -t edgednssvr:1.0 dist/edgednssvr
+      docker build -t certsigner:1.0 dist/certsigner
+      docker build -t certrequester:1.0 dist/certrequester
+    fi
     docker save eaa:1.0 > "$IMAGE_DOWNLOAD_PATH"/eaa.tar.gz
     docker save edgednssvr:1.0 > "$IMAGE_DOWNLOAD_PATH"/edgednssvr.tar.gz
     docker save certsigner:1.0 > "$IMAGE_DOWNLOAD_PATH"/certsigner.tar.gz
@@ -574,19 +358,24 @@ build::interfaceservice() {
     -w /opt/app golang:1.14.9 \
     bash -c "ln -sf /bin/cp /usr/bin/cp \
     && make interfaceservice SKIP_DOCKER_IMAGES=1"
-    docker build --build-arg http_proxy="${HTTP_PROXY}" \
-      --build-arg https_proxy="${HTTP_PROXY}" \
-      -t interfaceservice:1.0 dist/interfaceservice
+    if [[ -n "$HTTP_PROXY" ]];then
+      docker build --build-arg http_proxy="${HTTP_PROXY}" \
+      --build-arg https_proxy="${HTTP_PROXY}" -t interfaceservice:1.0 dist/interfaceservice
+    else
+      docker build -t interfaceservice:1.0 dist/interfaceservice
+    fi
     docker save interfaceservice:1.0 > "$IMAGE_DOWNLOAD_PATH"/interfaceservice.tar.gz
 }
 
 build::fpga-opae-pacn3000() {
   local kernel_version
+  local target_kernel_version
 
   kernel_version=$(uname -r)
+  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
   if [[ "$BUILD_OPAE" == "enable" ]];then
-    if [[ "$kernel_version" != "3.10.0-1160.11.1.rt56.1145.el7.x86_64" ]];then
-      echo -n "Update the kernel to kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64, do you agree?(Y/N) ";read update_kernel
+    if [[ "$kernel_version" != "$target_kernel_version" ]];then
+      echo -n "Update the kernel to $target_kernel_version, do you agree?(Y/N) ";read -r update_kernel
       update_kernel=$(echo "${update_kernel}" | tr '[:upper:]' '[:lower:]')
       if [[ "$update_kernel" == "y" ]];then
         opc::update_kernel
@@ -594,27 +383,30 @@ build::fpga-opae-pacn3000() {
     else
       cd "$CODE_DOWNLOAD_PATH"/edgeservices
       sudo_cmd chown -R "$USER":"$USER" ./*
-      cp "$DIR_OF_OPAE_ZIP"/OPAE_SDK_1.3.7-5_el7.zip build/fpga_opae
-      docker build --build-arg http_proxy="${HTTP_PROXY}" \
-        --build-arg https_proxy="${HTTP_PROXY}" \
-        -t fpga-opae-pacn3000:1.0 -f ./build/fpga_opae/Dockerfile ./build/fpga_opae
+      cp "$DIR_OF_OPAE_ZIP"/*.zip build/fpga_opae
+      if [[ -n "$HTTP_PROXY" ]];then
+        docker build --build-arg http_proxy="${HTTP_PROXY}" --build-arg https_proxy="${HTTP_PROXY}" \
+          -t fpga-opae-pacn3000:1.0 -f ./build/fpga_opae/Dockerfile ./build/fpga_opae
+      else
+        docker build -t fpga-opae-pacn3000:1.0 -f ./build/fpga_opae/Dockerfile ./build/fpga_opae
+      fi
       docker save fpga-opae-pacn3000:1.0 > "$IMAGE_DOWNLOAD_PATH"/fpga-opae-pacn3000.tar.gz
-      rm ./build/fpga_opae/OPAE_SDK_1.3.7-5_el7.zip
+      rm ./build/fpga_opae/*.zip
     fi
   fi
 }
 
 build::sriov_network() {
   cd "${CODE_DOWNLOAD_PATH}"/sriov-network-device-plugin
-  make image HTTP_PROXY="${HTTP_PROXY}" HTTPS_PROXY="${HTTPS_PROXY}" \
-    || opc::log::error "make image sriov_network_device_plugin"
+  sed -i 's/FROM golang:alpine as builder/FROM golang:alpine3.10 as builder/g' images/Dockerfile
+  make image || opc::log::error "make image sriov_network_device_plugin"
   docker save nfvpe/sriov-device-plugin:latest > "$IMAGE_DOWNLOAD_PATH"/sriov-device-plugin.tar.gz
 }
 
 build::sriov_cni() {
   cd "$CODE_DOWNLOAD_PATH"/sriov-cni
-  make image HTTP_PROXY="${HTTP_PROXY}" HTTPS_PROXY="${HTTPS_PROXY}" \
-    || opc::log::error "make image sriov_cni"
+  sed -i 's/FROM golang:alpine as builder/FROM golang:alpine3.10 as builder/g' Dockerfile
+  make image || opc::log::error "make image sriov_cni"
   docker save nfvpe/sriov-cni:latest > "$IMAGE_DOWNLOAD_PATH"/sriov_cni.tar.gz
 }
 
@@ -623,15 +415,28 @@ build::biosfw() {
     cd "$CODE_DOWNLOAD_PATH"/edgeservices
     sudo_cmd chown -R "${USER}":"${USER}" ./*
     cp "$DIR_OF_BIOSFW_ZIP"/syscfg_package.zip dist/biosfw
-    docker build --build-arg http_proxy="${HTTP_PROXY}" -t openness-biosfw dist/biosfw
+    if [[ -n "$HTTP_PROXY" ]];then
+      docker build --build-arg http_proxy="${HTTP_PROXY}" -t openness-biosfw dist/biosfw
+    else
+      docker build -t openness-biosfw dist/biosfw
+    fi
     docker save openness-biosfw:latest > "${IMAGE_DOWNLOAD_PATH}"/biosfw.tar.gz
     rm dist/biosfw/syscfg_package.zip -f
   fi
 }
 
 build::bb_config() {
-  docker build --build-arg http_proxy="${HTTP_PROXY}" --build-arg https_proxy="${HTTP_PROXY}" -t \
-    bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/kubernetes/bb_config/files
+  if [[ -n "$HTTP_PROXY" ]];then
+    if [[ -n "$GIT_PROXY" ]];then
+      docker build --build-arg http_proxy="${GIT_PROXY}" --build-arg https_proxy="${GIT_PROXY}" \
+        -t bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/kubernetes/bb_config/files
+    else
+      docker build --build-arg http_proxy="${HTTP_PROXY}" --build-arg https_proxy="${HTTP_PROXY}" \
+        -t bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/kubernetes/bb_config/files
+    fi
+  else
+    docker build -t bb-config-utility:0.1.0  "${OPC_BASE_DIR}"/../roles/kubernetes/bb_config/files
+  fi
   docker save bb-config-utility:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/bb-config-utility.tar.gz
 }
 
@@ -642,15 +447,30 @@ build::tas() {
     -v "${GOMODULE_DOWNLOAD_PATH}":/go/pkg \
     -w /opt/app \
     golang:1.14.9 make build
-  docker build -f deploy/images/Dockerfile_extender bin/ -t tas-extender
-  docker build -f deploy/images/Dockerfile_controller bin/ -t tas-controller
+  if [[ -n "$HTTP_PROXY" ]];then
+    docker build --build-arg http_proxy="${HTTP_PROXY}" -f deploy/images/Dockerfile_extender bin/ -t tas-extender
+    docker build --build-arg http_proxy="${HTTP_PROXY}" -f deploy/images/Dockerfile_controller bin/ -t tas-controller
+  else
+    docker build -f deploy/images/Dockerfile_extender bin/ -t tas-extender
+    docker build -f deploy/images/Dockerfile_controller bin/ -t tas-controller
+  fi
   docker save tas-extender:latest > "$IMAGE_DOWNLOAD_PATH"/tas-extender.tar.gz
   docker save tas-controller:latest > "$IMAGE_DOWNLOAD_PATH"/tas-controller.tar.gz
 }
 
 build::rmd() {
   cd "${CODE_DOWNLOAD_PATH}"/rmd
-  docker build --build-arg https_proxy="$GIT_PROXY" --build-arg http_proxy="$HTTP_PROXY" -t rmd ./
+  if [[ -n "$HTTP_PROXY" ]];then
+    if [[ -n "$GIT_PROXY" ]];then
+      docker build --build-arg http_proxy="${GIT_PROXY}" \
+                   --build-arg https_proxy="${GIT_PROXY}" -t rmd ./
+    else
+      docker build --build-arg http_proxy="${HTTP_PROXY}" \
+                   --build-arg https_proxy="${HTTP_PROXY}" -t rmd ./
+    fi
+  else
+    docker build -t rmd ./
+  fi
   docker save rmd:latest > "${IMAGE_DOWNLOAD_PATH}"/rmd.tar.gz
 }
 
@@ -658,46 +478,32 @@ build::intel_rmd_operator() {
   cd "${CODE_DOWNLOAD_PATH}"/rmd-operator
   docker run --rm -ti \
     -v "$PWD":/opt/app \
-    -v "${OPC_BASE_DIR}"/scripts/build_rmd_operator.sh.bak:/root/build_rmd_operator.sh:ro \
     -v "${GOMODULE_DOWNLOAD_PATH}":/go/pkg \
-    -e http_proxy="$GIT_PROXY" \
-    golang:1.14.9 bash /root/build_rmd_operator.sh
+    golang:1.14.9 bash -c "cd /root && if [[ -n ${HTTP_PROXY} ]];then \
+      if [[ -n $GIT_PROXY ]];then \
+      git config --global http.proxy $GIT_PROXY; \
+      else git config --global http.proxy $HTTP_PROXY;fi;fi;git clone https://github.com/intel/intel-cmt-cat.git && \
+      cd intel-cmt-cat && make && make install && cd /opt/app && make build"
 
-  docker build --build-arg https_proxy="${GIT_PROXY}" -t intel-rmd-node-agent -f build/Dockerfile.nodeagent .
-  docker build --build-arg https_proxy="${GIT_PROXY}" -t intel-rmd-operator   -f build/Dockerfile  .
+  if [[ -n "$HTTP_PROXY" ]];then
+    docker build --build-arg http_proxy="${HTTP_PROXY}" -t intel-rmd-node-agent -f build/Dockerfile.nodeagent .
+    docker build --build-arg http_proxy="${HTTP_PROXY}" -t intel-rmd-operator   -f build/Dockerfile  .
+  else
+    docker build -t intel-rmd-node-agent -f build/Dockerfile.nodeagent .
+    docker build -t intel-rmd-operator   -f build/Dockerfile  .
+  fi
   docker save intel-rmd-node-agent:latest > "${IMAGE_DOWNLOAD_PATH}"/intel-rmd-node-agent.tar.gz
   docker save intel-rmd-operator:latest > "${IMAGE_DOWNLOAD_PATH}"/intel-rmd-operator.tar.gz
 }
 
 opc::update_kernel() {
-  local tmp_dir
-  local tuned_list
-  local kernel_list
+  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_package=$(grep "^kernel_package" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_devel_package=$(grep "^kernel_devel_package" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
 
-  tmp_dir=$(mktemp -d)
-  # clean tuned version
-  sudo_cmd yum remove tuned -y
-  sudo_cmd rpm -ivh "${RPM_DOWNLOAD_PATH}"/tuned-2.11.0-9.el7.noarch.rpm
-  tuned_list=(libnl-1.1.4-3.el7.x86_64.rpm  \
-                    python-ethtool-0.8-8.el7.x86_64.rpm  \
-                    tuna-0.13-9.el7.noarch.rpm  \
-                    tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm)
-  kernel_list=(kernel-rt-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm  \
-                    kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm  \
-                    kernel-rt-devel-3.10.0-1160.11.1.rt56.1145.el7.x86_64.rpm \
-                    rt-setup-2.0-9.el7.x86_64.rpm)
-  for f in "${tuned_list[@]}"
-  do
-    cp "${RPM_DOWNLOAD_PATH}"/"$f" "$tmp_dir"
-  done
-  for f in "${kernel_list[@]}"
-  do
-    cp "${RPM_DOWNLOAD_PATH}"/"$f" "$tmp_dir"
-  done
-  sudo_cmd yum localinstall -y "$tmp_dir"/* && rm "$tmp_dir" -rf
-
-  sudo_cmd grubby --set-default /boot/vmlinuz-3.10.0-1160.11.1.rt56.1145.el7.x86_64
-  echo -n "Take effect after restart, whether to restart now?(Y/N) ";read choice
+  sudo_cmd yum install --disableexcludes=all -y "$target_kernel_package"-"$target_kernel_version" "$target_kernel_devel_package"-"$target_kernel_version"
+  sudo_cmd grubby --set-default /boot/vmlinuz-"$target_kernel_version"
+  echo -n "Take effect after restart, whether to restart now?(Y/N) ";read -r choice
   choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
   if [[ "$choice" == "y" ]];then
     sudo_cmd reboot
@@ -706,11 +512,13 @@ opc::update_kernel() {
 
 build::collectd_fpga_plugin() {
   local kernel_version collectd_dir
+  local target_kernel_version
 
   kernel_version=$(uname -r)
-  if [[ "$BUILD_COLLECTD_FPGA" == "enable" && ! -z "${DIR_OF_FPGA_ZIP}" ]];then
-    if [[ "$kernel_version" != "3.10.0-1160.11.1.rt56.1145.el7.x86_64" ]];then
-      echo -n "Update the kernel to kernel-rt-kvm-3.10.0-1160.11.1.rt56.1145.el7.x86_64, do you agree?(Y/N) ";read update_kernel
+  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  if [[ "$BUILD_COLLECTD_FPGA" == "enable" && -n "${DIR_OF_FPGA_ZIP}" ]];then
+    if [[ "$kernel_version" != "$target_kernel_version" ]];then
+      echo -n "Update the kernel to $target_kernel_version, do you agree?(Y/N) ";read -r update_kernel
       update_kernel=$(echo "${update_kernel}" | tr '[:upper:]' '[:lower:]')
       if [[ "${update_kernel}" == "y" ]];then
         opc::update_kernel
@@ -718,11 +526,15 @@ build::collectd_fpga_plugin() {
     else
       collectd_dir=$(mktemp -d)
       cp -f "$OPC_BASE_DIR"/../roles/telemetry/collectd/controlplane/files/* "$collectd_dir"
-      cp "$DIR_OF_FPGA_ZIP"/OPAE_SDK_1.3.7-5_el7.zip "$collectd_dir"
+      cp "$DIR_OF_FPGA_ZIP"/* "$collectd_dir"
       set +e
-      docker build --build-arg http_proxy="${HTTP_PROXY}" \
-        --build-arg https_proxy="${HTTP_PROXY}" \
-        -t collectd_fpga_plugin:0.1.0 "$collectd_dir"
+      if [[ -n "$HTTP_PROXY" ]];then
+        docker build --build-arg http_proxy="${HTTP_PROXY}" \
+          --build-arg https_proxy="${HTTP_PROXY}" \
+          -t collectd_fpga_plugin:0.1.0 "$collectd_dir"
+      else
+        docker build -t collectd_fpga_plugin:0.1.0 "$collectd_dir"
+      fi
       rm -f "$collectd_dir" -rf
       docker save collectd_fpga_plugin:0.1.0 > "${IMAGE_DOWNLOAD_PATH}"/collectd_fpga_plugin.tar.gz
       set -e
@@ -817,8 +629,7 @@ opc::download::others() {
     url=$(echo "$list" | cut -d ',' -f 2)
     name=$(echo "$url" | rev | cut -d '/' -f 1 | rev)
     if [[ ! -e "$OTHER_DOWNLOAD_PATH"/"$name" ]];then
-      wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" \
-           -e http_proxy="${HTTP_PROXY}" "$url" -P "$OTHER_DOWNLOAD_PATH" 2>&1 | progressfilt \
+      wget --progress=bar:force "$url" -P "$OTHER_DOWNLOAD_PATH" 2>&1 | progressfilt \
       || opc::log::error "Wget $url"
     fi
   done
@@ -833,7 +644,8 @@ opc::download::charts() {
   do
     OLD_IFS="$IFS"
     IFS=','
-    array=($list)
+    # shellcheck disable=SC2206
+    array=( $list )
     IFS="$OLD_IFS"
     for i in "${!array[@]}"
     do
@@ -845,8 +657,7 @@ opc::download::charts() {
         mkdir -p "$tmp_dir"
       fi
       if [[ ! -e "${tmp_dir}"/"${short_name}" ]];then
-        wget --progress=bar:force -e https_proxy="${HTTP_PROXY}" -e http_proxy="${HTTP_PROXY}" \
-          https://raw.githubusercontent.com/"$tmp_file" -P "$tmp_dir" 2>&1 | progressfilt \
+        wget --progress=bar:force https://raw.githubusercontent.com/"$tmp_file" -P "$tmp_dir" 2>&1 | progressfilt \
         || opc::log::error "wget https://raw.githubusercontent.com/$tmp_file"
       fi
     done

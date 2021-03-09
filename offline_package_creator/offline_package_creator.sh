@@ -7,18 +7,23 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# Download rpms
-rpms_download() {
-  download_rpm_list=$(python3 scripts/parse_yml.py rpm-packages)
-  if [[ -z ${download_rpm_list} ]];then
-    opc::log::error "ERROR: Can not parse the data yaml file"
-  fi
-  opc::download::rpm "${download_rpm_list[@]}"
+# Download precheck yum packages
+precheck_yum_download() {
+  sudo_cmd yum install --downloadonly --downloaddir="$PRERPM_DOWNLOAD_PATH" ansible
+  sudo_cmd yum install --downloadonly --downloaddir="$PRERPM_DOWNLOAD_PATH" python-netaddr
+  sudo_cmd yum install --downloadonly --downloaddir="$PRERPM_DOWNLOAD_PATH" python3
+  sudo_cmd tar czvf prepackages.tar.gz -C "$PRERPM_DOWNLOAD_PATH" ./
+  sudo_cmd mv prepackages.tar.gz ../roles/offline_roles/unpack_offline_package/files
 }
 
-# Download kubeadm kubelet kubectl command
-k8s_cmd() {
-  opc::download::k8s_commands
+# Download yum packages
+yum_download() {
+  download_yum_list=$(python3 scripts/get_yum_list.py)
+  if [[ -z ${download_yum_list} ]];then
+    opc::log::error "ERROR: Can not get yum packages list"
+  fi
+  opc::download::yum "${download_yum_list[@]}"
+  opc::download::yum "httpd mod_ssl expect"
 }
 
 # Download github code
@@ -90,10 +95,6 @@ charts_download() {
 }
 
 zip_and_move() {
-  local str
-  local nline
-  local tmpDir
-
   cd "$OPC_BASE_DIR"
   # remove an existing package
   if [ -e opcdownloads.tar.gz ];then
@@ -102,25 +103,7 @@ zip_and_move() {
   # zip the opcdownloads
   tar czvf opcdownloads.tar.gz --transform s=opcdownloads/== opcdownloads/*
   md5sum opcdownloads.tar.gz | awk '{print $1}' > checksum.txt
-
-  # zip the pakcages for prechecking
-  tmpDir=$(mktemp -d)
-  str=$(ls opcdownloads/rpms -l)
-  while read line
-  do
-    nline=${line//#*/}
-    if [[ -z "$nline" ]];then
-      continue
-    fi
-    names=$(echo "$str" | grep -oE " ${nline}-[0-9]")
-    for name in ${names}
-    do
-      cp "opcdownloads/rpms/${name}"* "${tmpDir}"
-    done
-  done < file/precheck/precheck_requirements.txt
-  tar czvf prepackages.tar.gz -C "${tmpDir}" ./
-  rm -rf "${tmpDir}"
-  sudo_cmd mv -f opcdownloads.tar.gz checksum.txt prepackages.tar.gz ../roles/offline_roles/unpack_offline_package/files
+  sudo_cmd mv -f opcdownloads.tar.gz checksum.txt  ../roles/offline_roles/unpack_offline_package/files
 }
 
 usage() {
@@ -129,8 +112,7 @@ usage() {
   echo -e "options:"
   echo -e "	""\033[33mhelp\033[0m         show help"
   echo -e "	""\033[33mall\033[0m          download all and zip it"
-  echo -e "	""\033[33mrpm\033[0m          download rpm only"
-  echo -e "	""\033[33mk8s\033[0m          download k8s commands only"
+  echo -e "	""\033[33myum\033[0m          download yum packages only"
   echo -e "	""\033[33mcode\033[0m         download code from github only"
   echo -e "	""\033[33mgo_modules\033[0m   download go_modules"
   echo -e "	""\033[33mpip_packages\033[0m download pip packages"
@@ -146,39 +128,70 @@ usage() {
 
 main() {
   id=$(id -u)
-  if [[ "$id" -eq 0 ]];then
-    usage
-    exit
-  fi
 
   if [[ $# -lt 1 || "$1" == "help" ]];then
     usage
     exit
   fi
 
-  read -p "Please Input sudo password:" -s PASSWD
-  echo "$PASSWD" | sudo -S ls /root > /dev/null || exit
+  if [[ "$id" -ne 0 ]];then
+    read -r -p "Please Input sudo password:" -s PASSWD
+    echo "$PASSWD" | sudo -S ls /root > /dev/null || exit
+  fi
 
 OPC_BASE_DIR=$(dirname "$(readlink -f "$0")")
 
+# load the system environment variable
+source /etc/environment
+
 source scripts/initrc
 source scripts/common.sh
-source scripts/precheck.sh
+
+rpm -aq | grep -qe "^epel-release" || sudo_cmd yum install -y epel-release ||
+  opc::log::error "ERROR:Install epel-release"
+
+for item in "$RPM_DOWNLOAD_PATH" "$PRERPM_DOWNLOAD_PATH" "$CODE_DOWNLOAD_PATH" \
+    "$GOMODULE_DOWNLOAD_PATH" "$PIP_DOWNLOAD_PATH" "$YAML_DOWNLOAD_PATH" \
+    "$IMAGE_DOWNLOAD_PATH" "$OTHER_DOWNLOAD_PATH" "$CHARTS_DOWNLOAD_PATH"
+do
+  if [ ! -e "$item" ];then
+    opc::dir::create "$item"
+    opc::log::status "Create the directory $OPC_DOWNLOAD_PATH successful"
+  fi
+done
+
+# tuned-2.11.0-9.el7 and tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm are from OEK's groups file
+# the location is "../group_vars/controller_group/10-*.yml"
+# must download first, then to install the tool
+yum install --downloadonly --downloaddir="$RPM_DOWNLOAD_PATH" wget python-setuptools python3 python3-pip tuna tuned-2.11.0-9.el7
+sudo_cmd yum install -y wget python-setuptools python3 python3-pip tuned-2.11.0-9.el7
+
+opc::download::yum "http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm"
+set +e
+sudo_cmd yum install -y install http://ftp.scientificlinux.org/linux/scientific/7.9/x86_64/os/Packages/tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm
+set -e
+
+# install repos on this machine
+host_repos_required
+
+# download precheck yum package first
+precheck_yum_download
+
+# Python libs
+host_pylibs_required "configparser" "pyyaml" "jinja2"
 
   case $1 in
-    rpm)
-      rpms_download
-      exit
-    ;;
-    k8s)
-      k8s_cmd
+    yum)
+      yum_download
       exit
     ;;
     code)
+      source scripts/precheck.sh
       code_download
       exit
     ;;
     go_modules)
+      source scripts/precheck.sh
       code_download
       go_modules_download
       exit
@@ -192,8 +205,7 @@ source scripts/precheck.sh
       exit
     ;;
     build)
-      code_download
-      go_modules_download
+      source scripts/precheck.sh
       if [ $# -lt 2 ];then
         images_build all
       else
@@ -202,6 +214,7 @@ source scripts/precheck.sh
       exit
     ;;
     images)
+      source scripts/precheck.sh
       images_download
       exit
     ;;
@@ -218,8 +231,8 @@ source scripts/precheck.sh
       exit
     ;;
     all)
-      rpms_download
-      k8s_cmd
+      yum_download
+      source scripts/precheck.sh
       code_download
       go_modules_download
       pip_packages_download
@@ -229,6 +242,7 @@ source scripts/precheck.sh
       others_download
       charts_download
       zip_and_move
+      printf "\n\nOPC INFO:  Completed Successfully\n"
       exit
     ;;
     *)

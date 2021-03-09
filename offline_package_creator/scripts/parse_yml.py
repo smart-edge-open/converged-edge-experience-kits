@@ -19,7 +19,7 @@ selected = sys.argv[1]
 
 curPath = os.path.dirname(os.path.realpath(__file__))
 yamlPath = os.path.join(curPath, "../package_definition_list/pdl_flexran.yml")
-f = open(yamlPath, 'r', encoding='utf-8')
+f = open(yamlPath, 'r')
 
 cfg = f.read()
 d = yaml.safe_load(cfg)
@@ -38,10 +38,7 @@ def get_charts_struct(parent, dic):
         line = line[:-1]
     return line
 
-if selected == 'rpm-packages':
-    for key in d[selected]:
-        print("%s,%s"%(key['name'], key['rpm']))
-elif selected == 'github-repos':
+if selected == 'github-repos':
     for key in d[selected]:
         print("%s,%s,%s,%s"%(key['name'], key['url'], key['flag'], key['value']))
 elif selected == 'go-modules':

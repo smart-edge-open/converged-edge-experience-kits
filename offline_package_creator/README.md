@@ -12,7 +12,7 @@ The preconditions are:
 Filesystem               Size  Used Avail Use% Mounted on
 /dev/mapper/centos-home  169G   12G  158G   7% /home
 ```
-- CentOS\* 7.8.2003 must be installed on host. It is highly recommended to install the operating system using a minimal ISO image on host.
+- CentOS\* 7.9.2009 must be installed on host. It is highly recommended to install the operating system using a minimal ISO image on host.
 
 - The network can connect with internet, such as docker hub, google...etc.
 
@@ -45,7 +45,20 @@ options:
 
 OPC is a download script for OpenNess flexran flavor, which mainly includes rpms, pip packages and docker images; In addition, it also includes compiled specified docker images such as eaa, biosfw...etc.
 
-### Step 1
+### Setp 1
+If you have set up a network proxy in your environment, please manually declare it in this file, "/etc/environment", like this:
+```sh
+[root@localhost ~]# cat /etc/environment
+export http_proxy=http://example.com:2345
+export https_proxy=http://example.com:2345
+export HTTP_PROXY=http://example.com:2345
+export HTTPS_PROXY=http://example.com:2345
+export no_proxy=localhost,127.0.0.1
+export NO_PROXY=localhost,127.0.0.1
+```
+### Step 2
+If you are root user, please ignore this step.
+
 No root user.
 If there is not normal user on your machine, please reference below:
 ```sh
@@ -68,11 +81,8 @@ To configure first and the configuration file is located in "scripts/initrc"
 
 | Option | Values | Description |
 | ------ | ------ | ----------- |
-| GITHUB_USERNAME | must not be nil | Your name of gitHub account |
 | GITHUB_TOKEN | must not be nil | The token of accessing github.[How to set token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) |
-| HTTP_PROXY | must not be nill | Proxy |
-| HTTPS_PROXY | must not be nill | Prox for HTTPS |
-| GIT_PROXY | must not be nill | In most cases, the value is the same as HTTP proxy |
+| GIT_PROXY | option | It is used by git tool |
 | BUILD_BIOSFW | enable\|disable | Enable build the image of 'biosfw' (default: disable), if enable it, you should set the value of 'DIR_OF_BIOSFW_ZIP' |
 | BUILD_OPAE | enable\|disable | Enable build the image of 'opae' (default: disable), if enable it, you should set the value of 'DIR_OF_OPAE_ZIP' |
 | BUILD_COLLECTD_FPGA | enable\|disable | Enable build the image of 'collectd_fpga_plugin' (default: disable), if enable it, you should set the value of 'DIR_OF_FPGA_ZIP' |
@@ -87,28 +97,24 @@ For example:
 # Declare a dictionary.
 declare -A SOURCES_TABLES
 SOURCES_TABLES=(
-[python3]='python3' \
-[pip3]='python3-pip' \
-[wget]='wget' \
 [dockerd]='docker-ce' \
-[git]='git' \
 [patch]='patch' \
-[pip]='python2-pip-8.1.2-14.el7.noarch' \
 [curl-config]='libcurl-devel' \
 )
 
 sudo_cmd() {
-  echo $PASSWD | sudo -S $@
+  id=$(id -u)
+  if [[ "$id" -ne 0 ]];then
+    echo $PASSWD | sudo -S $@
+  else
+    $@
+  fi
 }
 
 # otcshare token
-GITHUB_USERNAME="name"
-GITHUB_TOKEN="1111234rr47af7f1130d385f912fcfafdafdaf"
+GITHUB_TOKEN="user personal token"
 
-# User add ones
-HTTP_PROXY="http://example.com:1234" #Add proxy first
-HTTPS_PROXY="http://example.com:2345" #Add proxy for HTTPS
-GIT_PROXY="http://example.com:3456"
+GIT_PROXY="http://proxy.example.com:2345"
 
 # location of OPAE_SDK_1.3.7-5_el7.zip
 BUILD_OPAE=enable
@@ -122,7 +128,7 @@ DIR_OF_BIOSFW_ZIP="/home/worknode/download"
 BUILD_COLLECTD_FPGA=enable
 DIR_OF_FPGA_ZIP="/home/worknode/download"
 ```
-### Step 2
+### Step 3
 if http proxy needed to access internet, you need to add http proxy into the file of "/etc/yum.conf"
 ```sh
 [open@dev offline_package_creator]$ sudo echo "proxy=http://proxy.example.org:3128" >> /etc/yum.conf
@@ -156,10 +162,15 @@ distroverpkg=centos-release
 proxy=http://proxy.example.org:3128
 ```
 
-### Step 3
+### Step 4
 
+If you are no-root user
 ```sh
-sudo chown -R $USER:$USER ./*
+sudo chown -R $USER:$USER *openness-experience-kits
+./offline_package_creator.sh all
+```
+If you are root user
+```sh
 ./offline_package_creator.sh all
 ```
 If the current user is not in the docker group and the kernel version is not "3.10.0-1127.19.1.rt56.1116.el7.x86_64", the machine will restart twice.

@@ -5,27 +5,24 @@
 # Declare a dictionary.
 declare -A SOURCES_TABLES
 SOURCES_TABLES=(
-[python3]='python3' \
-[pip3]='python3-pip' \
-[wget]='wget' \
 [dockerd]='docker-ce' \
-[git]='git' \
 [patch]='patch' \
-[pip]='python2-pip-8.1.2-14.el7.noarch' \
 [curl-config]='libcurl-devel' \
 )
 
 sudo_cmd() {
-  echo $PASSWD | sudo -S $@
+  id=$(id -u)
+  if [[ "$id" -ne 0 ]];then
+    echo $PASSWD | sudo -S $@
+  else
+    $@
+  fi
 }
 
 # otcshare token
-GITHUB_USERNAME=""
 GITHUB_TOKEN=""
 
-# User add ones
-HTTP_PROXY="" #Add proxy first
-HTTPS_PROXY="" #Add proxy for HTTPS
+# only for PRC
 GIT_PROXY=""
 
 # location of OPAE_SDK_1.3.7-5_el7.zip
