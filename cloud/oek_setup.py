@@ -16,6 +16,7 @@ import glob
 
 _LOG = None
 OEK_PATH = "oek"
+INVENTORY_DIRECTORY = os.path.join(OEK_PATH, "inventory", "default")
 
 def make_parser():
     """Create command-line parser object"""
@@ -92,7 +93,7 @@ def clone_repository(git_repo, git_token, path):
                    ' '.join(err.cmd), err.returncode, err.output)
 
 
-def create_inventory(options, oek_path):
+def create_inventory(options, inventory_path):
     """Create Ansible inventory.ini file in the specified oek directory"""
     cfg = configparser.ConfigParser(allow_no_value=True)
     cfg['all'] = {}
@@ -117,17 +118,17 @@ def create_inventory(options, oek_path):
                 i, options.ansible_user, node)] = None
             cfg['edgenode_group']["node-{}".format(i)] = None
 
-    with open(os.path.join(oek_path, "inventory.ini"), "w") as inv:
+    with open(os.path.join(inventory_path, "inventory.ini"), "w") as inv:
         cfg.write(inv)
 
 
 def main(options):
     """Script entry function"""
     clone_repository(options.git_repo, options.git_token, OEK_PATH)
-    create_inventory(options, OEK_PATH)
+    create_inventory(options, INVENTORY_DIRECTORY)
 
     # Clean previous flavor links
-    for flavor in glob.glob(os.path.join(OEK_PATH, "inventory", "default", "group_vars", "*", "30_*_flavor.yml")):
+    for flavor in glob.glob(os.path.join(INVENTORY_DIRECTORY, "group_vars", "*", "30_*_flavor.yml")):
         if os.path.islink(flavor):
             os.unlink(flavor)
 
@@ -137,7 +138,7 @@ def main(options):
             _LOG.fatal("Failed to find flavor directory %s", flavor_path)
         for flavor in Path(flavor_path).iterdir():
             group_name = flavor.stem
-            dst_dir = os.path.join(OEK_PATH, "inventory", "default", "group_vars", group_name)
+            dst_dir = os.path.join(INVENTORY_DIRECTORY, "group_vars", group_name)
             if not (os.path.exists(dst_dir) and os.path.isdir(dst_dir)):
                 _LOG.fatal(
                     "Failed to find group_vars directory %s", dst_dir)
@@ -150,7 +151,7 @@ def main(options):
     if len(options.hosts.split(',')) == 1:
         playbook = os.path.join(OEK_PATH, "single_node_network_edge.yml")
     command.append(playbook)
-    command.extend(["--inventory", os.path.join(OEK_PATH, "inventory.ini")])
+    command.extend(["--inventory", os.path.join(INVENTORY_DIRECTORY, "inventory.ini")])
     if options.ansible_limits:
         command.extend(["--limit", options.ansible_limits])
     if options.oek_vars:
