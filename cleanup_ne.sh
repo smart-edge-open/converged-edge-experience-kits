@@ -65,4 +65,4 @@ fi
 
 eval ansible-playbook -vv \
     "${playbook}" \
-    --inventory inventory.ini "${limit}"
+    --inventory inventory/default/inventory.ini "${limit}"
