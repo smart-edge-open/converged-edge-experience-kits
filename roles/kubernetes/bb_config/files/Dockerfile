@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-FROM centos:7.8.2003 AS builder
+FROM centos:7.9.2009 AS builder
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
@@ -18,7 +18,7 @@ RUN cd inih/extra && make -f Makefile.static && cp ../ini.h /root/pf-bb-config
 
 RUN cd pf-bb-config && make
 
-FROM centos:7.8.2003
+FROM centos:7.9.2009
 
 RUN yum install -y sudo
 

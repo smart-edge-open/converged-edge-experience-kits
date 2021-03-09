@@ -4,9 +4,9 @@
 ## Custom FlexRAN flavor configuration
 # CPUs to be isolated (for RT procesess)
 # NOTE: If used for single node deployment please make sure that two cores are available to OS and K8s
-cpu_isol: "1-23,25-47"
+cpu_isol: "1-31,33-63,65-95,97-127"
 # CPUs not to be isolate (for non-RT processes) - minimum of two OS cores necessary for controller - adjust according to CPU model, HT enabled/disabled
-cpu_os: "0,24"
+cpu_os: "0,32,64,96"
 
 ## Kernel configuration
 # Skip kernel configuration
@@ -18,7 +18,7 @@ kernel_skip: false
 # Size of a single hugepage (2M or 1G)
 hugepage_size: "1G"
 # Amount of hugepages
-hugepage_amount: "20"
+hugepage_amount: "30"
 # Default grub parameters
 default_grub_params: "default_hugepagesz={{ hugepage_size }} hugepagesz={{ hugepage_size }} hugepages={{ hugepage_amount }} intel_iommu=on iommu=pt rdt=l3cat"
 # Additional grub parameters
