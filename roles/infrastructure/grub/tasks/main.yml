@@ -24,11 +24,15 @@
       debug:
         msg: "grub.cfg file path: {{ grub_file_path }}"
 
+- name: new kernel cmdline from default and additional grub params
+  set_fact:
+    new_kernel_cmdline: "{{ (default_grub_params + ' ' + additional_grub_params) | trim }}"
+
 - name: set GRUB_CMDLINE_LINUX_DEFAULT variable
   lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT=" {{ additional_grub_params }} {{ default_grub_params }}"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ new_kernel_cmdline }}"'
     insertafter: EOF
   become: yes
 
@@ -42,8 +46,18 @@
   register: current_cmdline
   changed_when: false
 
+- name: get future cmdline
+  shell: set -o pipefail && grubby --info=$(grubby --default-kernel) | grep args
+  register: future_cmdline
+  changed_when: false
+
+- name: extract proper parts from the outputs
+  set_fact:
+    current_args: "{{ current_cmdline.stdout | regex_replace('BOOT_IMAGE=.*? root=.*? (.*)', '\\1') | trim }}"
+    future_args:  "{{ future_cmdline.stdout | regex_replace('args=\"(.*)\"', '\\1') | trim }}"
+
 # role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
 - name: request reboot (will be performed by `conditional_reboot` role)
   set_fact:
     perform_reboot: "{{ perform_reboot|default([]) + [ 'grub' ] }}"
-  when: (additional_grub_params not in current_cmdline.stdout) or (default_grub_params not in current_cmdline.stdout)
+  when: current_args != future_args
