@@ -16,7 +16,8 @@
       "type": "string",
       "defaultValue": "minimal",
       "allowedValues": [
-        "minimal"
+        "minimal",
+        "central_orchestrator"
       ],
       "metadata": {
         "description": "(Required) OpenNESS experience kit flavor (must include kernel_skip=true)"
