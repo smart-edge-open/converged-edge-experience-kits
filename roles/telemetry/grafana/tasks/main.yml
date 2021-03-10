@@ -61,12 +61,21 @@
       state: directory
       suffix: grafana
     register: tmp_dir
-    delegate_to: localhost
+
+  - name: chown tmp directory
+    file:
+      path:  "{{ tmp_dir.path }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ openness_user_group }}"
+    become: yes
 
   - name: template values.yml to tmp directory
     template:
       src: values.yml
       dest: "{{ tmp_dir.path }}/"
+      owner: "{{ ansible_user }}"
+      group: "{{ openness_user_group }}"
+    become: yes
 
   - name: add default Helm repository
     command: helm repo add stable https://charts.helm.sh/stable
