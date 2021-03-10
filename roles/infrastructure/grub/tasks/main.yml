@@ -50,6 +50,7 @@
   shell: set -o pipefail && grubby --info=$(grubby --default-kernel) | grep args
   register: future_cmdline
   changed_when: false
+  become: yes
 
 - name: extract proper parts from the outputs
   set_fact:
