@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Check if namespace '{{ item }}' still exists
+  command: kubectl get namespace {{ item }}
+  register: get_custom_ns
+  changed_when: false
+  failed_when:
+    - get_custom_ns.rc != 0
+    - get_custom_ns.rc != 1
+
+- name: Delete namespace '{{ item }}'
+  command: kubectl delete namespace {{ item }}
+  when: get_custom_ns.rc == 0

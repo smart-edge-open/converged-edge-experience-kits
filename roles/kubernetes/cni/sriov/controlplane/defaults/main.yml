@@ -43,3 +43,6 @@ _sriov_dp_configmap_extension: []
 
 # list of CRDs strings to be appended to crd.yml
 _sriov_dp_crd_extension: []
+
+# list of namespace strings to be created for crd.yml
+_sriov_dp_crd_extension_ns: []

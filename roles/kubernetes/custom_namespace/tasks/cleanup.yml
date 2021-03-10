@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: Cleanup custom namespaces
+  include_tasks: delete_ns.yml
+  with_items: "{{ _custom_ns }}"

@@ -113,6 +113,13 @@
       - configMap.yml
       - crd.yml
 
+  - name: create custom namespaces for CRD if specified
+    include_role:
+      name: kubernetes/custom_namespace
+    vars:
+      - _custom_ns: "{{ _sriov_dp_crd_extension_ns }}"
+    when: _sriov_dp_crd_extension_ns | length > 0
+
   - name:
     set_fact:
       _sriov_dp_cek_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/sriov"
