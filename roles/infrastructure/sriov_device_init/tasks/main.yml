@@ -195,12 +195,14 @@
   shell: echo 0 > /sys/class/net/{{ item.key }}/device/sriov_numvfs && echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs
   loop: "{{ query('dict', sriov.network_interfaces) }}"
   changed_when: true
+  become: yes
 
 - name: enable SR-IOV for network interfaces at boot time
   lineinfile:
     path: /etc/rc.d/rc.local
     line: "echo {{ item.value }} > /sys/class/net/{{ item.key }}/device/sriov_numvfs"
   loop: "{{ query('dict', sriov.network_interfaces) }}"
+  become: yes
 
 - name: enable SR-IOV startup
   file:
