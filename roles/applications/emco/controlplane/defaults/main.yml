@@ -5,7 +5,7 @@
 
 _emco:
   repo: "https://github.com/otcshare/EMCO"
-  commit: main
+  commit: "{{ emco_commitID }}"
   dest: /opt/openness/emco
   registryPrefix: "{{ _registry_host }}:{{ _registry_port }}/intel/"
   buildCause: DEV_TEST

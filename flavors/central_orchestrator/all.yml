@@ -17,6 +17,9 @@ emco_repo_cleanup: false
 emco_db_auth_enable: true
 emco_db_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters') }}"
 
+# emco_commitID: "1df72fb4979d5d349af00b7068fb1d3ba926e50c"
+emco_commitID: "main"
+
 eaa_enable: False
 dns_enable: False
 ne_nfd_enable: False
