@@ -26,6 +26,10 @@
     update_cache: yes
     allow_downgrade: true
   become: yes
+  register: result
+  retries: 20
+  until: result is succeeded
+  delay: 10
   notify:
     - enable and restart kubelet
 
