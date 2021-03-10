@@ -14,14 +14,14 @@
   block:
   - name: reset SR-IOV Virtual Functions for QAT devices
     shell: echo 0 > /sys/bus/pci/devices/{{ item }}/sriov_numvfs
-    with_items: "{{ qat_pf | json_query('stdout_lines[]') }}"
+    with_items: "{{ qat_pf.stdout_lines }}"
     become: true
     failed_when: false
     changed_when: true
 
   - name: enable SR-IOV Virtual Functions for QAT devices
     shell: echo {{ qat_sriov_numvfs }} > "/sys/bus/pci/devices/{{ item }}/sriov_numvfs"
-    with_items: "{{ qat_pf | json_query('stdout_lines[]') }}"
+    with_items: "{{ qat_pf.stdout_lines }}"
     failed_when: false
     changed_when: true
 
@@ -30,7 +30,7 @@
       state: present
       dest: /etc/rc.d/rc.local
       line: echo {{ qat_sriov_numvfs }} > "/sys/bus/pci/devices/{{ item }}/sriov_numvfs"
-    with_items: "{{ qat_pf | json_query('stdout_lines[]') }}"
+    with_items: "{{ qat_pf.stdout_lines }}"
     become: true
 
   - name: discover QAT Virtual Functions
@@ -46,5 +46,5 @@
     vars:
       - pci_address: "{{ item }}"
       - driver: "{{ qat_vf_driver }}"
-    with_items: "{{ qat_vfs | json_query('stdout_lines[]') }}"
+    with_items: "{{ qat_vfs.stdout_lines }}"
   when: qat_pf.stdout | length > 0
