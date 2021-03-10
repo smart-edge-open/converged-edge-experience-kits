@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
+#
 
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -10,7 +11,7 @@ spec:
   ingress:
   - from:
     - ipBlock:
-        cidr: 10.16.0.0/16
+        cidr: {{ _base_noproxy.split(',')[8] }}	# primary continer network
     ports:
     - port: 8081
       protocol: TCP

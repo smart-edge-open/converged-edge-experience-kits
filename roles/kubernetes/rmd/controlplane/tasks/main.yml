@@ -24,9 +24,7 @@
 - name: create the RBAC objects
   shell: |
     source /etc/profile
-    kubectl create -f deploy/rbac.yaml
-    kubectl create -f deploy/crds/intel.com_rmdnodestates_crd.yaml
-    kubectl create -f deploy/crds/intel.com_rmdworkloads_crd.yaml
+    make deploy
   args:
     chdir: "{{ _rmd_operator_dir }}"
   when: rbac_installed.rc == 1
@@ -50,9 +48,9 @@
   changed_when: false
 
 - name: copy the network policy to /tmp
-  copy:
-    src: rmdNetworkPolicy.yaml
-    dest: "{{ _rmd_main_dir }}"
+  template:
+    src: rmdNetworkPolicy.yaml.j2
+    dest: "{{ _rmd_main_dir }}/rmdNetworkPolicy.yaml"
 
 - name: create the network policy
   command: kubectl create -f {{ _rmd_main_dir }}/rmdNetworkPolicy.yaml

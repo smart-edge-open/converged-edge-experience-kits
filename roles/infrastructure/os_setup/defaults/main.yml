@@ -3,6 +3,8 @@
 
 ---
 os_remove_yum_plugins: false
+# Note: currently the RMD network policy relies on the order of elements in the
+# two lines below, do not change
 _base_noproxy: "localhost,virt-api,.svc,.svc.cluster.local,cdi-api,127.0.0.1"
 _kubernetes_default_cidr: "10.96.0.0/12,10.32.0.0/12"
 

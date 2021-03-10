@@ -41,6 +41,18 @@
   when: not offline_enable
   become: yes
 
+- name: Make sure PQOS can be started
+  lineinfile:
+    path: /etc/ld.so.conf
+    regexp: '/usr/local/lib'
+    line: /usr/local/lib
+  become: yes
+
+- name: Run ldconfig after updating ld.so.conf
+  command: ldconfig
+  changed_when: false
+  become: yes
+
 - name: clone the RMD operator
   git:
     repo: "{{ _rmd_operator_repo }}"
@@ -50,7 +62,7 @@
   when: not offline_enable
 
 - name: build the RMD operator
-  shell: source /etc/profile && make
+  shell: source /etc/profile && make build images
   args:
     chdir: "{{ _rmd_operator_dir }}"
   changed_when: false
