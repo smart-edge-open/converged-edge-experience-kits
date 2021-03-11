@@ -21,6 +21,7 @@
     shell: lspci -D | grep {{ fpga_userspace_vf.pf_device_id }} | awk '{print $1;}'
     register: fpga_pci_address
     when: fpga_userspace_vf.enabled | default (False)
+    become: yes
 
   - block:
     - name: Check if ACC PF already initialized
@@ -31,6 +32,7 @@
     - name: check if ACC100 SRIOV device is connected and get PCI address of devices
       shell: lspci -D | grep {{ acc100_userspace_vf.pf_device_id }} | awk '{print $1;}'
       register: acc100_pci_address
+      become: yes
 
     - block:
       - name: bind ACC100 PFs to userspace driver
@@ -127,6 +129,7 @@
     with_items:
       - "{{ fpga_pci_address.stdout_lines }}"
     when: "{{ fpga_userspace_vf.enabled }}"
+    become: yes
 
   - name: enable creation of ACC100 SRIOV VFs on boot
     lineinfile:
@@ -136,16 +139,19 @@
     with_items:
       - "{{ acc100_pci_address.stdout_lines }}"
     when: "{{ acc100_userspace_vf.enabled }}"
+    become: yes
 
   - name: get FPGA SRIOV PCI address of devices
     shell: lspci -D | grep {{ fpga_userspace_vf.vf_device_id }} | awk '{print $1;}'
     register: fpga_vf_pci_address
     when: fpga_userspace_vf.enabled | default (False)
+    become: yes
 
   - name: get ACC100 VF PCI address of devices
     shell: lspci -D | grep {{ acc100_userspace_vf.vf_device_id }} | awk '{print $1;}'
     register: acc100_vf_pci_address
     when: acc100_userspace_vf.enabled | default (False)
+    become: yes
 
   - name: zip VF PCI addresses with their drivers
     set_fact:

@@ -12,6 +12,7 @@
           set -o pipefail && lspci -ns {{ pci_address }} | awk '{print $3}' | sed -e 's/:/ /g'
   register: device_id
   changed_when: false
+  become: yes
 
 - name: get device driver in use
   shell: >
@@ -19,6 +20,7 @@
   register: device_driver_in_use
   changed_when: false
   ignore_errors: true
+  become: yes
 
 - block:
   - name: add new device id to the driver group
@@ -46,9 +48,11 @@
       line: "echo \"{{ device_id.stdout }}\" | \
             sudo tee /sys/bus/pci/drivers/{{ driver }}/new_id && \
             echo \"{{ pci_address }}\" > /sys/bus/pci/drivers/{{ driver }}/bind"
+    become: yes
 
   - name: Enable devices binding on startup
     file:
       dest: /etc/rc.d/rc.local
       mode: a+x
+    become: yes
   when: driver != device_driver_in_use.stdout
