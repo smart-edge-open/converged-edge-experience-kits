@@ -12,7 +12,7 @@
 #  Single-node cluster:
 #   ./deploy_ne.sh -f <flavor> s[ingle]      deploy single-node cluster playbook
 
-set -eu
+set -euxo pipefail
 
 source scripts/ansible-precheck.sh
 source scripts/task_log_file.sh

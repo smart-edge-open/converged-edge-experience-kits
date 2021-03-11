@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019 Intel Corporation
 
+set -euxo pipefail
+
 PYTHON3_MINIMAL_SUPPORTED_VERSION=368
 
 if ! id -u 1>/dev/null; then
