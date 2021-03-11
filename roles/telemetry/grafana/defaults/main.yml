@@ -48,3 +48,6 @@ _grafana_chart_test_templates:
   - "templates/tests/test-rolebinding.yaml"
   - "templates/tests/test-serviceaccount.yaml"
   - "templates/tests/test.yaml"
+
+# Timeout for Grafana helm installation and checking pod readiness
+_grafana_timeout: 1800s

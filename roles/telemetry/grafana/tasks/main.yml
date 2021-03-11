@@ -215,7 +215,7 @@
     changed_when: true
 
   - name: install Grafana release
-    command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }}"
+    command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }} --timeout {{ _grafana_timeout }}"
     changed_when: true
 
   - name: wait for Grafana
@@ -223,7 +223,7 @@
     - name: wait for Grafana pod to be ready
       command: >
         kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
-        --for=condition=Ready pods --timeout=600s
+        --for=condition=Ready pods --timeout={{ _grafana_timeout }}
       changed_when: false
     rescue:
     - name: get grafana pod name
