@@ -28,7 +28,7 @@
 
   - name: unbind device from current driver
     shell: >
-            set -o pipefail && echo {{ pci_address }} | sudo tee $(realpath /sys/bus/pci/devices/{{ pci_address }}/drivers/unbind)
+            set -o pipefail && echo {{ pci_address }} | sudo tee $(realpath /sys/bus/pci/devices/{{ pci_address }}/driver/unbind)
     changed_when: true
     ignore_errors: true
     when: device_driver_in_use.stdout|length > 0
