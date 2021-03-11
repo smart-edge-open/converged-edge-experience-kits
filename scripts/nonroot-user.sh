@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2021 Intel Corporation
 
-set -euxo pipefail
 
 node_ip=""
 node_name=""
