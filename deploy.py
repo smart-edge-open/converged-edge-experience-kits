@@ -18,15 +18,16 @@ import subprocess
 import time
 from datetime import datetime
 from collections import namedtuple
-from deployment_handlers import inventory_handlers
+from deployment_handlers import inventory_handlers, output_handling
+
+LOGGER_LEVEL = logging.INFO
+LOGGER = logging.getLogger(__name__)
 
 DeploymentWrapper = namedtuple("DeploymentWrapper",
                                ["process", "cluster_name", "playbook_file_name", "log_file"])
 # Global variable to be shared between main and signal handler.
 deployment_wrappers = []
-
-LOGGER_LEVEL = logging.INFO
-LOGGER = logging.getLogger(__name__)
+RT_OUTPUT_HANDLER = output_handling.RtOutputHandler(logging)
 
 DEPLOYMENT_INTERVAL = 5
 ERROR_EXIT_CODE = 1
@@ -245,6 +246,7 @@ def check_deployments_status(deployments, exit_on_error=False):
                 if exit_on_error is True:
                     logging.info("--any-errors-fatal flag raised, terminating other deployments...")
                     kill_deployments(deployments)
+                    RT_OUTPUT_HANDLER.output_screens_cleanup()
                     sys.exit(ERROR_EXIT_CODE)
         time.sleep(1)
 
@@ -254,9 +256,9 @@ def exit_gracefully(signum, _):
     logging.info("")
     logging.info('Signal "%s" caught, killing deployments...', signum)
     kill_deployments(deployment_wrappers)
+    RT_OUTPUT_HANDLER.output_screens_cleanup()
     logging.info('All deployments stopped')
-    sys.exit(1)
-
+    sys.exit(ERROR_EXIT_CODE)
 
 
 def parse_arguments():
@@ -271,11 +273,13 @@ def parse_arguments():
                         help="Run cleanup scripts on clusters")
     parser.add_argument("--revert-dir-layout", dest="revert_dir_layout", action="store_true",
                         help="Revert alternate dir layout and exit [to be removed in future]")
+    parser.add_argument("--rt-output-tracking", dest="rt_output_tracking", action="store_true",
+                        help="Creates sessions with real-time log file tracking")
     return parser.parse_args()
 
 
 def main(args):
-    """Run parallel network edge deploymnets"""
+    """Run parallel network edge deployments"""
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
 
@@ -295,6 +299,7 @@ def main(args):
         logging.info("Directory layout reverted.")
         sys.exit(0)
 
+    RT_OUTPUT_HANDLER.enable_logs_tracking(args.rt_output_tracking)
     inventory_handler = inventory_handlers.InventoryHandler(MULTI_INVENTORY_FILE)
 
     for inventory in inventory_handler.get_inventories:
@@ -307,9 +312,14 @@ def main(args):
     for inventory in inventory_handler.get_inventories:
         deploy_wrapper = run_deployment(inventory, args.clean)
         deployment_wrappers.append(deploy_wrapper)
+        session_command = f"tail -n 50 -f {deploy_wrapper.log_file.name}"
+        RT_OUTPUT_HANDLER.call_new_track_output_session(deploy_wrapper.cluster_name,
+                                                        session_command)
         time.sleep(DEPLOYMENT_INTERVAL)
 
+    RT_OUTPUT_HANDLER.log_sessions_creation()
     check_deployments_status(deployment_wrappers, args.any_errors_fatal)
+    RT_OUTPUT_HANDLER.output_screens_cleanup()
     logging.info("Deployment finished")
     sys.exit(0)
 
