@@ -175,10 +175,14 @@
           src: "/etc/kubernetes/manifests/tmp"
           dest: "/etc/kubernetes/manifests/kube-scheduler.yaml"
           remote_src: true
-      - name: delete temporary file
+      - name: delete temporary files
         file:
-          path: "/etc/kubernetes/manifests/tmp"
+          path: "/etc/kubernetes/manifests/{{ item }}"
           state: absent
+        with_items:
+          - tmp
+          - extend_scheduler.yml
+          - kustomization.yaml
 
   - name: add TAS URL to no_proxy
     command: "{{ item }}"
