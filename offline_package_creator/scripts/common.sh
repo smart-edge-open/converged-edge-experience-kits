@@ -372,7 +372,7 @@ build::fpga-opae-pacn3000() {
   local target_kernel_version
 
   kernel_version=$(uname -r)
-  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../inventory/default/group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
   if [[ "$BUILD_OPAE" == "enable" ]];then
     if [[ "$kernel_version" != "$target_kernel_version" ]];then
       echo -n "Update the kernel to $target_kernel_version, do you agree?(Y/N) ";read -r update_kernel
@@ -497,9 +497,9 @@ build::intel_rmd_operator() {
 }
 
 opc::update_kernel() {
-  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
-  target_kernel_package=$(grep "^kernel_package" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
-  target_kernel_devel_package=$(grep "^kernel_devel_package" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../inventory/default/group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_package=$(grep "^kernel_package" "$OPC_BASE_DIR"/../inventory/default/group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_devel_package=$(grep "^kernel_devel_package" "$OPC_BASE_DIR"/../inventory/default/group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
 
   sudo_cmd yum install --disableexcludes=all -y "$target_kernel_package"-"$target_kernel_version" "$target_kernel_devel_package"-"$target_kernel_version"
   sudo_cmd grubby --set-default /boot/vmlinuz-"$target_kernel_version"
@@ -515,7 +515,7 @@ build::collectd_fpga_plugin() {
   local target_kernel_version
 
   kernel_version=$(uname -r)
-  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
+  target_kernel_version=$(grep "^kernel_version" "$OPC_BASE_DIR"/../inventory/default/group_vars/* -rsh | sort -u | cut -d ':' -f 2 | sed s/[[:space:]]//g)
   if [[ "$BUILD_COLLECTD_FPGA" == "enable" && -n "${DIR_OF_FPGA_ZIP}" ]];then
     if [[ "$kernel_version" != "$target_kernel_version" ]];then
       echo -n "Update the kernel to $target_kernel_version, do you agree?(Y/N) ";read -r update_kernel

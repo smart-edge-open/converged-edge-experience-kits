@@ -161,7 +161,7 @@ do
 done
 
 # tuned-2.11.0-9.el7 and tuned-profiles-realtime-2.11.0-9.el7.noarch.rpm are from OEK's groups file
-# the location is "../group_vars/controller_group/10-*.yml"
+# the location is "../inventory/default/group_vars/controller_group/10-*.yml"
 # must download first, then to install the tool
 yum install --downloadonly --downloaddir="$RPM_DOWNLOAD_PATH" wget python-setuptools python3 python3-pip tuna tuned-2.11.0-9.el7
 sudo_cmd yum install -y wget python-setuptools python3 python3-pip tuned-2.11.0-9.el7
