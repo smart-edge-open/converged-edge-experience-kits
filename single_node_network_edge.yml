@@ -21,14 +21,6 @@
       include_tasks: ./tasks/print_vars.yml
 
   roles:
-    - role: offline_roles/unpack_offline_package
-      when: offline_enable | default(False)
-    - role: offline_roles/local_fileshare_server
-      when: offline_enable | default(False)
-    - role: offline_roles/trust_ssl_list
-      when: offline_enable | default(False)
-    - role: offline_roles/yum_repo_enable
-      when: offline_enable | default(False)
     - role: infrastructure/os_setup
 
     - role: infrastructure/time_setup_ntp

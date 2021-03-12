@@ -26,7 +26,9 @@
         BIOSFW feature enabled, but the SYSCFG package is missing.
         It is expected in: {{ defaults._syscfg_local_path }}
     when: not biosfw_syscfg_package_stat.stat.exists
-  when: ne_biosfw_enable | default(False)
+  when:
+  - ne_biosfw_enable | default(False)
+  - not offline_enable | default(False)
   vars:
     role_path: "{{ playbook_dir }}/roles/kubernetes/biosfw/node"
 

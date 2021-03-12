@@ -18,10 +18,6 @@
     - name: print deployment settings
       include_tasks: "{{ playbook_dir }}/tasks/print_vars.yml"
 
-- name: Provision offline installation package
-  import_playbook: playbooks/offline_package.yml
-  when: offline_enable | default(False)
-
 - name: Provision target infrastructure
   import_playbook: playbooks/infrastructure.yml
 
