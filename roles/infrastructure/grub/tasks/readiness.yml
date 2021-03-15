@@ -8,8 +8,10 @@
   register: kernel_params
   changed_when: false
 
-- name: requested grub params should be active
-  assert:
-    that:
-      - default_grub_params|trim in kernel_params.stdout
-      - additional_grub_params|trim in kernel_params.stdout
+- name: print grub params
+  debug:
+    msg:
+     - "current: '{{ kernel_params.stdout }}'"
+     - "default_grub_params: '{{ default_grub_params }}'"
+     - "additional_grub_params: '{{ additional_grub_params }}'"
+
