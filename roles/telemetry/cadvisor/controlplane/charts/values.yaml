@@ -8,7 +8,7 @@ component: cadvisor
 
 #cAdvisor Values
 cadvisor:
-  image: k8s.gcr.io/cadvisor:v0.36.0
+  image: gcr.io/cadvisor/cadvisor:v0.37.5
   name: cadvisor
   resources:
     requests:

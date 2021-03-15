@@ -10,8 +10,8 @@ _grafana_dashboards_conf: "{{ openness_dir }}/grafana/dashboards"
 _grafana_dashboards_prov: "{{ openness_dir }}/grafana/provisioning/dashboards"
 
 _grafana_chart_dir: "{{ ne_helm_charts_default_dir }}/grafana"
-_grafana_chart_commit: "d6bf244a1b4f5ecc9401bd9ce75b7a3b4b129c2a"
-_grafana_chart_url: "https://raw.githubusercontent.com/helm/charts/{{ _grafana_chart_commit }}/stable/grafana/"
+_grafana_chart_commit: "grafana-6.4.5"
+_grafana_chart_url: "https://raw.githubusercontent.com/grafana/helm-charts/{{ _grafana_chart_commit }}/charts/grafana/"
 
 _grafana_chart:
   - ".helmignore"

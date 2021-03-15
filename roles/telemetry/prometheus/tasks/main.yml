@@ -64,7 +64,6 @@
     with_items:
       - "{{ _prometheus_chart_dir }}"
       - "{{ _prometheus_chart_dir }}/templates"
-    changed_when: true
 
   - name: reset _prometheus_chart_url when offline mode
     set_fact:
@@ -81,10 +80,16 @@
     delay: "{{ retry_delay }}"
     with_items: "{{ _prometheus_chart }}"
 
+  - name: create destination directories
+    file:
+      state: directory
+      path: "{{ _prometheus_chart_dir }}/{{ item | dirname }}"
+    with_items: "{{ _prometheus_chart_templates }}"
+
   - name: download Prometheus chart templates
     get_url:
       url: "{{ _prometheus_chart_url }}/{{ item }}"
-      dest: "{{ _prometheus_chart_dir }}/templates"
+      dest: "{{ _prometheus_chart_dir }}/{{ item }}"
     register: result
     retries: "{{ number_of_retries }}"
     until: result is succeeded
@@ -117,17 +122,17 @@
   - name: copy template file
     copy:
       src: node-exporter-configmap.yaml
-      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-configmap.yaml"
+      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter/cm.yaml"
 
   - name: copy server-service-tls template file
     copy:
       src: server-service-tls.yaml
-      dest: "{{ _prometheus_chart_dir }}/templates/server-service-tls.yaml"
+      dest: "{{ _prometheus_chart_dir }}/templates/server/service-tls.yaml"
 
   - name: copy server proxy template file
     copy:
       src: server-proxy-configmap.yaml
-      dest: "{{ _prometheus_chart_dir }}/templates/server-proxy-configmap.yaml"
+      dest: "{{ _prometheus_chart_dir }}/templates/server/proxy-configmap.yaml"
 
   - name: template telemetry-certs-daemonset
     template:
@@ -142,7 +147,7 @@
   - name: apply node-exporter-daemonset patch
     patch:
       src: node-exporter-daemonset.patch
-      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter-daemonset.yaml"
+      dest: "{{ _prometheus_chart_dir }}/templates/node-exporter/daemonset.yaml"
       strip: 1
       binary: no
       backup: no
@@ -151,6 +156,7 @@
     find:
       paths: "{{ _prometheus_chart_dir }}/templates"
       patterns: "*.orig"
+      recurse: yes
     register: backup_files
 
   - name: remove backup files
@@ -159,6 +165,11 @@
       state: absent
     with_items: "{{ backup_files.files }}"
     changed_when: true
+
+  - name: update Prometheus dependencies (kube-state-metrics)
+    command:
+      cmd: helm dep update
+      chdir: "{{ _prometheus_chart_dir }}"
 
   - name: install Prometheus release
     command: "helm install prometheus --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _prometheus_chart_dir }}"

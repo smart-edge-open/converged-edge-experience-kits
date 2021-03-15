@@ -80,7 +80,7 @@ os_yum_base_packages:
   "vim-common,curl,yum-utils,device-mapper-persistent-data,lvm2,python2-pip,python3,wget,bridge-utils,\
   boost-devel,pcre-devel,zlib-devel,glib2-devel,autoconf,automake,libtool,flex,bison,git2u-all,cmake,pciutils,\
   python-websocket-client,jsoncpp-devel,fcgi-devel,hiredis-devel,numactl-devel,gcc-c++,psmisc,python-httplib2,pixman-devel,\
-  moreutils,jq,python-devel,createrepo,psmisc,bash-completion,rsync,patch"
+  moreutils,jq,python-devel,createrepo,psmisc,bash-completion,rsync,patch,libselinux-python,libselinux-python3"
 _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
 
 # URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
