@@ -32,7 +32,7 @@
 
     - name: create collectd certificate directory
       file:
-        name: "{{ openness_dir }}/certs/telemtery/collectd"
+        name: "{{ openness_dir }}/certs/telemetry/collectd"
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ openness_user_group }}"
