@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: disable fingerprint to avoid ssh timeout issues
+  command: authconfig --disablefingerprint --update
+  changed_when: false
+  become: yes
