@@ -11,20 +11,6 @@
     immediate: yes
   become: yes
 
-- name: create directory for certificates
-  file:
-    path: "{{ openness_dir }}/certs/telemetry/collectd"
-    state: directory
-
-- name: create collectd config directory
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - "{{ openness_dir }}/collectd"
-    - "{{ openness_dir }}/collectd/configs"
-    - "{{ openness_dir }}/collectd/pmd"
-
 - name: download and patch ovs_pmd_stats.py script
   block:
     - name: create temp directory for barometer
@@ -88,7 +74,6 @@
         dest: '{{ openness_dir }}/collectd/configs/{{ item | basename | regex_replace("\.j2$", "") }}'
       with_fileglob:
         - ../templates/configs/common/*.j2
-      become: yes
     - name: telemetry flavor specific
       template:
         src: "{{ item }}"

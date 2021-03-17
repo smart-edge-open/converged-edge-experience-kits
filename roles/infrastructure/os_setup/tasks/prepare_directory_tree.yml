@@ -37,3 +37,15 @@
         owner: "{{ ansible_user }}"
         group: "{{ openness_user_group }}"
       when: "telemetry_collectd_enable | default(True)"
+
+    - name: create collectd config directory
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      with_items:
+        - "{{ openness_dir }}/collectd"
+        - "{{ openness_dir }}/collectd/configs"
+        - "{{ openness_dir }}/collectd/pmd"
+      when: "telemetry_collectd_enable | default(True)"
