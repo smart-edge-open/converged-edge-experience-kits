@@ -86,6 +86,24 @@
       path: "{{ _prometheus_chart_dir }}/{{ item | dirname }}"
     with_items: "{{ _prometheus_chart_templates }}"
 
+  - name: create destination directories only for offline
+    file:
+      state: directory
+      path: "{{ _prometheus_chart_dir }}/{{ item | dirname }}"
+    with_items: "{{ _prometheus_dependency_charts }}"
+    when: offline_enable
+
+  - name: download Prometheus dependency chart templates
+    get_url:
+      url: "{{ _prometheus_chart_url }}/{{ item }}"
+      dest: "{{ _prometheus_chart_dir }}/{{ item }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    with_items: "{{ _prometheus_dependency_charts }}"
+    when: offline_enable
+
   - name: download Prometheus chart templates
     get_url:
       url: "{{ _prometheus_chart_url }}/{{ item }}"
@@ -170,6 +188,7 @@
     command:
       cmd: helm dep update
       chdir: "{{ _prometheus_chart_dir }}"
+    when: not offline_enable
 
   - name: install Prometheus release
     command: "helm install prometheus --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _prometheus_chart_dir }}"
