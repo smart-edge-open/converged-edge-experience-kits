@@ -25,6 +25,14 @@
     chdir: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/scripts"
   ignore_errors: yes
   register: vcad_build_ret
+
+- name: make sure build directory owned by ansible_user
+  file:
+    path: "{{ _vca_dest }}/VCAC-A/Intel_Media_Analytics_Node/build"
+    state: directory
+    recurse: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ openness_user_group }}"
   become: yes
 
 - name: check build system image of VCA node result
