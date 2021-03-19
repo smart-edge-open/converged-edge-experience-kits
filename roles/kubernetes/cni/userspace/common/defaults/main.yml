@@ -4,7 +4,9 @@
 ---
 
 _userspace:
-  repository: "github.com/intel/userspace-cni-network-plugin"
+  repository: "https://github.com/intel/userspace-cni-network-plugin"
+  tag: "d904df8"
+  download_dir: "/tmp/_userspace-cni-network-plugin"
   bridgeName: "br-userspace"
   logFile: "/var/log/userspace-openness.log"
   logLevel: "info"
