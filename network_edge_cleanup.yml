@@ -76,9 +76,6 @@
   - name: load kubevirt variables
     include_vars: ./roles/kubernetes/kubevirt/controlplane/defaults/main.yml
 
-  - name: cleanup multus-cni
-    include_tasks: ./roles/kubernetes/cni/multus/controlplane/tasks/cleanup.yml
-
   - name: cleanup kubevirt
     include_tasks: ./roles/kubernetes/kubevirt/controlplane/tasks/cleanup.yml
 
@@ -145,6 +142,9 @@
       - name: Kafka Cluster cleanup
         include_tasks: ./roles/applications/kafka/tasks/cleanup.yml
     when: eaa_enable | d(True)
+
+  - name: cleanup multus-cni
+    include_tasks: ./roles/kubernetes/cni/multus/controlplane/tasks/cleanup.yml
 
   - name: helm cleanup
     block:
