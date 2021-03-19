@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+#Create tmp dir
+- name: Drivers create temp dir
+  tempfile:
+    state: directory
+    suffix: -drivers
+  register: tmp_dir
+
+#Check if packages exist
+- name: check local ice driver
+  stat:
+    path: "{{ _ice_local_path }}"
+  connection: local
+  register: ice_local_path
+
+- name: file for ice driver setup not present
+  debug:
+    msg: "{{ _ice_local_path }} does not exists, ice driver won't be set up on the node"
+  when: not ice_local_path.stat.exists
+
+- name: check local iavf driver
+  stat:
+    path: "{{ _iavf_local_path }}"
+  connection: local
+  register: iavf_local_path
+
+- name: file for iavf driver setup not present
+  debug:
+    msg: "{{ _iavf_local_path }} does not exists, ice driver won't be set up on the node"
+  when: not iavf_local_path.stat.exists
+
+- name: Copy files to remote and build/load driver
+  block:
+  - name: copy file to remote
+    copy:
+      src: "{{ item }}"
+      dest: "{{ tmp_dir.path }}"
+    with_items:
+      - "{{ _ice_local_path }}"
+      - "{{ _iavf_local_path }}"
+  - name: build driver
+    block:
+    - name: unpack driver
+      unarchive:
+        src: "{{ tmp_dir.path }}/{{ item }}.tar.gz"
+        dest: "{{ tmp_dir.path }}"
+        remote_src: True
+      with_items:
+        - "{{ _ice_driver }}"
+        - "{{ _iavf_driver }}"
+    - name: install driver
+      command: make install
+      args:
+        chdir: "{{ item }}"
+      with_items:
+        - "{{ tmp_dir.path }}/{{ _ice_driver }}/src"
+        - "{{ tmp_dir.path }}/{{ _iavf_driver }}/src"
+      become: yes
+    - name: remove modules
+      command: rmmod {{ item }}
+      with_items:
+        - "ice"
+        - "iavf"
+      become: yes
+      ignore_errors: yes
+    - name: load modules
+      command: modprobe {{ item }}
+      with_items:
+        - "ice"
+        - "iavf"
+      become: yes
+  when: ice_local_path.stat.exists and iavf_local_path.stat.exists

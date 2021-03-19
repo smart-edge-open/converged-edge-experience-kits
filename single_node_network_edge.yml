@@ -32,6 +32,8 @@
     - role: infrastructure/configure_tuned
       when: not (tuned_skip | default(False))
     - role: infrastructure/conditional_reboot
+    - role: infrastructure/e810_driver_update
+      when: e810_driver_enable | default(False)
 
     - role: infrastructure/git_repo
     - role: infrastructure/golang

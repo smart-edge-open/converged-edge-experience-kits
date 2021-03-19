@@ -32,6 +32,36 @@
   vars:
     role_path: "{{ playbook_dir }}/roles/kubernetes/biosfw/node"
 
+- name: e810 role - verify precondition
+  block:
+  - name: load e810 vars
+    include_vars:
+      file: "{{ role_path }}/defaults/main.yml"
+      name: defaults
+  - name: check ice<x>tar.gz
+    stat:
+      path: "{{ defaults._ice_local_path }}"
+    delegate_to: localhost
+    register: ice_package_stat
+
+  - name: check iavf<x>tar.gz
+    stat:
+      path: "{{ defaults._iavf_local_path }}"
+    delegate_to: localhost
+    register: iavf_package_stat
+
+  - name: fail if file not present
+    fail:
+      msg: |
+        E810 support enabled, but the iavf or ice package is missing.
+        It is expected in: {{ defaults._ice_local_path }} and {{ defaults._iavf_local_path }}
+    when: not ice_package_stat.stat.exists or not iavf_package_stat.stat.exists
+  when:
+  - e810_driver_enable | default(False)
+  - not offline_enable | default(False)
+  vars:
+    role_path: "{{ playbook_dir }}/roles/infrastructure/e810_driver_update"
+
 - name: check Hyperthreading state
   block:
   - name: check current state
