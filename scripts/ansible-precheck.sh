@@ -30,21 +30,21 @@ if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | gr
   fi
   tmpDir=$(mktemp -d)
   tar xvf "$prepackagePath" -C "$tmpDir"
-  yum localinstall -y "$tmpDir"/*
+  sudo yum localinstall -y "$tmpDir"/*
   rm -rf "$tmpDir"
 fi
 
 if ! command -v ansible-playbook 1>/dev/null; then
   echo "Ansible not installed..."
-  if ! rpm -qa | grep -q ^epel-release; then
+  if ! sudo rpm -qa | grep -q ^epel-release; then
     echo "EPEL repository not present in system, adding EPEL repository..."
-    if ! yum -y install epel-release; then
+    if ! sudo yum -y install epel-release; then
       echo "ERROR: Could not add EPEL repository. Check above for possible root cause"
       exit 1
     fi
   fi
   echo "Installing ansible..."
-  if ! yum -y install ansible; then
+  if ! sudo yum -y install ansible; then
     echo "ERROR: Could not install Ansible package from EPEL repository"
     exit 1
   fi
@@ -53,7 +53,7 @@ fi
 
 if ! python -c 'import netaddr' 2>/dev/null; then
   echo "netaddr not installed. Installing.."
-  if ! yum install -y python-netaddr; then
+  if ! sudo yum install -y python-netaddr; then
     echo "ERROR: Could not install netaddr"
     exit 1
   fi
@@ -62,8 +62,8 @@ fi
 
 if ! command -v python3 1>/dev/null; then
   echo "Python3 not installed..."
-  yum updateinfo
-  if ! yum -y install python3; then
+  sudo yum updateinfo
+  if ! sudo yum -y install python3; then
     echo "ERROR: Could not install python3 package."
     exit 1
   fi
@@ -71,9 +71,9 @@ if ! command -v python3 1>/dev/null; then
 else
   INSTALL=$(python3 -c "import sys; print( $PYTHON3_MINIMAL_SUPPORTED_VERSION > int('%d%d%d' % sys.version_info[:3]))")
   if [ "$INSTALL" = "True" ]; then
-    yum updateinfo
+    sudo yum updateinfo
     echo "Installing the latest version of python3 package."
-    if ! yum -y install python3; then
+    if ! sudo yum -y install python3; then
       echo "ERROR: Could not install python3 package."
       exit 1
     fi
