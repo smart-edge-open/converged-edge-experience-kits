@@ -71,10 +71,6 @@ allowed_number_of_k8s_retries: 10
 ## PTP synchronization between nodes
 ptp_sync_enable: False
 
-## Istio no_proxy settings
-istio_noproxy: "istio-sidecar-injector.istio-system.svc"
-ne_istio_enable: False
-
 ### Network Edge's Kubernetes CNIs
 # List of requested CNIs to be used in Network Edge mode
 # CNIs are applied in order of definition
@@ -279,6 +275,19 @@ kafka_secret_timeout_min: 60
 
 ## Video analitics
 video_analytics_services_enable: False
+
+### Istio Service Mesh
+ne_istio_enable: False
+# Istio no_proxy settings
+istio_noproxy: "istio-sidecar-injector.istio-system.svc"
+# Istio deployment profile possible values: default, demo, minimal, remote
+istio_deployment_profile: "default"
+# Istio is deployed to "default" namespace in the cluster
+istio_deployment_namespace: "default"
+# Kiali
+istio_kiali_username: "admin"
+istio_kiali_password: "{{ lookup('password', '/dev/null length=16') }}"
+istio_kiali_nodeport: 30001
 
 ## Hyperthreading
 check_hyperthreading: False
