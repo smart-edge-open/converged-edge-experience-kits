@@ -3,12 +3,12 @@
 
 ---
 - name: prepare directory tree
+  become: yes
   block:
     - name: add group "{{ openness_user_group }}"
       group:
         name: "{{ openness_user_group }}"
         state: present
-      become: yes
 
     - name: create main directory
       file:
@@ -16,8 +16,6 @@
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ openness_user_group }}"
-      become: yes
-
     - name: create openness subdirectories
       file:
         path: "{{ item }}"
@@ -32,7 +30,7 @@
 
     - name: create collectd certificate directory
       file:
-        name: "{{ openness_dir }}/certs/telemetry/collectd"
+        path: "{{ openness_dir }}/certs/telemetry/collectd"
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ openness_user_group }}"
