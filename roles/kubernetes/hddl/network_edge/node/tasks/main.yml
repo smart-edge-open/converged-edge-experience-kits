@@ -39,6 +39,7 @@
   args:
     chdir: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/"
   changed_when: true
+  become: yes
 
 - name: get current kernel
   command: uname -r
@@ -88,6 +89,7 @@
   args:
     chdir: "{{ _openvino.install_dir }}"
   changed_when: true
+  become: yes
 
 - name: Kill the HDDL Plugin backend service (hddldaemon) and reset all VPUs
   shell: "kill -9 $(pidof hddldaemon autoboot) "
