@@ -41,6 +41,7 @@
     - role: kubernetes/opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
     - role: telemetry/collectd/node
+      when: "telemetry_collectd_enable | default(True)"
 
 - hosts: controller_group
   pre_tasks:
