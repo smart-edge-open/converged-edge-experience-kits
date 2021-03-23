@@ -121,7 +121,8 @@ def check_daemonset(output):
                 available, desired
             )
     except KeyError as err:
-        message = "Could not find the {} field in status - most probably the amount is 0".format(",".join(err.args))
+        message = "Could not find the {} field in status - most probably the amount is 0".\
+            format(",".join(err.args))
 
     return (result, message)
 
@@ -144,7 +145,8 @@ def check_statefulset(output):
                 ready_replicas, replicas
             )
     except KeyError as err:
-        message = "Could not find the {} field in status - most probably the amount is 0".format(",".join(err.args))
+        message = "Could not find the {} field in status - most probably the amount is 0".\
+            format(",".join(err.args))
 
     return (result, message)
 
@@ -167,7 +169,8 @@ def check_deployment(output):
                 available, replicas
             )
     except KeyError as err:
-        message = "Could not find the {} field in status - most probably the amount is 0".format(",".join(err.args))
+        message = "Could not find the {} field in status - most probably the amount is 0".\
+            format(",".join(err.args))
 
     return (result, message)
 

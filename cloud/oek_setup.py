@@ -128,7 +128,8 @@ def main(options):
     create_inventory(options, INVENTORY_DIRECTORY)
 
     # Clean previous flavor links
-    for flavor in glob.glob(os.path.join(INVENTORY_DIRECTORY, "group_vars", "*", "30_*_flavor.yml")):
+    flavor_glob_path = os.path.join(INVENTORY_DIRECTORY, "group_vars", "*", "30_*_flavor.yml")
+    for flavor in glob.glob(flavor_glob_path):
         if os.path.islink(flavor):
             os.unlink(flavor)
 
