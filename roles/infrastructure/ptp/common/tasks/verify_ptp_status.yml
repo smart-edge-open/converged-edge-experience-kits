@@ -11,6 +11,7 @@
   register: ps_results
   changed_when: true
   ignore_errors: true
+  become: yes
 
 - name: Verify ps output
   set_fact:
@@ -18,15 +19,3 @@
   when: item.stdout_lines | length > 0
   with_items: "{{ ps_results.results }}"
   changed_when: true
-
-- name: Verify port status - if synchronized
-  block:
-  - name: Get PTP status on the node
-    command: pmc -u -b 0 'GET PORT_DATA_SET'
-    register: port_status
-    retries: "{{ number_of_retries }}"
-    delay: "{{ retry_delay }}"
-    until:   port_status.stdout.find(_port_type) != -1
-    changed_when: true
-  when:  _ptp4l_phc2sys_on
-

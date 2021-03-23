@@ -38,6 +38,7 @@
     async: "{{ async_time }}"
     poll: 0
     register: ptp_to_master
+    become: yes
 
   - name: Check previous command status - if not failed
     async_status:
@@ -56,6 +57,7 @@
     async: "{{ async_time }}"
     poll: 0
     register: phc2sys_on_node
+    become: yes
 
   - name: Check previous command status - if not failed
     async_status:

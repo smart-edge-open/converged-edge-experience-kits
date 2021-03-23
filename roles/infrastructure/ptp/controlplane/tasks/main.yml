@@ -13,6 +13,7 @@
     async: "{{ async_time }}"
     poll: 0
     register: ptp4l_to_gm
+    become: yes
 
   - name: Check previous command status - if not failed
     async_status:
@@ -36,6 +37,7 @@
     register: phc2sys_master
     async: "{{ async_time }}"
     poll: 0
+    become: yes
 
   - name: Check previous command status - if not failed
     async_status:
@@ -63,6 +65,7 @@
       src: "../../controlplane/files/{{ _config_patch }}"
       dest: "{{ _linuxptp_git_repo.download_dir }}/configs/default.cfg"
     delegate_to: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+    become: yes
 
   - name: Start PTP master port towards slave(s)
     command: ./ptp4l -f ./configs/default.cfg -2 -i {{ item }} –m
@@ -73,6 +76,7 @@
     register: ptp_to_node
     with_items: "{{ hostvars[inventory_hostname].ptp_port }}"
     ignore_errors: true
+    become: yes
 
   - name: Check previous command status - if not failed
     async_status:
@@ -100,6 +104,7 @@
     poll: 0
     register: phc_master_node
     with_items: "{{ hostvars[inventory_hostname].ptp_port }}"
+    become: yes
 
   - name: Check previous command status - if not failed
     async_status:

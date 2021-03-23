@@ -25,6 +25,7 @@
     command: ethtool -T {{ item }}
     with_items: "{{ ptp_port }}"
     register: hardware_timestamp
+    become: yes
 
   - name: Fail if the hardware does not support PTP
     fail:
@@ -56,6 +57,7 @@
     command: firewall-cmd --reload
     changed_when: true
     ignore_errors: yes
+    become: yes
 
   - name: Download linuxptp git repository
     git:
@@ -63,11 +65,13 @@
       dest: "{{ _linuxptp_git_repo.download_dir }}"
       version: "{{ _linuxptp_git_repo.branch }}"
       force: yes
+    become: yes
 
   - name: Install patch utility
     yum:
       name: patch
       state: present
+    become: yes
 
   - name: Compile and install linuxapp
     command: "{{ item }}"
@@ -76,6 +80,7 @@
       - make install
     args:
       chdir: "{{ _linuxptp_git_repo.download_dir }}"
+    become: yes
 
   - name: Copy config file
     copy:
@@ -83,12 +88,14 @@
       dest: "{{ _linuxptp_git_repo.download_dir }}/configs/default_slave.cfg"
       remote_src: true
     delegate_to: "{{ ansible_nodename }}"
+    become: yes
 
   - name: Apply patch to config
     patch:
       src: "{{ _config_slave_patch }}"
       basedir: "{{ _linuxptp_git_repo.download_dir }}"
       strip: 0
+    become: yes
   when:
     (inventory_hostname in groups['ptp_master'] or
     inventory_hostname in groups['ptp_slave_group'])

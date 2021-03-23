@@ -11,6 +11,7 @@
         - "ip addr flush dev {{ ptp_port }}"
         - "ip addr add {{ ptp_port_ip }}/{{ ptp_port_cidr }} dev {{ ptp_port }}"
         - "ip link set dev {{ ptp_port }} up"
+      become: yes
 
     - name: Configure Static IP Address in network-scripts
       lineinfile:
@@ -18,6 +19,7 @@
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
         state: present
+      become: yes
       with_items:
         - { regexp: '^DEVICE=', line: 'DEVICE={{ ptp_port }}' }
         - { regexp: '^BOOTPROTO=', line: 'BOOTPROTO=none' }
@@ -54,6 +56,7 @@
       #
       [{{ ptp_port }}]
       unicast_master_table            1
+  become: yes
   when:
     (inventory_hostname in groups['ptp_slave_group'] and
     ptp_port|length > 0 and
