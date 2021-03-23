@@ -4,6 +4,8 @@
 
 set -euxo pipefail
 
+PYTHON3_MINIMAL_SUPPORTED_VERSION=368
+
 PYTHON3_VERSION=python3-3.6.8-18.el7
 
 PYTHON_SH_VERSION=python36-sh-1.12.14-7.el7
