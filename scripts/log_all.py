@@ -64,7 +64,8 @@ def tar_filter_with_exclude(exclude_paths):
         return tar_filter
     return tar_filter_none
 
-def main(): # pylint: disable=too-many-locals
+
+def collect_logs(user, host):
     """
     Function creates archive file with Openness experience kit information and
     send it to controller root directory.
@@ -81,16 +82,6 @@ def main(): # pylint: disable=too-many-locals
     if "excludePaths" in config:
         exclude_paths = [re.compile(excluded_path) for excluded_path in config["excludePaths"]]
 
-    with open("inventory/default/inventory.ini", "r") as inventory_file:
-        lines = inventory_file.read().split("\n")
-        name = lines[lines.index("[controller_group]") + 1].strip()
-        controller = [x for x in lines
-                      if name in x and len(name) < len(x)][0].split(" ")
-        host = [x for x in controller if x.startswith("ansible_host")][0].split("=")[-1]
-        if any(item.startswith("ansible_user") for item in controller):
-            user = [x for x in controller if x.startswith("ansible_user")][0].split("=")[-1]
-        else:
-            user = ""
     try:
         with tarfile.open(file_name, "w:gz") as tar:
             main_dir = os.path.abspath(os.getcwd())
@@ -128,6 +119,25 @@ def main(): # pylint: disable=too-many-locals
         print("Please check connection and run: `python3 scripts/log_all.py`")
 
     return 0
+
+
+def main():
+    """
+    Function creates archive file with Openness experience kit information and
+    send it to controller root directory.
+    """
+    with open("inventory/default/inventory.ini", "r") as inventory_file:
+        lines = inventory_file.read().split("\n")
+        name = lines[lines.index("[controller_group]") + 1].strip()
+        controller = [x for x in lines
+                      if name in x and len(name) < len(x)][0].split(" ")
+        host = [x for x in controller if x.startswith("ansible_host")][0].split("=")[-1]
+        if any(item.startswith("ansible_user") for item in controller):
+            user = [x for x in controller if x.startswith("ansible_user")][0].split("=")[-1]
+        else:
+            user = ""
+
+    return collect_logs(user, host)
 
 
 if __name__ == "__main__":

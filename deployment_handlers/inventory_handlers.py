@@ -10,7 +10,7 @@ Handlers for inventory.yml file
 import os
 import yaml
 
-class Inventory:
+class Inventory: # pylint: disable=too-many-instance-attributes
     """Single inventory for deployment"""
     def __init__(self, inventory_doc):
         self.__inventory_doc = inventory_doc
@@ -42,6 +42,16 @@ class Inventory:
         return self.__cluster_name
 
     @property
+    def controller_ansible_host(self):
+        """Returns controller ansible_host for controller"""
+        return self.__controller_ansible_host
+
+    @property
+    def controller_ansible_user(self):
+        """Returns controller ansible_user for controller"""
+        return self.__controller_ansible_user
+
+    @property
     def inventory(self):
         """Returns inventory contents"""
         return yaml.dump(self.__inventory_doc)
@@ -65,6 +75,10 @@ class Inventory:
         self.__is_single_node = inventory_doc["all"]["vars"]["single_node_deployment"]
         self.__limit = inventory_doc["all"]["vars"]["limit"]
         self.__inventory_filename = f"inventory_{self.__cluster_name}.yml"
+        self.__controller_ansible_host = \
+            next(iter(inventory_doc["controller_group"]["hosts"].values()))["ansible_host"]
+        self.__controller_ansible_user = \
+            next(iter(inventory_doc["controller_group"]["hosts"].values()))["ansible_user"]
 
 class InventoryHandler:
     """Simple inventory.yml handler"""
@@ -84,7 +98,7 @@ class InventoryHandler:
 
     def __load_inventory(self, inventory_path):
         with open(inventory_path, 'r') as inventory_stream:
-            doc_iterator = yaml.load_all(inventory_stream, Loader=yaml.FullLoader)
+            doc_iterator = yaml.load_all(inventory_stream, Loader=yaml.SafeLoader)
             self.__inventories = []
             for doc in doc_iterator:
                 self.__inventories.append(Inventory(doc))

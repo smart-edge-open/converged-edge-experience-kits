@@ -12,22 +12,17 @@ import sys
 from re import match
 import os
 import signal
-import shutil
 import logging
 import subprocess
+import shutil
 import time
 from datetime import datetime
-from collections import namedtuple
-from deployment_handlers import inventory_handlers, output_handling
 
-LOGGER_LEVEL = logging.INFO
-LOGGER = logging.getLogger(__name__)
+import sh # pylint: disable=import-error
 
-DeploymentWrapper = namedtuple("DeploymentWrapper",
-                               ["process", "cluster_name", "playbook_file_name", "log_file"])
-# Global variable to be shared between main and signal handler.
-deployment_wrappers = []
-RT_OUTPUT_HANDLER = output_handling.RtOutputHandler(logging)
+from deployment_handlers import inventory_handlers
+from scripts import log_all
+
 
 DEPLOYMENT_INTERVAL = 5
 ERROR_EXIT_CODE = 1
@@ -50,6 +45,31 @@ FLAVOR_LINK_POSTFIX = "_flavor.yml"
 FLAVOR_LINK_PATTERN = f"{FLAVOR_LINK_PREFIX}.*{FLAVOR_LINK_POSTFIX}"
 DEFAULT_CLUSTER_NAME = "single_cluster"
 MULTI_INVENTORY_FILE = "inventory.yml"
+
+
+class DeploymentWrapper:
+    """DeploymentWrapper is an object that contains information about Network Edge deployment"""
+    def __init__(self, process, inventory, playbook_file_name, log_file):
+        self.process = process
+        self.inventory = inventory
+        self.cluster_name = inventory.cluster_name
+        self.playbook_file_name = playbook_file_name
+        self.log_file = log_file
+        self.has_ended = False
+        self.ended_successfully = False
+
+    def kill_deployment(self):
+        """kill deployment"""
+
+
+    def pull_logs(self):
+        """pull_logs pulls .tar.gz package with deployment logs"""
+        log_all.collect_logs(self.inventory.controller_ansible_user,
+                             self.inventory.controller_ansible_host)
+
+
+# Global variable to be shared between main and signal handler.
+deployment_wrappers = []
 
 
 def create_log_dir_if_not_exists():
@@ -122,12 +142,6 @@ def prepare_alt_dir_layout():
         os.makedirs(ALT_INVENTORIES_PATH)
 
 
-def handle_alt_dir_layout_cleanup():
-    """Removes alternative layout"""
-    if os.path.exists(ALT_INVENTORIES_PATH):
-        shutil.rmtree(ALT_INVENTORIES_PATH)
-
-
 def create_symlinks_for_inventory(src_vars_path, dest_vars_path):
     """Creates symlinks for alternative directory layout"""
     for root, dirs, files in os.walk(src_vars_path):
@@ -184,7 +198,7 @@ def run_deployment(inventory, cleanup=False):
         inventory.flavor,
         inventory.cluster_name,
         playbook_basename)
-    log_file = open(deployment_log_file_path, "w")
+    log_file = open(deployment_log_file_path, "a+")
 
     logging.info('%s %s: command: "%s"',
                  inventory.cluster_name, playbook_basename, ansible_playbook_command)
@@ -195,7 +209,7 @@ def run_deployment(inventory, cleanup=False):
                                           stdout=log_file, stderr=subprocess.STDOUT)
 
     return DeploymentWrapper(process=deployment_process,
-                             cluster_name=inventory.cluster_name,
+                             inventory=inventory,
                              playbook_file_name=playbook_basename,
                              log_file=log_file,
                              )
@@ -205,11 +219,7 @@ def kill_deployments(deployments):
     """Kills every executed deployment"""
     for deployment in deployments:
         if (deployment is not None) and (deployment.process.poll() is None):
-            # deployment_child = Popen(['ps', '-opid', '--no-headers', '--ppid',
-            #                           str(deployment.process.pid)], stdout=PIPE)
-            # ansible_playbook_pid = int(deployment_child.stdout.read())
             try:
-                # os.kill(ansible_playbook_pid, signal.SIGTERM)
                 os.kill(deployment.process.pid, signal.SIGTERM)
             except ProcessLookupError:
                 logging.info('Playbook "%s" | cluster "%s" already terminated.',
@@ -217,37 +227,72 @@ def kill_deployments(deployments):
                 continue
             deployment.process.terminate()
             deployment.process.wait()
+            deployment.has_ended = True
+            deployment.ended_successfully = False
             if deployment.log_file is not None:
                 deployment.log_file.close()
             logging.info('Playbook "%s" | cluster "%s" terminated.',
                          deployment.playbook_file_name, deployment.cluster_name)
 
 
+def print_log_line(line):
+    """Print ansible deployment log line callback"""
+    print(line, end='')
+
+
+def has_deployments_successful(deployments):
+    """Check if whole deployment was successful"""
+    for deployment in deployments:
+        if not deployment.ended_successfully:
+            return False
+    return True
+
+
+def has_deployments_ended(deployments):
+    """Check if deployments has ended"""
+    for deployment in deployments:
+        if not deployment.has_ended:
+            return False
+    return True
+
+
 def check_deployments_status(deployments, exit_on_error=False):
     """Simple asynchronous checks if some deployment is finished"""
-    ## TO-DO: process outputs from deployments
-    while len(deployments) > 0:
+
+    # In single cluster deployment, logs are forwarded to stdout.
+    if len(deployments) == 1:
+        logging.info("Only one cluster is being deployed. Redirecting logs to stdout.")
+        sh.tail("-n", "100000", "-f", # pylint: disable=no-member
+                deployments[0].log_file.name,
+                _out=print_log_line,
+                _bg=True,
+                _new_session=False)
+    else:
+        logging.info("More than one deployment is running,"
+                     "please check the log files for detailed deployment logs.")
+
+    while not has_deployments_ended(deployments):
         for _, deployment in enumerate(deployments):
-            if deployment.process.poll() is None:
+            if deployment.process.poll() is None or deployment.has_ended:
                 pass
             elif deployment.process.poll() == 0:
                 logging.info('%s %s: succeed.',
                              deployment.cluster_name,
                              deployment.playbook_file_name)
                 deployment.log_file.close()
-                deployments.remove(deployment)
+                deployment.has_ended = True
+                deployment.ended_successfully = True
             elif deployment.process.poll() != 0:
                 logging.error('%s %s: failed. Please check the logs: %s',
                               deployment.cluster_name,
                               deployment.playbook_file_name,
                               os.path.realpath(deployment.log_file.name))
                 deployment.log_file.close()
-                deployments.remove(deployment)
+                deployment.has_ended = True
+                deployment.ended_successfully = False
                 if exit_on_error is True:
                     logging.info("--any-errors-fatal flag raised, terminating other deployments...")
                     kill_deployments(deployments)
-                    RT_OUTPUT_HANDLER.output_screens_cleanup()
-                    sys.exit(ERROR_EXIT_CODE)
         time.sleep(1)
 
 
@@ -256,9 +301,31 @@ def exit_gracefully(signum, _):
     logging.info("")
     logging.info('Signal "%s" caught, killing deployments...', signum)
     kill_deployments(deployment_wrappers)
-    RT_OUTPUT_HANDLER.output_screens_cleanup()
     logging.info('All deployments stopped')
+    print_deployment_recap(deployment_wrappers)
     sys.exit(ERROR_EXIT_CODE)
+
+
+def print_deployment_recap(deployments):
+    """Prints deployment recap on stdout"""
+    deployment_count = len(deployments)
+    successful_count = 0
+    failure_count = 0
+    for deployment in deployments:
+        if deployment.ended_successfully:
+            successful_count = successful_count + 1
+        else:
+            failure_count = failure_count + 1
+    logging.info("====================")
+    logging.info("DEPLOYMENT RECAP:")
+    logging.info("====================")
+    logging.info("DEPLOYMENT COUNT: %d", deployment_count)
+    logging.info("SUCCESSFUL DEPLOYMENTS: %d", successful_count)
+    logging.info("FAILED DEPLOYMENTS: %d", failure_count)
+    for deployment in deployments:
+        deployment_status = "SUCCESSFUL" if deployment.ended_successfully else "FAILED"
+        logging.info('DEPLOYMENT "%s": %s', deployment.cluster_name, deployment_status)
+    logging.info("====================")
 
 
 def parse_arguments():
@@ -271,10 +338,6 @@ def parse_arguments():
                         help="Terminate all running actions when any of them fail")
     parser.add_argument("-c", "--clean", dest="clean", action="store_true",
                         help="Run cleanup scripts on clusters")
-    parser.add_argument("--revert-dir-layout", dest="revert_dir_layout", action="store_true",
-                        help="Revert alternate dir layout and exit [to be removed in future]")
-    parser.add_argument("--rt-output-tracking", dest="rt_output_tracking", action="store_true",
-                        help="Creates sessions with real-time log file tracking")
     return parser.parse_args()
 
 
@@ -286,7 +349,7 @@ def main(args):
     create_log_dir_if_not_exists()
     current_date_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     deploy_log_path = os.path.join(ANSIBLE_LOGS_PATH, f"deploy_script_{current_date_time}.log")
-    logging.basicConfig(level=LOGGER_LEVEL,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s.%(msecs)03d %(levelname)s: %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         handlers=[
@@ -294,39 +357,34 @@ def main(args):
                             logging.StreamHandler()
                             ]
                         )
-    if args.revert_dir_layout:
-        handle_alt_dir_layout_cleanup()
-        logging.info("Directory layout reverted.")
-        sys.exit(0)
-
-    RT_OUTPUT_HANDLER.enable_logs_tracking(args.rt_output_tracking)
     inventory_handler = inventory_handlers.InventoryHandler(MULTI_INVENTORY_FILE)
-
     for inventory in inventory_handler.get_inventories:
         if not verify_flavor(inventory.flavor, FLAVORS_PATH):
             logging.fatal('Parsing inventory failed: flavor "%s" does not exists in "%s"',
                           inventory.flavor, FLAVORS_PATH)
-            sys.exit(1)
+            sys.exit(ERROR_EXIT_CODE)
 
     prepare_alt_dir_layout()
     for inventory in inventory_handler.get_inventories:
         deploy_wrapper = run_deployment(inventory, args.clean)
         deployment_wrappers.append(deploy_wrapper)
-        session_command = f"tail -n 50 -f {deploy_wrapper.log_file.name}"
-        RT_OUTPUT_HANDLER.call_new_track_output_session(deploy_wrapper.cluster_name,
-                                                        session_command)
         time.sleep(DEPLOYMENT_INTERVAL)
 
-    RT_OUTPUT_HANDLER.log_sessions_creation()
     check_deployments_status(deployment_wrappers, args.any_errors_fatal)
-    RT_OUTPUT_HANDLER.output_screens_cleanup()
-    logging.info("Deployment finished")
-    sys.exit(0)
+
+    print_deployment_recap(deployment_wrappers)
+    if has_deployments_successful(deployment_wrappers):
+        sys.exit(0)
+    else:
+        logging.info("Deployment failed, pulling logs")
+        for deployment in deployment_wrappers:
+            deployment.pull_logs()
+        sys.exit(ERROR_EXIT_CODE)
 
 
 if __name__ == '__main__':
     try:
         main(parse_arguments())
-    except argparse.ArgumentTypeError as exception:
-        logging.error(exception)
+    except argparse.ArgumentTypeError as arg_type_exception:
+        logging.error(arg_type_exception)
         sys.exit(ERROR_EXIT_CODE)
