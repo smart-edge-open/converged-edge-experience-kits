@@ -184,6 +184,7 @@
     path: /etc/rc.d/rc.local
     regexp: '(.*)sriov_numvfs(.*)'
     state: absent
+  become: yes
 
 - name: checking network interfaces for SR-IOV support
   stat:
