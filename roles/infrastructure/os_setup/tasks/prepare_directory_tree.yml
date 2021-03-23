@@ -16,6 +16,7 @@
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ openness_user_group }}"
+
     - name: create openness subdirectories
       file:
         path: "{{ item }}"
@@ -47,3 +48,35 @@
         - "{{ openness_dir }}/collectd/configs"
         - "{{ openness_dir }}/collectd/pmd"
       when: "telemetry_collectd_enable | default(True)"
+
+    - name: create edgednssvr directory
+      file:
+        path: "{{ openness_dir }}/edgednssvr"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: dns_enable
+
+    - name: create pv kafka directory
+      file:
+        path: "{{ openness_dir }}/pv/kafka"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: eaa_enable | default(True)
+
+    - name: create pv grafana directory
+      file:
+        path: "{{ openness_dir }}/pv/grafana"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: telemetry_grafana_enable | default(True)
+
+    - name: create pv prometheus directory
+      file:
+        path: "{{ openness_dir }}/pv/prometheus"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: telemetry_prometheus_enable | default(True)
