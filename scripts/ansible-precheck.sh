@@ -21,7 +21,8 @@ then
 fi
 
 # Check the value of offline_enable
-TOP_PATH=$(cd "$(dirname "$0")";pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+TOP_PATH="$SCRIPT_DIR/.."
 if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | grep -qE "[T|t]rue"; then
   prepackagePath=""
   if [ -e "${TOP_PATH}/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz" ]; then
@@ -115,12 +116,4 @@ if ! sudo rpm -qa | grep -q ^$PYTHON_SH_VERSION; then
   echo "python36-sh successfully installed"
 else
   echo "python36-sh already installed"
-fi
-
-
-# pip upgrade
-if command sudo python3 -m pip install -U pip 1>/dev/null; then
-  echo "pip upgraded"
-else 
-  echo "ERROR: Failed to upgrade pip"
 fi
