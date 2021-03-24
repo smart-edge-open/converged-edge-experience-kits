@@ -49,3 +49,4 @@
   file:
     path: "{{ _pv_dir }}"
     state: absent
+  become: yes
