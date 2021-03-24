@@ -3,6 +3,12 @@
 
 ---
 
+- name: install authconfig
+  yum:
+    name: authconfig
+    state: present
+  become: yes
+
 - name: disable fingerprint to avoid ssh timeout issues
   command: authconfig --disablefingerprint --update
   changed_when: false
