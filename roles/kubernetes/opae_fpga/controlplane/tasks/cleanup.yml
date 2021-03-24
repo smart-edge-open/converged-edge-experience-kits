@@ -7,3 +7,4 @@
   file:
     path: "{{ _rsu_plugin_dest }}"
     state: absent
+  become: yes
