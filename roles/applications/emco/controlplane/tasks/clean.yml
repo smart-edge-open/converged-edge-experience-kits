@@ -4,7 +4,7 @@
 ---
 
 - name: load harbor-registry variables
-  include_vars: "{{ playbook_dir }}/roles/harbor_registry/controlplane/defaults/main.yml"
+  include_vars: "{{ playbook_dir }}/roles/kubernetes/harbor_registry/controlplane/defaults/main.yml"
 
 - name: delete emcoctl binary in go path
   file:
