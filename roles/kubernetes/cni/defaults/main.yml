@@ -17,4 +17,4 @@ _available_kubernetes_cnis:
 
 _cni_offline_path:
 - ./roles
-- ./oek/roles
+- ./ceek/roles

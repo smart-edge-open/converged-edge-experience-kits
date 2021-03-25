@@ -8,7 +8,7 @@ further deployment analysis and troubleshooting.
 It uses accompanying JSON configuration file with a list of files and commands
 output that will be gathered and stored in separate log file.
 The output of running this script is a tar.gz file with all important
-information about nodes, that is uploaded to OEK Controller.
+information about nodes, that is uploaded to CEEK Controller.
 """
 
 import os

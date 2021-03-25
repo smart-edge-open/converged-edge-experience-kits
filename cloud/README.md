@@ -49,7 +49,7 @@ The "result" field will include access instructions for the deployed cluster, as
 
 >  NOTE: If the recap includes a failure count other than `failed=0` then the OpenNESS installation failed.
 
-The OpenNESS installation log and the Ansible inventory file will be available on the Controller Node in `~/openness-install.log` and `~/inventory.ini` within the user specified non-root user account (e.g. `oekuser`).
+The OpenNESS installation log and the Ansible inventory file will be available on the Controller Node in `~/openness-install.log` and `~/inventory.ini` within the user specified non-root user account (e.g. `ceekuser`).
 
 The public IP addresses for the nodes can be queried with this script, your local `bash` shell with the presence of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) or an [Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/overview).  You will need to manually confirm you have an active Azure token, the easist method is by manually running `az login` prior to execution:
 
