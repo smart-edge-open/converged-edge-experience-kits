@@ -97,8 +97,11 @@
     --field-selector spec.nodeName={{ node_name }} -o=NAME | grep -E 'eaa'
   delegate_to: "{{ groups['controller_group'][0] }}"
   register: eaa_present
+  retries: 3
+  delay: 10
+  until: eaa_present is succeeded
   ignore_errors: yes
-  changed_when: true
+  changed_when: false
 
 # OpenNESS pods send a CSR from an init container - we should automatically approve it
 - name: approve openness CSRs
