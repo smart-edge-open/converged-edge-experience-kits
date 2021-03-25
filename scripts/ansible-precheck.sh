@@ -5,20 +5,12 @@
 set -euxo pipefail
 
 PYTHON3_MINIMAL_SUPPORTED_VERSION=368
-
 PYTHON3_VERSION=python3-3.6.8-18.el7
 
 PYTHON_SH_VERSION=python36-sh-1.12.14-7.el7
 PYTHON_NETADDR_VERSION=python-netaddr-0.7.5-9.el7
 PYTHON_PYYAML_VERSION=python36-PyYAML-3.13-1.el7
 ANSIBLE_VERSION=ansible-2.9.18-1.el7
-
-# Check if script called from main directory
-if [ ! -d "ceek/roles" ] && [ ! -d "roles" ]
-then
-  echo "ERROR: Script should be called from main directory!"
-  exit 1
-fi
 
 # Check the value of offline_enable
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -27,10 +19,10 @@ if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | gr
   prepackagePath=""
   if [ -e "${TOP_PATH}/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz" ]; then
      prepackagePath="${TOP_PATH}/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz"
-  elif [ -e "${TOP_PATH}/ceek/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz" ]; then
-     prepackagePath="${TOP_PATH}/ceek/roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz"
+  elif [ -e "${TOP_PATH}/../roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz" ]; then
+     prepackagePath="${TOP_PATH}/../roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz"
   else
-    echo "ERROR: Miss package: [ceek/]roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz!"
+    echo "ERROR: Miss package: roles/offline_roles/unpack_offline_package/files/prepackages.tar.gz!"
     exit 1
   fi
   tmpDir=$(mktemp -d)
