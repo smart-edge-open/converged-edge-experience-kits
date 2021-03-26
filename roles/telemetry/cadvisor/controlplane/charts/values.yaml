@@ -19,6 +19,7 @@ cadvisor:
   disabledMetrics: "percpu,diskIO,tcp,udp,disk,sched"
   storeContainerLabels: false
   maxHousekeepingInterval: "30s"
+  dockerOnly: true
 
 #Proxy Values
 proxy:
