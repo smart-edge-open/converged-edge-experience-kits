@@ -8,6 +8,7 @@
   register: num_vca
   changed_when: true
   when: inventory_hostname in groups['edgenode_vca_group']
+  become: yes
 
 - name: remove VCAC-A node(s) from the cluster
   include_tasks: vca_node_cleanup.yml

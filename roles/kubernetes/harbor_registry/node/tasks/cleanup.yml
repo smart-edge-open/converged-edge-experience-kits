@@ -14,6 +14,7 @@
   register: num_vca
   changed_when: true
   when: inventory_hostname in groups['edgenode_vca_group']
+  become: yes
 
 - name: delete certificate from VCA node
   command: "ssh {{ vca_node_ip }} 'rm -rf /etc/docker/certs.d/{{ _registry_ip_address }}:{{ _registry_port }}'"
@@ -23,3 +24,4 @@
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']
+  become: yes

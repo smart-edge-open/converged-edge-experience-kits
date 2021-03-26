@@ -20,3 +20,4 @@
   - "{{ _device_plugins.download_dir }}"
   - "{{ ne_helm_charts_default_dir }}/gpu-plugin"
   - "{{ ne_helm_charts_default_dir }}/vpu-plugin"
+  become: yes
