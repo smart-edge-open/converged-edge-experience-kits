@@ -23,6 +23,7 @@
       register: temp_result
       ignore_errors: yes
       when: calico_ebpf_enabled
+      become: yes
 
     - name: find out place for GPG key
       command: awk -F'=' '/gpgkey/ {gsub("file://", ""); print $2; exit;}' {{ _kernel_repo_dest }}
