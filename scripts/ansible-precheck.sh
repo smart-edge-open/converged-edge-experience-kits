@@ -4,13 +4,41 @@
 
 set -euxo pipefail
 
-PYTHON3_MINIMAL_SUPPORTED_VERSION=368
-PYTHON3_VERSION=python3-3.6.8-18.el7
+PYTHON3_PKG=python3
+PYTHON3_VERSION=3.6.8-18.el7
 
-PYTHON_SH_VERSION=python36-sh-1.12.14-7.el7
-PYTHON_NETADDR_VERSION=python-netaddr-0.7.5-9.el7
-PYTHON_PYYAML_VERSION=python36-PyYAML-3.13-1.el7
-ANSIBLE_VERSION=ansible-2.9.18-1.el7
+PYTHON_SH_PKG=python36-sh
+PYTHON_SH_VERSION=1.12.14-7.el7
+
+PYTHON_NETADDR_PKG=python-netaddr
+PYTHON_NETADDR_VERSION=0.7.5-9.el7
+
+PYTHON_PYYAML_PKG=python36-PyYAML
+PYTHON_PYYAML_VERSION=3.13-1.el7
+
+ANSIBLE_PKG=ansible
+ANSIBLE_VERSION=2.9.18-1.el7
+
+ensure_installed () {
+  if [[ ${2-} ]]
+  then
+      package_name="$1-$2"
+  else
+      package_name="$1"
+  fi
+
+  if ! sudo rpm -qa | grep -q ^"$package_name"; then
+    echo "Instaling $package_name"
+    if ! sudo yum -y install "$package_name"; then
+      echo "ERROR: Failed to install package $package_name"
+      exit 1
+    else
+      echo "$package_name successfully installed"
+    fi
+  else
+    echo "$package_name already installed"
+  fi
+}
 
 # Check the value of offline_enable
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -32,80 +60,19 @@ if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | gr
 fi
 
 # EPEL repository
-if ! sudo rpm -qa | grep -q ^epel-release; then
-  echo "EPEL repository not present in system, adding EPEL repository..."
-  if ! sudo yum -y install epel-release; then
-    echo "ERROR: Could not add EPEL repository. Check above for possible root cause"
-    exit 1
-  fi
-fi
+ensure_installed epel-release
 
 # Python 3
-if ! command -v python3 1>/dev/null; then
-  echo "Python3 not installed..."
-  sudo yum updateinfo
-  if ! sudo yum -y install $PYTHON3_VERSION; then
-    echo "ERROR: Could not install $PYTHON3_VERSION package."
-    exit 1
-  fi
-  echo "Python3 successfully instaled"
-else
-  INSTALL=$(python3 -c "import sys; print( $PYTHON3_MINIMAL_SUPPORTED_VERSION > int('%d%d%d' % sys.version_info[:3]))")
-  if [ "$INSTALL" = "True" ]; then
-    sudo yum updateinfo
-    echo "Installing the supported version of python3 package."
-    if ! sudo yum -y install $PYTHON3_VERSION; then
-      echo "ERROR: Could not install $PYTHON3_VERSION package."
-      exit 1
-    fi
-    echo "Python3 successfully installed."
-  fi
-fi
+ensure_installed $PYTHON3_PKG $PYTHON3_VERSION
 
 # ansible
-if ! command -v ansible-playbook 1>/dev/null; then
-  echo "Installing ansible..."
-  if ! sudo yum -y install $ANSIBLE_VERSION; then
-    echo "ERROR: Could not install Ansible package from EPEL repository"
-    exit 1
-  fi
-  echo "Ansible successfully instaled"
-else
-  echo "Ansible already installed"
-fi
+ensure_installed $ANSIBLE_PKG $ANSIBLE_VERSION
 
 # netaddr
-if ! sudo rpm -qa | grep -q ^$PYTHON_NETADDR_VERSION; then
-  echo "netaddr not installed. Installing.."
-  if ! sudo yum install -y $PYTHON_NETADDR_VERSION; then
-    echo "ERROR: Could not install netaddr"
-    exit 1
-  fi
-  echo "netaddr successfully installed"
-else
-  echo "netaddr already installed"
-fi
+ensure_installed $PYTHON_NETADDR_PKG $PYTHON_NETADDR_VERSION
 
 # pyyaml
-if ! sudo rpm -qa | grep -q ^$PYTHON_PYYAML_VERSION; then
-  echo "pyyaml not installed. Installing.."
-  if ! sudo yum install -y $PYTHON_PYYAML_VERSION; then
-    echo "ERROR: Could not install pyyaml"
-    exit 1
-  fi
-  echo "pyyaml successfully installed"
-else
-  echo "pyyaml already installed"
-fi
+ensure_installed $PYTHON_PYYAML_PKG $PYTHON_PYYAML_VERSION
 
 # sh
-if ! sudo rpm -qa | grep -q ^$PYTHON_SH_VERSION; then
-  echo "python36-sh not installed. Installing.."
-  if ! sudo yum install -y $PYTHON_SH_VERSION; then
-    echo "ERROR: Could not install python36-sh"
-    exit 1
-  fi
-  echo "python36-sh successfully installed"
-else
-  echo "python36-sh already installed"
-fi
+ensure_installed $PYTHON_SH_PKG $PYTHON_SH_VERSION
