@@ -7,13 +7,6 @@
   # following roles are not cleaned up directly, they're cleaned when Kubernetes cluster is reset
   # - nfd
   # - multus
-  # - sriov/controlplane
-
-  - name: load harbor_registry variables
-    include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
-
-  - name: cleanup harbor_registry
-    include_tasks: ./roles/kubernetes/harbor_registry/controlplane/tasks/cleanup.yml
 
   - name: emco cleanup
     block:
@@ -24,6 +17,12 @@
     vars:
       - role_path: "{{ playbook_dir }}/roles/applications/emco/"
     when: emco_enable | default(False)
+
+  - name: load harbor_registry variables
+    include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
+
+  - name: cleanup harbor_registry
+    include_tasks: ./roles/kubernetes/harbor_registry/controlplane/tasks/cleanup.yml
 
   - name: video analytics services cleanup
     include_tasks: ./roles/applications/video_analytics_services/tasks/cleanup.yml

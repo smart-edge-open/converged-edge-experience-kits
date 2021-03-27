@@ -71,6 +71,9 @@
     - role: applications/openness/controlplane
       when: openness_enable | default(True)
 
+    - role: applications/emco/controlplane
+      when: emco_enable | default(False)
+
     - role: kubernetes/qat_dev_plugin/controller
       when: qat_device_plugin_enable | default(False)
 

@@ -2,6 +2,10 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
+- debug:
+    msg: "playbook_dir ====> {{ playbook_dir }}"
+- debug:
+    msg: "role_path ====> {{ role_path }}"
 
 - name: load harbor-registry variables
   include_vars: "{{ playbook_dir }}/roles/kubernetes/harbor_registry/controlplane/defaults/main.yml"
@@ -14,16 +18,24 @@
   ignore_errors: yes
   become: yes
 
-- name: Uninstall EMCO on the K8s cluster
-  command: "./emco-openness-helm-install.sh uninstall"
-  args:
-    chdir: "{{ _emco.dest }}/bin/helm"
-  changed_when: false
-  ignore_errors: no
+- name: Uninstall EMCO in the K8s cluster
+  block:
+    - name: check the exist of emco repository
+      command: "ls {{ _emco.dest }}/bin/helm"
+      register: emcoRepoExist
+      ignore_errors: yes
+
+    - name: Uninstall EMCO on the K8s cluster
+      command: "./emco-openness-helm-install.sh uninstall"
+      args:
+        chdir: "{{ _emco.dest }}/bin/helm"
+      changed_when: false
+      ignore_errors: no
+      when: emcoRepoExist is succeeded
 
 - name: delete clusters_config used by emco
   file:
-    path: /opt/clusters_config
+    path: "{{ openness_dir }}/clusters_config"
     state: absent
   changed_when: false
   ignore_errors: yes
@@ -31,7 +43,7 @@
 
 - name: delete resource files used by emco
   file:
-    path: "/opt/{{ item }}"
+    path: "{{ openness_dir }}/{{ item }}"
     state: absent
   with_items:
     - smtc_cloud_helmchart.tar.gz
@@ -49,3 +61,4 @@
     state: absent
   changed_when: true
   become: yes
+  when: always_clean_repository

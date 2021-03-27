@@ -10,3 +10,4 @@ _emco:
   registryPrefix: "{{ _registry_host }}:{{ _registry_port }}/intel/"
   buildCause: DEV_TEST
   emcoSrvRelease: latest
+  release_name: emco-services
