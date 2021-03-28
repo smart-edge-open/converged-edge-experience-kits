@@ -87,7 +87,6 @@
       src: "{{ _linuxptp_git_repo.download_dir }}/configs/default.cfg"
       dest: "{{ _linuxptp_git_repo.download_dir }}/configs/default_slave.cfg"
       remote_src: true
-    delegate_to: "{{ ansible_nodename }}"
     become: yes
 
   - name: Apply patch to config
