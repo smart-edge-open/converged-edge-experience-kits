@@ -79,13 +79,13 @@
 
     - role: telemetry/certs
       when: >
-        "telemetry_prometheus_enable | default(True) OR
-        telemetry_opentelemetry_enable | default(True) OR
-        telemetry_collectd_enable | default(True) OR
-        telemetry_tas_enable | default(True) OR
-        telemetry_cadvisor_enable | default(True) OR
-        telemetry_grafana_enable | default(True) OR
-        telemetry_pcm_enable | default(False)"
+        telemetry_prometheus_enable | default(True) or
+        telemetry_opentelemetry_enable | default(True) or
+        telemetry_collectd_enable | default(True) or
+        telemetry_tas_enable | default(True) or
+        telemetry_cadvisor_enable | default(True) or
+        telemetry_grafana_enable | default(True) or
+        telemetry_pcm_enable | default(False)
 
     - role: telemetry/prometheus
       when: "telemetry_prometheus_enable | default(True)"
