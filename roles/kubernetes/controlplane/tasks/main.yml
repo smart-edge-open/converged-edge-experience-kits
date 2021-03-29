@@ -25,13 +25,15 @@
           file:
             path: .kube
             state: directory
-            mode: 0755
+            mode: 0700
         - name: copy kubernetes admin.conf to .kube/config
           copy:
             src: /etc/kubernetes/admin.conf
             dest: .kube/config
-            mode: 0664
+            mode: 0600
             remote_src: yes
+            owner: "{{ ansible_real_user_id }}"
+            group: "{{ ansible_real_group_id }}"
           become: yes
         - name: remove the taint to be able to schedule Pods on the control-plane node
           command: kubectl taint nodes --all node-role.kubernetes.io/master-
@@ -42,12 +44,12 @@
           file:
             path: /root/.kube
             state: directory
-            mode: 0755
+            mode: 0700
         - name: copy kubernetes admin.conf to /root/.kube/config
           copy:
             src: /etc/kubernetes/admin.conf
             dest: /root/.kube/config
-            mode: 0664
+            mode: 0600
             remote_src: yes
       become: yes
   when: cluster_info.rc == 1
