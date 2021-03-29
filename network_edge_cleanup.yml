@@ -385,8 +385,14 @@
     - name: cleanup harbor_registry certificate
       include_tasks: ./roles/kubernetes/harbor_registry/node/tasks/cleanup.yml
 
-- hosts: controller_group:edgenode_group
+- hosts: edgenode_group
   tasks:
-  - name: reboot machines
+  - name: reboot nodes
+    reboot:
+    become: yes
+
+- hosts: controller_group
+  tasks:
+  - name: reboot controller
     reboot:
     become: yes
