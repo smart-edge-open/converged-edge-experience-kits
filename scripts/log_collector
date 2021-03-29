@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 """
 Log-Collector is a tool to collect all requested artifacts i.e.: log files, \
 commands output reports/results, binary files, etc. \
@@ -207,16 +207,27 @@ def collect_pods_logs(file_name, com):
                        stderr=subprocess.STDOUT).stdout.decode("utf-8"))
 
     for pod in pods["items"]:
+        pod_name = pod["metadata"]["name"]
+        pod_ns = pod["metadata"]["namespace"]
 
-        # following pod is ignored, but it's generating massive amounts of logs
-        if "custom-metrics-apiserver" in pod["metadata"]["name"]:
-            continue
+        pod_cmd = com.replace("<POD>", pod_name).replace("<NAMESPACE>", pod_ns)
+        pod_path = file_name.replace("<POD>", pod_name).replace("<NAMESPACE>", pod_ns)
 
-        command = re.sub("<POD>", pod["metadata"]["name"], com)
-        command = re.sub("<NAMESPACE>", pod["metadata"]["namespace"], command)
-        path = re.sub("<POD>", "_".join(pod["metadata"]["name"].split("-")),
-                      file_name)
-        run_command(command, path)
+        if "describe" in com:
+            run_command(pod_cmd, pod_path)
+
+        if "logs" in com:
+            for container in pod["spec"]["containers"]:
+                command = pod_cmd.replace("<CONTAINER>", container["name"])
+                path = pod_path.replace("<CONTAINER>", container["name"])
+                run_command(command, path)
+
+            if "initContainers" in pod["spec"]:
+                for init_container in pod["spec"]["initContainers"]:
+                    command = pod_cmd.replace("<CONTAINER>", init_container["name"])
+                    path = pod_path.replace("<CONTAINER>", init_container["name"])
+                    run_command(command, path)
+
     logging.debug("Collecting pods logs finished.")
 
 
