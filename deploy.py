@@ -268,7 +268,7 @@ def check_deployments_status(deployments, exit_on_error=False):
                 _bg=True,
                 _new_session=False)
     else:
-        logging.info("More than one deployment is running,"
+        logging.info("More than one deployment is running, "
                      "please check the log files for detailed deployment logs.")
 
     while not has_deployments_ended(deployments):
