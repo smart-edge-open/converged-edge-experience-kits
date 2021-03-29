@@ -85,6 +85,7 @@
     - name: set kernel as default
       command: grubby --set-default /boot/vmlinuz-{{ ebpf_kernel_version.stdout }}
       changed_when: true
+      become: yes
 
     # role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
     - name: request reboot (will be performed by `conditional_reboot` role) for calico-ebpf

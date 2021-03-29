@@ -79,4 +79,6 @@
     args:
       chdir: "{{ _git_repo_dest_harbor }}"
     ignore_errors: no
+    environment:
+      PATH: "/usr/sbin:{{ ansible_env.PATH }}"
   when: get_release_harbor.rc != 0
