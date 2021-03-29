@@ -28,7 +28,7 @@ def make_parser():
 
     parser.add_argument(
         "-r", "--repo", action="store", metavar="GIT_REPO", dest="git_repo",
-        default="https://github.com/open-ness/openness-experience-kits",
+        default="https://github.com/open-ness/converged-edge-experience-kits",
         help="OpenNESS experience kit repository")
     parser.add_argument(
         "-t", "--token", action="store", metavar="GIT_TOKEN", dest="git_token",

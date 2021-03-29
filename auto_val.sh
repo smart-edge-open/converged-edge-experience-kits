@@ -5,12 +5,12 @@
 
 # Usage:
 #  Regular Network Edge mode:
-#   ./deploy_ne.sh -f <flavor>               deploy both controller & nodes
-#   ./deploy_ne.sh -f <flavor> c[ontroller]  deploy only controller
-#   ./deploy_ne.sh -f <flavor> n[odes]       deploy only nodes
+#   ./auto_val.sh -f <flavor>               deploy both controller & nodes
+#   ./auto_val.sh -f <flavor> c[ontroller]  deploy only controller
+#   ./auto_val.sh -f <flavor> n[odes]       deploy only nodes
 #
 #  Single-node cluster:
-#   ./deploy_ne.sh -f <flavor> s[ingle]      deploy single-node cluster playbook
+#   ./auto_val.sh -f <flavor> s[ingle]      deploy single-node cluster playbook
 
 set -euxo pipefail
 

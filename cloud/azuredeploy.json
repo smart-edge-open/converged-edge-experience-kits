@@ -4,9 +4,9 @@
   "parameters": {
     "opennessRepository": {
       "type": "string",
-      "defaultValue": "https://github.com/open-ness/openness-experience-kits",
+      "defaultValue": "https://github.com/open-ness/converged-edge-experience-kits",
       "allowedValues": [
-        "https://github.com/open-ness/openness-experience-kits"
+        "https://github.com/open-ness/converged-edge-experience-kits"
       ],
       "metadata": {
         "description": "(Required) OpenNESS experience kit repository url"
@@ -212,8 +212,8 @@
         "azCliVersion": "2.9.1",
         "scriptContent": "set -xe; pip install --upgrade pip > /dev/null; pip install ansible==2.9.10 > /dev/null; az login --identity -u \"${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}\"; az vmss create --resource-group=\"${AZ_RESOURCE_GROUP}\" --name=\"${AZ_VMSS}\" --image=\"${AZ_VM_IMAGE}\" --vm-sku=\"${AZ_VM_FLAVOR}\" --os-disk-size-gb=\"${AZ_VM_DISK_SIZE}\" --instance-count=\"${AZ_VM_COUNT}\" --public-ip-per-vm --generate-ssh-keys --vm-domain-name=\"${AZ_VMDOMAIN}\" --admin-username=\"${AZ_VM_USERNAME}\" --load-balancer=\"\" --disable-overprovision;cd /root; cp ${AZ_SCRIPTS_PATH_INPUT_DIRECTORY}/install.sh .; cp ${AZ_SCRIPTS_PATH_INPUT_DIRECTORY}/oek_setup.py .; ./install.sh 2>&1| tee install.log $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/install.log; cp ~/oek/inventory.ini $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY; SUMMARY=`tail -6 /root/install.log | sed 's/[*]//g'` ; IP=`awk '/ctrl/{match($0,/[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+/); ip = substr($0,RSTART,RLENGTH); print ip}' $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/inventory.ini` ; scp /root/install.log $AZ_VM_USERNAME@$IP:openness-install.log ; scp /root/oek/inventory.ini $AZ_VM_USERNAME@$IP:inventory.ini; echo -e \"Access Controller Node: ssh $AZ_VM_USERNAME@$IP\\nInteract with Kubernetes using 'kubectl' as root user\\n$SUMMARY \" | jq -Rs '{Result: split(\"\n\")}' > $AZ_SCRIPTS_OUTPUT_PATH ",
           "supportingScriptUris": [
-          "https://raw.githubusercontent.com/open-ness/openness-experience-kits/master/cloud/install.sh",
-          "https://raw.githubusercontent.com/open-ness/openness-experience-kits/master/cloud/oek_setup.py"
+          "https://raw.githubusercontent.com/open-ness/converged-edge-experience-kits/master/cloud/install.sh",
+          "https://raw.githubusercontent.com/open-ness/converged-edge-experience-kits/master/cloud/oek_setup.py"
         ],
         "cleanupPreference": "OnSuccess",
         "retentionInterval": "PT26H",

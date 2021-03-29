@@ -5,9 +5,9 @@
 
 # Usage:
 #  Regular Network Edge mode:
-#   ./cleanup_ne.sh -f <flavor>               cleanup both controller & nodes
-#   ./cleanup_ne.sh -f <flavor> c[ontroller]  cleanup only controller
-#   ./cleanup_ne.sh -f <flavor> n[odes]       cleanup only nodes
+#   ./auto_val_cleanup.sh -f <flavor>               cleanup both controller & nodes
+#   ./auto_val_cleanup.sh -f <flavor> c[ontroller]  cleanup only controller
+#   ./auto_val_cleanup.sh -f <flavor> n[odes]       cleanup only nodes
 
 source scripts/ansible-precheck.sh
 source scripts/task_log_file.sh

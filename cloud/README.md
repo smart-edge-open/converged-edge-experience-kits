@@ -37,7 +37,7 @@ The following fields **must** be populated within the Azure portal:
 
 > NOTE: The Deploy to Azure button may only work when clicked within Github web interface
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fopen-ness%2Fopenness-experience-kits%2Fmaster%2Fcloud%2Fazuredeploy.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fopen-ness%2Fconverged-edge-experience-kits%2Fmaster%2Fcloud%2Fazuredeploy.json)
 
 ## Post Deployment
 
