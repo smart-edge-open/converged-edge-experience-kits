@@ -37,6 +37,7 @@
     chdir: "{{ _openvino.install_dir }}/deployment_tools/inference_engine/external/hddl/drivers/"
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 - name: change silent file to uninstall openvino
   replace:
@@ -44,6 +45,7 @@
     regexp: 'PSET_MODE=install'
     replace: 'PSET_MODE=uninstall'
   ignore_errors: yes
+  become: yes
 
 - name: uninstall openvino
   command: ./install.sh  -s silent.cfg
@@ -51,19 +53,23 @@
     chdir: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/"
   ignore_errors: yes
   changed_when: true
+  become: yes
 
 
 - name: remove openvino install dir
   file:
     path: "{{ _openvino.install_dir }}"
     state: absent
+  become: yes
 
 - name: remove openvino drivers
   command: rmmod  i2c-dev i2c-i801
   ignore_errors: true
   changed_when: true
+  become: yes
 
 - name: remove openvino download dir
   file:
     path: "{{ _openvino.download_dir }}"
     state: absent
+  become: yes
