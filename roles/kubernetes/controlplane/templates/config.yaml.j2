@@ -23,3 +23,6 @@ kubernetesVersion: v{{ _kubernetes_version }}
 controllerManager:
   extraArgs:
     terminated-pod-gc-threshold: "600"
+apiServer:
+  extraArgs:
+    event-ttl: "48h0m0s"
