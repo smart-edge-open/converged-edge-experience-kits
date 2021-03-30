@@ -207,6 +207,9 @@ ne_opae_fpga_enable: False
 ## Network Edge HDDL
 ne_hddl_enable: False
 
+## QAT Device Plugin
+qat_device_plugin_enable: False
+
 ## Network Edge Node Feature Discovery (NFD)
 ne_nfd_enable: True
 

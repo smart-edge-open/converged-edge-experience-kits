@@ -37,6 +37,8 @@
       when: "ne_cmk_enable | default(False)"
     - role: kubernetes/hddl/network_edge/controlplane
       when: "ne_hddl_enable | default(False)"
+    - role: kubernetes/qat_dev_plugin/controller
+      when: qat_device_plugin_enable | default(False)
 
     - role: telemetry/certs
       when: >
@@ -90,6 +92,8 @@
       when: "ne_cmk_enable | default(False)"
     - role: kubernetes/hddl/network_edge/node
       when: "ne_hddl_enable | default(False)"
+    - role: kubernetes/qat_dev_plugin/node
+      when: qat_device_plugin_enable | default(False)
     - role: telemetry/pcm/node
       when: "telemetry_pcm_enable | default(False)"
 
