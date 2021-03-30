@@ -36,3 +36,4 @@
   file:
     path: "{{ _kafka_pv_dir }}"
     state: absent
+  become: yes
