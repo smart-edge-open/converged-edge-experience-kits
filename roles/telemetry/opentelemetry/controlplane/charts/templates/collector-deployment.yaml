@@ -18,6 +18,11 @@ spec:
       labels:
         component: {{ .Values.component }}
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
       containers:
       - name: {{ .Values.proxy.name }}
         image: {{ .Values.proxy.image }}
