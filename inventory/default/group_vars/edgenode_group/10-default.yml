@@ -86,5 +86,5 @@ _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kerne
 # URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
 docker_images: []
 
-git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgeservices.git
+git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgeservices.git
 _git_repo_dest: "{{ openness_dir }}/edgeservices"
