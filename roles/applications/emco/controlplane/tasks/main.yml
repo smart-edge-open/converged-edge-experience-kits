@@ -8,7 +8,7 @@
     msg: "role_path ====> {{ role_path }}"
 
 - name: load harbor-registry variables
-  include_vars: "{{ playbook_dir }}/roles/kubernetes/harbor_registry/controlplane/defaults/main.yml"
+  include_vars: "{{ role_path }}/../../../../roles/kubernetes/harbor_registry/controlplane/defaults/main.yml"
 
 - name: check if emco release exists
   command: "helm status {{ _emco.release_name }} -n emco"
@@ -19,7 +19,7 @@
 - name: Installing EMCO on the K8s cluster
   block:
     - name: create temporary custom .openness_gitconfig
-      include_tasks: "{{ playbook_dir }}/roles/infrastructure/git_repo/tasks/gitconfig_bootstrap.yml"
+      include_tasks: "{{ role_path }}/../../../../roles/infrastructure/git_repo/tasks/gitconfig_bootstrap.yml"
 
     - name: checkout EMCO repository
       block:
