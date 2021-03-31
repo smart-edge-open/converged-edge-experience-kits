@@ -4,7 +4,7 @@
 ---
 
 - name: discover QAT Physical Functions
-  shell: "set -o pipefail && for i in {{ qat_dev_ids|join(' ') }}; do lspci -d {{ manufacturer_id }}:$i -D | awk '{ print $1 }'; done"
+  shell: "set -o pipefail && for i in {{ qat_dev_ids|join(' ') }}; do /usr/sbin/lspci -d {{ manufacturer_id }}:$i -D | awk '{ print $1 }'; done"
   register: qat_pf
   args:
     executable: /bin/bash
@@ -34,7 +34,7 @@
     become: true
 
   - name: discover QAT Virtual Functions
-    shell: "set -o pipefail && lspci -d {{ manufacturer_id }}:{{ qat_vf_dev_id }} -D | awk '{ print $1 }'"
+    shell: "set -o pipefail && /usr/sbin/lspci -d {{ manufacturer_id }}:{{ qat_vf_dev_id }} -D | awk '{ print $1 }'"
     register: qat_vfs
     args:
       executable: /bin/bash

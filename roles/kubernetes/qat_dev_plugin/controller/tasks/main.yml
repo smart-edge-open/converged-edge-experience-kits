@@ -27,7 +27,6 @@
 
 - name: push Intel QAT Device Plugin image to local registry
   command: docker push {{ _qat_dp.image }}:{{ _qat_dp.version }}
-  become: true
   changed_when: true
 
 - name: copy Helm chart to the controller node
@@ -50,4 +49,3 @@
     --namespace {{ _qat_dp.namespace }}
     {{ ne_helm_charts_default_dir }}/intel-qat-plugin
   changed_when: true
-  become: true
