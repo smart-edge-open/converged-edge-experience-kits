@@ -14,7 +14,7 @@ pylint = "==2.7.2"
 netaddr = "==0.7.18"
 sh = "==1.14.1"
 # Force 3.2 due to security vulnabilities in 3.4.6
-cryptography = "==3.2"
+cryptography = "==3.3.2"
 
 [requires]
 python_version = "3.6"
