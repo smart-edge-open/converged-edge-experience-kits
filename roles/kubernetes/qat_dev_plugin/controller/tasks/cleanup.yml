@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: uninstall Intel QAT Plugin Helm chart
+  command: >
+    helm uninstall intel-qat-plugin
+    --namespace {{ _qat_dp.namespace }}
+  changed_when: true
+  failed_when: false
+  become: true
+
+- name: remove Intel QAT Device Plugin image from local registry
+  command: docker rmi {{ _qat_dp.image }}:{{ _qat_dp.version }}
+  become: true
+  changed_when: true
+  failed_when: false
+
+- name: remove Intel Device Plugins repository
+  file:
+    path: "{{ _qat_dp.dir }}"
+    state: absent
+    force: yes
+  failed_when: false

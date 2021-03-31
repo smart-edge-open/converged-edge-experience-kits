@@ -24,6 +24,16 @@
   - name: cleanup harbor_registry
     include_tasks: ./roles/kubernetes/harbor_registry/controlplane/tasks/cleanup.yml
 
+  - name: cleanup QAT device plugin
+    block:
+    - name: load QAT DP variables
+      include_vars: ./roles/kubernetes/qat_dev_plugin/controller/defaults/main.yml
+    - name: load harbor registry variables
+      include_vars: ./roles/kubernetes/harbor_registry/controlplane/defaults/main.yml
+    - name: run cleanup QAT device plugin
+      include_tasks: ./roles/kubernetes/qat_dev_plugin/controller/tasks/cleanup.yml
+    when: qat_device_plugin_enable | default(False)
+
   - name: video analytics services cleanup
     include_tasks: ./roles/applications/video_analytics_services/tasks/cleanup.yml
     vars:
@@ -225,6 +235,14 @@
       - name: load acc100 dpdk init app
         include_tasks: ./roles/infrastructure/init_app_acc100/tasks/cleanup.yml
       when: acc100_userspace_vf.enabled | default(False)
+
+    - name: cleanup QAT device plugin
+      block:
+      - name: load QAT DP variables
+        include_vars: ./roles/kubernetes/qat_dev_plugin/node/defaults/main.yml
+      - name: run cleanup QAT device plugin
+        include_tasks: ./roles/kubernetes/qat_dev_plugin/node/tasks/cleanup.yml
+      when: qat_device_plugin_enable | default(False)
 
     - name: load kubernetes variables
       include_vars: ./roles/kubernetes/node/defaults/main.yml
