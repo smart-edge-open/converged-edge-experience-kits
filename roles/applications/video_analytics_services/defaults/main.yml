@@ -22,8 +22,8 @@ _vas_helmReleaseName: "video-analytics-services"
 _vas_helmChartVersion: 0.1.0
 
 _frameworks:
-  - { name: ffmpeg, image: openvisualcloud/xeon-ubuntu1804-analytics-ffmpeg }
-  - { name: gstreamer, image: openvisualcloud/xeon-ubuntu1804-analytics-gst }
+  - { name: ffmpeg, image: "openvisualcloud/xeon-ubuntu1804-analytics-ffmpeg:20.10" }
+  - { name: gstreamer, image: "openvisualcloud/xeon-ubuntu1804-analytics-gst:20.10" }
 
 # instances names for vas multiinstances
 _instances:
