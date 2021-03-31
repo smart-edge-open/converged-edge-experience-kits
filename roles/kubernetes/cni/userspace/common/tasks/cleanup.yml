@@ -9,5 +9,6 @@
     state: absent
 
 - name: delete go files
-  shell: "source /etc/profile && rm -rf $GOPATH/src/{{ _userspace.repository }}"
-  changed_when: true
+  file:
+    path: "{{ _userspace.download_dir }}"
+    state: absent

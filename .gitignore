@@ -1,4 +1,5 @@
 /biosfw/
 /logs/
 *.pyc
-/group_vars/*/30_*_flavor.yml
+/inventory/default/group_vars/*/30_*_flavor.yml
+/inventory/automated/

@@ -1,0 +1,137 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- debug:
+    msg: "playbook_dir ====> {{ playbook_dir }}"
+- debug:
+    msg: "role_path ====> {{ role_path }}"
+
+- name: load harbor-registry variables
+  include_vars: "{{ role_path }}/../../../../roles/kubernetes/harbor_registry/controlplane/defaults/main.yml"
+
+- name: check if emco release exists
+  command: "helm status {{ _emco.release_name }} -n emco"
+  ignore_errors: yes
+  register: get_release_emco
+  changed_when: false
+
+- name: Installing EMCO on the K8s cluster
+  block:
+    - name: create temporary custom .openness_gitconfig
+      include_tasks: "{{ role_path }}/../../../../roles/infrastructure/git_repo/tasks/gitconfig_bootstrap.yml"
+
+    - name: checkout EMCO repository
+      block:
+        - debug:
+            msg: "Using git token for EMCO repository checkout"
+          when: git_repo_token|length > 0
+
+        - name: clone emco repo
+          git:
+            repo: "{{ _emco.repo }}"
+            dest: "{{ _emco.dest }}"
+            clone: yes
+            update: no
+            version: "{{ _emco.commit }}"
+
+      always:
+        - name: remove .openness_gitconfig
+          include_tasks:  "{{ role_path }}/../../../infrastructure/git_repo/tasks/gitconfig_remove.yml"
+
+    - name: get serviceBaseImageName
+      shell: set -o pipefail && cat config/*.txt | grep 'SERVICE_BASE_IMAGE_NAME' | cut -d'=' -f2
+      args:
+        chdir: "{{ _emco.dest }}"
+      register: serviceBaseImageName
+      changed_when: false
+      become: yes
+
+    - name: get serviceBaseImageVersion
+      shell: set -o pipefail && cat config/*.txt  | grep 'SERVICE_BASE_IMAGE_VERSION' | cut -d'=' -f2
+      args:
+        chdir: "{{ _emco.dest }}"
+      register: serviceBaseImageVersion
+      changed_when: false
+      become: yes
+
+    - name: Set facts for EMCO service base image
+      set_fact:
+        service_base_image_name: "{{ serviceBaseImageName.stdout }}"
+        service_base_image_version: "{{ serviceBaseImageVersion.stdout }}"
+
+    - name: pull EMCO service base image
+      docker_image:
+        name: "{{ service_base_image_name }}{{ service_base_image_version }}"
+        source: pull
+
+    - name: tag EMCO service base image
+      docker_image:
+        name: "{{ service_base_image_name }}{{ service_base_image_version }}"
+        repository: "{{ _emco.registryPrefix }}{{ service_base_image_name }}{{ service_base_image_version }}"
+
+    - name: push EMCO service base image to harbor repository
+      docker_image:
+        name: "{{ _emco.registryPrefix }}{{ service_base_image_name }}{{ service_base_image_version }}"
+        push: yes
+
+    - name: Build EMCO 'build-base' target with EMCODOCKERREPO
+      make:
+        chdir: "{{ _emco.dest }}"
+        target: build-base
+        params:
+          EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+      register: buildBase
+
+    - name: Build EMCO 'deploy' target with EMCODOCKERREPO (Wait about ten minutes here)
+      make:
+        chdir: "{{ _emco.dest }}"
+        target: deploy
+        params:
+          EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+          BUILD_CAUSE: "{{ _emco.buildCause }}"
+          # EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
+      register: deploy
+
+    - name: deploy pods on master in K8s cluster
+      command: kubectl taint nodes --all node-role.kubernetes.io/master-
+      changed_when: true
+      ignore_errors: yes
+      when: emco_single_node_cluster
+
+    - name: Installing EMCO on the K8s cluster with enableDbAuth=false
+      command: "./emco-openness-helm-install.sh -s 'enableDbAuth=false' install"
+      args:
+        chdir: "{{ _emco.dest }}/bin/helm"
+      environment:
+          EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+          BUILD_CAUSE: "{{ _emco.buildCause }}"
+          # EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
+      changed_when: false
+      when: not emco_db_auth_enable
+
+    - name: Installing EMCO on the K8s cluster with enableDbAuth=true
+      command: >
+        ./emco-openness-helm-install.sh -s 'enableDbAuth=true
+        --timeout 30m
+        --set db.rootPassword={{ emco_db_password }}
+        --set db.emcoPassword={{ emco_db_password }}
+        --set contextdb.rootPassword={{ emco_db_password }}
+        --set contextdb.emcoPassword={{ emco_db_password }}'
+        install
+      args:
+        chdir: "{{ _emco.dest }}/bin/helm"
+      environment:
+        EMCODOCKERREPO: "{{ _emco.registryPrefix }}"
+        BUILD_CAUSE: "{{ _emco.buildCause }}"
+        # EMCOSRV_RELEASE_TAG: "{{ _emco.emcoSrvRelease }}"
+      changed_when: false
+      when: emco_db_auth_enable
+
+    - name: add emcoctl to go path
+      shell: "mkdir -p  {{ ansible_env.HOME }}/go/bin; cp {{ _emco.dest }}/bin/emcoctl/emcoctl {{ ansible_env.HOME }}/go/bin/"
+      args:
+        chdir: "{{ _emco.dest }}"
+        warn: false
+      changed_when: false
+  when: get_release_emco.rc != 0

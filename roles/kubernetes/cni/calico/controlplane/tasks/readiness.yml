@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: verify calico deployments
+  check_k8s_object:
+    name: calico-kube-controllers
+    namespace: kube-system
+    kind: deployment
+
+- name: verify calico daemonsets
+  check_k8s_object:
+    name: calico-node
+    namespace: kube-system
+    kind: daemonset

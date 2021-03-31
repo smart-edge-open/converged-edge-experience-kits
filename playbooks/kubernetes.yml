@@ -1,0 +1,105 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2021 Intel Corporation
+
+---
+
+# Playbook for Network Edge deployment
+- hosts: controller_group
+  any_errors_fatal: true
+
+  pre_tasks:
+  - name: update controller repo path
+    set_fact:
+      _git_repo_dest: "{{ openness_dir }}/edgeservices/edgecontroller"
+
+  roles:
+    - role: kubernetes/controlplane
+    - role: kubernetes/helm
+    - role: kubernetes/harbor_registry/controlplane
+    - role: kubernetes/cni
+    - role: kubernetes/device_plugins
+      when: "k8s_device_plugins_enable | default(False)"
+    - role: kubernetes/dashboard
+      when: "kubernetes_dashboard_enable | default(False)"
+
+    - role: kubernetes/kubevirt/controlplane
+      when: "kubevirt_enable | default(True)"
+
+    - role: kubernetes/bb_config
+      when: "fpga_sriov_userspace_enable | default(False) or acc100_sriov_userspace_enable | default(False)"
+    - role: kubernetes/opae_fpga/controlplane
+      when: "ne_opae_fpga_enable | default(False)"
+    - role: kubernetes/nfd
+      when: "ne_nfd_enable | default(True)"
+    - role: kubernetes/biosfw/controlplane
+      when: "ne_biosfw_enable | default(False)"
+    - role: kubernetes/cmk/controlplane
+      when: "ne_cmk_enable | default(False)"
+    - role: kubernetes/hddl/network_edge/controlplane
+      when: "ne_hddl_enable | default(False)"
+    - role: kubernetes/qat_dev_plugin/controller
+      when: qat_device_plugin_enable | default(False)
+
+    - role: telemetry/certs
+      when: >
+        telemetry_prometheus_enable | default(True) or
+        telemetry_opentelemetry_enable | default(True) or
+        telemetry_collectd_enable | default(True) or
+        telemetry_tas_enable | default(True) or
+        telemetry_cadvisor_enable | default(True) or
+        telemetry_grafana_enable | default(True) or
+        telemetry_pcm_enable | default(False)
+
+    - role: telemetry/prometheus
+      when: "telemetry_prometheus_enable | default(True)"
+    - role: telemetry/opentelemetry/controlplane
+      when: "telemetry_opentelemetry_enable | default(True)"
+    - role: telemetry/collectd/controlplane
+      when: "telemetry_collectd_enable | default(True)"
+    - role: telemetry/tas
+      when: "telemetry_tas_enable | default(True)"
+    - role: telemetry/cadvisor/controlplane
+      when: "telemetry_cadvisor_enable | default(True)"
+    - role: telemetry/grafana
+      when: "telemetry_grafana_enable | default(True)"
+    - role: telemetry/pcm/controlplane
+      when: "telemetry_pcm_enable | default(False)"
+
+    - role: kubernetes/rmd/controlplane
+      when: "rmd_operator_enable | default(False)"
+
+- hosts: edgenode_group
+  any_errors_fatal: true
+  roles:
+    - role: kubernetes/rmd/node
+      when: "rmd_operator_enable | default(False)"
+    - role: kubernetes/opae_fpga/node
+      when: "ne_opae_fpga_enable | default(False)"
+
+    - role: kubernetes/node
+    - role: kubernetes/harbor_registry/node
+    - role: kubernetes/cni
+
+    - role: telemetry/collectd/node
+      when: "telemetry_collectd_enable | default(True)"
+    - role: telemetry/cadvisor/node
+      when: "telemetry_cadvisor_enable | default(True)"
+    - role: kubernetes/kubevirt/node
+      when: "kubevirt_enable | default(True)"
+    - role: kubernetes/biosfw/node
+      when: "ne_biosfw_enable | default(False)"
+    - role: kubernetes/cmk/node
+      when: "ne_cmk_enable | default(False)"
+    - role: kubernetes/hddl/network_edge/node
+      when: "ne_hddl_enable | default(False)"
+    - role: kubernetes/qat_dev_plugin/node
+      when: qat_device_plugin_enable | default(False)
+    - role: telemetry/pcm/node
+      when: "telemetry_pcm_enable | default(False)"
+
+- hosts: controller_group
+  any_errors_fatal: true
+  roles:
+    # Istio operator requires working worker node to deploy successfully.
+    - role: kubernetes/istio
+      when: "ne_istio_enable | default(False)"

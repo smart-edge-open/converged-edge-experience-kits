@@ -4,6 +4,8 @@
 ---
 # Playbook for single node Network Edge cluster deployment
 
+
+
 - hosts: edgenode_group
   pre_tasks:
     - name: set node name
@@ -19,32 +21,27 @@
       include_tasks: ./tasks/print_vars.yml
 
   roles:
-    - role: offline_roles/unpack_offline_package
-      when: offline_enable | default(False)
-    - role: offline_roles/local_fileshare_server
-      when: offline_enable | default(False)
-    - role: offline_roles/trust_ssl_list
-      when: offline_enable | default(False)
-    - role: offline_roles/yum_repo_enable
-      when: offline_enable | default(False)
-    - role: machine_setup/os_setup
+    - role: infrastructure/os_setup
 
-    - role: time/ntp
+    - role: infrastructure/time_setup_ntp
       when: ntp_enable | default(False)
 
-    - role: machine_setup/custom_kernel
+    - role: infrastructure/custom_kernel
       when: not (kernel_skip | default(False))
-    - role: machine_setup/grub
-    - role: machine_setup/configure_tuned
+    - role: infrastructure/grub
+    - role: infrastructure/configure_tuned
       when: not (tuned_skip | default(False))
-    - role: machine_setup/conditional_reboot
+    - role: infrastructure/conditional_reboot
+    - role: infrastructure/e810_driver_update
+      when: e810_driver_enable | default(False)
 
-    - role: git_repo
-    - role: golang
-    - role: docker
-    - role: opae_fpga/node
+    - role: infrastructure/git_repo
+    - role: infrastructure/golang
+    - role: infrastructure/docker
+    - role: kubernetes/opae_fpga/node
       when: ne_opae_fpga_enable | default(False)
     - role: telemetry/collectd/node
+      when: "telemetry_collectd_enable | default(True)"
 
 - hosts: controller_group
   pre_tasks:
@@ -53,67 +50,101 @@
     - name: create helper variable
       set_fact:
         single_node_deployment: true
+    - name: update controller repo path
+      set_fact:
+        _git_repo_dest: "{{ openness_dir }}/edgeservices/edgecontroller"
 
   roles:
-    - role: machine_setup/os_setup
-    - role: git_repo
+    - role: infrastructure/os_setup
     - role: kubernetes/controlplane
     - role: kubernetes/helm
-    - role: harbor_registry/controlplane
+    - role: kubernetes/harbor_registry/controlplane
     - role: kubernetes/cni
     - role: kubernetes/device_plugins
       when: k8s_device_plugins_enable | default(False)
     - role: kubernetes/dashboard
       when: kubernetes_dashboard_enable | default(False)
 
-    - role: kafka
+    - role: applications/kafka
       when: eaa_enable | default(True)
 
-    - role: openness/controlplane
+    - role: applications/openness/controlplane
+      when: openness_enable | default(True)
+
+    - role: applications/emco/controlplane
+      when: emco_enable | default(False)
+
+    - role: kubernetes/qat_dev_plugin/controller
+      when: qat_device_plugin_enable | default(False)
 
     - role: telemetry/certs
-    - role: telemetry/prometheus
-    - role: telemetry/opentelemetry/controlplane
-    - role: telemetry/collectd/controlplane
-    - role: telemetry/tas
-    # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
-    # - role: telemetry/cadvisor/controlplane
+      when: >
+        telemetry_prometheus_enable | default(True) or
+        telemetry_opentelemetry_enable | default(True) or
+        telemetry_collectd_enable | default(True) or
+        telemetry_tas_enable | default(True) or
+        telemetry_cadvisor_enable | default(True) or
+        telemetry_grafana_enable | default(True) or
+        telemetry_pcm_enable | default(False)
 
-    - role: bb_config
+    - role: telemetry/prometheus
+      when: "telemetry_prometheus_enable | default(True)"
+    - role: telemetry/opentelemetry/controlplane
+      when: "telemetry_opentelemetry_enable | default(True)"
+    - role: telemetry/collectd/controlplane
+      when: "telemetry_collectd_enable | default(True)"
+    - role: telemetry/tas
+      when: "telemetry_tas_enable | default(True)"
+#   # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
+#    - role: telemetry/cadvisor/controlplane
+#      when: "telemetry_cadvisor_enable | default(True)"
+    - role: telemetry/grafana
+      when: "telemetry_grafana_enable | default(True)"
+    - role: telemetry/pcm/controlplane
+      when: "telemetry_pcm_enable | default(False)"
+
+    - role: kubernetes/bb_config
       when: fpga_sriov_userspace_enable | default(False) or acc100_sriov_userspace_enable | default(False)
-    - role: kubevirt/controlplane
+    - role: kubernetes/kubevirt/controlplane
       when: kubevirt_enable | default(True)
-    - role: opae_fpga/controlplane
+    - role: kubernetes/opae_fpga/controlplane
       when: ne_opae_fpga_enable | default(False)
-    - role: nfd
+    - role: kubernetes/nfd
       when: ne_nfd_enable | default(True)
-    - role: biosfw/controlplane
+    - role: kubernetes/biosfw/controlplane
       when: ne_biosfw_enable | default(False)
-    - role: cmk/controlplane
+    - role: kubernetes/cmk/controlplane
       when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/controlplane
+    - role: kubernetes/hddl/network_edge/controlplane
       when: ne_hddl_enable | default(False)
 
-    - role: telemetry/grafana
-      when: telemetry_grafana_enable | default(True)
-    - role: telemetry/pcm/controlplane
-      when: telemetry_pcm_enable | default(False)
-
-    - role: istio
+    - role: kubernetes/istio
       when: ne_istio_enable | default(False)
 
+    - role: kubernetes/rmd/controlplane
+      when: rmd_operator_enable | default(False)
+
 - hosts: edgenode_group
+  pre_tasks:
+    - name: update edgenode repo path
+      set_fact:
+        _git_repo_dest: "{{ openness_dir }}/edgeservices"
+
   roles:
     # cAdvisor might cause platform instabilities when used with single node deployment, use at your own risk
     # - role: telemetry/cadvisor/node
-    - role: openness/node
-    - role: kubevirt/node
+    - role: applications/openness/node
+    - role: kubernetes/kubevirt/node
       when: kubevirt_enable | default(True)
-    - role: biosfw/node
+    - role: kubernetes/biosfw/node
       when: ne_biosfw_enable | default(False)
-    - role: cmk/node
+    - role: kubernetes/cmk/node
       when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/node
+    - role: kubernetes/hddl/network_edge/node
       when: ne_hddl_enable | default(False)
-    - role: ptp/node
+    - role: infrastructure/ptp/node
       when: ptp_sync_enable | default(False)
+    - role: kubernetes/qat_dev_plugin/node
+      when: qat_device_plugin_enable | default(False)
+    - role: kubernetes/rmd/node
+      when: rmd_operator_enable | default(False)

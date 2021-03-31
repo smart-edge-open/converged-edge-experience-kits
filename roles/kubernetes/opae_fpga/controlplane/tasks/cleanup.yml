@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: Remove RSU kubectl plugin
+  file:
+    path: "{{ _rsu_plugin_dest }}"
+    state: absent
+  become: yes

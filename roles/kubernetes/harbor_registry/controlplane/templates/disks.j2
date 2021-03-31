@@ -1,0 +1,237 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-db-pv
+  labels:
+    app: harbor-db
+spec:
+  capacity:
+    storage: {{ harbor_db_storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  local:
+    path: "{{ _harbor_pv_dir }}/harbor-disk1"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-db
+  namespace: harbor
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ harbor_db_storage }}
+  storageClassName: ""
+  selector:
+    matchLabels:
+      app: harbor-db
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-trivy-pv
+  labels:
+    app: harbor-trivy
+spec:
+  capacity:
+    storage: {{ harbor_trivy_storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  local:
+    path: "{{ _harbor_pv_dir }}/harbor-disk2"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-trivy
+  namespace: harbor
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ harbor_trivy_storage }}
+  storageClassName: ""
+  selector:
+    matchLabels:
+      app: harbor-trivy
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-registry-pv
+  labels:
+    app: harbor-registry
+spec:
+  capacity:
+    storage: {{ harbor_registry_storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  local:
+    path: "{{ _harbor_pv_dir }}/harbor-disk3"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-registry
+  namespace: harbor
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ harbor_registry_storage }}
+  storageClassName: ""
+  selector:
+    matchLabels:
+      app: harbor-registry
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-jobservice-pv
+  labels:
+    app: harbor-jobservice
+spec:
+  capacity:
+    storage: {{ harbor_jobservice_storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  local:
+    path: "{{ _harbor_pv_dir }}/harbor-disk4"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-jobservice
+  namespace: harbor
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ harbor_jobservice_storage }}
+  storageClassName: ""
+  selector:
+    matchLabels:
+      app: harbor-jobservice
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-chartmuseum-pv
+  labels:
+    app: harbor-chartmuseum
+spec:
+  capacity:
+    storage: {{ harbor_chartmuseum_storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  local:
+    path: "{{ _harbor_pv_dir }}/harbor-disk5"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-chartmuseum
+  namespace: harbor
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ harbor_chartmuseum_storage }}
+  storageClassName: ""
+  selector:
+    matchLabels:
+      app: harbor-chartmuseum
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-redis-pv
+  labels:
+    app: harbor-redis
+spec:
+  capacity:
+    storage: {{ harbor_redis_storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  local:
+    path: "{{ _harbor_pv_dir }}/harbor-disk6"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ hostvars[groups['controller_group'][0]]['ansible_nodename'] }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harbor-redis
+  namespace: harbor
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ harbor_redis_storage }}
+  storageClassName: ""
+  selector:
+    matchLabels:
+      app: harbor-redis

@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+# Variables that should be set:
+# - pci_address
+# - driver
+
+- name: get device ID
+  shell: >
+          set -o pipefail && lspci -ns {{ pci_address }} | awk '{print $3}' | sed -e 's/:/ /g'
+  register: device_id
+  changed_when: false
+  become: yes
+
+- name: get device driver in use
+  shell: >
+          set -o pipefail && lspci -ks {{ pci_address }} | grep driver | awk '{print $5}'
+  register: device_driver_in_use
+  changed_when: false
+  ignore_errors: true
+  become: yes
+
+- block:
+  - name: add new device id to the driver group
+    shell: >
+            set -o pipefail && echo "{{ device_id.stdout }}" | sudo tee $(realpath /sys/bus/pci/drivers/{{ driver }}/new_id)
+    changed_when: true
+
+  - name: unbind device from current driver
+    shell: >
+            set -o pipefail && echo {{ pci_address }} | sudo tee $(realpath /sys/bus/pci/devices/{{ pci_address }}/driver/unbind)
+    changed_when: true
+    ignore_errors: true
+    when: device_driver_in_use.stdout|length > 0
+
+  - name: bind device to userspace driver
+    shell: >
+            set -o pipefail && echo {{ pci_address }} | sudo tee $(realpath /sys/bus/pci/drivers/{{ driver }}/bind)
+    changed_when: true
+    when: device_driver_in_use.stdout|length > 0
+
+  - name: Enable device binding to {{ driver }} driver on boot
+    lineinfile:
+      state: present
+      dest: /etc/rc.d/rc.local
+      line: "echo \"{{ device_id.stdout }}\" | \
+            sudo tee /sys/bus/pci/drivers/{{ driver }}/new_id && \
+            echo \"{{ pci_address }}\" > /sys/bus/pci/drivers/{{ driver }}/bind"
+    become: yes
+
+  - name: Enable devices binding on startup
+    file:
+      dest: /etc/rc.d/rc.local
+      mode: a+x
+    become: yes
+  when: driver != device_driver_in_use.stdout

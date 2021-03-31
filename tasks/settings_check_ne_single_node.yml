@@ -8,11 +8,14 @@
   - name: fail if `edgenode_group` doesn't contain only one node
     fail:
       msg: |
-        For single-node Network Edge deployment `edgenode_group` group in the inventory.ini should contain only one node, e.g.:
+        For single-node Network Edge deployment `edgenode_group` group in the inventory.yml should contain only one node, e.g.:
 
-        # inventory.ini file
-        [edgenode_group]
-        node01
+        # inventory.yml file
+        edgenode_group:
+          hosts:
+            node01:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
     when:
     - groups['edgenode_group'] is defined
     - groups['edgenode_group'] | length != 1
@@ -22,15 +25,17 @@
       msg: |
         For single-node Network Edge deployment Controller and Node should be the same machine (i.e. same IP address), e.g.
 
-        # inventory.ini file
-        controller ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
-        node01 ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
-
-        [controller_group]
-        controller
-
-        [edgenode_group]
-        node01
+        # inventory.yml file
+        controller_group:
+          hosts:
+            controller:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
+        edgenode_group:
+          hosts:
+            node01:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
     when:
     - hostvars[groups['controller_group'][0]]['ansible_host'] != hostvars[groups['edgenode_group'][0]]['ansible_host']
 
@@ -39,14 +44,35 @@
       msg: |
         For single-node Network Edge deployment should be different entries with the same IP address, e.g.:
 
-        # inventory.ini file
-        controller ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
-        node01 ansible_ssh_user=root ansible_host={{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
-
-        [controller_group]
-        controller
-
-        [edgenode_group]
-        node01
+        # inventory.yml file
+        controller_group:
+          hosts:
+            controller:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
+        edgenode_group:
+          hosts:
+            node01:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
     when:
     - groups['controller_group'][0] == groups['edgenode_group'][0]
+
+  - name: fail if controller and node are deployed using different user
+    fail:
+      msg: |
+        For single-node deployment controller and node entries should use the same user, e.g.:
+
+        # inventory.yml file
+        controller_group:
+          hosts:
+            controller:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
+        edgenode_group:
+          hosts:
+            node01:
+              ansible_host: {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}
+              ansible_user: {{ hostvars[groups['controller_group'][0]]['ansible_user'] }}
+    when:
+    - hostvars[groups['controller_group'][0]]['ansible_user'] != hostvars[groups['edgenode_group'][0]]['ansible_user']

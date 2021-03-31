@@ -1,12 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-# Kube-ovn with OVS-DPDK
-kubeovn_dpdk: false
-
-# Network Edge Processor Counter Monitor (PCM)
-telemetry_pcm_enable: false
-
 # Network Edge's Kubernetes CNIs
 # sriov CNI for CDN Content Delivery
 kubernetes_cnis:

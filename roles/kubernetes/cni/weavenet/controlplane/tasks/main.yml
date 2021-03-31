@@ -15,6 +15,7 @@
   - 6784/tcp
   - 6783/udp
   - 6784/udp
+  become: yes
 
 - name: apply WeaveNet via the addon
   shell: set -o pipefail && kubectl apply -f "{{ _weavenet_yaml }}"

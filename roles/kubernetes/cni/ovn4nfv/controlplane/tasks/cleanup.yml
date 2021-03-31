@@ -24,3 +24,5 @@
   - 6641/tcp
   - 6642/tcp
   - 6081/udp
+  become: yes
+

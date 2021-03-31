@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019-2020 Intel Corporation
 
+set -euxo pipefail
+
 BASE_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 [ -d "${BASE_PATH}/logs" ] || mkdir "${BASE_PATH}/logs"

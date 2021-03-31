@@ -5,7 +5,7 @@
 
 - name: include dpdk role
   include_role:
-    name: dpdk
+    name: infrastructure/dpdk
   when: kubeovn_dpdk
 
 - name: open kube-ovn firewall rules
@@ -69,7 +69,6 @@
   shell: |
     ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ inventory_hostname }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
-  become: yes
   register: result
   until: not result.failed
   retries: 5

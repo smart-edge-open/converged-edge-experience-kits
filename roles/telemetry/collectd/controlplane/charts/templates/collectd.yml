@@ -94,6 +94,7 @@ spec:
       - name: cert-vol
         hostPath:
           path: /opt/openness/certs/telemetry/
+          type: Directory
       - name: ca
         secret:
           secretName: root-ca

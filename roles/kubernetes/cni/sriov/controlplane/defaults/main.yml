@@ -27,3 +27,22 @@ _sriov_dp_cek_url: "https://raw.githubusercontent.com/intel/container-experience
 _sriov_dp_cek_chart_templates:
 - "templates/sriovdp-daemonset.yaml"
 - "templates/sriovdp-sa.yaml"
+
+# list of json strings to be appended to configmap
+# WARNING: config must be inside single quotes and with leading space
+# otherwise it'll be converted internally to json and outputed with single quotes instead of double quotes
+# following is a correct example:
+# - ' {
+#     "resourceName": "intel_res_name",
+#      "selectors": {
+#          "drivers": ["vfio-pci"],
+#          "devices": ["0d90"]
+#      }
+#   }'
+_sriov_dp_configmap_extension: []
+
+# list of CRDs strings to be appended to crd.yml
+_sriov_dp_crd_extension: []
+
+# list of namespace strings to be created for crd.yml
+_sriov_dp_crd_extension_ns: []

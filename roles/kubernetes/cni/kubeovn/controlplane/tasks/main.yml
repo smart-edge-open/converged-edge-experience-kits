@@ -4,7 +4,7 @@
 ---
 - name: include dpdk role
   include_role:
-    name: dpdk
+    name: infrastructure/dpdk
   when: kubeovn_dpdk and single_node_deployment | default(false)
 
 - name: open kube-ovn firewall rules
@@ -18,6 +18,12 @@
     - 6641/tcp
     - 6642/tcp
     - 6081/udp
+  become: yes
+
+- name: Check if kube-ovn kubectl plugin exists
+  stat:
+    path: /usr/local/bin/kubectl-ko
+  register: kube_ovn_plugin_file
 
 - name: install kubeovn
   block:
@@ -53,12 +59,16 @@
       args:
         chdir: "{{ _kubeovn_destdir }}"
       when: kubeovn_dpdk
+      become: yes
 
     - name: install kube-ovn
       command: bash install.sh
       args:
         chdir: "{{ _kubeovn_destdir }}"
       when: not kubeovn_dpdk
+      become: yes
+  when: not kube_ovn_plugin_file.stat.exists or
+        (kube_ovn_plugin_file.stat.executable is defined and not kube_ovn_plugin_file.stat.executable)
 
 - name: Wait till k8s master starts
   shell: >
@@ -134,7 +144,6 @@
 - name: add local-ovs-phy port to local switch
   command: "ovn-nbctl --may-exist lsp-add {{ item }}-local {{ item }}-ovs-phy"
   register: result
-  become: yes
   until: not result.failed
   retries: 20
   delay: 30
@@ -147,7 +156,6 @@
     ovn-nbctl lsp-set-addresses "{{ item }}"-ovs-phy unknown
     ovn-nbctl lsp-set-type "{{ item }}"-ovs-phy localnet
     ovn-nbctl lsp-set-options "{{ item }}"-ovs-phy network_name="{{ item }}"-local-network
-  become: yes
   changed_when: true
   with_items: "{{ groups['edgenode_group'] }}"
   when: groups['edgenode_group'] | length > 0
@@ -157,7 +165,6 @@
     ovs-vsctl set open . external-ids:ovn-bridge-mappings="{{ item }}"-local-network:br-local
     ovs-vsctl --may-exist add-br br-local
   register: result
-  become: yes
   until: not result.failed
   retries: 5
   delay: 60

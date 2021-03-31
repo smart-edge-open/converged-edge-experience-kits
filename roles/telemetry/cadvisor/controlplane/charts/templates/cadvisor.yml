@@ -58,6 +58,7 @@ spec:
             - --disable_metrics={{ .Values.cadvisor.disabledMetrics }}
             - --store_container_labels={{ .Values.cadvisor.storeContainerLabels }}
             - --max_housekeeping_interval={{ .Values.cadvisor.maxHousekeepingInterval }}
+            - --docker_only={{ .Values.cadvisor.dockerOnly }}
           image: {{.Values.cadvisor.image}}
           imagePullPolicy: {{.Values.pullPolicy}}
           resources:
@@ -110,6 +111,7 @@ spec:
         - name: cert-vol
           hostPath:
             path: /opt/openness/certs/telemetry/
+            type: Directory
         - name: ca
           secret:
             secretName: root-ca

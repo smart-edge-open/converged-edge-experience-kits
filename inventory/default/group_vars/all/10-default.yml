@@ -1,0 +1,300 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+# This file contains variables intended to be configured by user.
+# It allows feature enabling and configuration.
+# Per-host variables should be places in `inventory/default/host_vars` directory.
+# Features should not be configured by changing roles' defaults (i.e. role/defaults/main.yml)
+
+##################################################
+##### User settings
+
+### GitHub token
+# It must be provided when using private repositories.
+# Not required when using github.com/open-ness repositories.
+# How to create a GitHub token: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
+git_repo_token: ""
+
+### Proxy settings
+# Setup proxy on the machine - required if the Internet is accessible via proxy
+proxy_enable: false
+# Clear previous proxy settings
+proxy_remove_old: true
+# Proxy URLs to be used for HTTP, HTTPS and FTP
+proxy_http: "http://proxy.example.org:3128"
+proxy_https: "http://proxy.example.org:3129"
+proxy_ftp: "http://proxy.example.org:3128"
+# Proxy to be used by YUM (/etc/yum.conf)
+proxy_yum: "{{ proxy_http }}"
+# No proxy setting contains addresses and networks that should not be accessed using proxy (e.g. local network, Kubernetes CNI networks)
+proxy_noproxy: ""
+
+# Proxy for be used by GIT HTTP - required if GIT HTTP via proxy
+git_http_proxy: "{{ proxy_http }}"
+
+# Disable YUM plugins (e.g. Fastest Mirror)
+os_remove_yum_plugins: true
+
+##################################################
+##### Network Edge
+
+### OpenNESS Git Repository
+# Following variable specify branch/SHA/tag to be checked out for the source repository
+git_repo_branch: openness-21.03
+
+# If True, the repository will be deleted and cloned again
+# If False, repository will be left as it is and any changes won't be overwritten.
+always_clean_repository: True
+
+### Network Time Protocol (NTP)
+# Enable machine's time synchronization with NTP server
+ntp_enable: false
+# Servers to be used by NTP instead of the default ones (e.g. 0.centos.pool.ntp.org)
+ntp_servers: []
+
+### Kernel, grub & tuned configuration
+# Kernel, grub & tuned configurations are machine-type specific:
+# - Edge Nodes - edit `inventory/default/group_vars/edgenode_group/10-default.yml`
+# - Edge Controller - edit `inventory/default/group_vars/controller_group/10-default.yml`
+# To provide configuration for specific machine, place the settings in `inventory/default/host_vars/_inventory_host_name.yml`
+
+### Retry settings for network-based tasks
+# - number_of_retries - configures how many times failed task should be retried
+# - retry_delay - configures delay between retries (in seconds)
+number_of_retries: 10
+retry_delay: 5
+
+# - allowed_number_of_k8s_retries - configures how many Kubernetes failures are allowed
+allowed_number_of_k8s_retries: 10
+
+## PTP synchronization between nodes
+ptp_sync_enable: False
+
+### Network Edge's Kubernetes CNIs
+# List of requested CNIs to be used in Network Edge mode
+# CNIs are applied in order of definition
+# Multus CNI is implicit - it will be applied as 2nd one if list contains more than 1
+# Available CNIs:
+# - kubeovn (note: if the kubeovn CNI is used, then it must be main/primary CNI, i.e. first on the list)
+# - weavenet
+# - flannel
+# - calico (note: if the calico CNI is used, then it must be main/primary CNI, i.e. first on the list)
+# - sriov (note: cannot be main or standalone)
+# - userspace (note: cannot be main or standalone)
+# - ovn4nfv
+# NOTE - For VCAC-A setup, use `weavenet` CNI
+kubernetes_cnis:
+  - calico
+
+# Calico's CIDR (will be included automatically to noproxy when calico is included in kubernetes_cnis)
+calico_cidr: "10.245.0.0/16"
+
+# Flannel's CIDR (will be included automatically to noproxy when flannel is included in kubernetes_cnis)
+flannel_cidr: "10.244.0.0/16"
+
+# weavenet's CIDR that is used by VCA deployment
+weavenet_cidr: "10.32.0.0/12"
+
+# Kubeovn's CIDR (will be included automatically to noproxy when kubeovn is included in kubernetes_cnis)
+kubeovn_cidr: "10.16.0.0/16,100.64.0.0/16,10.96.0.0/12"
+
+# ovn4nfv's CIDR (will be included automatically to noproxy when kubeovn is included in kubernetes_cnis)
+ovn4nfv_cidr: "10.233.64.0/18"
+
+## Kube-ovn with OVS-DPDK
+# Enable kube-ovn with OVS-DPDK
+kubeovn_dpdk: false
+# Hugepage configuration for NUMA nodes in MB, i.e. "1st_numa_memory,2nd_numa_memory"
+kubeovn_dpdk_socket_mem: "1024,0"
+# Core bitmask for datapath packet processing. 0x4 selects core 2
+kubeovn_dpdk_pmd_cpu_mask: "0x4"
+# Core bitmask for DPDK initialization. 0x2 selects core 1
+kubeovn_dpdk_lcore_mask: "0x2"
+# Hugepage size to be used with DPDK: 2Mi or 1Gi
+kubeovn_dpdk_hugepage_size: "2Mi"
+# Overall amount of hugepages available to DPDK
+kubeovn_dpdk_hugepages: "1Gi"
+# OVS pods memory resource requests
+kubeovn_dpdk_resources_requests: "1Gi"
+# OVS pods memory resource limits
+kubeovn_dpdk_resources_limits: "1Gi"
+
+## calico_ebpf can be enabled only when calico is Primary CNI
+calico_ebpf_enabled: false
+
+## SR-IOV CNI
+# FPGA SRIOV Userspace
+fpga_sriov_userspace_enable: false
+# ACC100 SRIOV Userspace
+acc100_sriov_userspace_enable: false
+
+# FPGA Userspace VF configuration
+fpga_userspace_vf:
+  enabled: false
+  vendor_id: "8086"
+  vf_device_id: "0d90"
+  pf_device_id: "0d8f"
+  vf_number: "2"
+  vf_driver: "vfio-pci"
+
+# ACC100 Userspace VF configuration
+acc100_userspace_vf:
+  enabled: false
+  vendor_id: "8086"
+  vf_device_id: "0d5d"
+  pf_device_id: "0d5c"
+  vf_number: "2"
+  vf_driver: "vfio-pci"
+
+# SR-IOV support for kube-virt based Virtual Machines
+sriov_kubevirt_enable: false
+
+# Kube-virt settings
+kubevirt_enable: false
+kubevirt_default_pv_dir: /var/vd/
+kubevirt_default_pv_vol_name: vol
+kubevirt_pv_vm_max_num: 64
+
+# Kubernetes device plugins
+k8s_device_plugins_enable: false
+
+# Kubernetes Dashboard
+kubernetes_dashboard_enable: false
+disable_dashboard_tls: false
+
+### BIOSFW
+# Enable BIOSFW feature (requires SYSCFG package provided by user)
+ne_biosfw_enable: false
+
+### CPU Manager for Kubernetes
+# Enable CMK feature
+ne_cmk_enable: false
+# CMK - Number of cores in exclusive pool
+cmk_num_exclusive_cores: "4"
+# CMK - Number of cores in shared pool
+cmk_num_shared_cores: "1"
+# CMK - Comma separated list of nodes' hostnames
+cmk_host_list: "node01,node02"
+
+### Kubernetes Topology Manager configuration (for worker)
+# CPU settings
+cpu:
+  # CPU policy - possible values: none (disabled), static (default)
+  policy: "static"
+  # Reserved CPUs for K8s and OS daemons - list of reserved CPUs
+  reserved_cpus: "0,1"
+
+# Kubernetes Topology Manager policy - possible values: none (disabled), best-effort (default), restricted, single-numa-node
+topology_manager:
+  policy: "best-effort"
+
+# Deploy OpenNESS services
+openness_enable: True
+
+# OpenNESS installation directory
+openness_dir: "/opt/openness"
+
+# OpenNESS users group
+openness_user_group: "{{ ansible_user }}"
+
+# OpenNESS pods retry variable
+openness_pods_timeout_min: 15
+
+## OPAE FPGA
+ne_opae_fpga_enable: False
+
+## Network Edge HDDL
+ne_hddl_enable: False
+
+## QAT Device Plugin
+qat_device_plugin_enable: False
+
+## Network Edge Node Feature Discovery (NFD)
+ne_nfd_enable: True
+
+## Network Edge Helm Charts Storage Default Directory
+ne_helm_charts_default_dir: "{{ openness_dir }}/helm-charts"
+
+###############
+## Telemetry
+
+# Telemetry flavor - possible values: common (default), flexran, smartcity, corenetwork
+telemetry_flavor: common
+
+# Grafana
+telemetry_grafana_enable: True
+
+# Processor Counter Monitor (PCM)
+telemetry_pcm_enable: False
+
+# Prometheus
+telemetry_prometheus_enable: True
+
+# Open Telemetry
+telemetry_opentelemetry_enable: True
+
+# Collectd
+telemetry_collectd_enable: True
+
+# Telemetry Aware Scheduler
+telemetry_tas_enable: True
+
+# CAdvisor
+telemetry_cadvisor_enable: True
+
+
+###############
+
+## Network Edge RMD
+rmd_operator_enable: False
+
+## Offline Mode support
+offline_enable: False
+
+## Edge DNS
+dns_enable: True
+
+## EAA Service
+eaa_enable: True
+
+## Docker images cache directory, all images with .tar* suffix will be preloaded during docker setup
+docker_images_dir: "{{ openness_dir }}/images-cache"
+
+## Docker registry mirrors
+## https://docs.docker.com/registry/recipes/mirror/
+# docker_registry_mirrors:
+#   - "https://docker-mirror.example.local"
+
+## Docker insecure registries
+## https://docs.docker.com/registry/insecure/
+# docker_insecure_registries:
+#   - "docker-insecure-mirror.example.local:5000"
+
+## Kafka variables
+kafka_cluster: cluster
+kafka_eaa_user: eaa-kafka
+kafka_secret_timeout_min: 60
+
+## Video analitics
+video_analytics_services_enable: False
+
+### Istio Service Mesh
+ne_istio_enable: False
+# Istio no_proxy settings
+istio_noproxy: "istio-sidecar-injector.istio-system.svc"
+# Istio deployment profile possible values: default, demo, minimal, remote
+istio_deployment_profile: "default"
+# Istio is deployed to "default" namespace in the cluster
+istio_deployment_namespace: "default"
+# Kiali
+istio_kiali_username: "admin"
+istio_kiali_password: "{{ lookup('password', '/dev/null length=16') }}"
+istio_kiali_nodeport: 30001
+
+## Hyperthreading
+check_hyperthreading: False
+expected_hyperthreading_state: "enabled"
+
+## EMCO
+emco_enable: False

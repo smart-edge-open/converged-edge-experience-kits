@@ -1,0 +1,220 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+- name: get current kernel
+  command: uname -r
+  register: unamer
+  changed_when: false
+
+- name: check if kernel-(rt-)devel is already installed
+  shell: >
+    set -o pipefail &&
+    yum list installed | grep -E "kernel-(rt-)?devel(.*){{ '.'.join(unamer.stdout.split('.')[:-1]) }}"
+  register: yum_list_kernel_devel
+  ignore_errors: true
+  changed_when: false
+
+- name: install kernel-devel package
+  block:
+    - name: use kernel-devel-uname-r
+      set_fact:
+        kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
+    - name: use kernel-devel from provided URL/package
+      set_fact:
+        kernel_devel_to_install: "{{ dpdk_kernel_devel }}"
+      when:
+        - dpdk_kernel_devel is defined
+        - dpdk_kernel_devel|length > 0
+
+    - name: fail if kernel-devel version is not correct
+      fail:
+        msg: "kernel-devel version({{ kernel_devel_to_install }}) does not match the current kernel({{ unamer.stdout }})"
+      when: "unamer.stdout not in kernel_devel_to_install"
+
+    - name: install kernel-devel package
+      yum:
+        name: "{{ kernel_devel_to_install }}"
+        state: present
+        disable_excludes: all
+        allow_downgrade: yes
+      become: yes
+  # install kernel-devel package if:
+  # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
+  # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
+  when:
+    - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+    - yum_list_kernel_devel.rc == 1 # kernel-(rt-)devel is missing
+
+- name: check if already installed
+  stat:
+    path: "{{ _dpdk_install_dir }}"
+  register: dpdk_dest_dir
+
+- name: Check if offline
+  set_fact:
+    _dpdk_download_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _dpdk_name }}.tar.xz"
+  when: offline_enable
+
+- name: download
+  get_url:
+    url: "{{ _dpdk_download_url }}"
+    dest: "{{ _dpdk_download_dest }}"
+    checksum: "md5:{{ _dpdk_checksum }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  when: not dpdk_dest_dir.stat.exists
+
+- name: ensure install dir exists
+  file:
+    path: "{{ _dpdk_install_dir }}"
+    state: directory
+
+- name: extract
+  unarchive:
+    src: "{{ _dpdk_download_dest }}"
+    dest: "{{ _dpdk_install_dir }}"
+    extra_opts: "--strip-components=1"
+    remote_src: yes
+    creates: "{{ _dpdk_install_dir }}/README"
+
+- name: WA Fix for compilation error for rte_kni ko
+  command: sed -i 's/ -Werror//g'  "{{ _dpdk_install_dir }}/kernel/linux/kni/Makefile"
+  args:
+    warn: false
+  when: calico_ebpf_enabled
+
+- name: check if already compiled
+  stat:
+    path: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
+  register: igb_uio_module
+
+- name: remove old dpdk path to compiled DPDK
+  file:
+    path: "{{ openness_dir }}/ansible/facts.d/dpdk.fact"
+    state: absent
+  when: not igb_uio_module.stat.exists
+
+- name: detect amount of cores
+  command: nproc
+  register: nproc_out
+  changed_when: false
+
+- name: install numactl-devel
+  yum:
+    name: "numactl-devel"
+    state: present
+  become: yes
+  when: not igb_uio_module.stat.exists
+
+- name: compile
+  make:
+    chdir: "{{ _dpdk_install_dir }}"
+    target: install
+    params:
+      T: x86_64-native-linuxapp-gcc
+  environment:
+    "MAKEFLAGS": "-j{{ nproc_out.stdout|int + 1 }}"
+  when: not igb_uio_module.stat.exists
+  ignore_errors: true
+
+- name: check if already compiled after first compilation
+  stat:
+    path: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/igb_uio.ko"
+  register: igb_uio_module
+
+# This is a workaround for rare compilation error
+# Lets try to re-compile it again by using shell make
+- name: re-compile again if previous failed
+  shell: >
+    source /etc/profile &&
+    make install T=x86_64-native-linuxapp-gcc "-j{{ nproc_out.stdout|int + 1 }}"
+  args:
+    chdir: "{{ _dpdk_install_dir }}"
+  when: not igb_uio_module.stat.exists
+
+- name: create Ansible dpdk facts.d folder
+  file:
+    path: "{{ openness_dir }}/ansible/facts.d"
+    state: directory
+
+- name: save dpdk path to local fact file
+  template:
+    src: dpdk.fact.j2
+    dest: "{{ openness_dir }}/ansible/facts.d/dpdk.fact"
+
+- name: copy kernel modules
+  copy:
+    src: "{{ _dpdk_install_dir }}/x86_64-native-linuxapp-gcc/kmod/{{ item }}"
+    dest: "/lib/modules/{{ unamer.stdout }}/kernel/drivers/"
+    remote_src: yes
+  with_items:
+    - "igb_uio.ko"
+    - "rte_kni.ko"
+  become: yes
+
+- name: depmod
+  command: depmod -a
+  changed_when: true
+  become: yes
+
+- name: copy list of modules to load at boot
+  copy:
+    src: dpdk.conf
+    dest: /etc/modules-load.d/dpdk.conf
+  become: yes
+
+- name: copy list of modules to modprobe at boot
+  copy:
+    src: dpdk0kni.conf
+    dest: /etc/modprobe.d/dpdk0kni.conf
+  become: yes
+
+- name: unload modules
+  modprobe:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "igb_uio"
+    - "rte_kni"
+    - "uio_pci_generic"
+    - "uio"
+  become: yes
+
+- name: unload vfio
+  modprobe:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "vfio-pci"
+  - "vfio"
+  ignore_errors: yes
+  become: yes
+
+- name: load uio and igb_uio modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "uio"
+    - "igb_uio"
+  become: yes
+
+- name: load rte_kni module
+  modprobe:
+    name: "rte_kni"
+    state: present
+    params: "carrier=on"
+  become: yes
+
+- name: load vfio module
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - "vfio-pci"
+  - "vfio"
+  ignore_errors: yes
+  become: yes

@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: Set static IP for the server port connected to GMC
+  block:
+    - name: Set static IP
+      command: "{{ item }}"
+      with_items:
+        - "ip addr flush dev {{ ptp_port }}"
+        - "ip addr add {{ ptp_port_ip }}/{{ ptp_port_cidr }} dev {{ ptp_port }}"
+        - "ip link set dev {{ ptp_port }} up"
+      become: yes
+
+    - name: Configure Static IP Address in network-scripts
+      lineinfile:
+        dest: /etc/sysconfig/network-scripts/ifcfg-{{ ptp_port }}
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      become: yes
+      with_items:
+        - { regexp: '^DEVICE=', line: 'DEVICE={{ ptp_port }}' }
+        - { regexp: '^BOOTPROTO=', line: 'BOOTPROTO=none' }
+        - { regexp: '^ONBOOT=', line: 'ONBOOT=yes' }
+        - { regexp: '^PREFIX=', line: 'PREFIX={{ ptp_port_cidr }}' }
+        - { regexp: '^IPADDR=', line: 'IPADDR={{ ptp_port_ip }}' }
+  when:
+    (inventory_hostname in groups['ptp_slave_group'] and
+    ptp_port_ip|length > 0 and
+    ptp_port_cidr|length > 0 and
+    ptp_port|length > 0)
+
+- name: Update config file - set GMC IP and interface connected to GMC
+  blockinfile:
+    path: "{{ _linuxptp_git_repo.download_dir }}/configs/default_slave.cfg"
+    block: |
+      [global]
+      dataset_comparison              G.8275.x
+      G.8275.defaultDS.localPriority  255
+      logAnnounceInterval             3
+      masterOnly                      0
+      G.8275.portDS.localPriority     255
+      hybrid_e2e                      1
+      inhibit_multicast_service       1
+      unicast_listen                  1
+      unicast_req_duration            32
+      #
+      # Customize the following for slave operation:
+      #
+      [unicast_master_table]
+      table_id                        1
+      logQueryInterval                3
+      UDPv4                {{ gm_ip }}
+      #
+      [{{ ptp_port }}]
+      unicast_master_table            1
+  become: yes
+  when:
+    (inventory_hostname in groups['ptp_slave_group'] and
+    ptp_port|length > 0 and
+    gm_ip|length > 0)

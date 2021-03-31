@@ -17,3 +17,4 @@ exclude_paths:
   - roles/telemetry/opentelemetry/controlplane/charts
   - roles/bb_config/charts
   - cloud
+  - inventory.yml

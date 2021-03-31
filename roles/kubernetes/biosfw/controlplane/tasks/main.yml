@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: copy biosfw plugin to dir with executables
+  copy:
+    src: "{{ _git_repo_dest }}/network-edge/kubectl-biosfw"
+    dest: "{{ _biosfw_plugin_dest }}"
+    mode: 0755
+    remote_src: yes
+  become: yes

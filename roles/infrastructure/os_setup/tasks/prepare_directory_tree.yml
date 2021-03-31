@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+- name: prepare directory tree
+  become: yes
+  block:
+    - name: add group "{{ openness_user_group }}"
+      group:
+        name: "{{ openness_user_group }}"
+        state: present
+
+    - name: create main directory
+      file:
+        path: "{{ openness_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+
+    - name: create openness subdirectories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      with_items:
+        - "{{ openness_dir }}/certs"
+        - "{{ openness_dir }}/certs/telemetry"
+        - "{{ openness_dir }}/certs/eaa-kafka"
+        - "{{ openness_dir }}/configs"
+
+    - name: create collectd certificate directory
+      file:
+        path: "{{ openness_dir }}/certs/telemetry/collectd"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: "telemetry_collectd_enable | default(True)"
+
+    - name: create collectd config directory
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      with_items:
+        - "{{ openness_dir }}/collectd"
+        - "{{ openness_dir }}/collectd/configs"
+        - "{{ openness_dir }}/collectd/pmd"
+      when: "telemetry_collectd_enable | default(True)"
+
+    - name: create edgednssvr directory
+      file:
+        path: "{{ openness_dir }}/edgednssvr"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: dns_enable
+
+    - name: create pv kafka directory
+      file:
+        path: "{{ openness_dir }}/pv/kafka"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: eaa_enable | default(True)
+
+    - name: create pv grafana directory
+      file:
+        path: "{{ openness_dir }}/pv/grafana"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: telemetry_grafana_enable | default(True)
+
+    - name: create pv prometheus directory
+      file:
+        path: "{{ openness_dir }}/pv/prometheus"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ openness_user_group }}"
+      when: telemetry_prometheus_enable | default(True)

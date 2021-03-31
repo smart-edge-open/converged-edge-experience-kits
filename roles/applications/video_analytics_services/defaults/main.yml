@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_video_analytics_serving:
+  repo: "https://github.com/intel/video-analytics-serving"
+  commit: "v0.3.1.1-alpha"
+  dest: "/opt/openness/video-analytics-serving"
+
+_va_serving:
+  image: "video-analytics-serving"
+  tag: latest
+  port: 8080
+
+_vas_sidecar:
+  name: "vas-sidecar"
+  image: "vas-sidecar"
+  tag: latest
+
+_vas_helmReleaseName: "video-analytics-services"
+_vas_helmChartVersion: 0.1.0
+
+_frameworks:
+  - { name: ffmpeg, image: "openvisualcloud/xeon-ubuntu1804-analytics-ffmpeg:20.10" }
+  - { name: gstreamer, image: "openvisualcloud/xeon-ubuntu1804-analytics-gst:20.10" }
+
+# instances names for vas multiinstances
+_instances:
+  - { name: "instance1", weight: 50 }
+  - { name: "instance2", weight: 30 }
+  - { name: "instance3", weight: 20 }

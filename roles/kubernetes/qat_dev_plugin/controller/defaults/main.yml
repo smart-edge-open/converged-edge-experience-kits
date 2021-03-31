@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_qat_dp:
+  git_url: "https://github.com/intel/intel-device-plugins-for-kubernetes.git"
+  git_ref: "v0.17.0"
+  version: "0.17.0"
+  dir: "{{ openness_dir }}/qat-device-plugin"
+  image: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/intel-qat-plugin"
+  namespace: "kube-system"
+  dpdk_drivers: "igb_uio"
+  kernel_drivers: "dh895xccvf,c6xxvf,c3xxxvf,d15xxvf"
+  max_num_devices: 50
+  debug: "false"
+  apparmor_profile: "unconfined"

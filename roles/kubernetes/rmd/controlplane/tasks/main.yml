@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+#
+# ---
+
+- name: Check if offline
+  set_fact:
+    _rmd_operator_repo: "{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}:{{ _offline_package_path }}/github/rmd-operator/"
+  when: offline_enable
+
+- name: clone the RMD operator
+  git:
+    repo: "{{ _rmd_operator_repo }}"
+    dest: "{{ _rmd_operator_dir }}"
+    version: "{{ _rmd_operator_tag }}"
+    update: no
+
+- name: check if RBAC objects already exist
+  shell: source /etc/profile && kubectl get rmdworkload
+  ignore_errors: yes
+  register: rbac_installed
+  changed_when: false
+
+- name: create the RBAC objects
+  shell: |
+    source /etc/profile
+    make deploy
+  args:
+    chdir: "{{ _rmd_operator_dir }}"
+  when: rbac_installed.rc == 1
+
+- name: check if operator pod exists
+  shell: kubectl get pods | grep -q rmd
+  ignore_errors: yes
+  register: rmd_installed
+  changed_when: false
+
+- name: create the operator pod
+  command: kubectl create -f deploy/operator.yaml
+  args:
+    chdir: "{{ _rmd_operator_dir }}"
+  when: rmd_installed.rc == 1
+
+- name: check if network policy exists
+  shell: kubectl get networkpolicy | grep rmd-policy
+  ignore_errors: yes
+  register: netpolicy_installed
+  changed_when: false
+
+- name: copy the network policy to /tmp
+  template:
+    src: rmdNetworkPolicy.yaml.j2
+    dest: "{{ _rmd_main_dir }}/rmdNetworkPolicy.yaml"
+
+- name: create the network policy
+  command: kubectl create -f {{ _rmd_main_dir }}/rmdNetworkPolicy.yaml
+  when: netpolicy_installed.rc == 1

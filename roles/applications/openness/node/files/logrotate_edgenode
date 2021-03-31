@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+/var/log/edgeservices/* {
+    weekly
+    rotate 3
+    size 10M
+    compress
+    delaycompress
+    missingok
+    notifempty
+}

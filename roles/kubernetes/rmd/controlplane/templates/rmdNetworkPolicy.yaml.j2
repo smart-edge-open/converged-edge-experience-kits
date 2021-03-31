@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+#
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rmd-policy
+  namespace: default
+spec:
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: {{ _base_noproxy.split(',')[8] }}	# primary continer network
+    ports:
+    - port: 8081
+      protocol: TCP
+  podSelector: {}
+  policyTypes:
+  - Ingress

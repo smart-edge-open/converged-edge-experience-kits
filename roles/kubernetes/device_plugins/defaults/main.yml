@@ -6,7 +6,7 @@
 _device_plugins:
   url: "https://github.com/intel/intel-device-plugins-for-kubernetes"
   download_dir : "/opt/intel_device_plugins"
-  commit: "826707420250c0d10f351f8274766101c7ecf58e"
+  commit: "v0.17.0"
 
 _gpu_plugin:
   image: "intel-gpu-plugin"

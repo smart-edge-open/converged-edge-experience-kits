@@ -47,6 +47,7 @@
       dest: "{{ _helm_binary_path }}"
       mode: preserve
       remote_src: yes
+    become: yes
   - name: remove downloaded package
     file:
       path: "{{ helm_tmp_dir.path }}/{{ _helm_download_item }}"

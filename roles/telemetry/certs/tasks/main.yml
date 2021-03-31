@@ -8,12 +8,21 @@
     state: directory
     suffix: prometheus
   register: tmp_dir
-  delegate_to: localhost
+
+- name: chown tmp dir
+  file:
+    path:  "{{ tmp_dir.path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ openness_user_group }}"
+  become: yes
 
 - name: copy namespace.yml to tmp directory
   copy:
     src: "namespace.yml"
     dest: "{{ tmp_dir.path }}/"
+    owner: "{{ ansible_user }}"
+    group: "{{ openness_user_group }}"
+  become: yes
 
 - name: create telemetry namespace
   command: kubectl apply -f "{{ tmp_dir.path }}"/namespace.yml

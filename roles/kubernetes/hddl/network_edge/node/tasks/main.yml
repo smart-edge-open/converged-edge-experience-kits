@@ -1,0 +1,189 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: create openvino download folder
+  file:
+    path: "{{ _openvino.download_dir }}"
+    state: directory
+
+- name: download openvino on node
+  get_url:
+    url: "{{ _openvino.url }}"
+    dest: "{{ _openvino.download_dir }}"
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+
+- name: unzip openvino
+  unarchive:
+    src: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}.tgz"
+    dest: "{{ _openvino.download_dir }}/"
+    remote_src:  yes
+
+- name: change silent file PSET_MODE to install
+  replace:
+    path: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/silent.cfg"
+    regexp: 'PSET_MODE=uninstall'
+    replace: 'PSET_MODE=install'
+
+- name: change silent file to accept
+  replace:
+    path: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/silent.cfg"
+    regexp: 'ACCEPT_EULA=decline'
+    replace: 'ACCEPT_EULA=accept'
+
+- name: install openvino
+  command: ./install.sh  -s silent.cfg
+  args:
+    chdir: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/"
+  changed_when: true
+  become: yes
+
+- name: get current kernel
+  command: uname -r
+  register: unamer
+  changed_when: false
+
+- name: check if kernel-(rt-)devel is already installed
+  shell: >
+    set -o pipefail &&
+    yum list installed | grep -E "kernel-(rt-)?devel(.*){{ '.'.join(unamer.stdout.split('.')[:-1]) }}"
+  register: yum_list_kernel_devel
+  ignore_errors: true
+  changed_when: false
+
+- name: install kernel-devel package
+  block:
+  - name: use kernel-devel-uname-r
+    set_fact:
+      kernel_devel_to_install: "kernel-devel-uname-r == {{ unamer.stdout }}"
+  - name: use kernel-devel from provided URL/package
+    set_fact:
+      kernel_devel_to_install: "{{ hddl_kernel_devel }}"
+    when:
+      - hddl_kernel_devel is defined
+      - hddl_kernel_devel|length > 0
+  - name: fail if kernel-devel version is not correct
+    fail:
+      msg: "kernel-devel version({{ kernel_devel_to_install }}) does not match the current kernel({{ unamer.stdout }})"
+    when: "unamer.stdout not in kernel_devel_to_install"
+
+  - name: install kernel-devel package
+    yum:
+      name: "{{ kernel_devel_to_install }}"
+      state: present
+      disable_excludes: all
+      allow_downgrade: yes
+    become: yes
+  # install kernel-devel package if:
+  # - kernel_package is not defined = `custom_kernel` role is commented (disabled), OR
+  # - kernel_skip is defined and kernel_skip = `custom_kernel` is enabled, but `kernel_skip` is true
+  when:
+  - (kernel_package is not defined) or (kernel_skip is defined and kernel_skip)
+  - yum_list_kernel_devel.rc == 1   # kernel-(rt-)devel is missing
+
+- name: install vpu  dependencies
+  shell: " source ./bin/setupvars.sh &&  sh ./deployment_tools/inference_engine/external/hddl/install_IVAD_VPU_dependencies.sh"
+  args:
+    chdir: "{{ _openvino.install_dir }}"
+  changed_when: true
+  become: yes
+
+- name: Kill the HDDL Plugin backend service (hddldaemon) and reset all VPUs
+  shell: "kill -9 $(pidof hddldaemon autoboot) "
+  ignore_errors: true
+  changed_when: true
+
+- name: reset all VPUs
+  shell: " source ./bin/setupvars.sh && ./deployment_tools/inference_engine/external/hddl/bin/bsl_reset"
+  args:
+    chdir: "{{ _openvino.install_dir }}"
+  ignore_errors: true
+  changed_when: true
+
+
+- name: remove old centos directory for hddldaemon
+  file:
+    path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04"
+    state: absent
+  become: yes
+
+- name: create openness ubuntu 18.04 directory for hddldaemon
+  block:
+    - name: create 1st level folder
+      file:
+        path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04"
+        state: directory
+      become: yes
+
+    - name: create 2nd level folder
+      file:
+        path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics"
+        state: directory
+      become: yes
+
+    - name: create 3rd level folder
+      file:
+        path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon"
+        state: directory
+      become: yes
+
+- name: copy files from ubuntu for hddldaemon
+  copy:
+    src: "{{ _hddldaemon_container.download_dir }}/VCAC-A/ubuntu-18.04/analytics/hddldaemon"
+    dest: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics"
+    remote_src: yes
+  become: yes
+
+- name: remove Dockerfile.m4
+  file:
+    path: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon/Dockerfile.m4"
+    state: absent
+  become: yes
+
+- name: create kustomization files from templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon/{{ item }}"
+    mode: 0777
+  with_items:
+  - build.sh
+  - run_hddl.sh
+  - shell.sh
+  - Dockerfile
+  become: yes
+
+- name: build hddlaaemon container image
+  command: ./build.sh
+  args:
+    chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/openness-ubuntu-18.04/analytics/hddldaemon"
+  changed_when: true
+  #become: yes
+
+- name: create hddldaemonSet
+  command: "kubectl apply -f setup_hddl_daemonset.yaml"
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  run_once: true
+  changed_when: true
+  args:
+    chdir: "{{ _hddldaemon_container.download_dir }}/VCAC-A/script"
+
+- name: set hddlhostname
+  set_fact:
+    hddl_worker_node_name: "{{ ansible_nodename | lower }}"
+
+- name: label hddl worker node with hddl-zone=yes
+  command: kubectl label node {{ hddl_worker_node_name }} hddl-zone=yes --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+
+- name: wait for running ov_hddl container
+  docker_container_info:
+    name: ov_hddl
+  register: hddldaemon_container_result
+  retries: 30
+  delay: 5
+  until: hddldaemon_container_result.exists
+  changed_when: false

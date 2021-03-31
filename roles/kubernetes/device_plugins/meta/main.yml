@@ -5,4 +5,4 @@
 
 dependencies:
 - kubernetes/helm
-- harbor_registry/controlplane
+- kubernetes/harbor_registry/controlplane

@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: check kafka deployments
+  check_k8s_object:
+    kind: deployment
+    name: "{{ item }}"
+    namespace: kafka
+  with_items:
+  - strimzi-cluster-operator
+  - cluster-entity-operator
+
+- name: check kafka statefulsets
+  check_k8s_object:
+    kind: statefulset
+    name: "{{ item }}"
+    namespace: kafka
+  with_items:
+  - cluster-kafka
+  - cluster-zookeeper
+

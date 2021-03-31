@@ -46,6 +46,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 - name: check if Grafana release already exists
   command: helm status grafana -n telemetry
@@ -60,12 +61,21 @@
       state: directory
       suffix: grafana
     register: tmp_dir
-    delegate_to: localhost
+
+  - name: chown tmp directory
+    file:
+      path:  "{{ tmp_dir.path }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ openness_user_group }}"
+    become: yes
 
   - name: template values.yml to tmp directory
     template:
       src: values.yml
       dest: "{{ tmp_dir.path }}/"
+      owner: "{{ ansible_user }}"
+      group: "{{ openness_user_group }}"
+    become: yes
 
   - name: add default Helm repository
     command: helm repo add stable https://charts.helm.sh/stable
@@ -205,7 +215,7 @@
     changed_when: true
 
   - name: install Grafana release
-    command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }}"
+    command: "helm install grafana --namespace telemetry -f {{ tmp_dir.path }}/values.yml {{ _grafana_chart_dir }} --timeout {{ _grafana_timeout }}"
     changed_when: true
 
   - name: wait for Grafana
@@ -213,7 +223,7 @@
     - name: wait for Grafana pod to be ready
       command: >
         kubectl wait --selector=app.kubernetes.io/instance=grafana --namespace=telemetry
-        --for=condition=Ready pods --timeout=600s
+        --for=condition=Ready pods --timeout={{ _grafana_timeout }}
       changed_when: false
     rescue:
     - name: get grafana pod name

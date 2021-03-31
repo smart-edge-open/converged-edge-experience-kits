@@ -14,10 +14,11 @@
     - 6641/tcp
     - 6642/tcp
     - 6081/udp
+  become: yes
 
 - name: ovn4nfv | Label control-plane node
   command: >-
-    kubectl label --overwrite node {{ ansible_hostname }}
+    kubectl label --overwrite node {{ ansible_nodename }}
     ovn4nfv-k8s-plugin=ovn-control-plane
 
 - name: create tmp dir

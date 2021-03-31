@@ -35,7 +35,8 @@
 +        - --prometheus-url={{ .Values.prometheusServiceUrl }}
 +        - --prometheus-auth-config=/opt/tls-config/tls-config.yml
          - --metrics-relist-interval=1m
-         - --v=10
+-        - --v=10
++        - --v=4
          - --config=/etc/adapter/config.yaml
 @@ -40,6 +49,10 @@
            readOnly: true

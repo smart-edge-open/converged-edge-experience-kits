@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+# cloud-init enabled machines has yum-installed python-requests library.
+# RPM installation conflicts with pip-managed packages and has to be removed.
+
+- name: remove python-requests
+  yum:
+    name: python-requests
+    state: absent
+  become: yes
+  register: python_requests_removed
+
+# ansible lint E503: https://ansible-lint.readthedocs.io/en/latest/default_rules.html#tasks-that-run-when-changed-should-likely-be-handlers
+# This task is a workaround for cloud-init systems, and it won't be reused anywhere in the code.
+- name: install python-requests from pip
+  pip:
+    name: requests
+    state: present
+  become: yes
+  when: python_requests_removed.changed # noqa 503

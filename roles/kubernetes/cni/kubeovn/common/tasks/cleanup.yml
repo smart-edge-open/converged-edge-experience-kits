@@ -8,3 +8,10 @@
     path: "{{ _kubeovn_scripts_dest }}/{{ item }}"
     state: absent
   with_items: "{{ _kubeovn_scripts }}"
+
+- name: remove ovs/ovn config
+  file:
+    path: "{{ _kubeovn_ovs_config_path }}"
+    state: absent
+  become: true
+

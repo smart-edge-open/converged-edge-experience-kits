@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: OVN_NB_DB -> /etc/environment
+  lineinfile:
+    path: /etc/environment
+    state: present
+    line: "OVN_NB_DB=unix:/var/run/ovn/ovnnb_db.sock"
+  become: yes
+

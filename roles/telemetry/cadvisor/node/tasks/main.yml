@@ -6,7 +6,6 @@
   file:
     path: "{{ openness_dir }}/certs/telemetry/cadvisor"
     state: directory
-  become: yes
 
 - name: get number of VCA nodes
   shell: set -o pipefail && vcactl status | grep Card | wc -l

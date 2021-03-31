@@ -24,3 +24,9 @@
   loop_control:
     loop_var: cni
   ignore_errors: yes # role might not have cleanup tasks (e.g. cleaned during cluster reset)
+
+- name: remove cni folder
+  file:
+    path: /etc/cni
+    state: absent
+  ignore_errors: yes

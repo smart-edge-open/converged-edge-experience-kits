@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+- name: Remove auditd docker rules
+  file:
+    name: "/etc/audit/rules.d/docker.rules"
+    state: absent
+
+- name: Restart auditd
+  command: service auditd restart # noqa 303
+  changed_when: true
+  become: yes
+  args:
+    warn: false
+
+- name: disable docker service
+  systemd:
+    name: docker
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+  become: yes
+
+- name: uninstall
+  yum:
+    name: "{{ _docker_packages_to_remove }}"
+    state: absent
+  become: yes
+
+- name: remove docker-compose
+  pip:
+    name: docker-compose
+    state: absent
+  ignore_errors: yes
+
+- name: remove dirs and files
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - /root/.docker
+  - /etc/systemd/system/docker.service.d
+  - /etc/docker
+  - /usr/bin/docker
+  - /var/lib/docker
+  - /etc/default/docker
+  - /usr/bin/docker-containerd
+  - /usr/bin/docker-runc
+  - /var/run/docker.sock
+  become: yes
+
+- name: remove repository
+  yum_repository:
+    name: docker
+    state: absent
+  become: yes
+
+- name: clear yum cache
+  command: yum clean all
+  args:
+    warn: false
+  changed_when: true
+
+- name: remove group "docker"
+  group:
+    name: docker
+    state: absent
+  become: yes

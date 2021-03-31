@@ -3,25 +3,16 @@
 
 ---
 
-- block:
-  - name: find cni dir
-    find:
-      paths: "{{ _cni_normal_path if not offline_enable else _cni_offline_path }}"
-      patterns: "cni"
-      recurse: yes
-      file_type: directory
-    delegate_to: localhost
-    register: cni_dir_matches
-  - name: set cni_dir variable (path to roles/kubernetes/cni dir)
-    set_fact:
-      cni_dir: "{{ cni_dir_matches.files[0].path }}"
+- name: set cni_role_dir variable (path to roles/kubernetes/cni dir)
+  set_fact:
+    cni_role_dir: "{{ role_path }}"
 
 - name: create list of available CNIs roles
   # it creates an array with CNI roles, e.g.: [ 'kubeovn/controlplane', 'kubeovn/node', 'calico' ]
   # it is used later to call only roles that exists (skip node role if it doesn't exist)
   set_fact:
     available_cni_roles: "{{ available_cni_roles|default([]) + [item.path] }}"
-  with_filetree: "{{ cni_dir }}"
+  with_filetree: "{{ cni_role_dir }}"
   when:
   - item.state == 'directory'
   - (item.path.endswith('controlplane')) or (item.path.endswith('node'))

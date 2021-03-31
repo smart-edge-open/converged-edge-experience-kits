@@ -47,21 +47,21 @@ server:
     nodePort: 30000
     type: NodePort
   sidecarContainers:
-  - name: server-proxy
-    image: nginx:alpine
-    securityContext:
-      runAsUser: 0
-      runAsNonRoot: false
-    volumeMounts:
-    - name: proxy-config
-      mountPath: /etc/nginx/nginx.conf
-      subPath: nginx.conf
-    - name: ca
-      mountPath: /root/CA
-    - name: cert-vol
-      mountPath: /opt/prometheus/certs/
-    ports:
-    - containerPort: 9099
+    server-proxy:
+      image: nginx:alpine
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+      volumeMounts:
+      - name: proxy-config
+        mountPath: /etc/nginx/nginx.conf
+        subPath: nginx.conf
+      - name: ca
+        mountPath: /root/CA
+      - name: cert-vol
+        mountPath: /opt/prometheus/certs/
+      ports:
+      - containerPort: 9099
 
 serverFiles:
   prometheus.yml:

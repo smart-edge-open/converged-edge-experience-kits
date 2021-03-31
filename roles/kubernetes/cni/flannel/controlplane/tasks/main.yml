@@ -9,6 +9,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  become: yes
 
 - name: patch node's Pod CIDR
   # flannel's CIDR is read from node's PodCIDR

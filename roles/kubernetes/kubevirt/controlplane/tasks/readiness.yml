@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: verify kubevirt deployments
+  check_k8s_object:
+    name: "{{ item }}"
+    namespace: kubevirt
+    kind: deployment
+  with_items:
+  - virt-api
+  - virt-controller
+  - virt-operator
+
+- name: verify cdi deployments
+  check_k8s_object:
+    name: "{{ item }}"
+    namespace: cdi
+    kind: deployment
+  with_items:
+  - cdi-apiserver
+  - cdi-deployment
+  - cdi-operator
+  - cdi-uploadproxy

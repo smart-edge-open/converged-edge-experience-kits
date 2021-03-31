@@ -50,7 +50,8 @@ class ActionModule(ansible.plugins.action.ActionBase):
         return def_val.get('value')
 
     def run(self, tmp=None, task_vars=None):
-        super(ActionModule, self).run(tmp, task_vars)
+        # NOTE: pylint disable used here to keep the Python 2 support.
+        super(ActionModule, self).run(tmp, task_vars) # pylint: disable=bad-option-value,super-with-arguments
         self.module_args = self._task.args.copy()
         self.task_vars = task_vars
 

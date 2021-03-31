@@ -3,33 +3,16 @@
 
 ---
 
-- name: print group_vars
-  shell: set -o pipefail && grep -v -E "^#|^$|^--|git_repo_token" "group_vars/{{ item.path }}" || true
-  delegate_to: localhost
-  with_filetree: ../group_vars/  # noqa 104
-  changed_when: false
-  run_once: true
-  when:
-  - item.state == 'file' or item.state == 'link'
-  ignore_errors: true
-
-- name: print host_vars
-  shell: set -o pipefail && grep -v -E "^#|^$|^--" "host_vars/{{ item.path }}" || true
-  delegate_to: localhost
-  with_filetree: ../host_vars/  # noqa 104
-  changed_when: false
-  run_once: true
-  when:
-  - item.state == 'file' or item.state == 'link'
-  - "'_example_variables' not in item.path"
-  ignore_errors: true
+- name: print hostvars
+  debug:
+    var: hostvars[inventory_hostname]
 
 - name: print vars about environment
   debug:
     msg: |
       ansible ver: {{ ansible_version.string }}
       distro: {{ ansible_distribution }} {{ ansible_distribution_version }}
-      hostname: {{ ansible_hostname }}
+      hostname: {{ ansible_nodename }}
       cmdline: {{ ansible_proc_cmdline }}
       interfaces: {{ ansible_interfaces }}
       memory: {{ ansible_memory_mb }}

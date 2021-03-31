@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: discover QAT Physical Functions
+  shell: "set -o pipefail && for i in {{ qat_dev_ids|join(' ') }}; do lspci -d {{ manufacturer_id }}:$i -D | awk '{ print $1 }'; done"
+  register: qat_pf
+  args:
+    executable: /bin/bash
+  changed_when: false
+  failed_when: false
+
+- name: remove SR-IOV Virtual Functions for QAT devices and unbind from the driver
+  block:
+  - name: disable creation of QAT SRIOV VFs on boot
+    lineinfile:
+      state: absent
+      dest: /etc/rc.d/rc.local
+      line: echo {{ qat_sriov_numvfs }} > "/sys/bus/pci/devices/{{ item }}/sriov_numvfs"
+    with_items: "{{ qat_pf.stdout_lines }}"
+    become: true
+    failed_when: false
+
+  - name: discover QAT Virtual Functions
+    shell: "set -o pipefail && lspci -d {{ manufacturer_id }}:{{ qat_vf_dev_id }} -D | awk '{ print $1 }'"
+    register: qat_vfs
+    args:
+      executable: /bin/bash
+    changed_when: false
+    failed_when: false
+
+  - name: unbind QAT VFs from current driver
+    shell: >
+            set -o pipefail && echo {{ item }} | sudo tee $(realpath /sys/bus/pci/devices/{{ item }}/driver/unbind)
+    with_items: "{{ qat_vfs.stdout_lines }}"
+    failed_when: false
+
+  - name: reset SR-IOV Virtual Functions for QAT devices
+    shell: echo 0 > /sys/bus/pci/devices/{{ item }}/sriov_numvfs
+    with_items: "{{ qat_pf.stdout_lines }}"
+    become: true
+    failed_when: false
+    changed_when: true
+  when: qat_pf.stdout | length > 0

@@ -8,11 +8,12 @@
   register: num_vca
   changed_when: true
   when: inventory_hostname in groups['edgenode_vca_group']
+  become: yes
 
 - name: remove VCAC-A node(s) from the cluster
   include_tasks: vca_node_cleanup.yml
   vars:
-    vca_node_name: "{{ inventory_hostname }}-vca{{ vca_idx }}"
+    vca_node_name: "{{ inventory_hostname | lower }}-vca{{ vca_idx }}"
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"

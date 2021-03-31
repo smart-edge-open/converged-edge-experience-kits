@@ -1,0 +1,153 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: check if single node deployment
+  set_fact:
+    singlenode: "{{ groups['edgenode_group'] | length == 1
+      and hostvars[groups['controller_group'][0]]['ansible_nodename'] == hostvars[groups['edgenode_group'][0]]['ansible_nodename'] }}"
+  tags: always
+- debug:
+    msg: Cluster detected as single node deployment
+  when: singlenode
+  tags: always
+
+- block:
+  - name: kernel
+    include_tasks: ../roles/infrastructure/custom_kernel/tasks/readiness.yml
+  tags: kernel
+  when: not (skip_kernel | default(True))
+- block:
+  - name: grub
+    include_tasks: ../roles/infrastructure/grub/tasks/readiness.yml
+  tags: grub
+
+- block:
+  - name: kubernetes/common
+    include_tasks: ../roles/kubernetes/common/tasks/readiness.yml
+  - name: kubernetes/controlplane
+    include_tasks: ../roles/kubernetes/controlplane/tasks/readiness.yml
+    when: "'controller_group' in group_names"
+  - name: kubernetes/node
+    include_tasks: ../roles/kubernetes/node/tasks/readiness.yml
+    when: "'edgenode_group' in group_names"
+  tags: kubernetes # when tags are applied to the block, the apply is not needed
+
+- block:
+  - name: harbor_registry/controlplane
+    include_tasks: ../roles/kubernetes/harbor_registry/controlplane/tasks/readiness.yml
+    when: "'controller_group' in group_names"
+  - name: harbor_registry/node
+    include_tasks: ../roles/kubernetes/harbor_registry/node/tasks/readiness.yml
+    # for both controlplane & node
+  tags: harbor
+
+- block:
+  - name: kubeovn/controlplane
+    include_tasks: ../roles/kubernetes/cni/kubeovn/controlplane/tasks/readiness.yml
+    when:
+    - "'controller_group' in group_names"
+    - "'kubeovn' in kubernetes_cnis"
+  - name: kubeovn/node
+    include_tasks: ../roles/kubernetes/cni/kubeovn/node/tasks/readiness.yml
+    when:
+      - "'edgenode_group' in group_names"
+      - "'kubeovn' in kubernetes_cnis"
+  tags: cni, kubeovn
+
+- block:
+  - name: calico
+    include_tasks: ../roles/kubernetes/cni/calico/controlplane/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+      - "'calico' in kubernetes_cnis"
+  tags: cni, calico
+
+- block:
+  - name: flannel
+    include_tasks: ../roles/kubernetes/cni/flannel/controlplane/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+      - "'flannel' in kubernetes_cnis"
+  tags: cni, flannel
+
+- block:
+  - name: sriov
+    include_tasks: ../roles/kubernetes/cni/sriov/controlplane/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+      - "'sriov' in kubernetes_cnis"
+  tags: cni, sriov
+
+- block:
+  - name: multus/controlplane
+    include_tasks: ../roles/kubernetes/cni/multus/controlplane/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+      - "kubernetes_cnis|length > 1"
+  - name: multus/node
+    include_tasks: ../roles/kubernetes/cni/multus/node/tasks/readiness.yml
+    when:
+      - "'edgenode_group' in group_names"
+      - "kubernetes_cnis|length > 1"
+  tags: cni, multus
+
+- block:
+  - name: kafka
+    include_tasks: ../roles/applications/kafka/tasks/readiness.yml
+  tags: kafka, openness # openness tag because eaa depends on kafka
+  when:
+    - "'controller_group' in group_names"
+    - "eaa_enabled | default(True)"
+
+- block:
+  - name: openness
+    include_tasks: ../roles/applications/openness/controlplane/tasks/readiness.yml
+  tags: openness
+  when:
+    - "'controller_group' in group_names"
+
+- block:
+  - name: nfd
+    include_tasks: ../roles/kubernetes/nfd/tasks/readiness.yml
+  tags: nfd
+  when:
+    - "'controller_group' in group_names"
+    - ne_nfd_enable | default(True)
+
+- block:
+  - name: kubevirt
+    include_tasks: ../roles/kubernetes/kubevirt/controlplane/tasks/readiness.yml
+  tags: kubevirt
+  when:
+    - "'controller_group' in group_names"
+    - kubevirt_enable | default(True)
+
+- block:
+  - name: cadvisor controlplane
+    include_tasks: ../roles/telemetry/cadvisor/controlplane/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+      - "not singlenode" # cadvisor is commented out for singlenode
+  - name: collectd controlplane
+    include_tasks: ../roles/telemetry/collectd/controlplane/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+  - name: prometheus
+    include_tasks: ../roles/telemetry/prometheus/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+  - name: tas
+    include_tasks: ../roles/telemetry/tas/tasks/readiness.yml
+    when:
+      - "'controller_group' in group_names"
+  tags: telemetry
+
+- block:
+  - name: istio
+    include_tasks: ../roles/kubernetes/istio/tasks/readiness.yml
+  tags: istio
+  when:
+    - "'controller_group' in group_names"
+    - ne_istio_enable | default(False)

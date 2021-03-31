@@ -1,0 +1,215 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+- name: add Docker repository
+  yum_repository:
+    name: docker
+    description: Docker CE repository
+    baseurl: "{{ _docker_repository_url }}"
+    gpgkey: "{{ _docker_repository_key }}"
+    gpgcheck: yes
+  become: yes
+  register: result
+  retries: "{{ number_of_retries }}"
+  until: result is succeeded
+  delay: "{{ retry_delay }}"
+  when: not offline_enable
+
+- name: clear yum cache
+  command: yum clean all
+  args:
+    warn: false
+  changed_when: true
+  when: not offline_enable
+
+- name: add group "docker"
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: "docker,{{ openness_user_group }}"
+    append: yes
+  become: yes
+
+- name: reset connection
+  meta: reset_connection
+
+- name: install Docker CE
+  yum:
+    name: "{{ _docker_packages }}"
+    state: present
+  become: yes
+  notify:
+    - enable and start docker service
+
+- name: get runc version
+  shell: set -o pipefail && runc --version | grep -oP '{{ _runc_ver_pattern }}\K(.+)'
+  register: runc_rc_ver
+  ignore_errors: true
+  changed_when: false
+
+- name: Check if offline mode
+  set_fact:
+    local_pip: "--no-index --find-links=https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }} \
+--trusted-host {{ hostvars[groups['controller_group'][0]]['ansible_host'] }}"
+    _runc_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/runc.amd64"
+  when: offline_enable
+
+# Upgrade runc to v1.0.0-rc93 which fixes an issue of freezing/frozen cgroups.
+- name: upgrade runc to a fixed version
+  block:
+    - name: backup old runc
+      copy:
+        src: /usr/bin/runc
+        dest: /usr/bin/runc_bak
+        remote_src: true
+      become: yes
+    - name: download specific runc
+      get_url:
+        url: "{{ _runc_url }}"
+        dest: /usr/bin/runc
+        checksum: "sha256:{{ _runc_checksum }}"
+      become: yes
+  when: runc_rc_ver.rc == 0 and runc_rc_ver.stdout|int < _runc_min_rc
+
+- name: install pip dependencies
+  block:
+    - name: copy requirements.txt
+      copy:
+        src: requirements.txt
+        dest: /tmp/requirements.txt
+    - name: install dependencies
+      pip:
+        requirements: /tmp/requirements.txt
+        state: present
+        extra_args: "{{ local_pip | default(omit) }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      become: yes
+    - name: install docker-compose
+      pip:
+        name: "{{ _docker_compose_package }}"
+        state: present
+        extra_args: "{{ local_pip | default(omit) }}"
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      become: yes
+
+- name: set up proxy
+  include_tasks: proxy.yml
+  when: proxy_enable|bool
+
+- name: set cgroups driver to systemd and configure docker registries
+  block:
+    - name: make sure /etc/docker/ exists
+      file:
+        path: /etc/docker/
+        state: directory
+    - name: Generate daemon.json
+      template:
+        src: daemon.json.j2
+        dest: /etc/docker/daemon.json
+      notify:
+        - enable and start docker service
+  become: yes
+
+- name: restart services if needed
+  meta: flush_handlers
+
+- name: find docker audit files
+  stat:
+    path: "{{ item }}"
+  with_items: "{{ _docker_audit_files }}"
+  register: stats
+
+- name: add audit rules for docker
+  lineinfile:
+    path: /etc/audit/rules.d/docker.rules
+    line: "-w {{ item.item }} -k docker"
+    create: yes
+  become: yes
+  when: item.stat.exists
+  with_items: "{{ stats.results }}"
+
+- name: restart auditd
+  command: service auditd restart # noqa 303
+  become: yes
+  changed_when: true
+  args:
+    warn: false
+
+- name: Check if offline mode
+  set_fact:
+    _docker_completion_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/docker"
+    _docker_compose_completion_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/docker-compose"
+  when: offline_enable
+
+- name: setup docker bash completion
+  block:
+    - name: download Docker CLI bash completion
+      get_url:
+        url: "{{ _docker_completion_url }}"
+        dest: "/etc/bash_completion.d"
+      become: yes
+    - name: download Docker Compose bash completion
+      get_url:
+        url: "{{ _docker_compose_completion_url }}"
+        dest: "/etc/bash_completion.d"
+      become: yes
+- name: create the directory for docker images
+  file:
+    path: "{{ docker_images_dir }}"
+    state: directory
+
+- name: Offline URLs
+  block:
+  - name: create temp directory for docker list
+    file:
+      state: directory
+      path: /tmp/dockerlist
+
+  - name: Download list of docker images
+    get_url:
+      url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/docker_images.yml"
+      dest: /tmp/dockerlist
+
+  - name: Read file
+    slurp:
+      src: /tmp/dockerlist/docker_images.yml
+    register: docker_files_encoded
+
+  - name: Decode file
+    set_fact:
+      docker_files: "{{ docker_files_encoded['content'] | b64decode }}"
+
+  - name: Create URLs for packages
+    set_fact:
+      docker_images: "{{ docker_images | default([]) + ['https://' + hostvars[groups['controller_group'][0]]['ansible_host'] + '/' + item] }}"
+    with_items: "{{ docker_files.split('\n') }}"
+
+  - name: download docker images
+    get_url:
+      url: "{{ item }}"
+      dest: "{{ docker_images_dir }}"
+    with_items: "{{ docker_images }}"
+
+  - name: find docker images
+    find:
+      paths: "{{ docker_images_dir }}"
+      patterns: "*.tar*"
+    register: docker_image_files
+
+  - name: load docker images
+    command: "docker load -i {{ item.path }}"
+    with_items: "{{ docker_image_files.files }}"
+    changed_when: true
+  when: offline_enable

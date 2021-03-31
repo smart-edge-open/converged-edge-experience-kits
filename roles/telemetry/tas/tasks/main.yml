@@ -8,7 +8,7 @@
 
 - name: include Harbor Registry vars
   include_vars:
-    file: ../../../harbor_registry/controlplane/defaults/main.yml
+    file: ../../../kubernetes/harbor_registry/controlplane/defaults/main.yml
 
 - name: create temporary directory
   tempfile:
@@ -139,6 +139,7 @@
   when: get_release_prometheus_adapter.rc != 0
 
 - name: Kubernetes Scheduler Extender
+  become: yes
   block:
   - name: copy Scheduler config
     template:
@@ -162,6 +163,7 @@
       dest:  "/etc/kubernetes/manifests/"
 
   - name: kustomize Scheduler
+    become: yes
     block:
       - name: save kustomized definition
         shell: kubectl kustomize . > tmp
@@ -173,16 +175,21 @@
           src: "/etc/kubernetes/manifests/tmp"
           dest: "/etc/kubernetes/manifests/kube-scheduler.yaml"
           remote_src: true
-      - name: delete temporary file
+      - name: delete temporary files
         file:
-          path: "/etc/kubernetes/manifests/tmp"
+          path: "/etc/kubernetes/manifests/{{ item }}"
           state: absent
+        with_items:
+          - tmp
+          - extend_scheduler.yml
+          - kustomization.yaml
 
   - name: add TAS URL to no_proxy
     command: "{{ item }}"
     with_items:
       - "perl -i -p0e \"s/(name: NO_PROXY\\n.*)/\\1,{{ _tas_svc_domain }}/gm\" /etc/kubernetes/manifests/kube-scheduler.yaml"
       - "perl -i -p0e \"s/(name: no_proxy\\n.*)/\\1,{{ _tas_svc_domain }}/gm\" /etc/kubernetes/manifests/kube-scheduler.yaml"
+    become: yes
 
   - name: create Scheduler Extender secret
     command: kubectl -n telemetry create secret tls extender-secret --cert /etc/kubernetes/pki/ca.crt --key /etc/kubernetes/pki/ca.key
@@ -245,6 +252,7 @@
     args:
       chdir: "{{ tmp_dir.path }}/tas-repo/deploy/"
     changed_when: true
+    become: yes
 
 - name: Descheduler
   block:
@@ -258,3 +266,4 @@
       command: kubectl apply -f "{{ tmp_dir.path }}/{{ item }}"
       changed_when: true
       with_items: "{{ _descheduler_deployment_files }}"
+      become: yes

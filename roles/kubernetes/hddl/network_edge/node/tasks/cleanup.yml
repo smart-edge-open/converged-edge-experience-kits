@@ -1,0 +1,75 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: include common vars
+  include_vars: ../../common/defaults/main.yml
+
+- name: remove downloaded all ovc dockerfile
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ _hddldaemon_container.download_dir }}"
+  ignore_errors: yes
+  become: yes
+
+- name: check Docker container hddldaemon is running
+  shell: docker ps -a | grep ov_hddl
+  changed_when: false
+  ignore_errors: yes
+  register: hddldaemon_container_running
+
+- name: remove hddldaemon container
+  command: docker rm -f ov_hddl
+  ignore_errors: yes
+  when: hddldaemon_container_running.stdout
+
+- name: docker stop and rmi
+  shell: docker images | grep openness-ubuntu1804-analytics-hddldaemon | awk '{print $1 ":" $2}' | xargs docker rmi -f
+  ignore_errors: yes
+  changed_when: true
+
+
+- name: uninstall the drivers
+  command: "./setup.sh uninstall"
+  args:
+    chdir: "{{ _openvino.install_dir }}/deployment_tools/inference_engine/external/hddl/drivers/"
+  ignore_errors: yes
+  changed_when: true
+  become: yes
+
+- name: change silent file to uninstall openvino
+  replace:
+    path: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/silent.cfg"
+    regexp: 'PSET_MODE=install'
+    replace: 'PSET_MODE=uninstall'
+  ignore_errors: yes
+  become: yes
+
+- name: uninstall openvino
+  command: ./install.sh  -s silent.cfg
+  args:
+    chdir: "{{ _openvino.download_dir }}/l_openvino_toolkit_p_{{ _openvino.version }}/"
+  ignore_errors: yes
+  changed_when: true
+  become: yes
+
+
+- name: remove openvino install dir
+  file:
+    path: "{{ _openvino.install_dir }}"
+    state: absent
+  become: yes
+
+- name: remove openvino drivers
+  command: rmmod  i2c-dev i2c-i801
+  ignore_errors: true
+  changed_when: true
+  become: yes
+
+- name: remove openvino download dir
+  file:
+    path: "{{ _openvino.download_dir }}"
+    state: absent
+  become: yes

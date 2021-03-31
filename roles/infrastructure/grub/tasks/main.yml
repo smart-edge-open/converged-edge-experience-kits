@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: detect path to GRUB config
+  block:
+    - name: set GRUB config path (BIOS)
+      set_fact:
+        grub_file_path: /boot/grub2/grub.cfg
+
+    - name: check if host is using EFI
+      stat:
+        path: /sys/firmware/efi
+      register: efi_sys_dir
+
+    - name: change GRUB config path (EFI)
+      set_fact:
+        grub_file_path: /boot/efi/EFI/centos/grub.cfg
+      when:
+        - efi_sys_dir.stat.exists
+        - efi_sys_dir.stat.isdir
+
+    - name: print grub.cfg path
+      debug:
+        msg: "grub.cfg file path: {{ grub_file_path }}"
+
+- name: new kernel cmdline from default and additional grub params
+  set_fact:
+    new_kernel_cmdline: "{{ (default_grub_params + ' ' + additional_grub_params) | trim }}"
+
+- name: set GRUB_CMDLINE_LINUX_DEFAULT variable
+  lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ new_kernel_cmdline }}"'
+    insertafter: EOF
+  become: yes
+
+- name: regenerate grub.cfg
+  command: grub2-mkconfig -o {{ grub_file_path }}
+  changed_when: true
+  become: yes
+
+- name: get current CMDLINE
+  command: cat /proc/cmdline
+  register: current_cmdline
+  changed_when: false
+
+- name: get future cmdline
+  shell: set -o pipefail && grubby --info=$(grubby --default-kernel) | grep args
+  register: future_cmdline
+  changed_when: false
+  become: yes
+
+- name: extract proper parts from the outputs
+  set_fact:
+    current_args: "{{ current_cmdline.stdout | regex_replace('BOOT_IMAGE=.*? root=.*? (.*)', '\\1') | trim }}"
+    future_args:  "{{ future_cmdline.stdout | regex_replace('args=\"(.*)\"', '\\1') | trim }}"
+
+# role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
+- name: request reboot (will be performed by `conditional_reboot` role)
+  set_fact:
+    perform_reboot: "{{ perform_reboot|default([]) + [ 'grub' ] }}"
+  when: current_args != future_args

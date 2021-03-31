@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: node should be ready
+  command: kubectl get node {{ ansible_nodename | lower }} -o jsonpath="{@.status.conditions[?(@.type=='Ready')].status}"
+  register: this
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  failed_when: "'True' not in this.stdout"
+  changed_when: false

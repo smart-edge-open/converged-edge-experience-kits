@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+#
+# ---
+
+- name: set the mountpoint for resctrl
+  mount:
+    path: /sys/fs/resctrl
+    src: resctrl
+    fstype: resctrl
+    state: mounted
+  become: yes
+
+- name: clone RMD repository
+  git:
+    repo: "{{ _rmd_repo }}"
+    dest: "{{ _rmd_src_dir }}"
+    version: "{{ _rmd_tag }}"
+    update: no
+  when: not offline_enable
+
+- name: build the RMD daemon
+  command: make docker
+  args:
+    chdir: "{{ _rmd_src_dir }}"
+  changed_when: false
+  when: not offline_enable
+
+- name: clone the PQOS repository
+  git:
+    repo: "{{ _pqos_repo }}"
+    dest: "{{ _pqos_dir }}"
+    version: master
+  when: not offline_enable
+
+- name: build and install the PQOS utility and library
+  command: make install
+  args:
+    chdir: "{{ _pqos_dir }}"
+  changed_when: false
+  when: not offline_enable
+  become: yes
+
+- name: Make sure PQOS can be started
+  lineinfile:
+    path: /etc/ld.so.conf
+    regexp: '/usr/local/lib'
+    line: /usr/local/lib
+  become: yes
+
+- name: Run ldconfig after updating ld.so.conf
+  command: ldconfig
+  changed_when: false
+  become: yes
+
+- name: clone the RMD operator
+  git:
+    repo: "{{ _rmd_operator_repo }}"
+    dest: "{{ _rmd_operator_dir }}"
+    version: "{{ _rmd_operator_tag }}"
+    update: no
+  when: not offline_enable
+
+- name: build the RMD operator
+  shell: source /etc/profile && make build images
+  args:
+    chdir: "{{ _rmd_operator_dir }}"
+  changed_when: false
+  when: not offline_enable

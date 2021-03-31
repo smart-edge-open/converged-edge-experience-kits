@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 
 ---
 
 # Common platform setup playbook
-- hosts: controller_group:edgenode_group
+- hosts: edgenode_group:controller_group
   any_errors_fatal: true
 
   pre_tasks:
@@ -14,112 +14,18 @@
       set_fact:
         single_node_deployment: false
     - name: check deployment settings
-      include_tasks: ./tasks/settings_check_ne.yml
+      include_tasks: "{{ playbook_dir }}/tasks/settings_check_ne.yml"
     - name: print deployment settings
-      include_tasks: ./tasks/print_vars.yml
+      include_tasks: "{{ playbook_dir }}/tasks/print_vars.yml"
 
-  roles:
-    - role: offline_roles/unpack_offline_package
-      when: "offline_enable | default(False) and 'controller_group' in group_names"
-    - role: offline_roles/local_fileshare_server
-      when: "offline_enable | default(False) and 'controller_group' in group_names"
-    - role: offline_roles/trust_ssl_list
-      when: "offline_enable | default(False) and 'edgenode_group' in group_names"
-    - role: offline_roles/yum_repo_enable
-      when: offline_enable | default(False)
-    - role: machine_setup/os_setup
-    - role: time/ntp
-      when: ntp_enable | default(False)
-    - role: time/verify
-      when: "'edgenode_group' in group_names"
-    - role: machine_setup/custom_kernel
-      when: not (kernel_skip | default(True))
-    - role: machine_setup/grub
+- name: Provision target infrastructure
+  import_playbook: playbooks/infrastructure.yml
 
-    - role: machine_setup/configure_tuned
-      when: "not (tuned_skip | default(False)) and 'edgenode_group' in group_names"
-    - role: machine_setup/conditional_reboot
+- name: Provision Kubernetes cluster
+  import_playbook: playbooks/kubernetes.yml
 
-    - role: git_repo
-
-    - role: golang
-    - role: docker
-
-# Playbook for Network Edge deployment
-- hosts: controller_group
-  roles:
-    - role: kubernetes/controlplane
-    - role: kubernetes/helm
-    - role: harbor_registry/controlplane
-    - role: kubernetes/cni
-    - role: kubernetes/device_plugins
-      when: k8s_device_plugins_enable | default(False)
-    - role: kubernetes/dashboard
-      when: kubernetes_dashboard_enable | default(False)
-
-    - role: kafka
-      when: eaa_enable | default(True)
-
-    - role: openness/controlplane
-    - role: kubevirt/controlplane
-      when: kubevirt_enable | default(True)
-
-    - role: telemetry/certs
-    - role: telemetry/prometheus
-    - role: telemetry/opentelemetry/controlplane
-    - role: telemetry/collectd/controlplane
-    - role: telemetry/tas
-    - role: telemetry/cadvisor/controlplane
-
-    - role: bb_config
-      when: fpga_sriov_userspace_enable | default(False) or acc100_sriov_userspace_enable | default(False)
-    - role: opae_fpga/controlplane
-      when: ne_opae_fpga_enable | default(False)
-    - role: nfd
-      when: ne_nfd_enable | default(True)
-    - role: biosfw/controlplane
-      when: ne_biosfw_enable | default(False)
-    - role: cmk/controlplane
-      when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/controlplane
-      when: ne_hddl_enable | default(False)
-    - role: ptp/controlplane
-      when: ptp_sync_enable | default(False)
-
-    - role: telemetry/grafana
-      when: telemetry_grafana_enable | default(True)
-    - role: telemetry/pcm/controlplane
-      when: telemetry_pcm_enable | default(False)
-
-    - role: rmd/controlplane
-      when: rmd_operator_enable | default(False)
-
-- hosts: edgenode_group
-  roles:
-    - role: rmd/node
-      when: "rmd_operator_enable | default(False)"
-
-    - role: opae_fpga/node
-      when: ne_opae_fpga_enable | default(False)
-    - role: kubernetes/node
-    - role: harbor_registry/node
-    - role: kubernetes/cni
-    - role: telemetry/collectd/node
-    - role: telemetry/cadvisor/node
-    - role: openness/node
-    - role: kubevirt/node
-      when: kubevirt_enable | default(True)
-    - role: biosfw/node
-      when: ne_biosfw_enable | default(False)
-    - role: cmk/node
-      when: ne_cmk_enable | default(False)
-    - role: hddl/network_edge/node
-      when: ne_hddl_enable | default(False)
-    - role: ptp/node
-      when: ptp_sync_enable | default(False)
-
-    - role: telemetry/pcm/node
-      when: telemetry_pcm_enable | default(False)
+- name: Provision Applications
+  import_playbook: playbooks/applications.yml
 
 # Play for edge nodes that have VCAC-A card installed
 - hosts: edgenode_vca_group
@@ -134,33 +40,22 @@
       include_tasks: ./tasks/print_vars.yml
 
   roles:
-    - role: machine_setup/os_setup
-    - role: time/ntp
+    - role: infrastructure/os_setup
+    - role: infrastructure/time_setup_ntp
       when: ntp_enable | default(False)
-    - role: time/verify
-    - role: git_repo
-    - role: golang
-    - role: docker
-    - role: machine_setup/vca_host_setup
-    - role: machine_setup/conditional_reboot
-    - role: machine_setup/vca_node_setup
+    - role: infrastructure/time_verify_ntp
+    - role: infrastructure/git_repo
+    - role: infrastructure/golang
+    - role: infrastructure/docker
+    - role: infrastructure/vca_host_setup
+    - role: infrastructure/conditional_reboot
+    - role: infrastructure/vca_node_setup
     - role: kubernetes/node
-    - role: harbor_registry/node
+    - role: kubernetes/harbor_registry/node
     - role: kubernetes/cni
     - role: telemetry/collectd/node
     - role: telemetry/cadvisor/node
-    - role: openness/node
+    - role: applications/openness/node
     - role: telemetry/pcm/node
       when: telemetry_pcm_enable | default(False)
-    - role: hddl/vca_setup
-
-# Playbook for post Network Edge deployment
-- hosts: controller_group
-  any_errors_fatal: true
-
-  roles:
-    - role: istio
-      when: ne_istio_enable | default(False)
-
-    - role: video_analytics_services
-      when: video_analytics_services_enable | default(False)
+    - role: kubernetes/hddl/vca_setup

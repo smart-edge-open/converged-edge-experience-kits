@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: copy list of modules to load at boot
+  copy:
+    src: opaedeps.conf
+    dest: /etc/modules-load.d/opaedeps.conf
+  become: yes
+
+- name: load opae dependancy modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - "mtd"
+  - "pps_core"
+  - "ptp"
+  become: yes
+
+- name: Check if not offline
+  block:
+  - name: check local OPAE_SDK_1.3.7-5_el7.zip
+    stat:
+      path: "{{ _opae_local_path_stp }}"
+    connection: local
+    register: opae_local_file_stp
+
+  - name: file for OPAE setup not present
+    debug:
+      msg: "{{ _opae_local_path_stp }} does not exists, OPAE won't be set up on the node"
+    when: not opae_local_file_stp.stat.exists
+
+  - name: set up OPAE for the node
+    block:
+    - name: copy local opae_stp to remote
+      copy:
+        src: "{{ _opae_local_path_stp }}"
+        dest: "{{ _opae_remote_path }}"
+    - name: build OPAE for PACN3000 FPGA worker image
+      command: make fpga-opae
+      args:
+        chdir: "{{ _git_repo_dest }}"
+    when: opae_local_file_stp.stat.exists
+
+  - name: Create directory for user FPGA images
+    file:
+      path: "{{ _vran_image_dir }}"
+      state: directory
+    become: yes
+
+  - name: chown image directory
+    file:
+      path:  "{{ _vran_image_dir }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ openness_user_group }}"
+    become: yes
+  when: not offline_enable

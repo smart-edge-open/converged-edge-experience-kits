@@ -16,6 +16,11 @@ spec:
     spec:
       hostPID: true
       restartPolicy: Never
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
       containers:
       - name: openssl
         image: {{ .Values.certs.image }}
@@ -46,7 +51,7 @@ spec:
       - name: cert-vol
         hostPath:
           path: {{ .Values.certs.certsHostPath }}
-          type: DirectoryOrCreate
+          type: Directory
       - name: ca
         secret:
           secretName: {{ .Values.rootSecretName }}

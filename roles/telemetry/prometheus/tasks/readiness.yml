@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: verify prometheus-server deployment
+  check_k8s_object:
+    name: prometheus-server
+    namespace: telemetry
+    kind: deployment
+
+- name: verify prometheus-node-exporter daemonsets
+  check_k8s_object:
+    name: prometheus-node-exporter
+    namespace: telemetry
+    kind: daemonset

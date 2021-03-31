@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: load nfd vars
+  include_vars: ../defaults/main.yml
+
+- name: check nfd controlplane deployment
+  check_k8s_object:
+    name: "{{ _nfd_release_name }}-node-feature-discovery-master"
+    namespace: openness
+    kind: deployment
+
+- name: check nfd daemonset workers
+  check_k8s_object:
+    name: "{{ _nfd_release_name }}-node-feature-discovery-worker"
+    namespace: openness
+    kind: daemonset

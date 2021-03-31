@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+os_remove_yum_plugins: false
+# Note: currently the RMD network policy relies on the order of elements in the
+# two lines below, do not change
+_base_noproxy: "localhost,virt-api,.svc,.svc.cluster.local,cdi-api,127.0.0.1"
+_kubernetes_default_cidr: "10.96.0.0/12,10.32.0.0/12"
+
+_openssl_version: "1.1.1i"
+_openssl_package_name: "openssl-{{ _openssl_version }}"
+_openssl_url: "https://www.openssl.org/source/{{ _openssl_package_name }}.tar.gz"
+_openssl_checksum_sha256: "e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242"
+
+_pip_version: "20.2.4"

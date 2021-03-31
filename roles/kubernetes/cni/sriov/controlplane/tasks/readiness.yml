@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: verify sriov daemonsets
+  check_k8s_object:
+    name: "{{ item }}"
+    namespace: kube-system
+    kind: daemonset
+  with_items:
+    - sriov-release-kube-sriov-device-plugin-amd64
+    - sriov-release-kube-sriov-cni-ds-amd64
+

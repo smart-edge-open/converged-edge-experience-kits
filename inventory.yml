@@ -1,0 +1,92 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+all:
+  vars:
+    cluster_name: cluster_test    # NOTE: Use `_` instead of spaces.
+    flavor: central_orchestrator  # NOTE: Flavors can be found in `flavors` directory.
+    single_node_deployment: true  # Request single node deployment (true/false).
+    limit:                        # Limit ansible deployment to certain inventory group or hosts
+controller_group:
+  hosts:
+    controller:
+      ansible_host: 172.16.0.1
+      ansible_user: openness
+edgenode_group:
+  hosts:
+    node01:
+      ansible_host: 172.16.0.1
+      ansible_user: openness
+    node02:
+      ansible_host: 172.16.0.2
+      ansible_user: openness
+    node03:
+      ansible_host: 172.16.0.3
+      ansible_user: openness
+edgenode_vca_group:
+  hosts:
+ptp_master:
+  hosts:
+ptp_slave_group:
+  hosts:
+
+---
+all:
+  vars:
+    cluster_name: central_office  # NOTE: Use `_` instead of spaces.
+    flavor: minimal               # NOTE: Flavors can be found in `flavors` directory.
+    single_node_deployment: false # Request single node deployment (true/false).
+    limit:                        # Limit ansible deployment to certain inventory group or hosts
+controller_group:
+  hosts:
+    co_controller:
+      ansible_host: 172.16.1.1
+      ansible_user: openness
+edgenode_group:
+  hosts:
+    co_node1:
+      ansible_host: 172.16.1.2
+      ansible_user: openness
+    co_node2:
+      ansible_host: 172.16.1.3
+      ansible_user: openness
+    co_node3:
+      ansible_host: 172.16.1.4
+      ansible_user: openness
+edgenode_vca_group:
+  hosts:
+ptp_master:
+  hosts:
+ptp_slave_group:
+  hosts:
+
+---
+all:
+  vars:
+    cluster_name: media           # NOTE: Use `_` instead of spaces.
+    flavor: media-analytics       # NOTE: Flavors can be found in `flavors` directory.
+    single_node_deployment: true  # Request single node deployment (true/false).
+    limit:                        # Limit ansible deployment to certain inventory group or hosts
+controller_group:
+  hosts:
+    media_controller:
+      ansible_host: 172.16.3.1
+      ansible_user: openness
+edgenode_group:
+  hosts:
+    media_node01:
+      ansible_host: 172.16.3.2
+      ansible_user: openness
+    media_node02:
+      ansible_host: 172.16.3.3
+      ansible_user: openness
+    media_node03:
+      ansible_host: 172.16.3.4
+      ansible_user: openness
+edgenode_vca_group:
+  hosts:
+ptp_master:
+  hosts:
+ptp_slave_group:
+  hosts:

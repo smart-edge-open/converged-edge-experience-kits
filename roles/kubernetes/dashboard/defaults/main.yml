@@ -5,8 +5,8 @@
 
 disable_dashboard_tls: false
 
-_dashboard_version: v2.0.3
-_dashboard_port: 30443
+_dashboard_version: v2.1.0
+_dashboard_port: 30553
 _dashboard_namespace: kube-system
 
 _dashboard_chart_url: "https://raw.githubusercontent.com/kubernetes/dashboard/{{ _dashboard_version }}/aio/deploy/helm-chart/kubernetes-dashboard"

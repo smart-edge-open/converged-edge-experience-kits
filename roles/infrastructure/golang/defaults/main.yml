@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+_golang_version: "1.16"
+_golang_download_checksum: "013a489ebb3e24ef3d915abe5b94c3286c070dfe0818d5bca8108f1d6e8440d2"
+
+_golang_download_name: "go{{ _golang_version }}.linux-amd64.tar.gz"
+_golang_download_url: "https://dl.google.com/go/{{ _golang_download_name }}"
+_golang_download_dest: "/tmp/{{ _golang_download_name }}"
+
+_offline_gomod_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/gomod.tar.gz"
+_offline_gomod_dest: "~/go/pkg/"

@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+_rmd_main_dir: "/tmp/rmd"
+
+_rmd_src_dir: "{{ _rmd_main_dir }}/src"
+_rmd_repo: "https://github.com/intel/rmd"
+_rmd_tag: "v0.3.1"
+
+_rmd_operator_dir: "{{ _rmd_main_dir }}/operator"
+_rmd_operator_repo: "https://github.com/intel/rmd-operator"
+_rmd_operator_tag: "v0.3"
+
+_pqos_dir: "{{ _rmd_main_dir }}/pqos"
+_pqos_repo: "https://github.com/intel/intel-cmt-cat"

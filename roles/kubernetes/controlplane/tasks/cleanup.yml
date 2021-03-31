@@ -18,3 +18,9 @@
   file:
     path: /root/.kube/
     state: absent
+
+- name: remove kubernetes artifacts
+  file:
+    path: /etc/kubernetes
+    state: absent
+  ignore_errors: yes

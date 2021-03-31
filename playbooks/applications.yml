@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2021 Intel Corporation
+
+---
+
+# Playbook for post Network Edge deployment
+
+
+- hosts: controller_group
+  any_errors_fatal: true
+
+  pre_tasks:
+    - name: update controller repo path
+      set_fact:
+        _git_repo_dest: "{{ openness_dir }}/edgeservices/edgecontroller"
+
+  roles:
+    - role: applications/kafka
+      when: eaa_enable | default(True)
+
+    - role: applications/openness/controlplane
+      when: openness_enable | default(True)
+
+    - role: applications/emco/controlplane
+      when: emco_enable | default(False)
+
+- hosts: edgenode_group
+  any_errors_fatal: true
+  roles:
+    - role: applications/openness/node
+      when: openness_enable | default(True)
+
+
+- hosts: controller_group
+  any_errors_fatal: true
+  roles:
+    # VAS deployment must happen after openness/node and must be run on the same node as openness/node.
+    - role: applications/video_analytics_services
+      when: video_analytics_services_enable | default(False)

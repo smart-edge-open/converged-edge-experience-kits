@@ -27,7 +27,7 @@
         state: absent
       become: yes
     - name: obtain the join command
-      command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_hostname }} ({{ ansible_host }})"
+      command: kubeadm token create --print-join-command --ttl=10m --description="token for {{ ansible_nodename }} ({{ ansible_host }})"
       register: join_command
       delegate_to: "{{ groups['controller_group'][0] }}"
     - name: join the cluster
@@ -51,7 +51,7 @@
   include_tasks: vca_node_join.yml
   vars:
     vca_node_ip: "172.32.{{ vca_idx }}.1"
-    vca_node_name: "{{ inventory_hostname }}-vca{{ vca_idx }}"
+    vca_node_name: "{{ inventory_hostname | lower }}-vca{{ vca_idx }}"
   loop_control:
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"

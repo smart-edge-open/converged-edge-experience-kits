@@ -9,8 +9,8 @@ args=()
 if [ -n "${GIT_TOKEN}" ]; then args+=("-t"  "${GIT_TOKEN}"); fi
 if [ -n "${GIT_REPO}" ]; then args+=("-r"  "${GIT_REPO}"); fi
 if [ -n "${ANSIBLE_USER}" ]; then args+=("-u"  "${ANSIBLE_USER}"); fi
-if [ -n "${OEK_FLAVOR}" ]; then args+=("-f"  "${OEK_FLAVOR}"); fi
-if [ -n "${OEK_VARS}" ]; then args+=("-o"  "${OEK_VARS}"); fi
+if [ -n "${CEEK_FLAVOR}" ]; then args+=("-f"  "${CEEK_FLAVOR}"); fi
+if [ -n "${CEEK_VARS}" ]; then args+=("-o"  "${CEEK_VARS}"); fi
 if [ -n "${ANSIBLE_LIMITS}" ]; then args+=("-l"  "${ANSIBLE_LIMITS}"); fi
 
 ip_addresses=$(az vmss list-instance-public-ips  -n "${AZ_VMSS}" -g "${AZ_RESOURCE_GROUP}" --query  [].ipAddress)
@@ -34,7 +34,7 @@ do
     fi
 
     echo "Configuring ${host}"
-    # Allow for root login, required by OEK scripts
+    # Allow for root login, required by CEEK scripts
     ssh "${AZ_VM_USERNAME}@${host}" sudo cp -r .ssh/ /root/
     ssh "${AZ_VM_USERNAME}@${host}" sudo systemctl enable --now firewalld
     ssh "${AZ_VM_USERNAME}@${host}" 'sudo sed  -i "/localhost/s/\$/ $(hostname)/" /etc/hosts'
@@ -47,5 +47,4 @@ do
     ssh "${AZ_VM_USERNAME}@${host}" sudo yum remove -y python2-requests
 done
 
-python3 oek_setup.py "${hosts}" "${args[@]}"
-
+python3 ceek_setup.py "${hosts}" "${args[@]}" && cd ~/ceek && python3 deploy.py

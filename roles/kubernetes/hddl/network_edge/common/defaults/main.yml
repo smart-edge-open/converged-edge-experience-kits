@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+_hddldaemon_container:
+  url: "https://github.com/OpenVisualCloud/Dockerfiles"
+  download_dir : "/opt/ovc_dockerfiles"
+  commit: "4a07dbe08b27c7f3c744ed4f9c9dbac2546b6b89"
+
+_openvino:
+  url: "https://registrationcenter-download.intel.com/akdlm/irc_nas/17062/l_openvino_toolkit_p_2021.1.110.tgz"
+  download_dir: "/tmp/openvino_download"
+  install_dir: "/opt/intel/openvino_2021.1.110"
+  version: "2021.1.110"
+hddl_kernel_devel: "http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/Packages/kernel-devel-3.10.0-1160.el7.x86_64.rpm"

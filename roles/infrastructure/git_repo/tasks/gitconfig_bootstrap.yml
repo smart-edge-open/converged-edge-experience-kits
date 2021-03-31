@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+- name: make sure openness directory exists
+  file:
+    path: "{{ openness_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+  become: yes
+
+- name: create temporary custom gitconfig
+  copy:
+    dest: "{{ openness_dir }}/.openness_gitconfig"
+    content: |
+      [url "https://{{ git_repo_token }}@github.com/"]
+        insteadOf = https://github.com/
+
+- name: create .gitconfig if needed
+  file:
+    path: "{{ ansible_env.HOME }}/.gitconfig"
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+
+- name: configure git http proxy
+  git_config:
+    name: http.proxy
+    scope: global
+    value: "{{ git_http_proxy }}"
+  when: proxy_enable|bool and git_http_proxy
+
+- name: add include to .gitconfig
+  blockinfile:
+    path: "{{ ansible_env.HOME }}/.gitconfig"
+    block: |
+      [include]
+        path = "{{ openness_dir }}/.openness_gitconfig"

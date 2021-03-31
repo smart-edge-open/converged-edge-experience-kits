@@ -1,19 +1,33 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2020 Intel Corporation
 
-## Kube-ovn with OVS-DPDK
 kubeovn_dpdk: false
 
 # Kube-virt settings
 kubevirt_enable: false
 
-## Network Edge Processor Counter Monitor (PCM)
-telemetry_pcm_enable: false
-
 kubernetes_cnis:
-  - kubeovn
+  - calico
 
+## EMCO
+emco_enable: True
+emco_single_node_cluster: true
+emco_repo_cleanup: false
 
-## emco
 emco_db_auth_enable: true
 emco_db_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters') }}"
+
+# emco_commitID: "1df72fb4979d5d349af00b7068fb1d3ba926e50c"
+emco_commitID: "main"
+
+eaa_enable: False
+dns_enable: False
+ne_nfd_enable: False
+telemetry_cadvisor_enable: False
+telemetry_grafana_enable: False
+telemetry_pcm_enable: False
+telemetry_prometheus_enable: False
+telemetry_opentelemetry_enable: False
+telemetry_collectd_enable: False
+telemetry_tas_enable: False
+openness_enable: False
