@@ -23,7 +23,6 @@
     gpgkey: "{{ _kubernetes_repository_key }}"
     gpgcheck: yes
     enabled: true
-    repo_gpgcheck: true
   become: yes
   register: result
   retries: "{{ number_of_retries }}"
