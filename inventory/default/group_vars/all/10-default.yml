@@ -298,3 +298,6 @@ expected_hyperthreading_state: "enabled"
 
 ## EMCO
 emco_enable: False
+
+##Enable cgroupfs to be used as a cgroup driver instead of systemd.
+cgroupfs_enable: False
