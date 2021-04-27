@@ -13,6 +13,6 @@ os_remove_yum_plugins: true
 ## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
 docker_images: []
 
-git_repo_url: https://{{ git_repo_token }}@github.com/otcshare/edgeservices.git
-git_repo_branch: master
+git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgeservices.git
+git_repo_branch: openness-21.03.02:
 _git_repo_dest: "{{ openness_dir }}/edgeservices"

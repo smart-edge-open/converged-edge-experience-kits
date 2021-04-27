@@ -4,7 +4,7 @@
 ---
 
 _emco:
-  repo: "https://github.com/otcshare/EMCO"
+  repo: "https://github.com/open-ness/EMCO"
   commit: "{{ emco_commitID }}"
   dest: /opt/openness/emco
   registryPrefix: "{{ _registry_host }}:{{ _registry_port }}/intel/"
