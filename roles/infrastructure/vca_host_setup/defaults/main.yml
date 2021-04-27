@@ -4,7 +4,7 @@
 ---
 
 _vca_dest: "/home/vca"
-_vca_image_url: "https://github.com/OpenVisualCloud/VCAC-SW-Analytics/archive/VCAC-A_R5.tar.gz"
+_vca_image_url: "https://github.com/OpenVisualCloud/VCAC-SW-Analytics/archive/VCAC-A_R5.1.tar.gz"
 
 _vca_download_files:
     - https://github.com/OpenVisualCloud/VCAC-SW/archive/VCAC-A_R4.tar.gz

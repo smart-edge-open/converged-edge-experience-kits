@@ -57,10 +57,10 @@ if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | gr
   tar xvf "$prepackagePath" -C "$tmpDir"
   sudo yum localinstall -y "$tmpDir"/*
   rm -rf "$tmpDir"
+else
+  # EPEL repository
+  ensure_installed epel-release
 fi
-
-# EPEL repository
-ensure_installed epel-release
 
 # Python 3
 ensure_installed $PYTHON3_PKG $PYTHON3_VERSION

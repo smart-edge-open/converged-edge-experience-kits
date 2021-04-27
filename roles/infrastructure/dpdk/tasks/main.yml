@@ -109,6 +109,14 @@
   become: yes
   when: not igb_uio_module.stat.exists
 
+- name: "[WORKAROUND] modify kernel headers to compile dpdk with kernel 5"
+  lineinfile:
+    path: /usr/src/kernels/{{ ansible_kernel }}/include/linux/compiler_types.h
+    regexp: '^#define asm_inline asm __inline'
+    line: '#define asm_inline asm'
+  become: yes
+  when: calico_ebpf_enabled
+
 - name: compile
   make:
     chdir: "{{ _dpdk_install_dir }}"

@@ -68,6 +68,7 @@
     dest: "{{ _vca_dest }}"
     mode: a+x
   with_items:
+    - boot_vca.sh
     - init_vca.sh
     - shutdown_vca.sh
     - setup_firewall.sh
@@ -104,7 +105,7 @@
   lineinfile:
     path: /etc/rc.d/rc.local
     regexp: '^{{ _vca_dest }}'
-    line: '{{ _vca_dest }}/init_vca.sh'
+    line: '{{ _vca_dest }}/boot_vca.sh'
     insertafter: EOF
     mode: u+x,g+x,o+x
   become: yes

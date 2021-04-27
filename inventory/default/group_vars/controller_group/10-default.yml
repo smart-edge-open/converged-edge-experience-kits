@@ -60,6 +60,8 @@ tuned_vars: |
   isolated_cores=2-3
   nohz=on
   nohz_full=2-3
+##Set tuned latency_enable setting.
+tuned_force_latency_enable: false
 
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
