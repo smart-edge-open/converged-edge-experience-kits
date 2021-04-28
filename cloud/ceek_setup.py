@@ -147,6 +147,8 @@ def create_inventory(options, inventory_path):
             cfgvars = yaml.load(group_vars, Loader=yaml.FullLoader)
 
         cfgvars["git_repo_token"] = options.git_token
+        #Note: Calico is not supported by Azure
+        cfgvars["kubernetes_cnis"] = ["kubeovn"]
 
         with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "w") as group_vars:
             yaml.dump(cfgvars, group_vars, sort_keys=False)
