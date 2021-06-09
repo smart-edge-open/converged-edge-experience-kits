@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: set SG1 firmware check flag
+  set_fact:
+    gpu_firmware_enable: false
+
+- name: check SG1 GUC status
+  shell: "cat /sys/kernel/debug/dri/*/gt/uc/guc_info | grep RUNNING"
+  register: guc_status
+  ignore_errors: yes
+  become: yes
+
+- name: check SG1 HUC status
+  shell: "cat /sys/kernel/debug/dri/*/gt/uc/huc_info | grep RUNNING"
+  register: huc_status
+  ignore_errors: yes
+  become: yes
+
+- name: check SG1 firmware check flag
+  set_fact:
+    gpu_firmware_enable: true
+  when: (guc_status.stdout | length > 0) and (huc_status.stdout | length > 0)

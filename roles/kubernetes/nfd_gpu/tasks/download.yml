@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: clone Node Feature Discovery repo
+  git:
+    repo: "{{ _nfd_gpu.url }}"
+    dest: "{{ _nfd_gpu.download_dir }}"
+    clone: yes
+    update: no
+    version: "{{ _nfd_gpu.commit }}"

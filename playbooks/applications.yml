@@ -37,3 +37,10 @@
     # VAS deployment must happen after openness/node and must be run on the same node as openness/node.
     - role: applications/video_analytics_services
       when: video_analytics_services_enable | default(False)
+
+- hosts: controller_group
+  any_errors_fatal: true
+  roles:
+    # MTS deployment only for SG1
+    - role: applications/media_transcode_services
+      when: media_transcode_services_enable | default(False)

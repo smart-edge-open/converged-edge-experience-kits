@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+# create folder for docker builds in /home for larger disk storage
+# (the folder is under the /dev/mapper/cl-root is limited to 50GB by default)
+
+- name: create /docker directory at /home
+  file:
+    path: "/home/docker"
+    state: directory
+  become: yes
+
+- name: edit docker configuration to use new directory
+  replace:
+    path: /usr/lib/systemd/system/docker.service
+    regexp: 'dockerd -H'
+    replace: 'dockerd --graph /home/docker -H'
+  become: yes
+
+- name: restart docker service
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+  become: yes
+
+- include_tasks: gpu_check.yml
+
+- include_tasks: kernel-install.yml
+  when: (not gpu_firmware_enable) or ne_kernel_force_build_enable
+
+- name: double check gpu status
+  block:
+  - include_tasks: gpu_check.yml
+  - name: report gpu check status
+    debug:
+      msg: "gpu_firmware_enable: {{ gpu_firmware_enable }}"
+    failed_when: not gpu_firmware_enable

@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}"
+  labels:
+    app: "{{ .Release.Name }}"
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Release.Name }}"
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        app: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: "{{ .Release.Name }}"
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+        {{- if $.Values.proxySettings.enabled }}
+          - name: HTTP_PROXY
+            value: {{ $.Values.proxySettings.http }}
+          - name: http_proxy
+            value: {{ $.Values.proxySettings.http }}
+          - name: HTTPS_PROXY
+            value: {{ $.Values.proxySettings.https }}
+          - name: https_proxy
+            value: {{ $.Values.proxySettings.https }}
+          - name: FTP_PROXY
+            value: {{ $.Values.proxySettings.ftp }}
+          - name: ftp_proxy
+            value: {{ $.Values.proxySettings.ftp }}
+          - name: NO_PROXY
+            value: {{ $.Values.proxySettings.noproxy }}
+          - name: no_proxy
+            value: {{ $.Values.proxySettings.noproxy }}
+        {{- end }}
+        image: "{{ .Values.registry }}/{{ .Values.gpuImage }}:{{ .Values.gpuImageTag }}"
+        command: ["/bin/bash","-c"]
+        args: ["tail -f /dev/null"]
+        imagePullPolicy: "{{ .Values.pullPolicy }}"
+        securityContext:
+          readOnlyRootFilesystem: false
+        resources:
+          limits:
+            gpu.intel.com/i915: {{ .Values.gpu_num }}

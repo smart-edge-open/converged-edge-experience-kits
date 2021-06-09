@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: include variables
+  include_vars: ../defaults/main.yml
+
+- name: remove gpu device plugin
+  command: kubectl delete -n {{ _gpu_plugins.namespace }} ds {{ _gpu_plugins.name }} --timeout=60s
+  ignore_errors: yes
+  changed_when: true
+
+- name: remove gpu device plugin directories and files
+  file:
+    path: "{{ _device_plugins.download_dir }}"
+    state: absent

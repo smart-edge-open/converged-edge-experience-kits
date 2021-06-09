@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_sg_dest: "/home/gpu"
+_sg_repo_url: "https://github.com/intel-gpu/kernel"
+_sg_firmware_pkg: "linux-firmware-dg1_2020.43.tgz"
+_sg_firmware_url: "https://repositories.intel.com/graphics/firmware/{{ _sg_firmware_pkg }}"
+_sg_commit_id: "f7c49b8e0b87e1d238e4815d8a13582dc655d773"
+_sg_config_base: "3.10.0-1160.el7.x86_64"
+_sg_kernel_tree: "{{ _sg_dest }}/kernel"
+_sg_firmware_dl_dir: "{{ _sg_dest }}/bin"
+_sg_guc: "dg1_guc_49.0.1.bin"
+_sg_huc: "dg1_huc_7.7.1.bin"
+
+_sg_rpm_files:
+    - kernel-devel
+    - kernel-headers
+    - gcc
+    - flex
+    - bison
+    - bc
+    - elfutils-libelf-devel
+    - dos2unix

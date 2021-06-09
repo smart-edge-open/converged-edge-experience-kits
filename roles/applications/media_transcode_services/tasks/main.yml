@@ -1,0 +1,86 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+- name: check current release and chart, and uninstall old release
+  block:
+  - name: grep exsiting release
+    shell: helm list -n {{ _mts_namespace }} | grep {{ _mts_helmReleaseName }} | awk '{print $9}'
+    ignore_errors: yes
+    register: grep_mts_helm_release
+  - name: grep chart version
+    shell: helm list -n {{ _mts_namespace }} | grep {{ _mts_helmReleaseName }}-{{ _mts_helmChartVersion }} | awk '{print $9}'
+    ignore_errors: yes
+    register: grep_mts_helm_chart
+  - name: uninstall when older chart
+    command: helm uninstall -n {{ _mts_namespace }} {{ _mts_helmReleaseName }}
+    ignore_errors: yes
+    when: (grep_mts_helm_chart.stdout | length == 0) and (grep_mts_helm_release.stdout | length > 0)
+
+- name: pull gpu docker image
+  docker_image:
+    name: "{{ _gpu_image.image }}"
+    tag: "{{ _gpu_image.tag }}"
+    source: pull
+
+- name: tag GPU image and push to Harbor registry
+  docker_image:
+    name: "{{ _gpu_image.image }}:{{ _gpu_image.tag }}"
+    repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/{{ _gpu_image.image }}"
+    tag: "{{ _gpu_image.tag }}"
+    push: yes
+    source: local
+
+- name: template Helm chart on the master node and deploy MTS with the Helm Charts
+  block:
+  - name: create namespace for media
+    command: kubectl create namespace {{ _mts_namespace }}
+    changed_when: true
+    ignore_errors: yes
+
+  - name: set path for gpu default
+    set_fact:
+      gpu_chart_path: "{{ role_path }}/gpu/charts"
+      gpu_templ_path: "{{ role_path }}/gpu/templates"
+    when: not (gpu_share_enable | default(False))
+
+  - name: set path for gpu default
+    set_fact:
+      gpu_chart_path: "{{ role_path }}/gpu_share/charts"
+      gpu_templ_path: "{{ role_path }}/gpu_share/templates"
+    when: gpu_share_enable | default(False)
+
+  - name: create chart directory
+    file:
+     path: "{{ ne_helm_charts_default_dir }}/{{ _mts_helmReleaseName }}"
+     state: directory
+
+  - name: copy Helm chart to the master node
+    copy:
+      src: "{{ gpu_chart_path }}/templates"
+      dest: "{{ ne_helm_charts_default_dir }}/{{ _mts_helmReleaseName }}"
+
+  - name: template Chart.yaml
+    template:
+      src: "{{ gpu_templ_path }}/Chart.yaml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/{{ _mts_helmReleaseName }}/Chart.yaml"
+      force: yes
+
+  - name: template values.yaml
+    template:
+      src: "{{ gpu_templ_path }}/values.yaml.j2"
+      dest: "{{ ne_helm_charts_default_dir }}/{{ _mts_helmReleaseName }}/values.yaml"
+      force: yes
+
+  - name: helm install MTS release
+    command: helm install {{ _mts_helmReleaseName }} {{ _mts_helmReleaseName }} -n {{ _mts_namespace }}
+    args:
+      chdir: "{{ ne_helm_charts_default_dir }}"
+    when: grep_mts_helm_chart.stdout | length == 0
+
+  - name: check if deployed successfully
+    shell: helm list -n media | grep {{ _mts_helmReleaseName }} | awk '{print $8}'
+    register: mts_helm_status
+    ignore_errors: yes
+    failed_when: "'deployed' not in mts_helm_status.stdout"

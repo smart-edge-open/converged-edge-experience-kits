@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include variables
+  include_vars: ../defaults/main.yml
+
+- name: remove MTS chart directory
+  file:
+    path: "{{ ne_helm_charts_default_dir }}/{{ _mts_helmReleaseName }}"
+    state: absent
+  ignore_errors: yes
+
+- name: uninstall if an older version
+  command: helm uninstall {{ _mts_helmReleaseName }} -n {{ _mts_namespace }}
+  changed_when: true
+  ignore_errors: yes
+
+- name: remove media namespace
+  command: kubectl delete namespace {{ _mts_namespace }} --timeout=60s
+  changed_when: true
+  ignore_errors: yes

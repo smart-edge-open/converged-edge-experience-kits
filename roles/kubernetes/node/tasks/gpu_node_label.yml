@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: label GPU node
+  command: kubectl label node {{ gpu_node_name }} {{ ne_gpu_node_label }} --overwrite
+  delegate_to: "{{ groups['controller_group'][0] }}"
+  changed_when: true
+  when:
+    - inventory_hostname in groups['edgenode_gpu_group']
+    - ne_gpu_node_label | length > 0

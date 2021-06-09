@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+# install kernel after main.yml checked the sg1 node
+
+- name: create SG directory
+  file:
+    path: "{{ _sg_dest }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ openness_user_group }}"
+  become: yes
+
+- name: install guc/huc firmware
+  block:
+  - name: remove firmware install directory
+    file:
+      path: "{{ _sg_firmware_dl_dir }}"
+      state: absent
+    become: yes
+
+  - name: create firmware directory
+    file:
+      path: "{{ _sg_firmware_dl_dir }}"
+      state: directory
+      owner: "{{ ansible_user }}"
+      group: "{{ openness_user_group }}"
+    become: yes
+
+  - name: add firmware to machine when firmware missing
+    shell: |
+      wget -q {{ _sg_firmware_url }}
+      tar -xvzf {{ _sg_firmware_pkg }}
+    args:
+      chdir: "{{ _sg_firmware_dl_dir }}"
+    become: yes
+
+  - name: copy firmware to target dir
+    copy:
+      src: "{{ item }}"
+      dest: "/lib/firmware/i915/"
+      remote_src: yes
+    with_items:
+      - "{{ _sg_firmware_dl_dir }}/{{ _sg_guc }}"
+      - "{{ _sg_firmware_dl_dir }}/{{ _sg_huc }}"
+    become: yes
+
+- name: setup SG kernel
+  block:
+  - name: install SG dependencies
+    yum:
+      state: present
+      name: "{{ _sg_rpm_files }}"
+    become: yes
+
+  - name: git clone SG repo
+    shell: |
+      rm -rf {{ _sg_kernel_tree }}
+      git clone {{ _sg_repo_url }} {{ _sg_kernel_tree }}
+    args:
+      chdir: "{{ _sg_dest }}"
+    register: result
+    retries: "{{ number_of_retries }}"
+    until: result is succeeded
+    delay: "{{ retry_delay }}"
+    become: yes
+
+  - name: git checkout commit id from SG repo
+    shell: |
+      git reset --hard {{ _sg_commit_id }}
+    args:
+      chdir: "{{ _sg_kernel_tree }}"
+    become: yes
+
+  - name: fix openssl lib config for kernel makefile
+    blockinfile:
+      path: "{{ _sg_kernel_tree }}/Makefile"
+      insertafter: "export mod_compress_cmd"
+      state: present
+      block: |
+
+        HOST_EXTRACFLAGS += -I/usr/local/include
+        HOST_EXTRACFLAGS += -L/usr/local/lib64
+
+    run_once: true
+    become: yes
+
+  - name: build Host Kernel and SG Driver
+    shell: |
+      cp /boot/config-{{ _sg_config_base }} .config
+      make olddefconfig
+      make -j $(nproc --all) all
+      make modules_install
+      make install
+    args:
+      chdir: "{{ _sg_kernel_tree }}"
+    register: ret
+    become: yes
+    failed_when: >
+      ('ERROR' in ret.stderr) or
+      ('Error' in ret.stderr) or
+      ('error' in ret.stderr)
+
+  - name: configure SG kernel to be the default at boot
+    shell: |
+      grub2-editenv create
+      grub2-editenv /boot/grub2/grubenv set saved_entry='CentOS Linux (5.4.48+) 7 (Core)'
+      grub2-mkconfig -o /boot/grub2/grub.cfg
+      grubby --set-default /boot/vmlinuz-5.4.48+
+    become: yes
+
+  - name: request reboot after SG kernel is newly installed
+    set_fact:
+      perform_reboot: "{{ perform_reboot|default([]) + [ 'sg' ] }}"
+
+  - name: reboot SG node
+    import_role:
+      name: infrastructure/conditional_reboot

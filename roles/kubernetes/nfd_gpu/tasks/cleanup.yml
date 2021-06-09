@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: include variables
+  include_vars: ../defaults/main.yml
+
+- name: remove Node Feature Discovery release if exist
+  block:
+    - name: check if NFD release already exists
+      command: helm status nfd-release -n {{ _nfd_gpu.namespace }}
+      ignore_errors: yes
+      register: get_release_nfd
+      changed_when: false
+
+    - name: remove old nfd gpu if exists
+      command: helm uninstall {{ _nfd_gpu.release_name }} -n {{ _nfd_gpu.namespace }}
+      ignore_errors: yes
+      when: not get_release_nfd.rc == 0
+
+- name: remove Node Feature Discovery directories and files
+  file:
+    path: "{{ _nfd_gpu.download_dir }}"
+    state: absent
+
+- name: remove Node Feature Discovery helm chart
+  file:
+    path: "{{ chart_target }}"
+    state: absent

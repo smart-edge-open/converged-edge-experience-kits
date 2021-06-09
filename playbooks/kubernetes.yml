@@ -31,6 +31,12 @@
       when: "ne_opae_fpga_enable | default(False)"
     - role: kubernetes/nfd
       when: "ne_nfd_enable | default(True)"
+
+    - role: kubernetes/nfd_gpu
+      when: "ne_nfd_gpu_enable | default(False)"
+    - role: kubernetes/gpu_plugin
+      when: "ne_gpu_plugin_enable | default(False)"
+
     - role: kubernetes/biosfw/controlplane
       when: "ne_biosfw_enable | default(False)"
     - role: kubernetes/cmk/controlplane

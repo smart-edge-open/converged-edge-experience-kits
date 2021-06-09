@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Network Edge's Kubernetes CNIs
+kubernetes_cnis:
+  - calico
+
+# GPU kernel force build flag (default: false)
+ne_kernel_force_build_enable: false
+
+# NFD flag (default: true)
+ne_nfd_enable: false
+
+# NFD GPU flag (default: true)
+ne_nfd_gpu_enable: true
+
+# GPU plugin flag (default: true)
+ne_gpu_plugin_enable: true
+
+# GPU node label (default: "gpu-zone=yes")
+ne_gpu_node_label: "gpu-zone=yes"
+
+# GPU share flag (default: false)
+gpu_share_enable: true
+
+# GPU share device number (default: 40)
+gpu_share_dev_num: 4
+
+# GPU aware schedule flag (default: false)
+gpu_aware_schedule_enable: false
+
+# Deploy Video Transcode services (Default true)
+media_transcode_services_enable: true
+
+# Media Transcode service default GPU number
+media_transcode_gpu_num: 1
+
+# Media Transcode service defautl GPU millicores
+media_transcode_gpu_millicores: 250
+
+# Media Transcode service default replicas number
+media_transcode_replicas: 1
+
+
+## Refer to emco flavor
+eaa_enable: False
+dns_enable: False
+telemetry_cadvisor_enable: False
+telemetry_grafana_enable: False
+telemetry_pcm_enable: False
+telemetry_prometheus_enable: False
+telemetry_opentelemetry_enable: False
+telemetry_collectd_enable: False
+telemetry_tas_enable: False
+openness_enable: False

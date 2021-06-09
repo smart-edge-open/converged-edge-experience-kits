@@ -38,3 +38,15 @@
   roles:
     - role: infrastructure/ptp/node
       when: ptp_sync_enable | default(False)
+
+- hosts: edgenode_gpu_group
+  any_errors_fatal: true
+  roles:
+    - role: infrastructure/os_setup
+    - role: infrastructure/time_setup_ntp
+      when: ntp_enable | default(False)
+    - role: infrastructure/time_verify_ntp
+    - role: infrastructure/gpu_host_setup
+    - role: infrastructure/git_repo
+    - role: infrastructure/golang
+    - role: infrastructure/docker

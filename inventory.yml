@@ -26,6 +26,8 @@ edgenode_group:
       ansible_user: openness
 edgenode_vca_group:
   hosts:
+edgenode_gpu_group:
+  hosts:
 ptp_master:
   hosts:
 ptp_slave_group:
@@ -56,6 +58,8 @@ edgenode_group:
       ansible_user: openness
 edgenode_vca_group:
   hosts:
+edgenode_gpu_group:
+  hosts:
 ptp_master:
   hosts:
 ptp_slave_group:
@@ -85,6 +89,8 @@ edgenode_group:
       ansible_host: 172.16.3.4
       ansible_user: openness
 edgenode_vca_group:
+  hosts:
+edgenode_gpu_group:
   hosts:
 ptp_master:
   hosts:

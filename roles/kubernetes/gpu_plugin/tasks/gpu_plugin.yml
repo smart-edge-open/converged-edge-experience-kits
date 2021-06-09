@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: remove old gpu device plugin
+  command: kubectl delete -n {{ _gpu_plugins.namespace }} ds {{ _gpu_plugins.name }}
+  ignore_errors: yes
+  changed_when: true
+
+- name: apply patch for gpu share
+  block:
+    - name: copy requirements.txt
+      copy:
+        src: "{{ role_path }}/files/{{ _gpu_plugins.patch_file }}"
+        dest: "/tmp/{{ _gpu_plugins.patch_file }}"
+    - name: update gpu dev number in patch
+      replace:
+        path: "/tmp/{{ _gpu_plugins.patch_file }}"
+        regexp: '"-shared-dev-num",\s*"\d+"'
+        replace: '"-shared-dev-num","{{ gpu_share_dev_num }}"'
+  when:
+    - gpu_share_enable | default(False)
+    - gpu_share_dev_num | int
+  delegate_to: localhost
+
+- name: apply patch for gpu share
+  block:
+    - name: git reset gpu plugin repo
+      shell: |
+        git reset --hard {{ _device_plugins.commit }}
+        git clean -dfx
+      args:
+        chdir: "{{ _device_plugins.download_dir }}"
+    - name: apply patch for gpu share to plugin
+      patch:
+        src: "/tmp/{{ _gpu_plugins.patch_file }}"
+        basedir: "{{ _device_plugins.download_dir }}"
+        strip: 1
+  when: gpu_share_enable | default(False)
+
+- name: deploy GPU plugin with nfd labeled
+  command: kubectl apply -n {{ _gpu_plugins.namespace }} -k deployments/gpu_plugin/overlays/nfd_labeled_nodes
+  args:
+    chdir: "{{ _device_plugins.download_dir }}"
+  changed_when: true

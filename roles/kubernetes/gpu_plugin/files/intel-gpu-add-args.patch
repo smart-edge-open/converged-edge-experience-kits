@@ -1,0 +1,25 @@
+diff --git a/deployments/gpu_plugin/overlays/nfd_labeled_nodes/add-args-intel-gpu.yaml b/deployments/gpu_plugin/overlays/nfd_labeled_nodes/add-args-intel-gpu.yaml
+new file mode 100644
+index 0000000..10cbdc0
+--- /dev/null
++++ b/deployments/gpu_plugin/overlays/nfd_labeled_nodes/add-args-intel-gpu.yaml
+@@ -0,0 +1,10 @@
++apiVersion: apps/v1
++kind: DaemonSet
++metadata:
++  name: intel-gpu-plugin
++spec:
++  template:
++    spec:
++      containers:
++      - name: intel-gpu-plugin
++        args: ["-shared-dev-num","40","-v","2"]
+diff --git a/deployments/gpu_plugin/overlays/nfd_labeled_nodes/kustomization.yaml b/deployments/gpu_plugin/overlays/nfd_labeled_nodes/kustomization.yaml
+index f873c3f..586edfc 100644
+--- a/deployments/gpu_plugin/overlays/nfd_labeled_nodes/kustomization.yaml
++++ b/deployments/gpu_plugin/overlays/nfd_labeled_nodes/kustomization.yaml
+@@ -2,3 +2,4 @@ bases:
+   - ../../base
+ patches:
+   - add-nodeselector-intel-gpu.yaml
++  - add-args-intel-gpu.yaml

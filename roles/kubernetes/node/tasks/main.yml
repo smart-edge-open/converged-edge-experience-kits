@@ -56,3 +56,9 @@
     loop_var: vca_idx
   with_sequence: count="{{ num_vca.stdout | int }}"
   when: inventory_hostname in groups['edgenode_vca_group']
+
+- name: label gpu node
+  include_tasks: gpu_node_label.yml
+  vars:
+    gpu_node_name: "{{ inventory_hostname | lower }}"
+  when: inventory_hostname in groups['edgenode_gpu_group']

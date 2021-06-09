@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2021 Intel Corporation
+
+---
+
+_nfd_gpu:
+  url: https://github.com/kubernetes-sigs/node-feature-discovery
+  download_dir: "{{ openness_dir }}/node-feature-discovery"
+  commit: v0.8.1
+  namespace: openness
+  patch_file: nfd-gpu-share-enable.patch
+  release_name: nfd-gpu
+  chart_target: "{{ ne_helm_charts_default_dir }}/node-feature-discovery"

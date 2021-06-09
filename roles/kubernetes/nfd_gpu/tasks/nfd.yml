@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+---
+
+- name: check if NFD release already exists
+  command: helm status {{ _nfd_gpu.release_name }} -n {{ _nfd_gpu.namespace }}
+  ignore_errors: yes
+  register: get_release_nfd
+  changed_when: false
+
+- name: remove old nfd gpu if exists
+  command: helm uninstall {{ _nfd_gpu.release_name }} -n {{ _nfd_gpu.namespace }}
+  when: get_release_nfd.rc == 0
+
+- name: create openness namespace if needed
+  block:
+    - name: check if openness namespace exists
+      command: kubectl get ns {{ _nfd_gpu.namespace }}
+      ignore_errors: yes
+      register: get_ns_openness
+    - name: create openness namespace
+      command: kubectl create namespace {{ _nfd_gpu.namespace }}
+      when: get_ns_openness.rc == 1
+
+- name: apply patch for gpu share to plugin
+  patch:
+    src: "{{ _nfd_gpu.patch_file }}"
+    basedir: "{{ _nfd_gpu.download_dir }}"
+    strip: 1
+  when: gpu_share_enable | default(False)
+
+- name: copy nfd gpu helm chart to target
+  copy:
+    src: "{{ _nfd_gpu.download_dir }}/deployment/node-feature-discovery"
+    dest: "{{ ne_helm_charts_default_dir }}"
+    remote_src: yes
+
+- name: deploy NFD with Helm chart
+  command: helm install {{ _nfd_gpu.release_name }} {{ _nfd_gpu.chart_target }} -n {{ _nfd_gpu.namespace }}
+  changed_when: true

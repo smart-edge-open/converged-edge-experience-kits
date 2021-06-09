@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+_device_plugins:
+  url: "https://github.com/intel/intel-device-plugins-for-kubernetes"
+  download_dir : "{{ openness_dir }}/intel_device_plugins"
+  commit: "v0.20.0"
+
+_gpu_plugins:
+  namespace: openness
+  name: intel-gpu-plugin
+  patch_file: intel-gpu-add-args.patch

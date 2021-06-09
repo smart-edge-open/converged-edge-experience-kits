@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+# registry specifies the Harbor registry in use
+registry: {{ _registry_ip_address }}:{{ _registry_port }}/intel
+
+# gpuImage media transcode service image
+gpuImage: {{ _gpu_image.image }}
+
+# sidecarTag media transcode service tag
+gpuImageTag: {{ _gpu_image.tag }}
+
+pullPolicy: IfNotPresent
+
+# replicas specifies the number of analytics instances running
+replicas: {{ media_transcode_replicas }}
+
+# the number of gpu shared by media transcode service
+gpu_num: {{ media_transcode_gpu_num }}
+
+# proxy settings for vas_gateways
+{% if proxy_enable | d(false) %}
+proxySettings:
+  enabled: true
+  http: {{ proxy_http }}
+  https: {{ proxy_https }}
+  ftp: {{ proxy_ftp }}
+  noproxy: {{ proxy_noproxy }}
+{% else %}
+proxySettings:
+  enabled: false
+{% endif %}

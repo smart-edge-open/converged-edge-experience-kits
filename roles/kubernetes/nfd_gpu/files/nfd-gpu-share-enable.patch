@@ -1,0 +1,26 @@
+diff --git a/deployment/node-feature-discovery/templates/clusterrole.yaml b/deployment/node-feature-discovery/templates/clusterrole.yaml
+index a4da230..b70cab2 100644
+--- a/deployment/node-feature-discovery/templates/clusterrole.yaml
++++ b/deployment/node-feature-discovery/templates/clusterrole.yaml
+@@ -12,7 +12,7 @@ rules:
+   - nodes
+   # when using command line flag --resource-labels to create extended resources
+   # you will need to uncomment "- nodes/status"
+-  # - nodes/status
++  - nodes/status
+   verbs:
+   - get
+   - patch
+diff --git a/deployment/node-feature-discovery/templates/master.yaml b/deployment/node-feature-discovery/templates/master.yaml
+index 3521bcd..572756e 100644
+--- a/deployment/node-feature-discovery/templates/master.yaml
++++ b/deployment/node-feature-discovery/templates/master.yaml
+@@ -42,6 +42,8 @@ spec:
+                 fieldPath: spec.nodeName
+           command:
+             - "nfd-master"
++            - "--resource-labels=gpu.intel.com/memory.max,gpu.intel.com/millicores"
++            - "--extra-label-ns=gpu.intel.com"
+           resources:
+             {{- toYaml .Values.master.resources | nindent 12 }}
+           args:

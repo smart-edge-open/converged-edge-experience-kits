@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2021 Intel Corporation
+
+---
+
+_gpu_image:
+  name: "gpu-image"
+  image: "openvisualcloud/sg1-ubuntu2004-media-ffmpeg"
+  tag: 21.3
+
+_mts_helmReleaseName: "media-transcode-ffmpeg-services"
+_mts_helmChartVersion: 0.1.0
+
+_mts_namespace: openness
