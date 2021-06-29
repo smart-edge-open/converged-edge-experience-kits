@@ -14,5 +14,5 @@ os_remove_yum_plugins: true
 docker_images: []
 
 git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgeservices.git
-git_repo_branch: openness-21.03.04
+git_repo_branch: openness-21.03.05
 _git_repo_dest: "{{ openness_dir }}/edgeservices"

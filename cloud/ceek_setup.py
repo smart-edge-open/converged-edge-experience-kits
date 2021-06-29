@@ -141,17 +141,18 @@ def create_inventory(options, inventory_path):
     with open(os.path.join(inventory_path, "inventory.yml"), "w") as inv:
         yaml.dump(cfgyaml, inv, sort_keys=False)
 
+    with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "r") as group_vars:
+        cfgvars = yaml.load(group_vars, Loader=yaml.FullLoader)
+
     #Add token to group_vars
     if options.git_token:
-        with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "r") as group_vars:
-            cfgvars = yaml.load(group_vars, Loader=yaml.FullLoader)
-
         cfgvars["git_repo_token"] = options.git_token
-        #Note: Calico is not supported by Azure
-        cfgvars["kubernetes_cnis"] = ["kubeovn"]
 
-        with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "w") as group_vars:
-            yaml.dump(cfgvars, group_vars, sort_keys=False)
+    #Note: Calico is not supported by Azure
+    cfgvars["kubernetes_cnis"] = ["kubeovn"]
+
+    with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "w") as group_vars:
+        yaml.dump(cfgvars, group_vars, sort_keys=False)
 
 def main(options):
     """Script entry function"""
