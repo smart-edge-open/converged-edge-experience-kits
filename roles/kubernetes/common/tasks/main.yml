@@ -2,48 +2,72 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-- name: import repository
-  yum_repository:
-    name: kubernetes
-    description: Kubernetes repository
-    baseurl: "{{ _kubernetes_repository_url }}"
-    enabled: true
-  become: yes
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  when: not offline_enable
+- name: CentOS installation
+  when: ansible_distribution == "CentOS"
+  block:
+    - name: import repository
+      yum_repository:
+        name: kubernetes
+        description: Kubernetes repository
+        baseurl: "{{ _kubernetes_repository_url }}"
+        enabled: true
+      become: yes
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      when: not offline_enable
 
-- name: edit repository
-  yum_repository:
-    name: kubernetes
-    description: Kubernetes repository
-    baseurl: "{{ _kubernetes_repository_url }}"
-    gpgkey: "{{ _kubernetes_repository_key }}"
-    gpgcheck: yes
-    enabled: true
-  become: yes
-  register: result
-  retries: "{{ number_of_retries }}"
-  until: result is succeeded
-  delay: "{{ retry_delay }}"
-  when: not offline_enable
+    - name: edit repository
+      yum_repository:
+        name: kubernetes
+        description: Kubernetes repository
+        baseurl: "{{ _kubernetes_repository_url }}"
+        gpgkey: "{{ _kubernetes_repository_key }}"
+        gpgcheck: yes
+        enabled: true
+      become: yes
+      register: result
+      retries: "{{ number_of_retries }}"
+      until: result is succeeded
+      delay: "{{ retry_delay }}"
+      when: not offline_enable
 
-- name: install packages
-  yum:
-    name: "{{ _kubernetes_packages }}"
-    state: present
-    skip_broken: yes
-    update_cache: yes
-    allow_downgrade: true
+    - name: install packages
+      yum:
+        name: "{{ _kubernetes_packages }}"
+        state: present
+        skip_broken: yes
+        update_cache: yes
+        allow_downgrade: true
+      become: yes
+      register: result
+      retries: 20
+      until: result is succeeded
+      delay: 10
+      notify:
+        - enable and restart kubelet
+
+- name: Ubuntu installation
   become: yes
-  register: result
-  retries: 20
-  until: result is succeeded
-  delay: 10
-  notify:
-    - enable and restart kubelet
+  when: ansible_distribution == "Ubuntu"
+  block:
+    - name: add Google official GPG key
+      apt_key:
+        url: "{{ _kubernetes_repository_key_ubuntu }}"
+        state: present
+    - name: add Kubernetes repository
+      apt_repository:
+        repo: "{{ _kubernetes_repository_ubuntu }}"
+        update_cache: yes
+        state: present
+        filename: kuerbentes
+        mode: 0600
+    - name: installing packages
+      apt:
+        name: "{{ _kubernetes_packages_ubuntu }}"
+        state: present
+        update_cache: yes
 
 - name: set up proxy
   include_tasks: proxy.yml
@@ -80,6 +104,8 @@
     - 6443/tcp
     - 2379-2380/tcp
     - 10250-10252/tcp
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 - name: restart services if needed
   meta: flush_handlers

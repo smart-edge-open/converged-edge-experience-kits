@@ -19,6 +19,8 @@
     - 6642/tcp
     - 6081/udp
   become: yes
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 - name: Check if kube-ovn kubectl plugin exists
   stat:

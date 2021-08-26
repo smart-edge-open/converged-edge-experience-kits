@@ -7,4 +7,6 @@
     name: epel-release
     state: present
   become: yes
-  when: not offline_enable
+  when: 
+    - not offline_enable
+    - ansible_distribution == "CentOS"

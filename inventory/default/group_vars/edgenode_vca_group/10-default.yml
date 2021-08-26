@@ -10,6 +10,12 @@ os_yum_base_packages:
 _os_yum_exclude_rpm_packages: "exclude=kernel-3* kernel-rt* kernel-rt-kvm* kernel-rt-devel*"
 os_remove_yum_plugins: true
 
+os_ubuntu_base_packages:
+  "vim-common,curl,lvm2,wget,bridge-utils,libboost-all-dev,libpcre3,libpcre3-dev,zlib1g-dev,libglib2.0-dev,\
+  autoconf,automake,libtool,flex,bison,cmake,pciutils,python-websocket,libjsoncpp-dev,libfcgi-dev,libhiredis-dev,\
+  libnuma-dev,build-essential,psmisc,python-httplib2,libpixman-1-dev,moreutils,jq,python-dev-is-python2,psmisc,\
+  sshpass,bash-completion,rsync"
+
 ## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
 docker_images: []
 

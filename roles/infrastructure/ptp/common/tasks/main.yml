@@ -52,6 +52,8 @@
     - 319/udp
     - 320/udp
     become: yes
+    vars:
+      ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
   - name: Reload firewall rules
     command: firewall-cmd --reload
