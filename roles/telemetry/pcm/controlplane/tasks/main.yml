@@ -27,6 +27,8 @@
     state: enabled
     immediate: yes
   become: yes
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 - name: check if pcm already exists
   command: helm status pcm --namespace telemetry

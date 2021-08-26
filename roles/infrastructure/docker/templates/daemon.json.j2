@@ -22,4 +22,8 @@
       "Soft": 4096
     }
   }
+}{% if ansible_distribution == 'Ubuntu' %},
+{
+  "dns": ["8.8.8.8"]
 }
+{% endif %}

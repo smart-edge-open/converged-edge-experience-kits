@@ -10,6 +10,8 @@
     state: enabled
     immediate: yes
   become: yes
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 # Starting with calico v3.16 the CNI is adding an accept rule at the end of FORWARD chain in filter table:
 # "Connections to services without endpoints are now properly rejected in iptables dataplane mode.

@@ -3,3 +3,4 @@
 *.pyc
 /inventory/default/group_vars/*/30_*_flavor.yml
 /inventory/automated/
+*.log

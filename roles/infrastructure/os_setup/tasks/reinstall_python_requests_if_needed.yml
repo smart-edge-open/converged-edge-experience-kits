@@ -12,6 +12,7 @@
     state: absent
   become: yes
   register: python_requests_removed
+  when: ansible_distribution == "CentOS"
 
 # ansible lint E503: https://ansible-lint.readthedocs.io/en/latest/default_rules.html#tasks-that-run-when-changed-should-likely-be-handlers
 # This task is a workaround for cloud-init systems, and it won't be reused anywhere in the code.
@@ -20,4 +21,15 @@
     name: requests
     state: present
   become: yes
-  when: python_requests_removed.changed # noqa 503
+  when: 
+     - python_requests_removed.changed # noqa 503
+     - ansible_distribution == "CentOS"
+
+- name: install python-requests from pip2
+  pip:
+    name: requests
+    state: present
+    executable: pip2
+  become: yes
+  when: ansible_distribution == "Ubuntu"
+

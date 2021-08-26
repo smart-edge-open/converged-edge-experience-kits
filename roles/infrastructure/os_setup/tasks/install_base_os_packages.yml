@@ -3,14 +3,16 @@
 
 ---
 - debug:
-    msg: "Installing the following packages: {{ os_yum_base_packages }}"
+    msg: "Installing the following packages: {{ os_yum_base_packages if ansible_distribution == 'CentOS' else os_ubuntu_base_packages }}"
 
 - name: install IUS repository
   yum:
     name: https://repo.ius.io/ius-release-el7.rpm
     state: present
   become: yes
-  when: not offline_enable
+  when: 
+     - not offline_enable
+     - ansible_distribution == "CentOS"
 
 - name: Set empty local_pip var
   set_fact:
@@ -24,6 +26,29 @@
     _openssl_url: "https://{{ hostvars[groups['controller_group'][0]]['ansible_host'] }}/{{ _openssl_package_name }}.tar.gz"
   when: offline_enable
 
+- name: install Python 2 and pip2 on Ubuntu
+  block:
+  - name: install Python 2 on Ubuntu
+    apt:
+      name: python2
+      state: present
+      update_cache: yes
+    become: yes
+    when: ansible_distribution == "Ubuntu"
+  
+  - name: download pip2 on Ubuntu
+    get_url:
+      url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+      dest: /home/openness/get-pip.py
+      mode: '0777'
+    become: yes
+    when: ansible_distribution == "Ubuntu"
+  
+  - name: Install pip2 in Ubuntu
+    command: python2 /home/openness/get-pip.py
+    become: yes
+    when: ansible_distribution == "Ubuntu"
+
 - name: install base OS rpm packages
   yum:
     name: "{{ os_yum_base_packages }}"
@@ -31,6 +56,15 @@
     enablerepo: "{{ omit if offline_enable else 'ius-archive' }}"
     skip_broken: yes
   become: yes
+  when: ansible_distribution == "CentOS"
+
+- name: install base OS Ubuntu packages
+  apt:
+    name: "{{ os_ubuntu_base_packages }}"
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_distribution == "Ubuntu"
 
 - name: upgrade python2-pip version
   command: "python2 -m pip install {{ local_pip }} --upgrade pip=={{ _pip_version }}"
@@ -40,6 +74,7 @@
   until: result is succeeded
   changed_when: true
   become: yes
+  when: ansible_distribution == "CentOS"  
 
 - name: get installed OpenSSL version
   command: "openssl version"
@@ -95,3 +130,9 @@
         path: "{{ tmp_dir.path }}"
         state: absent
   when: _openssl_version|string not in installed_openssl_version.stdout.split()
+
+- name: add bash-completion to bashrc on Ubuntu
+  lineinfile:
+    path: /etc/bash.bashrc
+    line: "source /usr/share/bash-completion/bash_completion"
+  become: yes

@@ -2,10 +2,12 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-
 - debug:
     msg: "Setting up OS"
 
+- include_tasks: set_ssl_certificates_ubuntu.yml
+- include_tasks: change_default_sh_ubuntu.yml
+- include_tasks: install_firewalld_ubuntu.yml
 - include_tasks: disable_fingerprint.yml
 - include_tasks: disable_swap.yml
 - include_tasks: disable_selinux.yml

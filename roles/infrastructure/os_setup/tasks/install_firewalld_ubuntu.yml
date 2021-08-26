@@ -1,0 +1,9 @@
+
+---
+- name: install firewalld package on Ubuntu
+  apt:
+    name: firewalld
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_distribution == "Ubuntu"

@@ -10,4 +10,5 @@
   when:
     - _os_yum_exclude_rpm_packages is defined
     - _os_yum_exclude_rpm_packages|length > 0
+    - ansible_distribution == "CentOS"
   become: yes

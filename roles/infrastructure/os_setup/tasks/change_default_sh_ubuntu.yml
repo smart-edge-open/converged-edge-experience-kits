@@ -1,0 +1,11 @@
+
+---
+- name: set bash as the default shell (sh)
+  when: ansible_distribution == 'Ubuntu'
+  become: yes
+  block: 
+  - name: set dash/sh to false
+    shell: echo "dash dash/sh boolean false" | debconf-set-selections
+
+  - name: set the default sh as bash on Ubuntu
+    shell: dpkg-reconfigure -p critical dash

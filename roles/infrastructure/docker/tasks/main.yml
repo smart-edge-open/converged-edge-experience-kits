@@ -2,7 +2,7 @@
 # Copyright (c) 2019-2020 Intel Corporation
 
 ---
-- name: add Docker repository
+- name: add Docker repository in CentOs
   yum_repository:
     name: docker
     description: Docker CE repository
@@ -14,14 +14,58 @@
   retries: "{{ number_of_retries }}"
   until: result is succeeded
   delay: "{{ retry_delay }}"
-  when: not offline_enable
+  when: 
+     - not offline_enable
+     - ansible_distribution == "CentOS"
+
+- name: Install aptitude on Ubuntu 
+  apt: 
+    name: aptitude 
+    state: latest 
+    update_cache: yes 
+    force_apt_get: yes
+  when: ansible_distribution == "Ubuntu"
+  become: yes
+
+- name: Install required system packages on Ubuntu
+  apt: 
+    name: "{{ item }}"
+    state: present 
+    update_cache: yes
+  with_items:
+     - apt-transport-https 
+     - ca-certificates 
+     - curl
+     - software-properties-common
+     - python3-pip
+     - virtualenv
+     - libcurl4-gnutls-dev
+     - python3-setuptools
+  become: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: gather the package facts
+  package_facts:
+    manager: "apt"
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Docker in Ubuntu
+  apt: 
+    name: docker.io
+    state: present
+    update_cache: yes 
+  when:
+    - ansible_distribution == "Ubuntu"
+  become: yes
 
 - name: clear yum cache
   command: yum clean all
   args:
     warn: false
   changed_when: true
-  when: not offline_enable
+  when: 
+     - not offline_enable
+     - ansible_distribution == "CentOS"
 
 - name: add group "docker"
   group:
@@ -39,19 +83,29 @@
 - name: reset connection
   meta: reset_connection
 
-- name: install Docker CE
+- name: install Docker CE for CentOS
   yum:
     name: "{{ _docker_packages }}"
     state: present
   become: yes
   notify:
     - enable and start docker service
+  when: ansible_distribution == "CentOS"
 
 - name: get runc version
   shell: set -o pipefail && runc --version | grep -oP '{{ _runc_ver_pattern }}\K(.+)'
   register: runc_rc_ver
   ignore_errors: true
   changed_when: false
+  when: ansible_distribution == "CentOS"
+
+- name: get runc for Ubuntu
+  apt: 
+    name: runc
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_distribution == "Ubuntu"
 
 - name: Check if offline mode
   set_fact:
@@ -75,7 +129,10 @@
         dest: /usr/bin/runc
         checksum: "sha256:{{ _runc_checksum }}"
       become: yes
-  when: runc_rc_ver.rc == 0 and runc_rc_ver.stdout|int < _runc_min_rc
+  when: 
+     - ansible_distribution == "CentOS"
+     - runc_rc_ver.rc == 0
+     - runc_rc_ver.stdout|int < _runc_min_rc 
 
 - name: install pip dependencies
   block:
@@ -83,11 +140,78 @@
       copy:
         src: requirements.txt
         dest: /tmp/requirements.txt
+    - name: remove non working requirements in Ubuntu
+      lineinfile: 
+        dest: /tmp/requirements.txt
+        state: absent
+        regexp: '^(perf==|pygobject==|python-linux-procfs==|schedutils==|urlgrabber==|yum-metadata-parser==|pycurl==)'
+      when: ansible_distribution == "Ubuntu"
+    - name: download and install python requirements that failed using pip on Ubuntu
+      vars:
+        packages:
+          python-linux-procfs: http://ftp.br.debian.org/debian/pool/main/p/python-linux-procfs/python-linux-procfs_0.6.1-1_amd64.deb
+          schedutils: http://ftp.br.debian.org/debian/pool/main/p/python-schedutils/python-schedutils_0.6-1_amd64.deb
+          urlgrabber: http://ftp.br.debian.org/debian/pool/main/u/urlgrabber/python-urlgrabber_3.10.2-1_all.deb
+      when: ansible_distribution == "Ubuntu"
+      block:
+        - name: download python packages on Ubuntu
+          get_url:
+            url: "{{ item.value }}"
+            dest: "/tmp/{{ item.key }}.deb"
+          loop: "{{ packages | dict2items }}"
+        - name: install python packages on Ubuntu
+          apt: "deb=/tmp/{{ item.key }}.deb"
+          loop: "{{ packages | dict2items }}"
+          become: yes
+        - name: install pygobject # 3.24
+          block:
+          - name: install pygobject dependencies
+            apt:
+              name:
+                - pkg-config
+                - libglib2.0-0
+                - libglib2.0-dev
+                - libgirepository1.0-dev
+                - libgtk-3-dev
+                - libcairo-gobject2
+                - gir1.2-freedesktop
+                - python3-cairo
+                - python3-cairo-dev
+                - python3-cairo-doc
+              state: present
+              update_cache: yes
+            become: yes
+          - unarchive:
+              src: https://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.gnome.org/sources/pygobject/3.22/pygobject-3.22.0.tar.xz
+              dest: /tmp/
+              remote_src: yes
+          - shell: ./configure; make; make install
+            args:
+              chdir: /tmp/pygobject-3.22.0/
+            become: yes
+        - name: install pycurl
+          apt: 
+            name: python-pycurl
+            update_cache: yes
+          become: yes
+    
+    - name: install some Ubuntu necessary dependencies
+      apt: 
+        name:
+          - python-dev
+          - libattr1-dev # for pyxattr
+          - libgpgme11-dev # for pygpgme
+          - liblzma-dev # pyliblzma
+        state: present
+        update_cache: yes
+      become: yes
+      when: ansible_distribution == "Ubuntu"
     - name: install dependencies
       pip:
         requirements: /tmp/requirements.txt
         state: present
         extra_args: "{{ local_pip | default(omit) }}"
+        executable: pip2
       register: result
       retries: "{{ number_of_retries }}"
       until: result is succeeded
@@ -98,6 +222,7 @@
         name: "{{ _docker_compose_package }}"
         state: present
         extra_args: "{{ local_pip | default(omit) }}"
+        executable: pip2
       register: result
       retries: "{{ number_of_retries }}"
       until: result is succeeded
@@ -140,6 +265,15 @@
   when: item.stat.exists
   with_items: "{{ stats.results }}"
 
+- name: install auditd on Ubuntu
+  apt:
+    name: 
+      - auditd
+      - audispd-plugins
+    update-cache: yes
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+
 - name: restart auditd
   command: service auditd restart # noqa 303
   become: yes
@@ -165,6 +299,7 @@
         url: "{{ _docker_compose_completion_url }}"
         dest: "/etc/bash_completion.d"
       become: yes
+
 - name: create the directory for docker images
   file:
     path: "{{ docker_images_dir }}"

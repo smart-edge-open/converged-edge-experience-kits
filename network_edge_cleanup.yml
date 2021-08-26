@@ -213,11 +213,12 @@
       - name: cleanup git repos
         include_tasks: ./roles/infrastructure/git_repo/tasks/cleanup.yml
 
-  - name: cleanup git
+  - name: cleanup git on CentOS
     yum:
       name: git*
       state: absent
     become: yes
+    when: ansible_distribution == 'CentOS'
 
   - name: rmd controller cleanup
     include_tasks: ./roles/kubernetes/rmd/common/tasks/cleanup.yml
