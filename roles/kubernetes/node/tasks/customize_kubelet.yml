@@ -28,6 +28,9 @@
         - 10.96.0.10
       clusterDomain: cluster.local
       featureGates:
+        {% if (pwek_enable is defined and pwek_enable) %}
+        SCTPSupport: True
+        {% endif %}
         TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
       podPidsLimit: 2048
   become: yes

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 
 ---
 
@@ -23,75 +23,12 @@
     when: fpga_userspace_vf.enabled | default (False)
     become: yes
 
-  - block:
-    - name: Check if ACC PF already initialized
-      shell: "cat {{ acc100_init_log_file }} | awk '/Tests Passed : /{print $5;exit;}'"
-      ignore_errors: yes
-      register: init_result
 
-    - name: check if ACC100 SRIOV device is connected and get PCI address of devices
-      shell: lspci -D | grep {{ acc100_userspace_vf.pf_device_id }} | awk '{print $1;}'
-      register: acc100_pci_address
-      become: yes
-
-    - block:
-      - name: bind ACC100 PFs to userspace driver
-        include_role:
-          name: infrastructure/bind_device_to_driver
-        vars:
-          - pci_address: "{{ item }}"
-          - driver: "{{ acc100_userspace_vf.vf_driver }}"
-        with_items:
-          - "{{ acc100_pci_address.stdout_lines }}"
-
-      - name: delete acc100 init log if it exists
-        file:
-          state: absent
-          path: "{{ acc100_init_log_file }}"
-
-      - name: clean acc100 init log on boot if it exists
-        lineinfile:
-          state: present
-          dest: /etc/rc.d/rc.local
-          line: "{{ item }}"
-        with_items:
-          - cat /dev/null > "{{ acc100_init_log_file }}"
-
-      - name: run init app for ACC100 PF
-        shell: >
-               cd "{{ _acc100_dpdk_init_dir }}" &&
-               ./test-bbdev.py --testapp-path ../../build/app/dpdk-test-bbdev -e="-w{{ item }} " -i -c validation -v test_vectors/ldpc_dec_v7813.data |
-               tee -a "{{ acc100_init_log_file }}"
-        with_items:
-          - "{{ acc100_pci_address.stdout_lines }}"
-
-      - name: add running init app for ACC100 PF on boot
-        lineinfile:
-          state: present
-          dest: /etc/rc.d/rc.local
-          line: "{{ _acc100_dpdk_init_dir }}/test-bbdev.py --testapp-path\
-                 {{ _acc100_dpdk_init_dir }}/../../build/app/dpdk-test-bbdev -e=\"-w{{ item }} \" -i -c \
-                 validation -v {{ _acc100_dpdk_init_dir }}/test_vectors/ldpc_dec_v7813.data >> {{ acc100_init_log_file }}"
-        with_items:
-          - "{{ acc100_pci_address.stdout_lines }}"
-
-      - name: unbind ACC100 PFs from userspace driver
-        shell: >
-               echo "{{ item }}" > $(realpath /sys/bus/pci/devices/{{ item }}/driver/unbind) &&
-               echo "" >  $(realpath /sys/bus/pci/devices/{{ item }}/driver_override)
-        with_items:
-          - "{{ acc100_pci_address.stdout_lines }}"
-
-      - name: unbind ACC100 PFs from userspace driver on boot
-        lineinfile:
-          state: present
-          dest: /etc/rc.d/rc.local
-          line: "echo \"{{ item }}\" > $(realpath /sys/bus/pci/devices/{{ item }}/driver/unbind) && echo \"\" > \
-          $(realpath /sys/bus/pci/devices/{{ item }}/driver_override)"
-        with_items:
-          - "{{ acc100_pci_address.stdout_lines }}"
-      when: init_result.stdout != "1"
+  - name: check if ACC100 SRIOV device is connected and get PCI address of devices
+    shell: lspci -D | grep {{ acc100_userspace_vf.pf_device_id }} | awk '{print $1;}'
+    register: acc100_pci_address
     when: acc100_userspace_vf.enabled | default (False)
+    become: yes
 
   - name: combine PCI addresses
     set_fact:
@@ -173,8 +110,12 @@
   register: sriov_ifaces
   changed_when: false
 
-- name: disable SR-IOV ethernet interfaces
-  shell: echo 0 > {{ item }}
+- name: disable SR-IOV ethernet interfaces while ignoring QAT devices
+  shell: |
+    bdf=$(echo {{ item }} | awk -F/ '{print $6}')
+    bdf=${bdf#*:}
+    qat=$(lspci -nnvv | grep -i quick | grep $bdf)
+    [[ $? == 0 ]] && echo  "Ignore QAT device $bdf " || echo 0 > {{ item }}
   with_items: "{{ sriov_ifaces.stdout_lines }}"
   changed_when: true
   become: yes

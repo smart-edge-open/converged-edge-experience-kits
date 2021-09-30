@@ -26,8 +26,8 @@ def make_parser():
 
     parser.add_argument(
         "-r", "--repo", action="store", metavar="GIT_REPO", dest="git_repo",
-        default="https://github.com/open-ness/converged-edge-experience-kits",
-        help="OpenNESS converged edge experience kit repository")
+        default="https://github.com/smart-edge-open/converged-edge-experience-kits",
+        help="Smart Edge Open converged edge experience kit repository")
     parser.add_argument(
         "-t", "--token", action="store", metavar="GIT_TOKEN", dest="git_token",
         default="",
@@ -42,13 +42,13 @@ def make_parser():
         help="Username used by ansible automation scripts")
     parser.add_argument(
         "-o", "--ceek-vars", action="store", metavar="CEEK_VARS", dest="ceek_vars",
-        help="Extra OpenNESS experience kit variables to override the defaults")
+        help="Extra Smart Edge Open experience kit variables to override the defaults")
     parser.add_argument(
         "-f", "--flavor", action="store", metavar="CEEK_FLAVOR", dest="ceek_flavor",
-        help="OpenNESS experience kit flavor")
+        help="Smart Edge Open experience kit flavor")
     parser.add_argument(
         "-l", "--limits", action="store", metavar="ANSIBLE_LIMITS", dest="ansible_limits",
-        help="OpenNESS experience kit ansible limits")
+        help="Smart Edge Open experience kit ansible limits")
 
     parser.add_argument(
         "-v", "--verbosity", action="store", metavar="LEVEL", dest="verbosity", default="INFO",
@@ -64,7 +64,7 @@ def make_parser():
 
 def setup_logger(options):
     """Configure Python logging module"""
-    log_fmt = "OpenNESS Setup: [%(levelname)s] %(module)s(%(lineno)d): %(message)s"
+    log_fmt = "Smart Edge Open Setup: [%(levelname)s] %(module)s(%(lineno)d): %(message)s"
     ts_fmt = "%Y-%m-%dT%H:%M:%S"
 
     handler = logging.StreamHandler()

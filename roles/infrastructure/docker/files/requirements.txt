@@ -8,7 +8,7 @@ certifi==2020.6.20
 cffi==1.14.3
 chardet==3.0.4
 configobj==4.7.2
-cryptography==3.2.1
+cryptography==3.3.2
 decorator==3.4.0
 docker==4.3.1
 docker-compose==1.26.2
@@ -37,6 +37,6 @@ schedutils==0.4
 six==1.9.0
 texttable==1.6.3
 urlgrabber==3.10
-urllib3==1.25.11
+urllib3==1.26.5
 websocket-client==0.56.0
 yum-metadata-parser==1.1.4

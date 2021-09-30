@@ -59,14 +59,6 @@ spec:
         volumeMounts:
         - name: {{ .Values.collector.configmapName }}
           mountPath: /conf
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 13133 # Health Check extension default port.
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 13133 # Health Check extension default port.
       volumes:
         - name: {{ .Values.collector.configmapName }}
           configMap:
