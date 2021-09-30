@@ -12,7 +12,7 @@
 
 ### GitHub token
 # It must be provided when using private repositories.
-# Not required when using github.com/open-ness repositories.
+# Not required when using github.com/smart-edge-open repositories.
 # How to create a GitHub token: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 git_repo_token: ""
 
@@ -41,7 +41,7 @@ os_remove_yum_plugins: true
 
 ### OpenNESS Git Repository
 # Following variable specify branch/SHA/tag to be checked out for the source repository
-git_repo_branch: openness-21.03.05
+git_repo_branch: smart-edge-open-21.09
 
 # If True, the repository will be deleted and cloned again
 # If False, repository will be left as it is and any changes won't be overwritten.

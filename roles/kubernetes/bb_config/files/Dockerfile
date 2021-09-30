@@ -22,6 +22,8 @@ FROM centos:7.9.2009
 
 RUN yum install -y sudo
 
+RUN yum -y upgrade bind-license glib2 openssl-libs
+
 ARG username=bb_config
 ARG user_dir=/home/$username
 

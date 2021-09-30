@@ -12,6 +12,8 @@ RUN python get-pip.py
 RUN pip install --upgrade pip==20.3.3
 RUN pip install intelhex
 
+RUN yum -y upgrade bind-license glib2
+
 # RT repo
 RUN wget http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo -O /etc/yum.repos.d/CentOS-RT.repo
 RUN wget http://linuxsoft.cern.ch/cern/centos/7.9.2009/os/x86_64/RPM-GPG-KEY-cern -O /etc/pki/rpm-gpg/RPM-GPG-KEY-cern

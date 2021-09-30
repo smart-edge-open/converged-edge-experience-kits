@@ -198,14 +198,16 @@ def run_deployment(inventory, cleanup=False):
         inventory.flavor,
         inventory.cluster_name,
         playbook_basename)
-    log_file = open(deployment_log_file_path, "a+")
+    # pylint disable because log_file is a long living object.
+    log_file = open(deployment_log_file_path, "a+") # pylint: disable=bad-option-value,consider-using-with
 
     logging.info('%s %s: command: "%s"',
                  inventory.cluster_name, playbook_basename, ansible_playbook_command)
     logging.info('%s %s: log file: "%s"',
                  inventory.cluster_name, playbook_basename, os.path.realpath(log_file.name))
 
-    deployment_process = subprocess.Popen(ansible_playbook_command.split(),
+    # pylint disable because deployment_process is a long living object.
+    deployment_process = subprocess.Popen(ansible_playbook_command.split(), # pylint: disable=bad-option-value,consider-using-with
                                           stdout=log_file, stderr=subprocess.STDOUT)
 
     return DeploymentWrapper(process=deployment_process,

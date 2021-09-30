@@ -31,6 +31,13 @@
   - not offline_enable | default(False)
   vars:
     role_path: "{{ playbook_dir }}/roles/kubernetes/biosfw/node"
+- name: check VT-d open in bios
+  block:
+  - debug:
+      msg: "Expected VT-d - ENABLED,if failed please check bios"
+  - name: check VT-d status
+    shell: ls /sys/kernel/iommu_groups/0/devices/0000:00:00.0
+  when: vtd_bios_check | default(False)
 
 - name: e810 role - verify precondition
   block:

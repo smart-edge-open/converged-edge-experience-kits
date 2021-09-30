@@ -3,11 +3,9 @@ SPDX-License-Identifier: Apache-2.0
 Copyright (c) 2020 Intel Corporation
 ```
 
-![OpenNESS](https://www.openness.org/images/openness-logo.png)
+# Smart Edge Open Devkit for Azure
 
-# OpenNESS Devkit for Azure
-
-This is an Azure Resource Manager template to deploy OpenNESS within Azure. 
+This is an Azure Resource Manager template to deploy Smart Edge Open within Azure. 
 
 ## Requirements
 
@@ -37,7 +35,7 @@ The following fields **must** be populated within the Azure portal:
 
 > NOTE: The Deploy to Azure button may only work when clicked within Github web interface
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fopen-ness%2Fconverged-edge-experience-kits%2Fmaster%2Fcloud%2Fazuredeploy.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsmart-edge-open%2Fconverged-edge-experience-kits%2Fmaster%2Fcloud%2Fazuredeploy.json)
 
 ## Post Deployment
 
@@ -47,9 +45,9 @@ After deployment completes, the Azure Deployment resource will have Outputs with
 
 The "result" field will include access instructions for the deployed cluster, as well as the Ansible _Play Recap_.
 
->  NOTE: If the recap includes a failure count other than `failed=0` then the OpenNESS installation failed.
+>  NOTE: If the recap includes a failure count other than `failed=0` then the Smart Edge Open installation failed.
 
-The OpenNESS installation log and the Ansible inventory file will be available on the Controller Node in `~/openness-install.log` and `~/inventory.yml` within the user specified non-root user account (e.g. `ceekuser`).
+The Smart Edge Open installation log and the Ansible inventory file will be available on the Controller Node in `~/smartEdgeOpen-install.log` and `~/inventory.yml` within the user specified non-root user account (e.g. `ceekuser`).
 
 The public IP addresses for the nodes can be queried with this script, your local `bash` shell with the presence of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) or an [Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/overview).  You will need to manually confirm you have an active Azure token, the easist method is by manually running `az login` prior to execution:
 
@@ -66,6 +64,6 @@ az vmss list-instance-public-ips  -n "$vmssName" -g "$resourceGroupName" --query
 
 You can now proceed to onboarding applications to your Devkit environment. 
 
-If you are looking to integrate your own application with OpenNESS please start at our [Network Edge Applications Onboarding](https://www.openness.org/docs/doc/applications-onboard/network-edge-applications-onboarding) guide.
+If you are looking to integrate your own application with Smart Edge Open please start at our [Network Edge Applications Onboarding](https://www.openness.org/docs/doc/applications-onboard/network-edge-applications-onboarding) guide.
 
-You can find OpenNESS existing integrated apps within our [edgeapps repo](https://github.com/open-ness/edgeapps) and our [Commercial Edge Applications portal](https://networkbuilders.intel.com/commercial-applications), or you can [participate and have your apps featured](https://networkbuilders.intel.com/commercial-applications/participate).
+You can find Smart Edge Open existing integrated apps within our [edgeapps repo](https://github.com/smart-edge-open/edgeapps) and our [Commercial Edge Applications portal](https://networkbuilders.intel.com/commercial-applications), or you can [participate and have your apps featured](https://networkbuilders.intel.com/commercial-applications/participate).

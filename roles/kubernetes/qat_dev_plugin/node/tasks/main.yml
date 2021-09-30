@@ -10,7 +10,14 @@
     executable: /bin/bash
   changed_when: false
 
-- name: create SR-IOV Virtual Functions for QAT devices
+- name: discover QAT Virtual Functions
+  shell: "set -o pipefail && /usr/sbin/lspci -d {{ manufacturer_id }}:{{ qat_vf_dev_id }} -D | awk '{ print $1 }'"
+  register: qat_vfs
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Re-enable SR-IOV Virtual Functions for QAT devices
   block:
   - name: reset SR-IOV Virtual Functions for QAT devices
     shell: echo 0 > /sys/bus/pci/devices/{{ item }}/sriov_numvfs
@@ -18,13 +25,18 @@
     become: true
     failed_when: false
     changed_when: true
+    ignore_errors: yes
 
   - name: enable SR-IOV Virtual Functions for QAT devices
     shell: echo {{ qat_sriov_numvfs }} > "/sys/bus/pci/devices/{{ item }}/sriov_numvfs"
     with_items: "{{ qat_pf.stdout_lines }}"
+    become: true
     failed_when: false
     changed_when: true
+  when: qat_pf.stdout | length > 0 and qat_vfs.stdout | length == 0
 
+- name: Bind SR-IOV Virtual Functions for QAT devices
+  block:
   - name: enable creation of QAT SRIOV VFs on boot
     lineinfile:
       state: present
@@ -35,10 +47,14 @@
 
   - name: discover QAT Virtual Functions
     shell: "set -o pipefail && /usr/sbin/lspci -d {{ manufacturer_id }}:{{ qat_vf_dev_id }} -D | awk '{ print $1 }'"
-    register: qat_vfs
+    register: qat_vfs_origin
     args:
       executable: /bin/bash
     changed_when: false
+
+  - name: Get qat_vfs_origin.stdout_lines
+    set_fact:
+      qat_vfs_stdout_lines: "{{ qat_vfs_origin.stdout_lines }}"
 
   - name: Bind QAT VFs to selected driver
     include_role:
@@ -46,5 +62,5 @@
     vars:
       - pci_address: "{{ item }}"
       - driver: "{{ qat_vf_driver }}"
-    with_items: "{{ qat_vfs.stdout_lines }}"
+    with_items: "{{ qat_vfs_stdout_lines }}"
   when: qat_pf.stdout | length > 0

@@ -10,6 +10,9 @@ cgroupDriver: "systemd"
 {% endif %}
 {% if single_node_deployment | d(false) %}
 featureGates:
+{% if pwek_enable is defined and pwek_enable %}
+  SCTPSupport: True
+{% endif %}
   TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
 {% if topology_manager is defined and topology_manager.policy is defined and topology_manager.policy != 'none' %}
 topologyManagerPolicy: {{ topology_manager.policy }}
@@ -30,3 +33,7 @@ controllerManager:
 apiServer:
   extraArgs:
     event-ttl: "48h0m0s"
+{% if pwek_enable is defined and pwek_enable %}
+    service-node-port-range: "20000-39999"
+{% endif %}
+    
