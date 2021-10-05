@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2019-2020 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 
 ---
 
@@ -18,8 +18,6 @@ acc100_userspace_vf:
     pf_device_id: "0d5c"
     vf_number: "2"
     vf_driver: "vfio-pci"
-
-acc100_init_log_file: /tmp/acc100-init
 
 sriov:
     network_interfaces: {}

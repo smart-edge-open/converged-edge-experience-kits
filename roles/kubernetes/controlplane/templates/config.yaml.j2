@@ -3,18 +3,25 @@
 
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
+{% if cgroupfs_enable is defined and cgroupfs_enable %}
+cgroupDriver: "cgroupfs"
+{% else %}
 cgroupDriver: "systemd"
+{% endif %}
 {% if single_node_deployment | d(false) %}
 featureGates:
+{% if pwek_enable is defined and pwek_enable %}
+  SCTPSupport: True
+{% endif %}
   TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
 {% if topology_manager is defined and topology_manager.policy is defined and topology_manager.policy != 'none' %}
-topologyManagerPolicy: {{ topology_manager.policy }}		
+topologyManagerPolicy: {{ topology_manager.policy }}
 {% endif %}
 {% if cpu is defined and cpu.policy is defined and cpu.policy == 'static' %}
 cpuManagerPolicy: {{ cpu.policy }}
 reservedSystemCPUs: {{ cpu.reserved_cpus }}
 {% endif %}
-{% endif %} 
+{% endif %}
 ---
 
 apiVersion: kubeadm.k8s.io/v1beta2
@@ -26,3 +33,7 @@ controllerManager:
 apiServer:
   extraArgs:
     event-ttl: "48h0m0s"
+{% if pwek_enable is defined and pwek_enable %}
+    service-node-port-range: "20000-39999"
+{% endif %}
+    

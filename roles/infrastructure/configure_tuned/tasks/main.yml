@@ -37,6 +37,15 @@
     mode: 0644
   become: yes
 
+- name: set force_latency in realtime config
+  blockinfile:
+    path: /usr/lib/tuned/realtime/tuned.conf
+    block: |
+      [cpu]
+      force_latency=-1
+  when: tuned_force_latency_enable is defined and tuned_force_latency_enable
+  become: yes
+
 - name: apply tuned profile
   command: tuned-adm profile {{ tuned_profile }}
   changed_when: true

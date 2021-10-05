@@ -7,4 +7,4 @@ qat_sriov_numvfs: 16
 manufacturer_id: "8086"
 qat_dev_ids: ["0435", "37c8", "19e2", "6f54", "18a0"]
 qat_vf_dev_id: "37c9"
-qat_vf_driver: "igb_uio"
+qat_vf_driver: "vfio-pci"

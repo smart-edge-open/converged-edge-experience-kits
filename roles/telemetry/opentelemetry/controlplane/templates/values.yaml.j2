@@ -9,7 +9,7 @@ rootSecretName: root-ca
 
 #Collector Values
 collector:
-  image: otel/opentelemetry-collector-dev:{{ _otel_img_tag }}
+  image: otel/opentelemetry-collector:{{ _otel_img_tag }}
   replicas: 1
   name: otel-collector
   configMap: otel-collector-conf

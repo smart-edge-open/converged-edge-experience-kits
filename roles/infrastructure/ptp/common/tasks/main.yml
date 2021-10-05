@@ -67,7 +67,6 @@
       dest: "{{ _linuxptp_git_repo.download_dir }}"
       version: "{{ _linuxptp_git_repo.branch }}"
       force: yes
-    become: yes
 
   - name: Install patch utility
     yum:

@@ -60,6 +60,8 @@ tuned_vars: |
   isolated_cores=2-3
   nohz=on
   nohz_full=2-3
+##Set tuned latency_enable setting.
+tuned_force_latency_enable: false
 
 ## GRUB configuration
 # Size of a single hugepage (2M or 1G)
@@ -86,7 +88,7 @@ os_ubuntu_base_packages:
 ## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
 docker_images: []
 
-git_repo_url: https://{{ git_repo_token }}@github.com/open-ness/edgeservices.git
+git_repo_url: https://{{ git_repo_token }}@github.com/smart-edge-open/edgeservices.git
 _git_repo_dest: "{{ openness_dir }}/edgeservices"
 
 ## Network Edge Helm Charts Storage Default Directory

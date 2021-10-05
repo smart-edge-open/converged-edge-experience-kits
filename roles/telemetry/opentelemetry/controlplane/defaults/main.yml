@@ -4,4 +4,4 @@
 ---
 
 _otel_collector_chart_dir: "{{ ne_helm_charts_default_dir }}/otel_collector"
-_otel_img_tag: 34889381d978f87c3f757c422bd15f884ff50862
+_otel_img_tag: 0.34.0

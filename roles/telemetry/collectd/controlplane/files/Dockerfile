@@ -7,7 +7,12 @@ ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
 
 RUN yum install -y gcc gcc-c++ cmake make autoconf automake libxml2 libxml2-devel json-c-devel boost ncurses ncurses-devel ncurses-libs boost-devel libuuid libuuid-devel python2-jsonschema doxygen hwloc-devel libpng12 rsync openssl-devel bc python-devel python-libs python-sphinx openssl unzip which wget python36 epel-release flex bison libtool pkgconfig git patch OpenIPMI ipmitool OpenIPMI-devel yajl yajl-devel protobuf-c protobuf-c-devel libmicrohttpd libmicrohttpd-devel
-RUN easy_install pip==20.3.3 && pip install intelhex
+RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+RUN python get-pip.py
+RUN pip install --upgrade pip==20.3.3
+RUN pip install intelhex
+
+RUN yum -y upgrade bind-license glib2
 
 # RT repo
 RUN wget http://linuxsoft.cern.ch/cern/centos/7.9.2009/rt/CentOS-RT.repo -O /etc/yum.repos.d/CentOS-RT.repo

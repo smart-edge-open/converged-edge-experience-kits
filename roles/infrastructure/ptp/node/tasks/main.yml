@@ -51,7 +51,7 @@
     ignore_errors: true
 
   - name: Synchronize local clock on the slave node
-    command: ./phc2sys -s {{ ptp_port }} -w -m -R 8
+    command: ./phc2sys -s {{ ptp_port }} -w -m -R 8 -n {{ ptp_domain }}
     args:
       chdir: "{{ _linuxptp_git_repo.download_dir }}"
     async: "{{ async_time }}"

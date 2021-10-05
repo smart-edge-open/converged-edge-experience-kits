@@ -1,6 +1,11 @@
 {
   "exec-opts": [
+{% if cgroupfs_enable is not defined or not cgroupfs_enable %}
     "native.cgroupdriver=systemd"
+{% endif %}
+{% if cgroupfs_enable is defined and cgroupfs_enable %}
+    "native.cgroupdriver=cgroupfs"
+{% endif %}
   ],
   
 {% if docker_registry_mirrors is defined and docker_registry_mirrors %}

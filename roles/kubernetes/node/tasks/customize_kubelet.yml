@@ -26,8 +26,8 @@
     block: |
       apiVersion: kubelet.config.k8s.io/v1beta1
       kind: KubeletConfiguration
-      cgroupDriver: "systemd"
-      KubeletCgroups: "/systemd/system.slice"
+      cgroupDriver: "{{ 'cgroupfs' if (cgroupfs_enable is defined and cgroupfs_enable) else 'systemd' }}"
+      KubeletCgroups: "{{ '' if (cgroupfs_enable is defined and cgroupfs_enable) else '/systemd/system.slice' }}"
       authentication:
         x509:
           clientCAFile: /etc/kubernetes/pki/ca.crt
@@ -35,6 +35,9 @@
         - 10.96.0.10
       clusterDomain: cluster.local
       featureGates:
+        {% if (pwek_enable is defined and pwek_enable) %}
+        SCTPSupport: True
+        {% endif %}
         TopologyManager: {{ False if topology_manager.policy == 'none' else True }}
       podPidsLimit: 2048
   become: yes

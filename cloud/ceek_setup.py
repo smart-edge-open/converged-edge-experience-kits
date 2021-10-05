@@ -26,8 +26,8 @@ def make_parser():
 
     parser.add_argument(
         "-r", "--repo", action="store", metavar="GIT_REPO", dest="git_repo",
-        default="https://github.com/open-ness/converged-edge-experience-kits",
-        help="OpenNESS converged edge experience kit repository")
+        default="https://github.com/smart-edge-open/converged-edge-experience-kits",
+        help="Smart Edge Open converged edge experience kit repository")
     parser.add_argument(
         "-t", "--token", action="store", metavar="GIT_TOKEN", dest="git_token",
         default="",
@@ -42,13 +42,13 @@ def make_parser():
         help="Username used by ansible automation scripts")
     parser.add_argument(
         "-o", "--ceek-vars", action="store", metavar="CEEK_VARS", dest="ceek_vars",
-        help="Extra OpenNESS experience kit variables to override the defaults")
+        help="Extra Smart Edge Open experience kit variables to override the defaults")
     parser.add_argument(
         "-f", "--flavor", action="store", metavar="CEEK_FLAVOR", dest="ceek_flavor",
-        help="OpenNESS experience kit flavor")
+        help="Smart Edge Open experience kit flavor")
     parser.add_argument(
         "-l", "--limits", action="store", metavar="ANSIBLE_LIMITS", dest="ansible_limits",
-        help="OpenNESS experience kit ansible limits")
+        help="Smart Edge Open experience kit ansible limits")
 
     parser.add_argument(
         "-v", "--verbosity", action="store", metavar="LEVEL", dest="verbosity", default="INFO",
@@ -64,7 +64,7 @@ def make_parser():
 
 def setup_logger(options):
     """Configure Python logging module"""
-    log_fmt = "OpenNESS Setup: [%(levelname)s] %(module)s(%(lineno)d): %(message)s"
+    log_fmt = "Smart Edge Open Setup: [%(levelname)s] %(module)s(%(lineno)d): %(message)s"
     ts_fmt = "%Y-%m-%dT%H:%M:%S"
 
     handler = logging.StreamHandler()
@@ -141,15 +141,18 @@ def create_inventory(options, inventory_path):
     with open(os.path.join(inventory_path, "inventory.yml"), "w") as inv:
         yaml.dump(cfgyaml, inv, sort_keys=False)
 
+    with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "r") as group_vars:
+        cfgvars = yaml.load(group_vars, Loader=yaml.FullLoader)
+
     #Add token to group_vars
     if options.git_token:
-        with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "r") as group_vars:
-            cfgvars = yaml.load(group_vars, Loader=yaml.FullLoader)
-
         cfgvars["git_repo_token"] = options.git_token
 
-        with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "w") as group_vars:
-            yaml.dump(cfgvars, group_vars, sort_keys=False)
+    #Note: Calico is not supported by Azure
+    cfgvars["kubernetes_cnis"] = ["kubeovn"]
+
+    with open(os.path.join(INVENTORY_DIRECTORY, "group_vars", "all", "10-default.yml"), "w") as group_vars:
+        yaml.dump(cfgvars, group_vars, sort_keys=False)
 
 def main(options):
     """Script entry function"""

@@ -21,7 +21,7 @@ PYTHON_PYYAML_VERSION=3.13-1.el7
 PYTHON_PYYAML_PKG_UBUNTU=python-yaml
 
 ANSIBLE_PKG=ansible
-ANSIBLE_VERSION=2.9.18-1.el7
+ANSIBLE_VERSION=2.9.25-1.el7
 ANSIBLE_PKG_UBUNTU=ansible
 
 ensure_installed () {
@@ -84,10 +84,10 @@ if grep "offline_enable" "$TOP_PATH"/inventory/default/group_vars/all/*.yml | gr
   tar xvf "$prepackagePath" -C "$tmpDir"
   sudo yum localinstall -y "$tmpDir"/*
   rm -rf "$tmpDir"
+else
+  # EPEL repository
+  ensure_installed epel-release
 fi
-
-# EPEL repository
-ensure_installed epel-release
 
 # Python 3
 ensure_installed $PYTHON3_PKG $PYTHON3_PKG_UBUNTU $PYTHON3_VERSION

@@ -68,15 +68,15 @@
 
 - name: install ebpf ml kernel, kernel devel and reboot for calico-ebpf
   block:
-    - name: install ebpf kernel and kernel devel for calico-ebpf
-      command: yum -y --enablerepo=elrepo-kernel install kernel-ml.x86_64 kernel-ml-devel.x86_64
+    - name: install ebpf longterm ml kernel devel for calico-ebpf
+      command: yum -y --enablerepo=elrepo-kernel install kernel-lt.x86_64 kernel-lt-devel.x86_64
       args:
         warn: false
       register: temp_out
       become: yes
 
-    - name: get mainline kernel version for calico-ebpf
-      shell: yum list available --disablerepo='*' --enablerepo=elrepo-kernel | grep -m 1 "kernel-ml" | awk '{ print $2".x86_64"}'
+    - name: get longterm mainline kernel version for calico-ebpf
+      shell: yum list available --disablerepo='*' --enablerepo=elrepo-kernel | grep -m 1 "kernel-lt" | awk '{ print $2".x86_64"}'
       args:
         warn: false
       register: ebpf_kernel_version

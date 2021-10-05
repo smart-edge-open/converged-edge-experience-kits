@@ -229,14 +229,6 @@
   tasks:
     # biosfw/node - no clean up, because build image is deleted when running docker's prune.yml
 
-    - name: cleanup acc100 dpdk init app
-      block:
-      - name: load acc100 dpdk init app variables
-        include_vars: ./roles/infrastructure/init_app_acc100/defaults/main.yml
-      - name: load acc100 dpdk init app
-        include_tasks: ./roles/infrastructure/init_app_acc100/tasks/cleanup.yml
-      when: acc100_userspace_vf.enabled | default(False)
-
     - name: cleanup QAT device plugin
       block:
       - name: load QAT DP variables
