@@ -7,6 +7,12 @@
     - name: set GRUB config path (BIOS)
       set_fact:
         grub_file_path: /boot/grub2/grub.cfg
+      when: ansible_distribution == "CentOS"
+
+    - name: set GRUB config path (BIOS)
+      set_fact:
+        grub_file_path: /boot/grub/grub.cfg
+      when: ansible_distribution == "Ubuntu"
 
     - name: check if host is using EFI
       stat:
@@ -40,25 +46,36 @@
   command: grub2-mkconfig -o {{ grub_file_path }}
   changed_when: true
   become: yes
+  when: ansible_distribution == "CentOS"
+
+- name: regenerate grub.cfg
+  command: grub-mkconfig -o {{ grub_file_path }}
+  changed_when: true
+  become: yes
+  when: ansible_distribution == "Ubuntu"
 
 - name: get current CMDLINE
   command: cat /proc/cmdline
   register: current_cmdline
   changed_when: false
 
-- name: get future cmdline
+- name: get future cmdline CentOS
   shell: set -o pipefail && grubby --info=$(grubby --default-kernel) | grep args
   register: future_cmdline
   changed_when: false
   become: yes
+  when: ansible_distribution == "CentOS"  
 
 - name: extract proper parts from the outputs
   set_fact:
     current_args: "{{ current_cmdline.stdout | regex_replace('BOOT_IMAGE=.*? root=.*? (.*)', '\\1') | trim }}"
     future_args:  "{{ future_cmdline.stdout | regex_replace('args=\"(.*)\"', '\\1') | trim }}"
+  when: ansible_distribution == "CentOS"
 
 # role `conditional_reboot` checks if `perform_reboot` is defined, is so machine is rebooted
 - name: request reboot (will be performed by `conditional_reboot` role)
   set_fact:
     perform_reboot: "{{ perform_reboot|default([]) + [ 'grub' ] }}"
-  when: current_args != future_args
+  when: 
+     - ansible_distribution == "CentOS"
+     - current_args != future_args

@@ -7,9 +7,11 @@
   ignore_errors: true
   changed_when: false
   become: yes
+  when: ansible_distribution == "CentOS"
 
 - name: Set SELinux to permissive mode permanently (2/2)
   selinux:
     policy: targeted
     state: permissive
   become: yes
+  when: ansible_distribution == "CentOS"

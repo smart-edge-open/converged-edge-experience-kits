@@ -32,6 +32,8 @@
     state: enabled
     immediate: yes
   become: yes
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 - name: check if Prometheus release already exists
   command: helm status prometheus -n telemetry
@@ -157,10 +159,20 @@
       src: telemetry-certs-daemonset.yml.j2
       dest: "{{ _prometheus_chart_dir }}/templates/telemetry-certs-daemonset.yaml"
 
-  - name: install patch utility
+  - name: install patch utility on CentOS
     yum:
       name: patch
       state: present
+    become: yes
+    when: ansible_distribution == 'CentOS'
+    
+  - name: install patch utility on Ubuntu
+    apt:
+      name: patch
+      state: present
+      update_cache: yes
+    become: yes
+    when: ansible_distribution == 'Ubuntu'
 
   - name: apply node-exporter-daemonset patch
     patch:

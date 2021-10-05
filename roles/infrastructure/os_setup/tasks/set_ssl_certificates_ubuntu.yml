@@ -1,0 +1,7 @@
+
+---
+- name: set certificates directory on Ubuntu
+  lineinfile:
+    path: /etc/environment
+    line: SSL_CERT_DIR=/etc/ssl/certs
+  become: yes

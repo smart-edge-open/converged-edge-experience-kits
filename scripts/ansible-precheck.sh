@@ -6,37 +6,64 @@ set -euxo pipefail
 
 PYTHON3_PKG=python3
 PYTHON3_VERSION=3.6.8-18.el7
+PYTHON3_PKG_UBUNTU=python3
 
 PYTHON_SH_PKG=python36-sh
 PYTHON_SH_VERSION=1.12.14-7.el7
+PYTHON_SH_PKG_UBUNTU=python3-sh
 
 PYTHON_NETADDR_PKG=python-netaddr
 PYTHON_NETADDR_VERSION=0.7.5-9.el7
+PYTHON_NETADDR_PKG_UBUNTU=python3-netaddr
 
 PYTHON_PYYAML_PKG=python36-PyYAML
 PYTHON_PYYAML_VERSION=3.13-1.el7
+PYTHON_PYYAML_PKG_UBUNTU=python-yaml
 
 ANSIBLE_PKG=ansible
 ANSIBLE_VERSION=2.9.25-1.el7
+ANSIBLE_PKG_UBUNTU=ansible
 
 ensure_installed () {
-  if [[ ${2-} ]]
-  then
-      package_name="$1-$2"
-  else
-      package_name="$1"
-  fi
-
-  if ! sudo rpm -qa | grep -q ^"$package_name"; then
-    echo "Instaling $package_name"
-    if ! sudo yum -y install "$package_name"; then
-      echo "ERROR: Failed to install package $package_name"
-      exit 1
+  if [[ -f /etc/redhat-release ]]; then
+    if [[ ${3-} ]]
+    then
+        package_name="$1-$3"
     else
-      echo "$package_name successfully installed"
+        package_name="$1"
+    fi
+
+    if ! sudo rpm -qa | grep -q ^"$package_name"; then
+      echo "Instaling $package_name"
+      if ! sudo yum -y install "$package_name"; then
+        echo "ERROR: Failed to install package $package_name"
+        exit 1
+      else
+        echo "$package_name successfully installed"
+      fi
+    else
+      echo "$package_name already installed"
+    fi
+  elif [[ -f /etc/debian_version ]]; then
+    if [[ ${2-} ]]; then
+      package_name="$2"
+
+      if [ $(dpkg-query -W -f='${Status}' "$package_name" | grep -c "install ok installed") -eq 0 ]; then
+        echo "Installing $package_name"
+        if ! sudo apt install -y "$package_name"; then
+          echo "ERROR: Failed to install package $package_name"
+          exit 1
+        else
+          echo "$package_name successfully installed"
+        fi
+      else
+        echo "$package_name already installed"
+      fi
     fi
   else
-    echo "$package_name already installed"
+    echo "Linux distribution not recognized"
+    uname -s
+    exit 1
   fi
 }
 
@@ -63,16 +90,16 @@ else
 fi
 
 # Python 3
-ensure_installed $PYTHON3_PKG $PYTHON3_VERSION
+ensure_installed $PYTHON3_PKG $PYTHON3_PKG_UBUNTU $PYTHON3_VERSION
 
 # ansible
-ensure_installed $ANSIBLE_PKG $ANSIBLE_VERSION
+ensure_installed $ANSIBLE_PKG $ANSIBLE_PKG_UBUNTU $ANSIBLE_VERSION
 
 # netaddr
-ensure_installed $PYTHON_NETADDR_PKG $PYTHON_NETADDR_VERSION
+ensure_installed $PYTHON_NETADDR_PKG $PYTHON_NETADDR_PKG_UBUNTU $PYTHON_NETADDR_VERSION
 
 # pyyaml
-ensure_installed $PYTHON_PYYAML_PKG $PYTHON_PYYAML_VERSION
+ensure_installed $PYTHON_PYYAML_PKG $PYTHON_PYYAML_PKG_UBUNTU $PYTHON_PYYAML_VERSION
 
 # sh
-ensure_installed $PYTHON_SH_PKG $PYTHON_SH_VERSION
+ensure_installed $PYTHON_SH_PKG $PYTHON_SH_PKG_UBUNTU $PYTHON_SH_VERSION

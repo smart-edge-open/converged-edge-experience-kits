@@ -84,11 +84,20 @@
 
     - name: apply CMK worker patch
       block:
-        - name: install patch utility
+        - name: install patch utility on CentOS
           yum:
             name: patch
             state: present
           become: yes
+          when: ansible_distribution == 'CentOS'
+
+        - name: install patch utility on Ubuntu
+          apt:
+            name: patch
+            state: present
+            update_cache: yes
+          become: yes
+          when: ansible_distribution == 'Ubuntu'
 
         - name: apply CMK worker patch
           patch:

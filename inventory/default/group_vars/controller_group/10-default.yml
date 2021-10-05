@@ -82,6 +82,9 @@ os_yum_base_packages:
   "git2u-all,jq,vim-common,curl,yum-utils,python2-pip,python3,wget,bridge-utils,rsync,\
   device-mapper-persistent-data,lvm2,moreutils,gcc,python-devel,createrepo,psmisc,bash-completion,patch"
 
+os_ubuntu_base_packages:
+  "jq,vim-common,curl,python3,wget,bridge-utils,rsync,lvm2,moreutils,gcc,python-dev-is-python2,psmisc,bash-completion,patch"
+
 ## URLs to docker images saved with `docker save <image>:<ver> | gzip > <image>.tar.gz` that are going to be preloaded after docker setup
 docker_images: []
 

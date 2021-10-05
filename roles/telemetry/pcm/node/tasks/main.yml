@@ -28,6 +28,8 @@
     state: enabled
     immediate: yes
   become: yes
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 - name: wait for pcm pod to be ready
   command: >
