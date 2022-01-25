@@ -89,7 +89,7 @@
 
   - name: tag and push device plugin image to local registry
     docker_image:
-      name: nfvpe/sriov-device-plugin
+      name: ghcr.io/k8snetworkplumbingwg/sriov-network-device-plugin
       repository: "{{ _registry_ip_address }}:{{ _registry_port }}/intel/sriov-device-plugin"
       push: yes
       source: local
@@ -97,7 +97,7 @@
   - name: remove local device plugin image
     docker_image:
       state: absent
-      name: nfvpe/sriov-device-plugin
+      name: ghcr.io/k8snetworkplumbingwg/sriov-network-device-plugin
 
   - name: copy sriov chart
     block:
