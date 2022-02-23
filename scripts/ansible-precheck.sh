@@ -17,7 +17,7 @@ PYTHON_PYYAML_PKG=python36-PyYAML
 PYTHON_PYYAML_VERSION=3.13-1.el7
 
 ANSIBLE_PKG=ansible
-ANSIBLE_VERSION=2.9.25-1.el7
+ANSIBLE_VERSION=2.9.27-1.el7
 
 ensure_installed () {
   if [[ ${2-} ]]
