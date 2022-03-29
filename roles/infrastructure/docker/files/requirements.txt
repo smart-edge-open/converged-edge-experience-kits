@@ -20,7 +20,7 @@ idna==2.10
 iniparse==0.4
 ipaddress==1.0.16
 jsonschema==3.2.0
-paramiko==2.7.2
+paramiko==2.10.1
 perf==0.1
 pycparser==2.14
 pycurl==7.19.0
