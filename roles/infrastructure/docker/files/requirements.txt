@@ -4,7 +4,7 @@
 backports.ssl-match-hostname==3.5.0.1
 bcrypt==3.1.7
 cached-property==1.5.2
-certifi==2020.6.20
+certifi==2022.12.7
 cffi==1.14.3
 chardet==3.0.4
 configobj==4.7.2
