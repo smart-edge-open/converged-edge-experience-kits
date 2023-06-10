@@ -5,6 +5,14 @@
 - debug:
     msg: "Installing the following packages: {{ os_yum_base_packages }}"
 
+
+- name: install latest ca-certificates
+  yum:
+    name: ca-certificates
+    state: latest
+  become: yes
+  when: not offline_enable
+
 - name: install IUS repository
   yum:
     name: https://repo.ius.io/ius-release-el7.rpm
