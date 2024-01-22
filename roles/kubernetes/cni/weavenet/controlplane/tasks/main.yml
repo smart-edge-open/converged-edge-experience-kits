@@ -16,6 +16,8 @@
   - 6783/udp
   - 6784/udp
   become: yes
+  vars:
+    ansible_python_interpreter: "{{ '/usr/bin/python3' if ansible_distribution == 'Ubuntu' else '/usr/bin/python2' }}"
 
 - name: apply WeaveNet via the addon
   shell: set -o pipefail && kubectl apply -f "{{ _weavenet_yaml }}"

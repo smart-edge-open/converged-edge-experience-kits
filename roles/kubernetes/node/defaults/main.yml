@@ -3,7 +3,7 @@
 
 ---
 
-_kubernetes_env_file: "/etc/sysconfig/kubelet"
+_kubernetes_env_file: "{{ '/etc/sysconfig/kubelet' if ansible_distribution == 'CentOS' else '/etc/default/kubelet' }}"
 _kubernetes_config_file: "/usr/lib/systemd/system/kubelet.service.d/kubelet_config.yml"
 
 cpu:

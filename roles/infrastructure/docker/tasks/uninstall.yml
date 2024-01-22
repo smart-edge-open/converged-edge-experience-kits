@@ -6,6 +6,7 @@
   file:
     name: "/etc/audit/rules.d/docker.rules"
     state: absent
+  become: yes
 
 - name: Restart auditd
   command: service auditd restart # noqa 303
@@ -22,11 +23,19 @@
   ignore_errors: yes
   become: yes
 
-- name: uninstall
+- name: uninstall on CentOS
   yum:
     name: "{{ _docker_packages_to_remove }}"
     state: absent
   become: yes
+  when: ansible_distribution == "CentOS"
+
+- name: uninstall on Ubuntu
+  apt:
+    name: docker.io
+    state: absent
+  become: yes
+  when: ansible_distribution == "Ubuntu"
 
 - name: remove docker-compose
   pip:
@@ -55,12 +64,14 @@
     name: docker
     state: absent
   become: yes
+  when: ansible_distribution == "CentOS"
 
 - name: clear yum cache
   command: yum clean all
   args:
     warn: false
   changed_when: true
+  when: ansible_distribution == "CentOS"
 
 - name: remove group "docker"
   group:

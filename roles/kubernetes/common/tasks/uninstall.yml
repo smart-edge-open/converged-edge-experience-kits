@@ -39,27 +39,44 @@
     state: absent
   become: yes
 
-- name: uninstall packages
-  yum:
-    name: "{{ _kubernetes_packages_to_remove }}"
-    state: absent
-  become: yes
+- name: uninstallation on CentOS
+  when: ansible_distribution == "CentOS"
+  block:
+    - name: uninstall packages
+      yum:
+        name: "{{ _kubernetes_packages_to_remove }}"
+        state: absent
+      become: yes
+    
+    - name: remove repository
+      yum_repository:
+        name: kubernetes
+        state: absent
+      become: yes
+    
+    - name: clear yum cache
+      command: yum clean metadata
+      args:
+        warn: false
+      changed_when: true
 
-- name: remove repository
-  yum_repository:
-    name: kubernetes
-    state: absent
-  become: yes
+- name: uninstallation on Ubuntu
+  when: ansible_distribution == "Ubuntu"
+  block:
+    - name: uninstall packages
+      apt: 
+        name: "{{ _kubernetes_packages_ubuntu }}"
+        state: absent
+      become: yes
 
-- name: clear yum cache
-  command: yum clean metadata
-  args:
-    warn: false
-  changed_when: true
-
+    - name: remove repository
+      apt_repository:
+        repo: "{{ _kubernetes_repository_ubuntu }}"
+        state: absent
+      become: yes
+    
 - name: remove CNI directory
   file:
     name: /etc/cni/net.d
     state: absent
   become: yes
-
